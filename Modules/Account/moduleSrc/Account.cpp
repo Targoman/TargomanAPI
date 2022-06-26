@@ -667,49 +667,28 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 /*****************************************************************\
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, mergeBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
-)) {
-    ///@TODO: must be implemented
+//Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, mergeBasket, (
+//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
+//)) {
+//    ///@TODO: must be implemented
 
+//}
 
+//Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, getBasket, (
+//    APICALLBOOM_TYPE_JWT_IMPL   &APICALLBOOM_PARAM
+//)) {
+//    ///@TODO: must be implemented
 
+//}
 
+//bool IMPL_REST_POST(Account, deleteBasket, (
+//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
+//)) {
+//    ///@TODO: must be implemented
 
-
-
-
-}
-
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, getBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL   &APICALLBOOM_PARAM
-)) {
-    ///@TODO: must be implemented
-
-
-
-
-
-
-
-
-}
-
-bool IMPL_REST_POST(Account, deleteBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
-    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
-)) {
-    ///@TODO: must be implemented
-
-
-
-
-
-
-
-
-}
+//}
 
 ///@TODO: select gateway (null|single|multiple) from service
 ///@TODO: check for common gateway voucher
@@ -758,15 +737,66 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     ///@TODO: reserve saleables before returning voucher
     ///@TODO: implement overall coupon at the end of checkout steps
 
-    quint64 VoucherID = this->Create(Voucher::instance(),
-                              _APICALLBOOM,
-                              TAPI::ORMFields_t({
-                                                    { tblVoucher::Fields::vch_usrID, CurrentUserID },
-                                                    { tblVoucher::Fields::vchDesc, _preVoucher.toJson().toVariantMap() },
-                                                    { tblVoucher::Fields::vchTotalAmount, _preVoucher.ToPay },
-                                                    { tblVoucher::Fields::vchType, enuVoucherType::Expense },
-                                                    { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
-                                                }));
+    //check prevoucher changes
+    if (_preVoucher.VoucherID > 0) {
+        tblVoucher::DTO VoucherDTO = SelectQuery(Voucher::instance())
+                                     .addCols(Voucher::instance().SelectableColumnNames())
+                                     .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _preVoucher.VoucherID })
+                                     .one<tblVoucher::DTO>();
+
+        Targoman::API::AAA::stuPreVoucher PreVoucher;
+        PreVoucher.fromJson(VoucherDTO.vchDesc.object());
+
+        if ((PreVoucher.Round + PreVoucher.ToPay) != (_preVoucher.Round + _preVoucher.ToPay)) {
+            ///@TODO: trigger: unfreeze wallet amount
+
+            clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                               "spVoucher_Cancel", {
+                                                   { "iUserID", CurrentUserID },
+                                                   { "iVoucherID", _preVoucher.VoucherID },
+                                                   { "iSetAsError", false },
+                                               });
+
+//            Voucher::instance().Update(_APICALLBOOM,
+//                                      {},
+//                                      TAPI::ORMFields_t({
+//                                         { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Canceled }
+//                                      }),
+//                                      {
+//                                         { tblVoucher::Fields::vchID, _preVoucher.VoucherID }
+//                                      });
+
+//            Voucher::instance().DeleteByPks(_APICALLBOOM,
+//                                            QString::number(_preVoucher.VoucherID)
+//                                            );
+
+            _preVoucher.VoucherID = 0;
+        }
+    }
+
+    if (_preVoucher.VoucherID == 0) {
+        _preVoucher.VoucherID = Voucher::instance().Create(
+                                    _APICALLBOOM,
+                                    TAPI::ORMFields_t({
+                                                          { tblVoucher::Fields::vch_usrID,      CurrentUserID },
+                                                          { tblVoucher::Fields::vchDesc,        _preVoucher.toJson().toVariantMap() },
+                                                          { tblVoucher::Fields::vchTotalAmount, _preVoucher.ToPay },
+                                                          { tblVoucher::Fields::vchType,        enuVoucherType::Expense },
+                                                          { tblVoucher::Fields::vchStatus,      enuVoucherStatus::New },
+                                                      }));
+
+        _preVoucher.Sign.clear();
+        _preVoucher.Sign = QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64());
+
+        Voucher::instance().Update(_APICALLBOOM,
+                                  {},
+                                  TAPI::ORMFields_t({
+                                     { tblVoucher::Fields::vchDesc, _preVoucher.toJson().toVariantMap() },
+                                  }),
+                                  {
+                                     { tblVoucher::Fields::vchID, _preVoucher.VoucherID }
+                                  });
+    }
 
     ///?: create pending vouchers per item
 
@@ -784,7 +814,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             if ((PendingVoucher.Type == enuVoucherType::Income)
                 || (PendingVoucher.Type == enuVoucherType::Prize)
             ) {
-                PendingVoucher.Info.insert("mainVoucherID", static_cast<double>(VoucherID));
+                PendingVoucher.Info.insert("mainVoucherID", static_cast<double>(_preVoucher.VoucherID));
 
                 QJsonDocument Doc;
                 Doc.setObject(PendingVoucher.Info);
@@ -823,7 +853,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                       { tblVoucher::Fields::vchProcessResult, vchProcessResult }
                                    }),
                                    {
-                                      { tblVoucher::Fields::vchID, VoucherID }
+                                      { tblVoucher::Fields::vchID, _preVoucher.VoucherID }
                                    });
     }
 
@@ -831,7 +861,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     Targoman::API::AAA::stuVoucher Voucher = payAndProcessBasket(
         APICALLBOOM_PARAM,
         _domain,
-        VoucherID,
+        _preVoucher.VoucherID,
         _gatewayType,
         _preVoucher.ToPay,
         _walID,
@@ -841,25 +871,25 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     return Voucher;
 }
 
-Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payForBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    QString _domain,
-    quint64 _voucherID,
-    NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType,
-    qint64 _amount,
-    qint64 _walID,
-    QString _paymentVerifyCallback
-)) {
-    return this->payAndProcessBasket(
-        APICALLBOOM_PARAM,
-        _domain,
-        _voucherID,
-        _gatewayType,
-        _amount,
-        _walID,
-        _paymentVerifyCallback
-    );
-}
+//Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payForBasket, (
+//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    QString _domain,
+//    quint64 _voucherID,
+//    NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType,
+//    qint64 _amount,
+//    qint64 _walID,
+//    QString _paymentVerifyCallback
+//)) {
+//    return this->payAndProcessBasket(
+//        APICALLBOOM_PARAM,
+//        _domain,
+//        _voucherID,
+//        _gatewayType,
+//        _amount,
+//        _walID,
+//        _paymentVerifyCallback
+//    );
+//}
 
 Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
@@ -882,15 +912,15 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 
 //    quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
-    tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
-                                  .addCols(Voucher::instance().SelectableColumnNames())
-                                  .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
-                                  .one<tblVoucher::DTO>();
+    tblVoucher::DTO VoucherDTO = SelectQuery(Voucher::instance())
+                                 .addCols(Voucher::instance().SelectableColumnNames())
+                                 .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
+                                 .one<tblVoucher::DTO>();
 
-    if (VoucherInfo.vchStatus != enuVoucherStatus::New)
+    if (VoucherDTO.vchStatus != enuVoucherStatus::New)
         throw exHTTPBadRequest("Only New vouchers allowed");
 
-    if (VoucherInfo.vchType != enuVoucherType::Expense)
+    if (VoucherDTO.vchType != enuVoucherType::Expense)
         throw exHTTPBadRequest("Only Expense vouchers allowed");
 
     if (_amount < 0) {
@@ -922,8 +952,9 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
         return Account::processVoucher(APICALLBOOM_PARAM, _voucherID);
 
     Targoman::API::AAA::stuVoucher Voucher;
-    Voucher.ID = VoucherInfo.vchID;
-    Voucher.Info.fromJson(VoucherInfo.vchDesc.object());
+
+    Voucher.ID = VoucherDTO.vchID;
+    Voucher.Info.fromJson(VoucherDTO.vchDesc.object());
 
     //create online/offline payment
     switch (NULLABLE_VALUE(_gatewayType)) {
@@ -938,7 +969,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
                                       NULLABLE_VALUE(_gatewayType),
                                       _domain,
                                       _voucherID,
-                                      VoucherInfo.vchDesc.toJson(), //_preVoucher.Summary,
+                                      Voucher.Info.Summary, //VoucherDTO.vchDesc.toJson(), //_preVoucher.Summary,
                                       RemainingAfterWallet,
                                       _paymentVerifyCallback,
                                       PaymentKey,
@@ -1028,12 +1059,12 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
             .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, NULLABLE_VALUE(voucherID) })
             .one()
         );
-        tblVoucher::DTO Voucher;
-        Voucher.fromJson(VoucherInfo);
+        tblVoucher::DTO VoucherDTO;
+        VoucherDTO.fromJson(VoucherInfo);
 
         //check operator or owner
         if (Authorization::hasPriv(_APICALLBOOM, { "AAA:claimOfflinePayment" }) == false) {
-            if (Voucher.vch_usrID != _APICALLBOOM.getUserID())
+            if (VoucherDTO.vch_usrID != _APICALLBOOM.getUserID())
                 throw exAuthorization("Voucher is not yours");
         }
 
@@ -1082,19 +1113,19 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
         .one()
     );
 
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaim;
-    OfflinePaymentClaim.fromJson(PaymentInfo);
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO;
+    OfflinePaymentClaimDTO.fromJson(PaymentInfo);
 
-//    tblVoucher::DTO Voucher;
-//    Voucher.fromJson(PaymentInfo);
+//    tblVoucher::DTO VoucherDTO;
+//    VoucherDTO.fromJson(PaymentInfo);
 
     //check operator or owner
     if (Authorization::hasPriv(_APICALLBOOM, { "AAA:rejectOfflinePayment" }) == false) {
-        if (OfflinePaymentClaim.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
+        if (OfflinePaymentClaimDTO.ofpcCreatedBy_usrID != _APICALLBOOM.getUserID())
             throw exAuthorization("This voucher is not yours");
     }
 
-    if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
+    if (OfflinePaymentClaimDTO.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
 
     this->Update(OfflinePaymentClaims::instance(),
@@ -1118,7 +1149,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
 )) {
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaim = SelectQuery(OfflinePaymentClaims::instance())
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO = SelectQuery(OfflinePaymentClaims::instance())
         .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
 //        .addCols(Voucher::instance().SelectableColumnNames())
 //        .innerJoin(tblVoucher::Name)
@@ -1129,7 +1160,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     if (Authorization::hasPriv(_APICALLBOOM, { "AAA:approveOfflinePayment" }) == false)
         throw exAuthorization("Access denied");
 
-    if (OfflinePaymentClaim.ofpcStatus != enuPaymentStatus::New)
+    if (OfflinePaymentClaimDTO.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
 
 //    if (ApprovalLimit > 0) {
@@ -1140,16 +1171,16 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    quint64 _walID = NULLABLE_GET_OR_DEFAULT(OfflinePaymentClaim.ofpcTarget_walID, 0);
+    quint64 _walID = NULLABLE_GET_OR_DEFAULT(OfflinePaymentClaimDTO.ofpcTarget_walID, 0);
     quint64 VoucherID;
 
-    if (NULLABLE_IS_NULL(OfflinePaymentClaim.ofpc_vchID)) {
+    if (NULLABLE_IS_NULL(OfflinePaymentClaimDTO.ofpc_vchID)) {
         Targoman::API::AAA::stuVoucher Voucher;
 
         Voucher.Info.UserID = _APICALLBOOM.getUserID();
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
-        Voucher.Info.ToPay = OfflinePaymentClaim.ofpcAmount;
+        Voucher.Info.ToPay = OfflinePaymentClaimDTO.ofpcAmount;
         Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
 
         Voucher.ID = this->Create(Voucher::instance(),
@@ -1165,20 +1196,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
         VoucherID = Voucher.ID;
     } else
-        VoucherID = NULLABLE_VALUE(OfflinePaymentClaim.ofpc_vchID);
+        VoucherID = NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpc_vchID);
 
     QVariantMap CreateParams = {
         { tblOfflinePayments::Fields::ofp_vchID, VoucherID },
-        { tblOfflinePayments::Fields::ofpBank, OfflinePaymentClaim.ofpcBank },
-        { tblOfflinePayments::Fields::ofpReceiptCode, OfflinePaymentClaim.ofpcReceiptCode },
-        { tblOfflinePayments::Fields::ofpReceiptDate, OfflinePaymentClaim.ofpcReceiptDate },
-        { tblOfflinePayments::Fields::ofpAmount, OfflinePaymentClaim.ofpcAmount },
-        { tblOfflinePayments::Fields::ofpNotes, OfflinePaymentClaim.ofpcNotes.trimmed().size() ? OfflinePaymentClaim.ofpcNotes.trimmed() : QVariant() },
+        { tblOfflinePayments::Fields::ofpBank, OfflinePaymentClaimDTO.ofpcBank },
+        { tblOfflinePayments::Fields::ofpReceiptCode, OfflinePaymentClaimDTO.ofpcReceiptCode },
+        { tblOfflinePayments::Fields::ofpReceiptDate, OfflinePaymentClaimDTO.ofpcReceiptDate },
+        { tblOfflinePayments::Fields::ofpAmount, OfflinePaymentClaimDTO.ofpcAmount },
+        { tblOfflinePayments::Fields::ofpNotes, OfflinePaymentClaimDTO.ofpcNotes.trimmed().size() ? OfflinePaymentClaimDTO.ofpcNotes.trimmed() : QVariant() },
         { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Payed },
     };
 
-    if (NULLABLE_HAS_VALUE(OfflinePaymentClaim.ofpcTarget_walID))
-            CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaim.ofpcTarget_walID));
+    if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID))
+            CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID));
 
     quint64 PaymentID = this->Create(OfflinePayments::instance(),
                  _APICALLBOOM,
@@ -1344,16 +1375,16 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         if (RemainingAmount != 0)
             throw exHTTPInternalServerError("This voucher has not been paid in full");
 
-        tblVoucher::DTO VoucherInfo = SelectQuery(Voucher::instance())
-                                      .addCols(Voucher::instance().SelectableColumnNames())
-                                      .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
-                                      .one<tblVoucher::DTO>();
+        tblVoucher::DTO VoucherDTO = SelectQuery(Voucher::instance())
+                                     .addCols(Voucher::instance().SelectableColumnNames())
+                                     .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
+                                     .one<tblVoucher::DTO>();
 
-        if (VoucherInfo.vchStatus != enuVoucherStatus::New)
+        if (VoucherDTO.vchStatus != enuVoucherStatus::New)
             throw exHTTPInternalServerError("only NEW vouchers are allowed to process");
 
         Targoman::API::AAA::stuPreVoucher PreVoucher;
-        PreVoucher.fromJson(VoucherInfo.vchDesc.object());
+        PreVoucher.fromJson(VoucherDTO.vchDesc.object());
 //        if (VoucherInfo.vchDesc.canConvert<QJsonObject>())
 //            PreVoucher.fromJson(VoucherInfo.vchDesc.toJsonObject());
 //        else if (VoucherDesc.canConvert<QVariantMap>())
@@ -1385,7 +1416,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         if (Services.isEmpty())
             throw exHTTPInternalServerError("There is no services registered.");
 
-        QVariantMap vchProcessResult = VoucherInfo.vchProcessResult.object().toVariantMap();
+        QVariantMap vchProcessResult = VoucherDTO.vchProcessResult.object().toVariantMap();
         quint8 ErrorCount = 0;
 
         //1: process voucher items

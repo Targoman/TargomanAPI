@@ -262,20 +262,20 @@ QString PaymentLogic::createOnlinePaymentLink(
     QFV.url().validate(_paymentVerifyCallback, "callBack");
 
     //1: find best payment gateway
-    ORM::tblPaymentGateways::DTO PaymentGateway = PaymentLogic::findBestPaymentGateway(
-                                                      APICALLBOOM_PARAM,
-                                                      _toPay,
-                                                      _gatewayType,
-                                                      _domain);
+    ORM::tblPaymentGateways::DTO PaymentGatewayDTO = PaymentLogic::findBestPaymentGateway(
+                                                         APICALLBOOM_PARAM,
+                                                         _toPay,
+                                                         _gatewayType,
+                                                         _domain);
 
     //2: get payment gateway driver
-    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGateway.pgwDriver);
+    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGatewayDTO.pgwDriver);
 
     //3: create payment
     TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP(APICALLBOOM_PARAM,
                                                            "spOnlinePayment_Create", {
                                                                { "iVoucherID", _vchID },
-                                                               { "iGatewayID", PaymentGateway.pgwID },
+                                                               { "iGatewayID", PaymentGatewayDTO.pgwID },
                                                                { "iAmount", _toPay },
                                                                { "iTargetWalID", _walID },
                                                            })
@@ -290,7 +290,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentKey", onpMD5);
 
         //4: call driver::request
-        auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(PaymentGateway,
+        auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(PaymentGatewayDTO,
                                                                                         onpMD5,
                                                                                         _toPay,
                                                                                         Callback,
@@ -314,7 +314,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         try {
             PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
                                                "spPaymentGateway_UpdateRequestCounters", {
-                                                   { "iPgwID", PaymentGateway.pgwID },
+                                                   { "iPgwID", PaymentGatewayDTO.pgwID },
                                                    { "iAmount", _toPay },
                                                })
             ;

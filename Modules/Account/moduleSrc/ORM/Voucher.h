@@ -63,21 +63,21 @@ namespace tblVoucher {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                           Type                    Validation                  Default     UpBy    Sort   Filter Self  Virt   PK
-                { Fields::vchID,                ORM_PRIMARYKEY_64 },
-                { Fields::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
-                { Fields::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPNone, false, false },
-                { Fields::vchType,              S(Targoman::API::AAA::enuVoucherType::Type), QFV, QRequired /*Targoman::API::AAA::enuVoucherType::Expense*/, UPNone },
-                { Fields::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
-                { Fields::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin, false, false },
-                { Fields::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
-                { Fields::vchCreationDateTime,  ORM_CREATED_ON },
-            };
+            //ColName                       Type                    Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
+            { Fields::vchID,                ORM_PRIMARYKEY_64 },
+            { Fields::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPAdmin,    false,  false },
+            { Fields::vchType,              S(Targoman::API::AAA::enuVoucherType::Type), QFV,   QRequired /*Targoman::API::AAA::enuVoucherType::Expense*/, UPNone },
+            { Fields::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
+            { Fields::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin,    false,  false },
+            { Fields::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },
+            { Fields::vchCreationDateTime,  ORM_CREATED_ON },
+        };
 
         const QList<stuRelation> Relations = {
             ///Col                     Reference Table              ForeignCol
-                { Fields::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::Fields::usrID },
-            };
+            { Fields::vch_usrID,  R(AAASchema, tblUser::Name), tblUser::Fields::usrID },
+        };
 
         const QList<stuDBIndex> Indexes = {
         };

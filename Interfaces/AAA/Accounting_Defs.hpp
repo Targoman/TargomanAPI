@@ -57,8 +57,8 @@ TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      );
 
 TARGOMAN_DEFINE_ENUM(enuDiscountType,
-                     Percent = '%',
-                     Currency  = '$',
+                     Percent  = '%',
+                     Currency = '$',
                      );
 
 TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
@@ -851,6 +851,7 @@ TAPI_DEFINE_STRUCT(stuPreVoucher,
     SF_QString          (Summary),
     SF_quint16          (Round),
     SF_quint32          (ToPay, 0, v>0),
+    SF_quint64          (VoucherID),
     SF_QString          (Sign)
 );
 
@@ -859,6 +860,8 @@ TAPI_DEFINE_STRUCT(stuVoucher,
     SF_Struct           (Info, stuPreVoucher, v.ToPay),
     SF_QString          (PaymentLink),
     SF_QString          (PaymentKey),
+    SF_quint32          (Payed),
+    SF_quint32          (Remained),
     SF_Enum             (Status, enuVoucherStatus, enuVoucherStatus::New)
 );
 

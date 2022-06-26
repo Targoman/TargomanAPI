@@ -301,31 +301,31 @@ private:
     );
 
 private slots:
-    Targoman::API::AAA::stuPreVoucher REST_POST(
-        mergeBasket,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-        ),
-        "Merge given pre-Voucher and user's new asset items by service"
-    )
+//    Targoman::API::AAA::stuPreVoucher REST_POST(
+//        mergeBasket,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+//        ),
+//        "Merge given pre-Voucher and user's new asset items by service"
+//    )
 
-    Targoman::API::AAA::stuPreVoucher REST_POST(
-        getBasket,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
-        ),
-        "Fetch and make current user's pre-Voucher"
-    )
+//    Targoman::API::AAA::stuPreVoucher REST_POST(
+//        getBasket,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+//        ),
+//        "Fetch and make current user's pre-Voucher"
+//    )
 
-    bool REST_POST(
-        deleteBasket,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
-        ),
-        "Remove all items from pre-Voucher"
-    )
+//    bool REST_POST(
+//        deleteBasket,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
+//        ),
+//        "Remove all items from pre-Voucher"
+//    )
 
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
@@ -343,22 +343,22 @@ private slots:
         "When callback is set to URL you must specify payment gateway"
     )
 
-    Targoman::API::AAA::stuVoucher REST_POST(
-        payForBasket,
-        (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            QString _domain,
-            quint64 _voucherID,
-            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
-            qint64 _amount = -1, //-1: rest of voucher's remained amount
-            qint64 _walID = -1, //-1: no wallet
-            QString _paymentVerifyCallback = {}
-        ),
-        "Pay for voucher by wallet and/or offline/online payment."
-        "gatewayType=null for pay only by wallet."
-        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining."
-        "At least one of gatewayType or walID must be provided."
-    )
+//    Targoman::API::AAA::stuVoucher REST_POST(
+//        payForBasket,
+//        (
+//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            QString _domain,
+//            quint64 _voucherID,
+//            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
+//            qint64 _amount = -1, //-1: rest of voucher's remained amount
+//            qint64 _walID = -1, //-1: no wallet
+//            QString _paymentVerifyCallback = {}
+//        ),
+//        "Pay for voucher by wallet and/or offline/online payment."
+//        "gatewayType=null for pay only by wallet."
+//        "amount=-1 for remainig of voucher's amount or >0 for custom amount less than remaining."
+//        "At least one of gatewayType or walID must be provided."
+//    )
 
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
