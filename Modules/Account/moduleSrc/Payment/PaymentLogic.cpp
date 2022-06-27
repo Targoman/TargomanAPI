@@ -126,9 +126,11 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
                     , DBExpression::VALUE(tblPaymentGateways::Fields::pgwSumTodayPaidAmount)
                     , "inner_pgwSumTodayPaidAmount"
                    )
+
+            .leftJoinWith(tblPaymentGateways::Relation::Type)
 //            .where({ tblPaymentGateways::Fields::pgwType, enuConditionOperator::Equal, _gatewayType })
             .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::Fields::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
-            .andWhere({ tblPaymentGateways::Fields::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
+            .andWhere({ tblPaymentGatewayTypes::Fields::pgtMinRequestAmount, enuConditionOperator::LessEqual, _amount })
             .andWhere(
                 clsCondition({ tblPaymentGateways::Fields::pgwMaxPerDayAmount, enuConditionOperator::Null })
                 .orCond(
@@ -142,8 +144,8 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
                 )
             )
             .andWhere(
-                clsCondition({ tblPaymentGateways::Fields::pgwMaxRequestAmount, enuConditionOperator::Null })
-                .orCond({ tblPaymentGateways::Fields::pgwMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
+                clsCondition({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::Null })
+                .orCond({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
             )
 //            .groupBy(tblPaymentGateways::Fields::pgwID)
             , "tmptbl_inner"
@@ -203,9 +205,10 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
                     , DBExpression::VALUE(tblPaymentGateways::Fields::pgwSumTodayPaidAmount)
                     , "inner_pgwSumTodayPaidAmount"
                    )
+            .leftJoinWith(tblPaymentGateways::Relation::Type)
             .where({ tblPaymentGateways::Fields::pgwType, enuConditionOperator::Equal, _gatewayType })
             .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::Fields::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
-            .andWhere({ tblPaymentGateways::Fields::pgwMinRequestAmount, enuConditionOperator::LessEqual, _amount })
+            .andWhere({ tblPaymentGatewayTypes::Fields::pgtMinRequestAmount, enuConditionOperator::LessEqual, _amount })
             .andWhere(
                 clsCondition({ tblPaymentGateways::Fields::pgwMaxPerDayAmount, enuConditionOperator::Null })
                 .orCond(
@@ -219,8 +222,8 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
                 )
             )
             .andWhere(
-                clsCondition({ tblPaymentGateways::Fields::pgwMaxRequestAmount, enuConditionOperator::Null })
-                .orCond({ tblPaymentGateways::Fields::pgwMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
+                clsCondition({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::Null })
+                .orCond({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
             )
 //            .groupBy(tblPaymentGateways::Fields::pgwID)
             , "tmptbl_inner"

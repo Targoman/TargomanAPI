@@ -160,16 +160,16 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
 
-    Voucher.ID = this->Create(Voucher::instance(),
-                              _APICALLBOOM,
-                              TAPI::ORMFields_t({
-                                                    { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
-//                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                    { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                    { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                                    { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
-                                                    { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
-                                                }));
+    Voucher.ID = Voucher::instance().Create(
+                     _APICALLBOOM,
+                     TAPI::ORMFields_t({
+                                           { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+//                                           { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                           { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                           { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
+                                           { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
+                                           { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                       }));
 
     try {
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {

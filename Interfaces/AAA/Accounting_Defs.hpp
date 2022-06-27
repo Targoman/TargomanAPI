@@ -39,12 +39,15 @@ namespace Targoman::API::AAA {
 
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
-                     Expense        = 'E',
+                     Invoice        = 'E', //Expense -> Invoice
                      Income         = 'I',
                      Credit         = 'C',
                      Prize          = 'Z',
                      TransferFrom   = 'F',
                      TransferTo     = 'T',
+
+                     Freeze         = 'R', //freeze wallet
+                     UnFreeze       = 'U', //unfreeze wallet
                      )
 
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,

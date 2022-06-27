@@ -31,6 +31,7 @@ using namespace Targoman::API::Helpers;
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGateway);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
 //TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuPaymentGatewayDriver);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTypeStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
 
@@ -38,6 +39,41 @@ namespace Targoman::API::AccountModule {
 
 namespace ORM {
 
+/*****************************************************************\
+|* PaymentGatewayTypes *******************************************|
+\*****************************************************************/
+PaymentGatewayTypes::PaymentGatewayTypes() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblPaymentGatewayTypes::Name,
+        tblPaymentGatewayTypes::Private::ORMFields,
+        tblPaymentGatewayTypes::Private::Relations,
+        tblPaymentGatewayTypes::Private::Indexes
+) { ; }
+
+QVariant IMPL_ORMGET(PaymentGatewayTypes) {
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+quint32 IMPL_ORMCREATE(PaymentGatewayTypes) {
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMUPDATE(PaymentGatewayTypes) {
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMDELETE(PaymentGatewayTypes) {
+    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+/*****************************************************************\
+|* PaymentGateways ***********************************************|
+\*****************************************************************/
 PaymentGateways::PaymentGateways() :
     intfSQLBasedModule(
         AAASchema,

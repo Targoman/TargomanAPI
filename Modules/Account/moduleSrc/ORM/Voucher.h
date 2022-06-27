@@ -67,7 +67,7 @@ namespace tblVoucher {
             { Fields::vchID,                ORM_PRIMARYKEY_64 },
             { Fields::vch_usrID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::vchDesc,              S(TAPI::JSON_t),        QFV/*.maxLenght(500)*/,     QRequired,  UPAdmin,    false,  false },
-            { Fields::vchType,              S(Targoman::API::AAA::enuVoucherType::Type), QFV,   QRequired /*Targoman::API::AAA::enuVoucherType::Expense*/, UPNone },
+            { Fields::vchType,              S(Targoman::API::AAA::enuVoucherType::Type), QFV,   QRequired /*Targoman::API::AAA::enuVoucherType::Invoice*/, UPNone },
             { Fields::vchTotalAmount,       S(quint64),             QFV,                        0,          UPNone },
             { Fields::vchProcessResult,     S(TAPI::JSON_t),        QFV,                        QNull,      UPAdmin,    false,  false },
             { Fields::vchStatus,            ORM_STATUS_FIELD(Targoman::API::AAA::enuVoucherStatus, Targoman::API::AAA::enuVoucherStatus::New) },

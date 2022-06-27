@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 #define TARGOMAN_API_MODULES_ACCOUNT_ORM_USERWALLETS_H
 
-#include "ORM/PaymentGateways.h"
+#include "PaymentGateways.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
 

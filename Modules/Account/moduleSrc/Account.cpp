@@ -153,7 +153,8 @@ Account::Account() :
     this->addSubModule(&Voucher::instance());
     this->addSubModule(&IPBin::instance());
     this->addSubModule(&IPStats::instance());
-    this->addSubModule(&ORM::PaymentGateways::instance());
+    this->addSubModule(&PaymentGatewayTypes::instance());
+    this->addSubModule(&PaymentGateways::instance());
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&OfflinePayments::instance());
     this->addSubModule(&OfflinePaymentClaims::instance());
@@ -781,7 +782,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                           { tblVoucher::Fields::vch_usrID,      CurrentUserID },
                                                           { tblVoucher::Fields::vchDesc,        _preVoucher.toJson().toVariantMap() },
                                                           { tblVoucher::Fields::vchTotalAmount, _preVoucher.ToPay },
-                                                          { tblVoucher::Fields::vchType,        enuVoucherType::Expense },
+                                                          { tblVoucher::Fields::vchType,        enuVoucherType::Invoice },
                                                           { tblVoucher::Fields::vchStatus,      enuVoucherStatus::New },
                                                       }));
 
@@ -920,7 +921,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
     if (VoucherDTO.vchStatus != enuVoucherStatus::New)
         throw exHTTPBadRequest("Only New vouchers allowed");
 
-    if (VoucherDTO.vchType != enuVoucherType::Expense)
+    if (VoucherDTO.vchType != enuVoucherType::Invoice)
         throw exHTTPBadRequest("Only Expense vouchers allowed");
 
     if (_amount < 0) {
@@ -1889,8 +1890,6 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                                                         tblPaymentGateways::Fields::pgwAllowedDomainName,
 //                                                        tblPaymentGateways::Fields::pgwTransactionFeeValue,
 //                                                        tblPaymentGateways::Fields::pgwTransactionFeeType,
-//                                                        tblPaymentGateways::Fields::pgwMinRequestAmount,
-//                                                        tblPaymentGateways::Fields::pgwMaxRequestAmount,
 //                                                        tblPaymentGateways::Fields::pgwMaxPerDayAmount,
 //                                                        tblPaymentGateways::Fields::pgwLastPaymentDateTime,
 //                                                        tblPaymentGateways::Fields::pgwSumTodayPaidAmount,

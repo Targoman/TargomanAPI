@@ -33,7 +33,7 @@ namespace Targoman::API::AccountModule {
 
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
                      _DeveloperTest             = '-',
-                     COD                        = 'D', //offline payment
+                     COD                        = 'O',
                      IranBank                   = 'I',
                      IranIntermediateGateway    = 'M',
                      InternationalDebitCart     = 'D',
@@ -49,11 +49,18 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayType,
 //                     TurkeyZiraatBank   = 'T',
 //                     CryptoEther        = 'E',
 //                     );
+TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTypeStatus,
+                     Active   = 'A',
+                     Disabled = 'D',
+                     Removed  = 'R',
+                     );
+
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayStatus,
                      Active   = 'A',
                      Disabled = 'D',
                      Removed  = 'R',
                      );
+
 TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
                      Percent = '%',
                      Currency = '$',
@@ -66,6 +73,7 @@ TARGOMAN_DEFINE_ENUM(enuPaymentGatewayTransactionFeeType,
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayType);
 //TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::enuPaymentGatewayType::List);
 
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTypeStatus);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayStatus);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuPaymentGatewayTransactionFeeType);
 
@@ -75,6 +83,48 @@ namespace ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+namespace tblPaymentGatewayTypes {
+    constexpr char Name[] = "tblPaymentGatewayTypes";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(pgtType);
+        TARGOMAN_CREATE_CONSTEXPR(pgtName);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                           Type                        Validation                              Default     UpBy     Sort   Filter Self  Virt   PK
+            { Fields::pgtType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type), QFV,  QRequired,  UPAdmin },
+            { Fields::pgtName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(64),       QRequired,  UPAdmin },
+            { Fields::pgtMinRequestAmount,      S(qreal),                   QFV.minValue(1),                        1,          UPAdmin },
+            { Fields::pgtMaxRequestAmount,      S(NULLABLE_TYPE(qreal)),    QFV,                                    QNull,      UPAdmin },
+            { Fields::pgtStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active) },
+        };
+
+        const QList<stuRelation> Relations = {
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_Enum                     (pgtType, Targoman::API::AccountModule::enuPaymentGatewayType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
+        SF_QString                  (pgtName),
+        SF_quint32                  (pgtMinRequestAmount),
+        SF_NULLABLE_quint32         (pgtMaxRequestAmount),
+        SF_ORM_STATUS_FIELD         (pgtStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active)
+    );
+}
 
 namespace tblPaymentGateways {
     constexpr char Name[] = "tblPaymentGateways";
@@ -91,8 +141,8 @@ namespace tblPaymentGateways {
         TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeValue);
         TARGOMAN_CREATE_CONSTEXPR(pgwTransactionFeeType);
         //------------------
-        TARGOMAN_CREATE_CONSTEXPR(pgwMinRequestAmount);
-        TARGOMAN_CREATE_CONSTEXPR(pgwMaxRequestAmount);
+//        TARGOMAN_CREATE_CONSTEXPR(pgwMinRequestAmount);
+//        TARGOMAN_CREATE_CONSTEXPR(pgwMaxRequestAmount);
         TARGOMAN_CREATE_CONSTEXPR(pgwMaxPerDayAmount);
         //load balance:
         TARGOMAN_CREATE_CONSTEXPR(pgwLastPaymentDateTime);
@@ -111,7 +161,7 @@ namespace tblPaymentGateways {
     }
 
     namespace Relation {
-        // constexpr char AAA[] = "aaa";
+         constexpr char Type[] = "type";
     }
 
     namespace Private {
@@ -128,8 +178,8 @@ namespace tblPaymentGateways {
             { Fields::pgwTransactionFeeValue,   S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             { Fields::pgwTransactionFeeType,    S(Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Type), QFV, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Currency, UPAdmin },
             //------------------
-            { Fields::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    1,          UPAdmin },
-            { Fields::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
+//            { Fields::pgwMinRequestAmount,      S(quint32),                                         QFV.minValue(1),                    1,          UPAdmin },
+//            { Fields::pgwMaxRequestAmount,      S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             { Fields::pgwMaxPerDayAmount,       S(NULLABLE_TYPE(quint32)),                          QFV,                                QNull,      UPAdmin },
             //------------------
             { Fields::pgwLastPaymentDateTime,   S(NULLABLE_TYPE(TAPI::DateTime_t)),                 QFV,                                QNull,      UPAdmin },
@@ -148,7 +198,9 @@ namespace tblPaymentGateways {
         };
 
         const QList<stuRelation> Relations = {
-            ///Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            //Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            { Relation::Type,
+              { Fields::pgwType, R(AAASchema, tblPaymentGatewayTypes::Name), tblPaymentGatewayTypes::Fields::pgtType } },
             ORM_RELATION_OF_CREATOR(Fields::pgwCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::pgwUpdatedBy_usrID),
         };
@@ -168,8 +220,8 @@ namespace tblPaymentGateways {
         SF_QString                  (pgwAllowedDomainName),
         SF_NULLABLE_quint32         (pgwTransactionFeeValue),
         SF_Enum                     (pgwTransactionFeeType, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Currency),
-        SF_quint32                  (pgwMinRequestAmount),
-        SF_NULLABLE_quint32         (pgwMaxRequestAmount),
+//        SF_quint32                  (pgwMinRequestAmount),
+//        SF_NULLABLE_quint32         (pgwMaxRequestAmount),
         SF_NULLABLE_quint32         (pgwMaxPerDayAmount),
         SF_DateTime_t               (pgwLastPaymentDateTime),
         SF_quint64                  (pgwSumTodayPaidAmount),
@@ -186,6 +238,18 @@ namespace tblPaymentGateways {
 }
 
 #pragma GCC diagnostic pop
+
+class PaymentGatewayTypes : public intfSQLBasedModule
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGatewayTypes)
+
+private slots:
+    QVariant ORMGET("Get payment gateway type information")
+    quint32 ORMCREATE("Create a new payment gateway type by priviledged user")
+    bool ORMUPDATE("Update payment gateway type info by priviledged user")
+    bool ORMDELETE("Delete a payment gateway type")
+};
 
 class PaymentGateways : public intfSQLBasedModule
 {
