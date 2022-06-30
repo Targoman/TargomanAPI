@@ -290,15 +290,15 @@ private:
         bool _setAsError = false
     );
 
-    Targoman::API::AAA::stuVoucher payAndProcessBasket(
-        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-        QString _domain,
-        quint64 _voucherID,
-        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
-        qint64 _amount = -1, //-1: rest of voucher's remained amount
-        qint64 _walID = -1, //-1: no wallet
-        QString _paymentVerifyCallback = {}
-    );
+//    Targoman::API::AAA::stuVoucher payAndProcessBasket(
+//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        QString _domain,
+//        quint64 _voucherID,
+//        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
+//        qint64 _amount = -1, //-1: rest of voucher's remained amount
+//        qint64 _walID = -1, //-1: no wallet
+//        QString _paymentVerifyCallback = {}
+//    );
 
 private slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
@@ -335,7 +335,8 @@ private slots:
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
             qint64 _walID = -1,
-            QString _paymentVerifyCallback = {}
+            QString _paymentVerifyCallback = {},
+            bool _allowChargeWallet = false
         ),
         "create a voucher based on preVoucher. "
         "Set gatewayType = COD for offline payment, url for online payment or keep empty for wallet payment,"

@@ -101,6 +101,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 ) {
     QString Domain = URLHelper::domain(_domain);
 
+    //@TODO: return pgtMaxRequestAmount
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
                       .addCols({
 //                                   tblPaymentGateways::Fields::pgwID,
@@ -153,7 +154,9 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
                 enuConditionOperator::Equal,
                 tblPaymentGateways::Name, tblPaymentGateways::Fields::pgwID }
         )
-//        .where({ tblPaymentGateways::Fields::pgwType, enuConditionOperator::Equal, _gatewayType })
+#ifndef QT_DEBUG
+        .andWhere({ tblPaymentGateways::Fields::pgwType, enuConditionOperator::NotEqual, enuPaymentGatewayType::_DeveloperTest })
+#endif
         .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::Fields::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
 //        .orderBy("tmptbl_inner.inner_pgwTransactionFeeAmount")
 //        .orderBy("tmptbl_inner.inner_pgwSumTodayPaidAmount")
@@ -181,6 +184,11 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     const QString& _domain
 ) {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
+
+#ifndef QT_DEBUG
+    if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
+        throw exPayment("DeveloperTest is not allowed in non debug mode");
+#endif
 
     QString Domain = URLHelper::domain(_domain);
 

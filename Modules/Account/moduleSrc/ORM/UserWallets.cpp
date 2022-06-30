@@ -164,10 +164,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
                      _APICALLBOOM,
                      TAPI::ORMFields_t({
                                            { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+                                           { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
 //                                           { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                            { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                            { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                           { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
                                            { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                        }));
 

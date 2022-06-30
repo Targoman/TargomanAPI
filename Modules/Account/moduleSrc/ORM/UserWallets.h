@@ -55,8 +55,9 @@ namespace tblUserWallets {
         TARGOMAN_CREATE_CONSTEXPR(walName);
         TARGOMAN_CREATE_CONSTEXPR(walDefault);
         TARGOMAN_CREATE_CONSTEXPR(walMinBalance);
-        TARGOMAN_CREATE_CONSTEXPR(walNotTransferableAmount);
         TARGOMAN_CREATE_CONSTEXPR(walMaxTransferPerDay);
+        TARGOMAN_CREATE_CONSTEXPR(walNotTransferableAmount);
+        TARGOMAN_CREATE_CONSTEXPR(walFreezedAmount);
         TARGOMAN_CREATE_CONSTEXPR(walBalance);
         TARGOMAN_CREATE_CONSTEXPR(walSumIncome);
         TARGOMAN_CREATE_CONSTEXPR(walSumExpense);
@@ -79,14 +80,15 @@ namespace tblUserWallets {
             { Fields::wal_usrID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
             { Fields::walName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(100),  "default",  UPOwner },
             { Fields::walDefault,               S(bool),                    QFV,                                false,      UPOwner },
-            { Fields::walMinBalance,            S(qint64),                  QFV,                                0,          UPAdmin, false, false },
-            { Fields::walNotTransferableAmount, S(qint64),                  QFV,                                0,          UPAdmin, false, false },
-            { Fields::walMaxTransferPerDay,     S(qint64),                  QFV,                                10000000,   UPAdmin, false, false },
+            { Fields::walMinBalance,            S(quint64),                 QFV,                                0,          UPAdmin, false, false },
+            { Fields::walMaxTransferPerDay,     S(quint64),                 QFV,                                10000000,   UPAdmin, false, false },
+            { Fields::walNotTransferableAmount, S(quint64),                 QFV,                                0,          UPAdmin, false, false },
+            { Fields::walFreezedAmount,         S(quint64),                 QFV,                                0,          UPAdmin, false, false },
             { Fields::walBalance,               S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { Fields::walSumIncome,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { Fields::walSumExpense,            S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { Fields::walSumCredit,             S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
-            { Fields::walSumDebit,              S(qint64),                  QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumIncome,             S(quint64),                 QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumExpense,            S(quint64),                 QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumCredit,             S(quint64),                 QFV,                                QInvalid,   UPNone,  false, false },
+            { Fields::walSumDebit,              S(quint64),                 QFV,                                QInvalid,   UPNone,  false, false },
             { Fields::walStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::walCreationDateTime,      ORM_CREATED_ON },
@@ -116,14 +118,15 @@ namespace tblUserWallets {
         SF_quint64                  (wal_usrID),
         SF_QString                  (walName),
         SF_bool                     (walDefault),
-        SF_qint64                   (walMinBalance),
-        SF_qint64                   (walNotTransferableAmount),
-        SF_qint64                   (walMaxTransferPerDay),
+        SF_quint64                  (walMinBalance),
+        SF_quint64                  (walMaxTransferPerDay),
+        SF_quint64                  (walNotTransferableAmount),
+        SF_quint64                  (walFreezedAmount),
         SF_qint64                   (walBalance),
-        SF_qint64                   (walSumIncome),
-        SF_qint64                   (walSumExpense),
-        SF_qint64                   (walSumCredit),
-        SF_qint64                   (walSumDebit),
+        SF_quint64                  (walSumIncome),
+        SF_quint64                  (walSumExpense),
+        SF_quint64                  (walSumCredit),
+        SF_quint64                  (walSumDebit),
         SF_ORM_STATUS_FIELD         (walStatus, Targoman::API::AccountModule::enuUserWalletStatus, Targoman::API::AccountModule::enuUserWalletStatus::Active),
         SF_ORM_CREATED_ON           (walCreationDateTime),
         SF_ORM_CREATED_BY           (walCreatedBy_usrID),
