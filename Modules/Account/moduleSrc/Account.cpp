@@ -961,17 +961,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     if ((RemainingAfterWallet == 0) || (_gatewayType == enuPaymentGatewayType::COD)) {
 
         if (TotalFreezed > 0) {
-            ///@TODO: unfreeze + wallet transaction per each freezed (group by wallet id)
-
-
-            SELECT tblVoucher.vch_rootVchID
-                 , SUM(tblVoucher.vchTotalAmount) AS TotalFreezed
-              FROM tblVoucher
-             WHERE tblVoucher.vchType = 'R' -- freeze
-               AND tblVoucher.vch_rootVchID IS NOT NULL
-          GROUP BY tblVoucher.vch_rootVchID
-
-
+            clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                               "spWallet_unFreezeAndDoTransaction", {
+                                                   { "iUserID",             CurrentUserID },
+                                                   { "iVoucherID",          _preVoucher.VoucherID },
+                                                   { "iCheckTotalFreezed",  TotalFreezed },
+                                               });
         }
 
         if (MustFreeze > 0) { //_preVoucher.ToPay > TotalPayed) {
@@ -979,16 +974,57 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                "spWalletTransaction_Create", {
                                                    { "iWalletID", _walID },
                                                    { "iVoucherID", _preVoucher.VoucherID },
+                                                   { "ioAmount", 0 },
                                                });
 
-//            RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
+//            RemainingAfterWallet -= Result.spDirectOutputs().value("ioAmount").toUInt();
 
 //            if (RemainingAfterWallet != 0)
 //                throw exHTTPInternalServerError("Error in wallet transaction");
         }
 
-        if (_gatewayType == enuPaymentGatewayType::COD) {
-            ///@TODO: create COD related vouchers
+        if ((_gatewayType == enuPaymentGatewayType::COD)
+            && (RemainingAfterWallet > 0)
+        ) {
+            //create COD related vouchers
+
+            //1: COD Credit
+            stuPreVoucher PreVoucher_COD_Credit;
+            PreVoucher_COD_Credit.UserID = CurrentUserID;
+            PreVoucher_COD_Credit.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_COD_CREDIT));
+            PreVoucher_COD_Credit.Summary = "COD Credit";
+            PreVoucher_COD_Credit.ToPay = RemainingAfterWallet;
+            PreVoucher_COD_Credit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson()).toBase64());
+
+            quint64 COD_CreditVoucherID = Voucher::instance().Create(
+                                              _APICALLBOOM,
+                                              TAPI::ORMFields_t({
+                                                   { tblVoucher::Fields::vch_usrID,         CurrentUserID },
+                                                   { tblVoucher::Fields::vchType,           enuVoucherType::Credit },
+                                                   { tblVoucher::Fields::vchDesc,           PreVoucher_COD_Credit.toJson().toVariantMap() },
+                                                   { tblVoucher::Fields::vch_rootVchID,     _preVoucher.VoucherID },
+                                                   { tblVoucher::Fields::vchTotalAmount,    PreVoucher_COD_Credit.ToPay },
+                                                   { tblVoucher::Fields::vchStatus,         enuVoucherStatus::Finished },
+                                               }));
+
+            //2: COD Debit
+            stuPreVoucher PreVoucher_COD_Debit;
+            PreVoucher_COD_Debit.UserID = CurrentUserID;
+            PreVoucher_COD_Debit.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_COD_DEBIT));
+            PreVoucher_COD_Debit.Summary = "COD Debit";
+            PreVoucher_COD_Debit.ToPay = RemainingAfterWallet;
+            PreVoucher_COD_Debit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Debit.toJson()).toJson()).toBase64());
+
+            quint64 COD_DebitVoucherID = Voucher::instance().Create(
+                                              _APICALLBOOM,
+                                              TAPI::ORMFields_t({
+                                                   { tblVoucher::Fields::vch_usrID,         CurrentUserID },
+                                                   { tblVoucher::Fields::vchType,           enuVoucherType::Debit },
+                                                   { tblVoucher::Fields::vchDesc,           PreVoucher_COD_Debit.toJson().toVariantMap() },
+                                                   { tblVoucher::Fields::vch_rootVchID,     _preVoucher.VoucherID },
+                                                   { tblVoucher::Fields::vchTotalAmount,    PreVoucher_COD_Debit.ToPay },
+                                                   { tblVoucher::Fields::vchStatus,         enuVoucherStatus::Finished },
+                                               }));
         }
 
         return Account::processVoucher(APICALLBOOM_PARAM, _preVoucher.VoucherID);
@@ -1127,9 +1163,10 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
                                            "spWalletTransaction_Create", {
                                                { "iWalletID", _walID },
                                                { "iVoucherID", _voucherID },
+                                               { "ioAmount", 0 },
                                            });
 
-        RemainingAfterWallet -= Result.spDirectOutputs().value("oAmount").toUInt();
+        RemainingAfterWallet -= Result.spDirectOutputs().value("ioAmount").toUInt();
 
         if (RemainingAfterWallet < 0)
             throw exHTTPInternalServerError("Remaining after wallet transaction is negative.");

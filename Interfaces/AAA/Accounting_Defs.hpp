@@ -42,6 +42,7 @@ TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Invoice        = 'E', //Expense -> Invoice
                      Income         = 'I',
                      Credit         = 'C',
+                     Debit          = 'D',
                      Prize          = 'Z',
                      TransferFrom   = 'F',
                      TransferTo     = 'T',
@@ -85,6 +86,8 @@ extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
 
 constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
+constexpr char VOUCHER_ITEM_NAME_COD_CREDIT[]           = "COD_CREDIT";
+constexpr char VOUCHER_ITEM_NAME_COD_DEBIT[]            = "COD_DEBIT";
 //constexpr char PENDING_VOUCHER_NAME_COUPON_DISCOUNT[]   = "COUPON_DISCOUNT";
 constexpr char PENDING_VOUCHER_NAME_REFERRER_PRIZE[]    = "REFERRER_PRIZE";
 
