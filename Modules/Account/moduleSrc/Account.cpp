@@ -718,6 +718,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
+#ifndef QT_DEBUG
+    if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
+        throw exHTTPBadRequest("DeveloperTest not available");
+#endif
 
     if (_preVoucher.Items.isEmpty())
         throw exHTTPBadRequest("Pre-Voucher is empty");
@@ -1060,9 +1064,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                { tblVoucher::Fields::vchTotalAmount,    Voucher.Info.ToPay },
                                                { tblVoucher::Fields::vchStatus,         enuVoucherStatus::New },
                                            }));
+        Voucher.Payed = 0;
+        Voucher.Remained = Voucher.Info.ToPay;
     } else {
         Voucher.Info = _preVoucher;
         Voucher.ID = _preVoucher.VoucherID;
+
+        Voucher.Remained = RemainingAfterWallet;
+        Voucher.Payed = Voucher.Info.ToPay - Voucher.Remained;
     }
 
     //freeze MustFreeze
@@ -1731,11 +1740,13 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                    });
 
         //--------------------------
-        return Targoman::API::AAA::stuVoucher(
+        return stuVoucher(
                     _voucherID,
                     PreVoucher,
                     QString(),
                     QString(),
+                    VoucherDTO.vchTotalAmount,
+                    0,
                     Targoman::API::AAA::enuVoucherStatus::Finished
                     );
 //    } catch (...) {

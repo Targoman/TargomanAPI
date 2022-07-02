@@ -130,7 +130,7 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 //    if (_amount == 0)
 //        throw exHTTPBadRequest("amount is zero");
 
-//    QVariantList Result = Payment::PaymentLogic::findAvailableGatewayTypes(
+//    QVariantMap Result = Payment::PaymentLogic::findAvailableGatewayTypes(
 //                _amount,
 //                _domain
 //                );
