@@ -94,7 +94,7 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
 //    return out.join(",");
 //}
 
-QVariantMap PaymentLogic::findAvailableGatewayTypes(
+QVariantList PaymentLogic::findAvailableGatewayTypes(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     const QString& _domain
@@ -102,10 +102,10 @@ QVariantMap PaymentLogic::findAvailableGatewayTypes(
     QString Domain = URLHelper::domain(_domain);
 
     SelectQuery qry = SelectQuery(PaymentGatewayTypes::instance())
-                      .addCols({
-                                   tblPaymentGatewayTypes::Fields::pgtType,
-                                   tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount,
-                               })
+                      .addCol(tblPaymentGatewayTypes::Fields::pgtType)
+                      .addCol(tblPaymentGatewayTypes::Fields::pgtName)
+                      .addCol(DBExpression::VALUE("IFNULL(pgtMinRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMinRequestAmount)
+                      .addCol(DBExpression::VALUE("IFNULL(pgtMaxRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount)
                       .innerJoin(SelectQuery(PaymentGatewayTypes::instance())
                                  .addCol(tblPaymentGatewayTypes::Fields::pgtType)
                                  .addCol(enuAggregation::COUNT, tblPaymentGatewayTypes::Fields::pgtType, "_cnt")
@@ -125,9 +125,13 @@ QVariantMap PaymentLogic::findAvailableGatewayTypes(
                                                 , DBExpression::VALUE(tblPaymentGateways::Fields::pgwSumTodayPaidAmount)
                                                 , "inner_pgwSumTodayPaidAmount"
                                             )
-                                            .innerJoinWith(tblPaymentGateways::Relation::Type)
+//                                            .innerJoinWith(tblPaymentGateways::Relation::Type)
+//                                            .andWhere({ tblPaymentGatewayTypes::Fields::pgtMinRequestAmount, enuConditionOperator::LessEqual, _amount })
+//                                            .andWhere(
+//                                                clsCondition({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::Null })
+//                                                .orCond({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
+//                                            )
                                             .andWhere({ { enuAggregation::LOWER, tblPaymentGateways::Fields::pgwAllowedDomainName }, enuConditionOperator::Equal, Domain })
-                                            .andWhere({ tblPaymentGatewayTypes::Fields::pgtMinRequestAmount, enuConditionOperator::LessEqual, _amount })
                                             .andWhere(
                                                 clsCondition({ tblPaymentGateways::Fields::pgwMaxPerDayAmount, enuConditionOperator::Null })
                                                 .orCond(
@@ -140,10 +144,6 @@ QVariantMap PaymentLogic::findAvailableGatewayTypes(
                                                     })
                                                 )
                                             )
-//                                            .andWhere(
-//                                                clsCondition({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::Null })
-//                                                .orCond({ tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount, enuConditionOperator::GreaterEqual, _amount })
-//                                            )
                                             , "tmptbl_inner"
                                             , { "tmptbl_inner", tblPaymentGateways::Fields::pgwType,
                                                 enuConditionOperator::Equal,
@@ -154,7 +154,8 @@ QVariantMap PaymentLogic::findAvailableGatewayTypes(
                                  , { "tmptbl_outer", tblPaymentGatewayTypes::Fields::pgtType,
                                      enuConditionOperator::Equal,
                                      tblPaymentGatewayTypes::Name, tblPaymentGatewayTypes::Fields::pgtType }
-                                 )
+                      )
+                      .andWhere({ tblPaymentGatewayTypes::Fields::pgtMinRequestAmount, enuConditionOperator::LessEqual, _amount })
 #ifndef QT_DEBUG
                       .andWhere({ tblPaymentGatewayTypes::Fields::pgtType, enuConditionOperator::NotEqual, enuPaymentGatewayType::_DeveloperTest })
 #endif
@@ -169,15 +170,17 @@ QVariantMap PaymentLogic::findAvailableGatewayTypes(
 
     QVariantList Rows = qry.all();
 
-    QVariantMap Result;
+    QVariantList Result;
 
     foreach (auto Row, Rows) {
         QVariantMap Map = Row.toMap();
 
-        Result.insert(
-                Map[tblPaymentGatewayTypes::Fields::pgtType].toString(),
-                Map[tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount]
-                );
+        Result.append(QVariantMap({
+                                { "Type", Map[tblPaymentGatewayTypes::Fields::pgtType] },
+                                { "Name", Map[tblPaymentGatewayTypes::Fields::pgtName] },
+                                { "MinRequestAmount", Map[tblPaymentGatewayTypes::Fields::pgtMinRequestAmount] },
+                                { "MaxRequestAmount", Map[tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount] },
+                     }));
     }
 
     return Result;
