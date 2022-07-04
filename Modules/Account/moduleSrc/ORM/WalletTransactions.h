@@ -95,7 +95,7 @@ namespace tblWalletsTransactions {
                 { Fields::wltID,        ORM_PRIMARYKEY_64 },
                 { Fields::wlt_walID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
                 { Fields::wlt_vchID,    S(quint64),                     QFV.integer().minValue(1),  QRequired,  UPNone, true,  true },
-                { Fields::wlt_vchType,  S(Targoman::API::AAA::enuVoucherType::Type), QFV, Targoman::API::AAA::enuVoucherType::Expense, UPNone },
+                { Fields::wlt_vchType,  S(Targoman::API::AAA::enuVoucherType::Type), QFV, Targoman::API::AAA::enuVoucherType::Invoice, UPNone },
                 { Fields::wltAmount,    S(qint64),                      QFV,                        QInvalid,   UPNone, false, false },
                 { Fields::wltStatus,    ORM_STATUS_FIELD(Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New) },
                 { Fields::wltDateTime,  ORM_CREATED_ON },
@@ -117,7 +117,7 @@ namespace tblWalletsTransactions {
         SF_ORM_PRIMARYKEY_64        (wltID),
         SF_quint64                  (wlt_walID),
         SF_quint64                  (wlt_vchID),
-        SF_Enum                     (wlt_vchType, Targoman::API::AAA::enuVoucherType, Targoman::API::AAA::enuVoucherType::Expense),
+        SF_Enum                     (wlt_vchType, Targoman::API::AAA::enuVoucherType, Targoman::API::AAA::enuVoucherType::Invoice),
         SF_qint64                   (wltAmount),
         SF_ORM_STATUS_FIELD         (wltStatus, Targoman::API::AccountModule::enuWalletTransactionStatus, Targoman::API::AccountModule::enuWalletTransactionStatus::New),
         SF_ORM_CREATED_ON           (wltDateTime)

@@ -39,12 +39,16 @@ namespace Targoman::API::AAA {
 
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
-                     Expense        = 'E',
+                     Invoice        = 'E', //Expense -> Invoice
                      Income         = 'I',
                      Credit         = 'C',
+                     Debit          = 'D',
                      Prize          = 'Z',
                      TransferFrom   = 'F',
                      TransferTo     = 'T',
+
+                     Freeze         = 'R', //freeze wallet
+                     UnFreeze       = 'U', //unfreeze wallet
                      )
 
 TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
@@ -57,8 +61,8 @@ TARGOMAN_DEFINE_ENUM(enuVoucherStatus,
                      );
 
 TARGOMAN_DEFINE_ENUM(enuDiscountType,
-                     Percent = '%',
-                     Currency  = '$',
+                     Percent  = '%',
+                     Currency = '$',
                      );
 
 TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
@@ -82,6 +86,8 @@ extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
 
 constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
+constexpr char VOUCHER_ITEM_NAME_COD_CREDIT[]           = "COD_CREDIT";
+constexpr char VOUCHER_ITEM_NAME_COD_DEBIT[]            = "COD_DEBIT";
 //constexpr char PENDING_VOUCHER_NAME_COUPON_DISCOUNT[]   = "COUPON_DISCOUNT";
 constexpr char PENDING_VOUCHER_NAME_REFERRER_PRIZE[]    = "REFERRER_PRIZE";
 
@@ -851,14 +857,18 @@ TAPI_DEFINE_STRUCT(stuPreVoucher,
     SF_QString          (Summary),
     SF_quint16          (Round),
     SF_quint32          (ToPay, 0, v>0),
+    SF_quint64          (VoucherID),
     SF_QString          (Sign)
 );
 
 TAPI_DEFINE_STRUCT(stuVoucher,
     SF_quint64          (ID, 0, v>0),
     SF_Struct           (Info, stuPreVoucher, v.ToPay),
+//    SF_Struct           (PreVoucher, stuPreVoucher, v.ToPay),
     SF_QString          (PaymentLink),
     SF_QString          (PaymentKey),
+    SF_quint32          (Payed),
+    SF_quint32          (Remained),
     SF_Enum             (Status, enuVoucherStatus, enuVoucherStatus::New)
 );
 

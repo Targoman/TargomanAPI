@@ -388,15 +388,15 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, it->UUID })
             .one();
 
-        tblAccountUserAssetsBase::DTO AccountUserAssetsBase;
-        AccountUserAssetsBase.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+        tblAccountUserAssetsBase::DTO AccountUserAssetsBaseDTO;
+        AccountUserAssetsBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
-        tblAccountSaleablesBase::DTO AccountSaleablesBase;
-        AccountSaleablesBase.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
+        tblAccountSaleablesBase::DTO AccountSaleablesBaseDTO;
+        AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
-        if ((AccountSaleablesBase.slbCode != _saleableCode)
-            || (AccountUserAssetsBase.uas_usrID != CurrentUserID)
-            || (AccountUserAssetsBase.uasVoucherItemUUID != it->UUID)
+        if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
+            || (AccountUserAssetsBaseDTO.uas_usrID != CurrentUserID)
+            || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
 

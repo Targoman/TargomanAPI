@@ -139,6 +139,7 @@ void Advert::computeReferrer(
 ) {
     ///@TODO: [very important] complete this
 
+#ifdef QT_DEBUG
     ///::: SAMPLE CODE :::
 
     //1: add, modify or remove credit voucher for fp.com
@@ -189,6 +190,7 @@ void Advert::computeReferrer(
         _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
     else
         _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
+#endif
 };
 
 QVariantMap Advert::getCustomUserAssetFieldsForQuery(

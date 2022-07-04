@@ -109,16 +109,16 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
                             .orderBy(tblApprovalRequest::Fields::aprRequestDate, enuOrderDir::Descending)
                             .one();
 
-    tblApprovalRequest::DTO ApprovalRequestInfo;
-    ApprovalRequestInfo.fromJson(QJsonObject::fromVariantMap(Info));
+    tblApprovalRequest::DTO ApprovalRequestInfoDTO;
+    ApprovalRequestInfoDTO.fromJson(QJsonObject::fromVariantMap(Info));
 
-    if ((ApprovalRequestInfo.aprStatus == enuAPRStatus::New) || ApprovalRequestInfo.aprSentDate.isNull())
+    if ((ApprovalRequestInfoDTO.aprStatus == enuAPRStatus::New) || ApprovalRequestInfoDTO.aprSentDate.isNull())
         throw exTargomanBase("Code not sent to the client");
 
-    if ((ApprovalRequestInfo.aprStatus == enuAPRStatus::Applied) || (ApprovalRequestInfo.aprApplyDate.isNull() == false))
+    if ((ApprovalRequestInfoDTO.aprStatus == enuAPRStatus::Applied) || (ApprovalRequestInfoDTO.aprApplyDate.isNull() == false))
         throw exTargomanBase("Already applied before");
 
-    if (ApprovalRequestInfo.aprStatus == enuAPRStatus::Expired)
+    if (ApprovalRequestInfoDTO.aprStatus == enuAPRStatus::Expired)
         throw exTargomanBase("Code expired");
 
     quint32 ConfigTTL = (Type == enuApprovalType::Email
@@ -127,9 +127,9 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
                         );
 
     QDateTime Now = Info.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
-    quint64 Secs = Now.toSecsSinceEpoch() - ApprovalRequestInfo.aprSentDate.toSecsSinceEpoch();
+    quint64 Secs = Now.toSecsSinceEpoch() - ApprovalRequestInfoDTO.aprSentDate.toSecsSinceEpoch();
 
-    qDebug() << Now.toString() << ApprovalRequestInfo.aprSentDate.toString() << Secs << ConfigTTL;
+    qDebug() << Now.toString() << ApprovalRequestInfoDTO.aprSentDate.toString() << Secs << ConfigTTL;
 
     if (Secs >= ConfigTTL)
         throw exTargomanBase("The remaining time is up");

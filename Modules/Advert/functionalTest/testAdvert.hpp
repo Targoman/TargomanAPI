@@ -548,13 +548,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 200);
-            QVERIFY(this->LastPreVoucher.ToPay == 46'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 13'800);
             QVERIFY(item.TotalPrice == 46'200);
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 200);
+            QVERIFY(this->LastPreVoucher.ToPay == 46'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -607,13 +607,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 920);
-            QVERIFY(this->LastPreVoucher.ToPay == 73'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 22'080);
             QVERIFY(item.TotalPrice == 73'920);
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 920);
+            QVERIFY(this->LastPreVoucher.ToPay == 73'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -638,13 +638,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 400);
-            QVERIFY(this->LastPreVoucher.ToPay == 92'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 27'600);
             QVERIFY(item.TotalPrice == 92'400);
+
+            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 400);
+            QVERIFY(this->LastPreVoucher.ToPay == 92'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -669,13 +669,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 0);
-            QVERIFY(this->LastPreVoucher.ToPay == 114'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 6'000);
             QVERIFY(item.TotalPrice == 114'000);
+
+            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 0);
+            QVERIFY(this->LastPreVoucher.ToPay == 114'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -703,13 +703,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 360);
-            QVERIFY(this->LastPreVoucher.ToPay == 243'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 38'640);
             QVERIFY(item.TotalPrice == 129'360);
+
+            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 360);
+            QVERIFY(this->LastPreVoucher.ToPay == 243'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -737,13 +737,13 @@ private slots:
 
             this->LastPreVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 600);
-            QVERIFY(this->LastPreVoucher.ToPay == 252'000);
-
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 41'400);
             QVERIFY(item.TotalPrice == 138'600);
+
+            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY(this->LastPreVoucher.Round == 600);
+            QVERIFY(this->LastPreVoucher.ToPay == 252'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -793,7 +793,7 @@ private slots:
         }
     }
 
-    void finalizeBasket() {
+    void finalizeBasket_1_of_3_nopermit() {
         QT_TRY {
             QVariant Result = callAdminAPI(
                 RESTClientHelper::POST,
@@ -808,16 +808,47 @@ private slots:
                 }
             );
 
+//            this->BasketVoucher.fromJson(Result.toJsonObject());
+
+//            QVERIFY(this->BasketVoucher.ID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            if (strcmp(exp.what(), "Permission to charge the wallet is not given") != 0)
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    ///@TODO: create test for change basket after calling not finished finalize
+
+    //3 step for pay basket
+    void finalizeBasket_1_of_3() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            "_DeveloperTest" },
+                    { "domain",                 "dev.test" },
+//                    { "walID",               9988 },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+                    { "allowChargeWallet", true },
+                }
+            );
+
             this->BasketVoucher.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = this->BasketVoucher.Info;
 
             QVERIFY(this->BasketVoucher.ID > 0);
+            QVERIFY(this->LastPreVoucher.VoucherID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
-    void approveOnlinePayment() {
+    void approveOnlinePayment_1_of_3() {
         if (this->BasketVoucher.PaymentKey.isEmpty() == false) {
             QT_TRY {
                 QVariant Result = callGuestAPI(
@@ -836,6 +867,118 @@ private slots:
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
                 QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 100'000);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 152'000);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void finalizeBasket_2_of_3() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            "_DeveloperTest" },
+                    { "domain",                 "dev.test" },
+//                    { "walID",               9988 },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+                    { "allowChargeWallet", true },
+                }
+            );
+
+            this->BasketVoucher.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = this->BasketVoucher.Info;
+
+            QVERIFY(this->BasketVoucher.ID > 0);
+            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void approveOnlinePayment_2_of_3() {
+        if (this->BasketVoucher.PaymentKey.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callGuestAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentKey",     this->BasketVoucher.PaymentKey },
+                        { "domain",         "dev.test" },
+                        { "pgResponse",     QVariantMap({
+                            { "result",     "ok" },
+                        }) },
+                    }
+                );
+
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 200'000);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 52'000);
+
+            } QT_CATCH (const std::exception &exp) {
+                QTest::qFail(exp.what(), __FILE__, __LINE__);
+            }
+        }
+    }
+
+    void finalizeBasket_3_of_3() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::POST,
+                "Account/finalizeBasket",
+                {},
+                {
+                    { "preVoucher",             this->LastPreVoucher.toJson().toVariantMap() },
+                    { "gatewayType",            "_DeveloperTest" },
+                    { "domain",                 "dev.test" },
+//                    { "walID",               9988 },
+                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+                    { "allowChargeWallet", true },
+                }
+            );
+
+            this->BasketVoucher.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = this->BasketVoucher.Info;
+
+            QVERIFY(this->BasketVoucher.ID > 0);
+            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void approveOnlinePayment_3_of_3() {
+        if (this->BasketVoucher.PaymentKey.isEmpty() == false) {
+            QT_TRY {
+                QVariant Result = callGuestAPI(
+                    RESTClientHelper::POST,
+                    "Account/approveOnlinePayment",
+                    {},
+                    {
+                        { "paymentKey",     this->BasketVoucher.PaymentKey },
+                        { "domain",         "dev.test" },
+                        { "pgResponse",     QVariantMap({
+                            { "result",     "ok" },
+                        }) },
+                    }
+                );
+
+                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+
+                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 252'000);
+                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -994,60 +1137,60 @@ private slots:
         }
     }
 
-    void payForBasket2() {
-        this->Voucher = {};
+//    void payForBasket2() {
+//        this->Voucher = {};
 
-        QT_TRY {
-            QVariant Result = callUserAPI(
-                RESTClientHelper::POST,
-                "Account/payForBasket",
-                {},
-                {
-                    { "domain",                 "dev.test" },
-                    { "voucherID",              this->BasketVoucher.ID },
-                    { "gatewayType",            "_DeveloperTest" },
-                    { "amount",                 100'000 },
-//                    { "walID",                  0 },
-                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
-                }
-            );
+//        QT_TRY {
+//            QVariant Result = callUserAPI(
+//                RESTClientHelper::POST,
+//                "Account/payForBasket",
+//                {},
+//                {
+//                    { "domain",                 "dev.test" },
+//                    { "voucherID",              this->BasketVoucher.ID },
+//                    { "gatewayType",            "_DeveloperTest" },
+//                    { "amount",                 100'000 },
+////                    { "walID",                  0 },
+//                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+//                }
+//            );
 
-            this->Voucher.fromJson(Result.toJsonObject());
+//            this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.ID > 0);
+//            QVERIFY(this->Voucher.ID > 0);
 
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
 
-    void payForBasket2_approveOnlinePayment() {
-        if (this->Voucher.PaymentKey.isEmpty() == false) {
-            QT_TRY {
-                QVariant Result = callGuestAPI(
-                    RESTClientHelper::POST,
-                    "Account/approveOnlinePayment",
-                    {},
-                    {
-                        { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "dev.test" },
-                        { "pgResponse",     QVariantMap({
-                            { "result",     "ok" },
-                        }) },
-                    }
-                );
+//    void payForBasket2_approveOnlinePayment() {
+//        if (this->Voucher.PaymentKey.isEmpty() == false) {
+//            QT_TRY {
+//                QVariant Result = callGuestAPI(
+//                    RESTClientHelper::POST,
+//                    "Account/approveOnlinePayment",
+//                    {},
+//                    {
+//                        { "paymentKey",     this->Voucher.PaymentKey },
+//                        { "domain",         "dev.test" },
+//                        { "pgResponse",     QVariantMap({
+//                            { "result",     "ok" },
+//                        }) },
+//                    }
+//                );
 
-                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+//                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-//                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+////                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
 
-            } QT_CATCH (const std::exception &e) {
-                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
-            }
+//            } QT_CATCH (const std::exception &e) {
+//                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
+//            }
 
-            this->Voucher = {};
-        }
-    }
+//            this->Voucher = {};
+//        }
+//    }
 
     void claimOfflinePayment2() {
         QT_TRY {
@@ -1056,7 +1199,7 @@ private slots:
                 "Account/claimOfflinePayment",
                 {},
                 {
-                    { "voucherID",      this->BasketVoucher.ID },
+//                    { "voucherID",      this->BasketVoucher.ID },
                     { "bank",           "bank mellat 2" },
                     { "receiptCode",    "8090" },
                     { "receiptDate",    "2022/03/04" },

@@ -122,25 +122,6 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
     return true;
 }
 
-//QVariantList IMPL_REST_GET_OR_POST(UserWallets, availableGatewayTypesForRequestIncrease, (
-//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-//    quint32 _amount,
-//    QString _domain
-//)) {
-//    if (_amount == 0)
-//        throw exHTTPBadRequest("amount is zero");
-
-//    QVariantList Result = Payment::PaymentLogic::findAvailableGatewayTypes(
-//                _amount,
-//                _domain
-//                );
-
-//    if (Result.contains(Targoman::API::AccountModule::enuPaymentGatewayType::COD))
-//        Result.removeAt(Result.indexOf(Targoman::API::AccountModule::enuPaymentGatewayType::COD));
-
-//    return Result;
-//}
-
 Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
@@ -160,16 +141,16 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
 
-    Voucher.ID = this->Create(Voucher::instance(),
-                              _APICALLBOOM,
-                              TAPI::ORMFields_t({
-                                                    { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
-//                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                    { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                    { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                                    { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
-                                                    { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
-                                                }));
+    Voucher.ID = Voucher::instance().Create(
+                     _APICALLBOOM,
+                     TAPI::ORMFields_t({
+                                           { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+                                           { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
+//                                           { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
+                                           { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                           { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
+                                           { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                       }));
 
     try {
         if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD) {
