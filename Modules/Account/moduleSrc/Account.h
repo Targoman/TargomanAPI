@@ -389,7 +389,7 @@ private slots:
             const QString& _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
-            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
+//            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
             quint64 _walID = 0,
             const QString& _note = {}
         ),

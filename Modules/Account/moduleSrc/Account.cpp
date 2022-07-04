@@ -811,8 +811,6 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher.fromJson(VoucherDTO.vchDesc.object());
 
             if ((PreVoucher.Round + PreVoucher.ToPay) != (_preVoucher.Round + _preVoucher.ToPay)) {
-                ///@TODO: trigger: unfreeze wallet amount
-
                 clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
                                                    "spVoucher_Cancel", {
                                                        { "iUserID", CurrentUserID },
@@ -951,18 +949,37 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher_COD_Credit.ToPay = RemainingAfterWallet;
             PreVoucher_COD_Credit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson()).toBase64());
 
-            quint64 COD_CreditVoucherID = Voucher::instance().Create(
-                                              _APICALLBOOM,
-                                              TAPI::ORMFields_t({
-                                                   { tblVoucher::Fields::vch_usrID,         CurrentUserID },
-                                                   { tblVoucher::Fields::vchType,           enuVoucherType::Credit },
-                                                   { tblVoucher::Fields::vchDesc,           PreVoucher_COD_Credit.toJson().toVariantMap() },
-                                                   { tblVoucher::Fields::vch_rootVchID,     _preVoucher.VoucherID },
-                                                   { tblVoucher::Fields::vchTotalAmount,    PreVoucher_COD_Credit.ToPay },
-                                                   { tblVoucher::Fields::vchStatus,         enuVoucherStatus::Finished },
-                                               }));
+//            quint64 COD_CreditVoucherID = Voucher::instance().Create(
+//                                              _APICALLBOOM,
+//                                              TAPI::ORMFields_t({
+//                                                   { tblVoucher::Fields::vch_usrID,         CurrentUserID },
+//                                                   { tblVoucher::Fields::vchType,           enuVoucherType::Credit },
+//                                                   { tblVoucher::Fields::vchDesc,           PreVoucher_COD_Credit.toJson().toVariantMap() },
+//                                                   { tblVoucher::Fields::vch_rootVchID,     _preVoucher.VoucherID },
+//                                                   { tblVoucher::Fields::vchTotalAmount,    PreVoucher_COD_Credit.ToPay },
+//                                                   { tblVoucher::Fields::vchStatus,         enuVoucherStatus::Finished },
+//                                               }));
 
-            //2: COD Debit
+            quint64 COD_CreditVoucherID = this->callSP(APICALLBOOM_PARAM,
+                                "spWallet_Increase", {
+                                    { "iWalletID",      0 },
+                                    { "iForUsrID",      CurrentUserID },
+                                    { "iByUserID",      CurrentUserID },
+                                    { "iType",          QString(static_cast<char>(enuVoucherType::Credit)) },
+                                    { "iAmount",        PreVoucher_COD_Credit.ToPay },
+                                    { "iDesc",          QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson() },
+                                    { "iRootVoucherID", _preVoucher.VoucherID },
+                                }).spDirectOutputs().value("oVoucherID").toULongLong();
+
+            //2:
+            clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
+                                               "spWalletTransaction_Create", {
+                                                   { "iWalletID", 0 },
+                                                   { "iVoucherID", _preVoucher.VoucherID },
+                                                   { "ioAmount", PreVoucher_COD_Credit.ToPay },
+                                               });
+
+            //3: COD Debit
             stuPreVoucher PreVoucher_COD_Debit;
             PreVoucher_COD_Debit.UserID = CurrentUserID;
             PreVoucher_COD_Debit.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_COD_DEBIT));
@@ -991,7 +1008,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     tblPaymentGatewayTypes::DTO PaymentGatewayTypesDTO = SelectQuery(PaymentGatewayTypes::instance())
                                                          .where({ tblPaymentGatewayTypes::Fields::pgtType, enuConditionOperator::Equal, _gatewayType })
                                                          .one<tblPaymentGatewayTypes::DTO>();
-    Targoman::API::AAA::stuVoucher Voucher;
+    stuVoucher Voucher;
 
     if (NULLABLE_HAS_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount)
         && (RemainingAfterWallet > NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount))
@@ -1045,13 +1062,15 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                               _domain,
                               Voucher.ID,
                               Voucher.Info.Summary,
-                              RemainingAfterWallet,
+                              Voucher.Remained, //Info.ToPay,
                               _paymentVerifyCallback,
                               PaymentKey,
                               0 /* _walID */
                               );
 
     Voucher.PaymentKey = PaymentKey;
+
+    Voucher.Info = _preVoucher;
 
     return Voucher;
 }
@@ -1302,7 +1321,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
         if (RemainingAfterWallet > 0) {
             stuVoucher Voucher;
 
-//            Voucher.ID
+//            Voucher.ID = MainExpenseVoucherID;
+            Voucher.ID = VoucherID;
 //            Voucher.Info : stuPreVoucher
 //            Voucher.PaymentLink
 //            Voucher.PaymentKey
@@ -1376,11 +1396,11 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     const QString &_receiptCode,
     TAPI::Date_t _receiptDate,
     quint32 _amount,
-    NULLABLE_TYPE(quint64) voucherID,
+//    NULLABLE_TYPE(quint64) voucherID,
     quint64 _walID,
     const QString &_note
 )) {
-    if (NULLABLE_HAS_VALUE(voucherID)) {
+    /*if (NULLABLE_HAS_VALUE(voucherID)) {
         QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
 //            .addCol(tblVoucher::Fields::vchTotalAmount)
             .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, NULLABLE_VALUE(voucherID) })
@@ -1397,7 +1417,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
 
 //        if (Voucher.vchTotalAmount > _amount)
 //            throw exAuthorization("Voucher total amount is greater than provided amount");
-    }
+    }*/
 
     QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
@@ -1412,8 +1432,9 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     if ((_note.isNull() == false) && (_note.trimmed().length() > 0))
         CreateParams.insert("ofpcNotes", _note.trimmed());
 
-    if (NULLABLE_HAS_VALUE(voucherID))
+    /*if (NULLABLE_HAS_VALUE(voucherID))
         CreateParams.insert("ofpc_vchID", NULLABLE_VALUE(voucherID));
+    */
 
     if (_walID > 0)
         CreateParams.insert("ofpcTarget_walID", _walID);
@@ -1865,6 +1886,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                                  { "iType", QString(static_cast<char>(PendingVoucher.Type)) },
                                                  { "iAmount", PendingVoucher.Amount },
                                                  { "iDesc", Doc.toJson(QJsonDocument::Compact) },
+                                    { "iRootVoucherID", 0 },
                                              }).spDirectOutputs().value("oVoucherID").toULongLong();
                     } else {
                         vchid = Voucher::instance().Create(_APICALLBOOM,
@@ -1987,8 +2009,6 @@ void Account::tryCancelVoucher(
 
     //2: cancel voucher
 
-    ///@TODO: complete spVoucher_Cancel: create cancel voucher and credit to wallet
-
     clsDACResult Result = Voucher::instance().callSP(APICALLBOOM_PARAM,
                                                      "spVoucher_Cancel", {
                                                          { "iUserID", SYSTEM_USER_ID },
@@ -2034,6 +2054,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
                             { "iType", QString(static_cast<char>(enuVoucherType::Prize)) },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
+                            { "iRootVoucherID", 0 },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
@@ -2064,6 +2085,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
                             { "iType", QString(static_cast<char>(enuVoucherType::Income)) },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
+                            { "iRootVoucherID", 0 },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
 }
 
