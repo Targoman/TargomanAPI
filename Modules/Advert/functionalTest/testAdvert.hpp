@@ -994,60 +994,60 @@ private slots:
         }
     }
 
-    void payForBasket2() {
-        this->Voucher = {};
+//    void payForBasket2() {
+//        this->Voucher = {};
 
-        QT_TRY {
-            QVariant Result = callUserAPI(
-                RESTClientHelper::POST,
-                "Account/payForBasket",
-                {},
-                {
-                    { "domain",                 "dev.test" },
-                    { "voucherID",              this->BasketVoucher.ID },
-                    { "gatewayType",            "_DeveloperTest" },
-                    { "amount",                 100'000 },
-//                    { "walID",                  0 },
-                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
-                }
-            );
+//        QT_TRY {
+//            QVariant Result = callUserAPI(
+//                RESTClientHelper::POST,
+//                "Account/payForBasket",
+//                {},
+//                {
+//                    { "domain",                 "dev.test" },
+//                    { "voucherID",              this->BasketVoucher.ID },
+//                    { "gatewayType",            "_DeveloperTest" },
+//                    { "amount",                 100'000 },
+////                    { "walID",                  0 },
+//                    { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+//                }
+//            );
 
-            this->Voucher.fromJson(Result.toJsonObject());
+//            this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.ID > 0);
+//            QVERIFY(this->Voucher.ID > 0);
 
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
+//        } QT_CATCH (const std::exception &exp) {
+//            QTest::qFail(exp.what(), __FILE__, __LINE__);
+//        }
+//    }
 
-    void payForBasket2_approveOnlinePayment() {
-        if (this->Voucher.PaymentKey.isEmpty() == false) {
-            QT_TRY {
-                QVariant Result = callGuestAPI(
-                    RESTClientHelper::POST,
-                    "Account/approveOnlinePayment",
-                    {},
-                    {
-                        { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "dev.test" },
-                        { "pgResponse",     QVariantMap({
-                            { "result",     "ok" },
-                        }) },
-                    }
-                );
+//    void payForBasket2_approveOnlinePayment() {
+//        if (this->Voucher.PaymentKey.isEmpty() == false) {
+//            QT_TRY {
+//                QVariant Result = callGuestAPI(
+//                    RESTClientHelper::POST,
+//                    "Account/approveOnlinePayment",
+//                    {},
+//                    {
+//                        { "paymentKey",     this->Voucher.PaymentKey },
+//                        { "domain",         "dev.test" },
+//                        { "pgResponse",     QVariantMap({
+//                            { "result",     "ok" },
+//                        }) },
+//                    }
+//                );
 
-                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
+//                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-//                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+////                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
 
-            } QT_CATCH (const std::exception &e) {
-                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
-            }
+//            } QT_CATCH (const std::exception &e) {
+//                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
+//            }
 
-            this->Voucher = {};
-        }
-    }
+//            this->Voucher = {};
+//        }
+//    }
 
     void claimOfflinePayment2() {
         QT_TRY {

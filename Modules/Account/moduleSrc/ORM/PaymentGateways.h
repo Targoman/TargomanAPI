@@ -84,48 +84,6 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-namespace tblPaymentGatewayTypes {
-    constexpr char Name[] = "tblPaymentGatewayTypes";
-
-    namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pgtType);
-        TARGOMAN_CREATE_CONSTEXPR(pgtName);
-        TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
-        TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
-        TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
-    }
-
-    namespace Relation {
-        // constexpr char AAA[] = "aaa";
-    }
-
-    namespace Private {
-        const QList<clsORMField> ORMFields = {
-            //ColName                           Type                        Validation                              Default     UpBy     Sort   Filter Self  Virt   PK
-            { Fields::pgtType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type), QFV,  QRequired,  UPAdmin },
-            { Fields::pgtName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(64),       QRequired,  UPAdmin },
-            { Fields::pgtMinRequestAmount,      S(qreal),                   QFV.minValue(1),                        1,          UPAdmin },
-            { Fields::pgtMaxRequestAmount,      S(NULLABLE_TYPE(qreal)),    QFV,                                    QNull,      UPAdmin },
-            { Fields::pgtStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active) },
-        };
-
-        const QList<stuRelation> Relations = {
-        };
-
-        const QList<stuDBIndex> Indexes = {
-        };
-
-    } //namespace Private
-
-    TAPI_DEFINE_STRUCT(DTO,
-        SF_Enum                     (pgtType, Targoman::API::AccountModule::enuPaymentGatewayType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
-        SF_QString                  (pgtName),
-        SF_quint32                  (pgtMinRequestAmount),
-        SF_NULLABLE_quint32         (pgtMaxRequestAmount),
-        SF_ORM_STATUS_FIELD         (pgtStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active)
-    );
-}
-
 namespace tblPaymentGateways {
     constexpr char Name[] = "tblPaymentGateways";
 
@@ -159,17 +117,63 @@ namespace tblPaymentGateways {
         TARGOMAN_CREATE_CONSTEXPR(pgwCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(pgwUpdatedBy_usrID);
     }
+}
 
+namespace tblPaymentGatewayTypes {
+    constexpr char Name[] = "tblPaymentGatewayTypes";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(pgtType);
+        TARGOMAN_CREATE_CONSTEXPR(pgtName);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
+    }
+
+    namespace Relation {
+        // constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                           Type                        Validation                              Default     UpBy     Sort   Filter Self  Virt   PK
+            { Fields::pgtType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type), QFV,  QRequired,  UPAdmin },
+            { Fields::pgtName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(64),       QRequired,  UPAdmin },
+            { Fields::pgtMinRequestAmount,      S(qreal),                   QFV.minValue(1),                        1,          UPAdmin },
+            { Fields::pgtMaxRequestAmount,      S(NULLABLE_TYPE(double)),   QFV,                                    QNull,      UPAdmin },
+            { Fields::pgtStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active) },
+        };
+
+        const QList<stuRelation> Relations = {
+            //Col                        Reference Table              ForeignCol       Rename     LeftJoin
+            { Fields::pgtType, R(AAASchema, tblPaymentGateways::Name), tblPaymentGateways::Fields::pgwType },
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_Enum                     (pgtType, Targoman::API::AccountModule::enuPaymentGatewayType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
+        SF_QString                  (pgtName),
+        SF_qreal                    (pgtMinRequestAmount),
+        SF_NULLABLE_qreal           (pgtMaxRequestAmount),
+        SF_ORM_STATUS_FIELD         (pgtStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active)
+    );
+}
+
+namespace tblPaymentGateways {
     namespace Relation {
          constexpr char Type[] = "type";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                                       Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
+            //ColName                           Type                                                Validation                          Default     UpBy     Sort   Filter Self  Virt   PK
             { Fields::pgwID,                    ORM_PRIMARYKEY_32 },
             { Fields::pgwName,                  S(QString),                                         QFV.unicodeAlNum().maxLenght(64),   QRequired,  UPAdmin },
-            { Fields::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type),               QFV,                                QRequired,  UPAdmin },
+            { Fields::pgwType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type), QFV,                      QRequired,  UPAdmin },
             { Fields::pgwDriver,                S(QString),                                         QFV,                                QRequired,  UPAdmin },
             { Fields::pgwMetaInfo,              S(NULLABLE_TYPE(TAPI::JSON_t)),                     QFV,                                QNull,      UPAdmin },
             { Fields::pgw_curID,                S(quint32),                                         QFV,                                QRequired,  UPAdmin },
