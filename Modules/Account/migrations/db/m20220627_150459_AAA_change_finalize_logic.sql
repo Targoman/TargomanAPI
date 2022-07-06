@@ -79,10 +79,6 @@ ALTER TABLE `tblUserWallets`
     ADD COLUMN `walFreezedAmount` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' AFTER `walNotTransferableAmount`
 /*!*/;
 
-ALTER TABLE `tblUserWallets`
-    CHANGE COLUMN `walFreezedAmount` `walSumFreezed` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0' AFTER `walSumDebit`
-/*!*/;
-
 ALTER TABLE `tblVoucher`
     CHANGE COLUMN `vch_rootVchID` `vch_rootVchID` BIGINT(19) UNSIGNED NULL DEFAULT NULL AFTER `vchDesc`
 /*!*/;
@@ -93,7 +89,7 @@ DELIMITER ;;
 CREATE PROCEDURE `spVoucher_Cancel`(
     IN `iUserID` BIGINT UNSIGNED,
     IN `iVoucherID` BIGINT UNSIGNED,
-    IN `iSetAsError` BOOL
+    IN `iSetAsError` TINYINT
 )
 BEGIN
     DECLARE vErr VARCHAR(500);
@@ -197,7 +193,7 @@ BEGIN
     CLOSE curunFreeze;
 
     UPDATE tblVoucher
-       SET vchStatus = IF(iSetAsError, 'E', 'C')
+       SET vchStatus = IF(iSetAsError = 1, 'E', 'C')
      WHERE vchID = iVoucherID
     ;
 

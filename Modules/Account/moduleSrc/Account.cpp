@@ -706,7 +706,7 @@ bool IMPL_REST_POST(Account, cancelVoucher, (
                                        "spVoucher_Cancel", {
                                            { "iUserID", CurrentUserID },
                                            { "iVoucherID", _voucherID },
-                                           { "iSetAsError", false },
+                                           { "iSetAsError", 0 },
                                        });
     return true;
 }
@@ -815,7 +815,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                    "spVoucher_Cancel", {
                                                        { "iUserID", CurrentUserID },
                                                        { "iVoucherID", _preVoucher.VoucherID },
-                                                       { "iSetAsError", false },
+                                                       { "iSetAsError", 0 },
                                                    });
                 _preVoucher.VoucherID = 0;
             } else {
