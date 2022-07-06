@@ -10,6 +10,7 @@ using namespace std;
 #include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/Helpers/IteratorHelper.hpp"
+#include "Interfaces/Helpers/URLHelper.h"
 
 using namespace Targoman;
 using namespace Targoman::API::Helpers;
@@ -394,6 +395,16 @@ private slots:
                     return true;
                 })
         ;
+    }
+
+    void test_URLHelper() {
+        qDebug() << URLHelper::domain("Dev.Test", false);
+        qDebug() << URLHelper::domain("http://Dev.Test", false);
+        qDebug() << URLHelper::domain("https://Dev.Test", false);
+
+        qDebug() << URLHelper::domain("Dev.Test", true);
+        qDebug() << URLHelper::domain("http://Dev.Test", true);
+        qDebug() << URLHelper::domain("https://Dev.Test", true);
     }
 
 };
