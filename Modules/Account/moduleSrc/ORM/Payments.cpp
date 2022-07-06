@@ -83,7 +83,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 
     if (_callback.isEmpty())
         _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
-                    .arg("https://newapi.targoman.ir/rest/v1/") //ClientConfigs::RESTServerAddress.value())
+                    .arg("https://newapi.targoman.ir/rest/v1") //ClientConfigs::RESTServerAddress.value())
                     .arg(_paymentKey)
                     ;
     else

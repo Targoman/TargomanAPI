@@ -112,6 +112,8 @@ QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (
     quint32 _amount,
     QString _domain
 )) {
+    _domain = URLHelper::domain(_domain, true);
+
     if (_amount == 0)
         throw exHTTPBadRequest("amount is zero");
 

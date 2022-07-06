@@ -97,9 +97,9 @@ intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
 QVariantList PaymentLogic::findAvailableGatewayTypes(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
-    const QString& _domain
+    QString _domain
 ) {
-    QString Domain = URLHelper::domain(_domain);
+    QString Domain = URLHelper::domain(_domain, true);
 
     SelectQuery qry = SelectQuery(PaymentGatewayTypes::instance())
                       .addCol(tblPaymentGatewayTypes::Fields::pgtType)
@@ -190,7 +190,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     enuPaymentGatewayType::Type _gatewayType,
-    const QString& _domain
+    QString _domain
 ) {
 //    QString CSVGatewayTypes = enuPaymentGatewayTypeToCSV(_gatewayTypes, "'");
 
@@ -199,7 +199,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
         throw exPayment("DeveloperTest is not allowed in non debug mode");
 #endif
 
-    QString Domain = URLHelper::domain(_domain);
+    QString Domain = URLHelper::domain(_domain, true);
 
     SelectQuery qry = SelectQuery(PaymentGateways::instance())
         .addCols(PaymentGateways::instance().SelectableColumnNames())
@@ -261,7 +261,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
 QString PaymentLogic::createOnlinePaymentLink(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     enuPaymentGatewayType::Type _gatewayType,
-    const QString& _domain,
+    QString _domain,
     quint64 _vchID,
     const QString& _invDesc,
     quint32 _toPay,
@@ -269,6 +269,8 @@ QString PaymentLogic::createOnlinePaymentLink(
     /*OUT*/ TAPI::MD5_t& _outPaymentKey,
     quint64 _walID
 ) {
+    _domain = URLHelper::domain(_domain, true);
+
     ///scenario:
     ///1: find best payment gateway
     ///2: get payment gateway driver
@@ -365,8 +367,10 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString& _paymentKey,
     const TAPI::JSON_t& _pgResponse,
-    const QString& _domain
+    QString _domain
 ) {
+    _domain = URLHelper::domain(_domain, true);
+
     if (_paymentKey.isEmpty())
         throw exPayment("paymentKey is empty");
 

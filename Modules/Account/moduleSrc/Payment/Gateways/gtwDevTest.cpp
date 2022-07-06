@@ -55,7 +55,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
     QString TrackID = "track_" + _paymentKey;
 
     QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
-                          .arg("https://newapi.targoman.ir/rest/v1/") //ClientConfigs::RESTServerAddress.value())
+                          .arg("https://newapi.targoman.ir/rest/v1") //ClientConfigs::RESTServerAddress.value())
                           .arg(_paymentKey)
                           .arg(TrackID)
                           .arg(_callback)

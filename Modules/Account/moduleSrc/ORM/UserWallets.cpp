@@ -26,6 +26,7 @@
 #include "Voucher.h"
 #include "Payment/PaymentLogic.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
+#include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
@@ -130,6 +131,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     QString _paymentVerifyCallback,
     quint64 _walID
 )) {
+    _domain = URLHelper::domain(_domain, true);
+
     if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
         throw exHTTPBadRequest("requestIncrease is just for Online payments. For offline increase use claimOfflinePayment");
 
