@@ -40,9 +40,9 @@ QString URLHelper::domain(QString _url, bool _stripProtocol) {
         Domain.chop(1);
 
     if (_stripProtocol) {
-        if (_url.startsWith("http://"))
+        if (Domain.startsWith("http://"))
             Domain = Domain.mid(7);
-        else if (_url.startsWith("https://"))
+        else if (Domain.startsWith("https://"))
             Domain = Domain.mid(8);
     }
 
