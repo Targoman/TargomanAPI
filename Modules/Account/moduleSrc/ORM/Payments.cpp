@@ -83,7 +83,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 
     if (_callback.isEmpty())
         _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
-                    .arg(ClientConfigs::RESTServerAddress.value())
+                    .arg("https://newapi.targoman.ir/rest/v1/") //ClientConfigs::RESTServerAddress.value())
                     .arg(_paymentKey)
                     ;
     else
@@ -96,20 +96,59 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
     </head>
     <body>
         <p>&nbsp;</p>
-        <h1 style='text-align:center'>DevTest<br>Bank of MARS</h1><br>
+        <h1 style='text-align:center; margin:0;'>DevTest</h1><br>
+        <h2 style='text-align:center; margin:0;'>Payment Page</h2><br>
         <hr>
-        <p style='text-align:center'>
-            <a href='{URL_OK}'>[OK]</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href='{URL_ERROR}'>[ERROR]</a>
-        </p>
+        <div style='display: grid; justify-items: center; grid-template-columns: 1fr 1fr; align-items: start;'>
+            <div style='width:90%'>
+                <p style='text-align:center'>GET:</p>
+                <div style='display: grid; justify-items: center; grid-template-columns: 1fr 1fr;'>
+                    <div>
+                        <a href='{URL_OK}'>[OK]</a>
+                    </div>
+                    <div>
+                        <a href='{URL_ERROR}'>[ERROR]</a>
+                    </div>
+                </div>
+                <hr>
+                <p style='text-align:center'>POST:</p>
+                <div style='display: grid; justify-items: center; grid-template-columns: 1fr 1fr;'>
+                    <div>
+                        <form action='{URL_OK}' method='post'>
+                            <input type='submit' value='[OK]'>
+                        </form>
+                    </div>
+                    <div>
+                        <form action='{URL_ERROR}' method='post'>
+                            <input type='submit' value='[ERROR]'>
+                        </form>
+                    </div>
+                </div>
+                <hr>
+            </div>
+            <div style='display: grid; grid-template-columns: auto 100%; grid-column-gap: 10px;'>
+                <div style='white-space: nowrap;'>Voucher ID:</div><div>{VOUCHER_ID}</div>
+                <div style='white-space: nowrap;'>Wallet ID:</div><div>{WALLET_ID}</div>
+                <div style='white-space: nowrap;'>Amount:</div><div>{AMOUNT}</div>
+                <div style='white-space: nowrap;'>Callback Url:</div><div>{CALLBACK_URL}</div>
+            </div>
+        </div>
     </body>
 </html>
 )";
 
+    tblOnlinePayments::DTO OnlinePaymentsDTO = SelectQuery(OnlinePayments::instance())
+                                               .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
+                                               .one<tblOnlinePayments::DTO>();
+
     Content = Content
-                .replace("{URL_OK}", URLHelper::addParameter(_callback, "result", "ok").toLatin1())
-                .replace("{URL_ERROR}", URLHelper::addParameter(_callback, "result", "error").toLatin1());
+              .replace("{URL_OK}", URLHelper::addParameter(_callback, "result", "ok").toLatin1())
+              .replace("{URL_ERROR}", URLHelper::addParameter(_callback, "result", "error").toLatin1())
+              .replace("{VOUCHER_ID}", QString::number(OnlinePaymentsDTO.onp_vchID).toLatin1())
+              .replace("{WALLET_ID}", QString::number(NULLABLE_GET_OR_DEFAULT(OnlinePaymentsDTO.onpTarget_walID, 0)).toLatin1())
+              .replace("{AMOUNT}", QString::number(OnlinePaymentsDTO.onpAmount).toLatin1())
+              .replace("{CALLBACK_URL}", _callback.toLatin1())
+    ;
 
     return TAPI::RawData_t(Content,
                            "text/html; charset=utf-8"

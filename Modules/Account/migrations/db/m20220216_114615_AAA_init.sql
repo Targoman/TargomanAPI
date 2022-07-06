@@ -2809,7 +2809,7 @@ DELIMITER ;;
 CREATE PROCEDURE `spVoucher_Cancel`(
     IN `iUserID` BIGINT UNSIGNED,
     IN `iVoucherID` BIGINT UNSIGNED,
-    IN `iSetAsError` BOOL
+    IN `iSetAsError` TINYINT
 )
 BEGIN
     DECLARE vErr VARCHAR(500);
@@ -2833,7 +2833,7 @@ BEGIN
     END;
 
     UPDATE tblVoucher
-       SET vchStatus = IF(iSetAsError, 'E', 'C')
+       SET vchStatus = IF(iSetAsError = 1, 'E', 'C')
      WHERE vchID = iVoucherID
     ;
 
