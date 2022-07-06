@@ -52,6 +52,7 @@
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
 #include "Interfaces/Helpers/IteratorHelper.hpp"
+#include "Interfaces/Helpers/URLHelper.h"
 using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
@@ -738,6 +739,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     QString _paymentVerifyCallback,
     bool _allowChargeWallet
 )) {
+    _domain = URLHelper::domain(_domain, true);
+
     ///scenario:
     ///1: create main expense voucher
     ///?: create pending vouchers per item
@@ -1009,6 +1012,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                          .where({ tblPaymentGatewayTypes::Fields::pgtType, enuConditionOperator::Equal, _gatewayType })
                                                          .one<tblPaymentGatewayTypes::DTO>();
     stuVoucher Voucher;
+    quint64 MustPay = 0;
 
     if (NULLABLE_HAS_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount)
         && (RemainingAfterWallet > NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount))
@@ -1016,10 +1020,12 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         if (_allowChargeWallet == false)
             throw exHTTPInternalServerError("Permission to charge the wallet is not given");
 
+        MustPay = NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount);
+
         Voucher.Info.UserID = CurrentUserID;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, 0 /*_walID*/));
         Voucher.Info.Summary = "Increase wallet";
-        Voucher.Info.ToPay = NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount);
+        Voucher.Info.ToPay = MustPay;
         Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
 
         Voucher.ID = Voucher::instance().Create(
@@ -1036,11 +1042,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         Voucher.Remained = Voucher.Info.ToPay;
         Voucher.Payed = 0;
     } else {
-        Voucher.Info = _preVoucher;
+        MustPay = RemainingAfterWallet;
         Voucher.ID = _preVoucher.VoucherID;
-
-        Voucher.Remained = RemainingAfterWallet;
-        Voucher.Payed = Voucher.Info.ToPay - Voucher.Remained;
+        Voucher.Info = _preVoucher;
     }
 
     //freeze MustFreeze
@@ -1062,15 +1066,18 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                               _domain,
                               Voucher.ID,
                               Voucher.Info.Summary,
-                              Voucher.Remained, //Info.ToPay,
+                              MustPay,
                               _paymentVerifyCallback,
                               PaymentKey,
                               0 /* _walID */
                               );
 
-    Voucher.PaymentKey = PaymentKey;
-
+    //send master voucher info back to the client
     Voucher.Info = _preVoucher;
+    Voucher.Remained = RemainingAfterWallet;
+    Voucher.Payed = Voucher.Info.ToPay - Voucher.Remained;
+
+    Voucher.PaymentKey = PaymentKey;
 
     return Voucher;
 }
@@ -1198,10 +1205,12 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    const QString _paymentKey,
-    const QString _domain,
+    QString _paymentKey,
+    QString _domain,
     TAPI::JSON_t _pgResponse
 )) {
+    _domain = URLHelper::domain(_domain, true);
+
     auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(
             APICALLBOOM_PARAM,
             _paymentKey,
@@ -1321,8 +1330,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
         if (RemainingAfterWallet > 0) {
             stuVoucher Voucher;
 
-//            Voucher.ID = MainExpenseVoucherID;
-            Voucher.ID = VoucherID;
+            Voucher.ID = MainExpenseVoucherID;
+//            Voucher.ID = VoucherID;
 //            Voucher.Info : stuPreVoucher
 //            Voucher.PaymentLink
 //            Voucher.PaymentKey
@@ -1392,13 +1401,13 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
  */
 quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    const QString &_bank,
-    const QString &_receiptCode,
+    QString _bank,
+    QString _receiptCode,
     TAPI::Date_t _receiptDate,
     quint32 _amount,
 //    NULLABLE_TYPE(quint64) voucherID,
     quint64 _walID,
-    const QString &_note
+    QString _note
 )) {
     /*if (NULLABLE_HAS_VALUE(voucherID)) {
         QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
@@ -2035,7 +2044,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
-    const QString &_desc
+    QString _desc
 )) {
     qint64 Limit = Authorization::getPrivValue(_APICALLBOOM, "AAA:addPrizeTo:maxAmount", -1).toLongLong();
     if (Limit == 0)
@@ -2066,7 +2075,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
-    const QString &_desc
+    QString _desc
 )) {
     qint64 Limit = Authorization::getPrivValue(_APICALLBOOM, "AAA:addIncomeTo:maxAmount", -1).toLongLong();
     if (Limit == 0)

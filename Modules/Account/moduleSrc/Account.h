@@ -374,8 +374,8 @@ private slots:
         approveOnlinePayment,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
-            const QString _paymentKey,
-            const QString _domain,
+            QString _paymentKey,
+            QString _domain,
             TAPI::JSON_t _pgResponse
         ),
         "approve payment back from payment gateway"
@@ -385,13 +385,13 @@ private slots:
         claimOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            const QString& _bank,
-            const QString& _receiptCode,
+            QString _bank,
+            QString _receiptCode,
             TAPI::Date_t _receiptDate,
             quint32 _amount,
 //            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
             quint64 _walID = 0,
-            const QString& _note = {}
+            QString _note = {}
         ),
         "Claim offline payment by user."
         "Set vchID to null just for charging wallet, otherwise after increasing the wallet, the voucher will be paid"
@@ -442,7 +442,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            const QString &_desc
+            QString _desc
         ),
         "Add prize to a user by priviledged user"
     )
@@ -453,7 +453,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
-            const QString &_desc
+            QString _desc
         ),
         "Add income to a user by priviledged user"
     )

@@ -28,7 +28,7 @@
 
 namespace Targoman::API::Helpers {
 
-QString URLHelper::domain(QString _url) {
+QString URLHelper::domain(QString _url, bool _stripProtocol) {
     if (!_url.startsWith("http://") && !_url.startsWith("https://") && (_url.indexOf("://") < 0))
         _url = "http://" + _url;
 
@@ -38,6 +38,13 @@ QString URLHelper::domain(QString _url) {
 
     if (Domain.endsWith("/"))
         Domain.chop(1);
+
+    if (_stripProtocol) {
+        if (_url.startsWith("http://"))
+            Domain = Domain.mid(7);
+        else if (_url.startsWith("https://"))
+            Domain = Domain.mid(8);
+    }
 
     return Domain;
 };

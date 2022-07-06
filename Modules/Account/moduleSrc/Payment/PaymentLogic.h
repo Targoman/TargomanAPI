@@ -54,20 +54,20 @@ public:
     static QVariantList findAvailableGatewayTypes(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint32 _amount,
-        const QString& _domain
+        QString _domain
     );
 
     static const ORM::tblPaymentGateways::DTO findBestPaymentGateway(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint32 _amount,
         enuPaymentGatewayType::Type _gatewayType,
-        const QString& _domain
+        QString _domain
     );
 
     static QString createOnlinePaymentLink(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         enuPaymentGatewayType::Type _gatewayType,
-        const QString& _domain,
+        QString _domain,
         quint64 _vchID,
         const QString& _invDesc,
         quint32 _toPay,
@@ -80,7 +80,7 @@ public:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const QString& _paymentKey,
         const TAPI::JSON_t& _pgResponse,
-        const QString& _domain
+        QString _domain
     );
 
 public:
