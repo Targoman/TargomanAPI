@@ -1492,6 +1492,9 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     if (_alias.length())
         this->JoinTraitData->Owner->Data->BaseQueryPreparedItems.RenamedCols.append(_alias);
 
+    //for preventing to adding limit in nested queries
+    _nestedQuery.pageSize(0);
+
     QString joinBody = _nestedQuery.buildQueryString({}, false, false, true);
 
     if (SQLPrettyLen)
@@ -2622,7 +2625,7 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
                                       + sLimit);
                 }
             }
-        } else {
+        } else if (this->Data->PageSize > 0) { //for preventing to adding limit in nested queries
             if (SQLPrettyLen)
                 QueryParts.append(QString("LIMIT").rightJustified(SQLPrettyLen)
                                   + " "

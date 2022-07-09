@@ -487,14 +487,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
 
-
-
-//    QJsonArray JSAPendingVouchers;
-//    foreach (auto PendingVoucher, AssetItem.PendingVouchers)
-//        JSAPendingVouchers.append(PendingVoucher.toJson());
     QJsonDocument JSDPendingVouchers = QJsonDocument();
-//    JSDPendingVouchers.setArray(JSAPendingVouchers);
-//    PreVoucherItem.PendingVouchers = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
     JSDPendingVouchers.setObject(AssetItem.Private.toJson());
     PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
@@ -751,10 +744,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
     //--  --------------------------------
-//    AssetItem.PendingVouchers.clear();
     QString StrPrivate = simpleCryptInstance()->decryptToString(_voucherItem.Private);
-//    foreach (auto I, QJsonDocument().fromJson(StrPendingVouchers.toLatin1()).array())
-//        AssetItem.PendingVouchers.append(stuPendingVoucher().fromJson(I.toObject()));
     AssetItem.Private.fromJson(QJsonDocument().fromJson(StrPrivate.toLatin1()).object());
 
     //--  --------------------------------
@@ -811,12 +801,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     } else { //update
         FinalPrice += AssetItem.TotalPrice;
 
-//        QJsonArray JSAPendingVouchers;
-//        foreach (auto PendingVoucher, AssetItem.PendingVouchers)
-//            JSAPendingVouchers.append(PendingVoucher.toJson());
         QJsonDocument JSDPendingVouchers = QJsonDocument();
-//        JSDPendingVouchers.setArray(JSAPendingVouchers);
-//        _voucherItem.PendingVouchers = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
         JSDPendingVouchers.setObject(AssetItem.Private.toJson());
         _voucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
