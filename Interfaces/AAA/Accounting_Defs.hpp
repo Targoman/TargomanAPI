@@ -34,6 +34,7 @@
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include <QString>
 #include <QJsonArray>
+#include "Interfaces/Server/clsSimpleCrypt.h"
 
 namespace Targoman::API::AAA {
 
@@ -99,6 +100,8 @@ namespace Targoman::API::AAA {
 inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
 extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
 extern QByteArray voucherSign(const QByteArray& _data);
+extern Targoman::Common::Configuration::tmplConfigurable<quint64> SimpleCryptKey;
+extern clsSimpleCrypt* simpleCryptInstance();
 
 constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
 constexpr char VOUCHER_ITEM_NAME_COD_CREDIT[]           = "COD_CREDIT";
@@ -755,6 +758,10 @@ TAPI_DEFINE_STRUCT(stuPendingVoucher,
 );
 //typedef QList<stuPendingVoucher> PendingVouchers_t;
 
+TAPI_DEFINE_STRUCT(stuVoucherItemPrivate,
+    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
+);
+
 TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
@@ -784,7 +791,8 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
 
     SF_QJsonObject      (AdditionalInfo), //per service
 
-    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
+    SF_Struct           (Private, stuVoucherItemPrivate, [](auto v) { return true; } (v))
+//    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
 );
 
 typedef QMap<QString, stuAssetItem> ActiveCredits_t;
@@ -857,7 +865,9 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_QString          (Referrer),
     SF_JSON_t           (ReferrerParams),
 
-    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher),
+//    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher),
+    SF_QString          (Private), //encrypted + base64
+//    SF_Struct           (Private, stuVoucherItemPrivate, [](auto v) { return true; } (v)),
     SF_QListOfVarStruct (SubItems, stuVoucherItem),
 
     SF_QString          (Sign)

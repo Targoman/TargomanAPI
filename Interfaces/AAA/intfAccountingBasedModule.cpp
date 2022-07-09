@@ -25,6 +25,8 @@
 #include "PrivHelpers.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "App/Server/ServerConfigs.h"
+#include "libTargomanCommon/Configuration/Validators.hpp"
+using namespace Targoman::Common::Configuration;
 
 //#include "Server/clsSimpleCrypt.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
@@ -41,9 +43,9 @@ namespace Targoman::API::AAA {
 static QMap<QString, intfAccountingBasedModule*> ServiceRegistry;
 
 Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
-        makeConfig("Secret"),
-        "Secret to be used for signing voucher and prevoucher",
-        "fcy^E?a*4<;auY?>^6s@");
+    makeConfig("Secret"),
+    "Secret to be used for signing voucher and prevoucher",
+    "fcy^E?a*4<;auY?>^6s@");
 
 QByteArray voucherSign(const QByteArray& _data) {
    return QMessageAuthenticationCode::hash(_data, Secret.value().toUtf8(), QCryptographicHash::Sha256);
@@ -65,6 +67,27 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
         if (Sign != QString(voucherSign(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
+}
+
+Targoman::Common::Configuration::tmplConfigurable<quint64> SimpleCryptKey(
+    makeConfig("SimpleCryptKey"),
+    "Secret to be used for encrypting private objects",
+    static_cast<quint64>(43121109170974192),
+    ReturnTrueCrossValidator(),
+    "",
+    "", //"SECRET",
+    "", //"jwt-private-key",
+    /*enuConfigSource::Arg | */enuConfigSource::File);
+
+thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
+clsSimpleCrypt* simpleCryptInstance()
+{
+    if (Q_UNLIKELY(!SimpleCryptInstance)) {
+        SimpleCryptInstance = new clsSimpleCrypt(SimpleCryptKey.value());
+        SimpleCryptInstance->setIntegrityProtectionMode(clsSimpleCrypt::ProtectionHash);
+    }
+
+    return SimpleCryptInstance;
 }
 
 intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
@@ -464,7 +487,17 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
 
-    PreVoucherItem.PendingVouchers = AssetItem.PendingVouchers;
+
+
+//    QJsonArray JSAPendingVouchers;
+//    foreach (auto PendingVoucher, AssetItem.PendingVouchers)
+//        JSAPendingVouchers.append(PendingVoucher.toJson());
+    QJsonDocument JSDPendingVouchers = QJsonDocument();
+//    JSDPendingVouchers.setArray(JSAPendingVouchers);
+//    PreVoucherItem.PendingVouchers = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
+    JSDPendingVouchers.setObject(AssetItem.Private.toJson());
+    PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
+
     PreVoucherItem.Service = this->ServiceName;
     //PreVoucherItem.OrderID
     PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
@@ -718,6 +751,13 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
     //--  --------------------------------
+//    AssetItem.PendingVouchers.clear();
+    QString StrPrivate = simpleCryptInstance()->decryptToString(_voucherItem.Private);
+//    foreach (auto I, QJsonDocument().fromJson(StrPendingVouchers.toLatin1()).array())
+//        AssetItem.PendingVouchers.append(stuPendingVoucher().fromJson(I.toObject()));
+    AssetItem.Private.fromJson(QJsonDocument().fromJson(StrPrivate.toLatin1()).object());
+
+    //--  --------------------------------
     AssetItem.DiscountCode      = NULLABLE_GET_OR_DEFAULT(_newDiscountCode, _voucherItem.CouponDiscount.Code);
     AssetItem.OrderAdditives    = _voucherItem.Additives;
     AssetItem.Referrer          = _voucherItem.Referrer;
@@ -771,7 +811,15 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     } else { //update
         FinalPrice += AssetItem.TotalPrice;
 
-        _voucherItem.PendingVouchers = AssetItem.PendingVouchers;
+//        QJsonArray JSAPendingVouchers;
+//        foreach (auto PendingVoucher, AssetItem.PendingVouchers)
+//            JSAPendingVouchers.append(PendingVoucher.toJson());
+        QJsonDocument JSDPendingVouchers = QJsonDocument();
+//        JSDPendingVouchers.setArray(JSAPendingVouchers);
+//        _voucherItem.PendingVouchers = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
+        JSDPendingVouchers.setObject(AssetItem.Private.toJson());
+        _voucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
+
         _voucherItem.Service = this->ServiceName;
 //        _voucherItem.UUID = _voucherItem.UUID;
         _voucherItem.Desc = AssetItem.Saleable.slbName;

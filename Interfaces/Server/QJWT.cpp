@@ -96,9 +96,7 @@ tmplConfigurable<quint32> QJWT::RememberLoginTTL(
     enuConfigSource::Arg | enuConfigSource::File);
 
 thread_local static clsSimpleCrypt* SimpleCryptInstance = nullptr;
-
-static clsSimpleCrypt* simpleCryptInstance()
-{
+static clsSimpleCrypt* simpleCryptInstance() {
     if (Q_UNLIKELY(!SimpleCryptInstance)) {
         SimpleCryptInstance = new clsSimpleCrypt(QJWT::SimpleCryptKey.value());
         SimpleCryptInstance->setIntegrityProtectionMode(clsSimpleCrypt::ProtectionHash);
