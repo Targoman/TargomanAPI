@@ -16,8 +16,8 @@ then
         echo -e "\n------------# $project:$tag has been successfully pulled. #-----------"
         break
 else
-	sleep 8m
-	while [ $counter -lt 300  ];do
+#	sleep 8m
+	while [ $counter -lt 600  ];do
     		curl -m 2 -s ""$deploy_url"check-pull?token=$token&project=$project&tag=$tag" | grep pulled > /dev/null 2>&1
     		if [ $? -eq 0 ]
     		then
@@ -25,7 +25,7 @@ else
         		echo -e "\n------------# $project:$tag has been successfully pulled. #-----------"
         		break
     		else
-        		sleep 2
+        		sleep 30
         		counter=$counter+1
     		fi
 	done
