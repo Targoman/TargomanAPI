@@ -34,7 +34,7 @@ using namespace Targoman::API;
 
 using namespace Targoman::API::AAA;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuPreVoucherType);
+//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuPreVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
