@@ -362,8 +362,8 @@ QString PaymentLogic::createOnlinePaymentLink(
     }
 }
 
-// [PaymentID, VoucherID, TargetWalletID]
-std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
+// [PaymentID, VoucherID, TargetWalletID, PaymentAmount]
+std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString& _paymentKey,
     const TAPI::JSON_t& _pgResponse,
@@ -424,7 +424,8 @@ std::tuple<quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
         return {
             OnlinePayment.OnlinePayment.onpID,
             OnlinePayment.OnlinePayment.onp_vchID,
-            NULLABLE_GET_OR_DEFAULT(OnlinePayment.OnlinePayment.onpTarget_walID, 0)
+            NULLABLE_GET_OR_DEFAULT(OnlinePayment.OnlinePayment.onpTarget_walID, 0),
+            OnlinePayment.OnlinePayment.onpAmount
         };
 
     } catch (std::exception &_exp) {

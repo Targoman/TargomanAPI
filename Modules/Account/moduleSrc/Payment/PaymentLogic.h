@@ -76,7 +76,7 @@ public:
         quint64 _walID = 0
     );
 
-    static std::tuple<quint64, quint64, quint64> approveOnlinePayment(
+    static std::tuple<quint64, quint64, quint64, quint64> approveOnlinePayment(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const QString& _paymentKey,
         const TAPI::JSON_t& _pgResponse,

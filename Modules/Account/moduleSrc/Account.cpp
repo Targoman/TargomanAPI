@@ -950,6 +950,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher_COD_Credit.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_COD_CREDIT));
             PreVoucher_COD_Credit.Summary = "COD Credit";
             PreVoucher_COD_Credit.ToPay = RemainingAfterWallet;
+            PreVoucher_COD_Credit.Type = enuPreVoucherType::CODCreadit;
             PreVoucher_COD_Credit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson()).toBase64());
 
 //            quint64 COD_CreditVoucherID = Voucher::instance().Create(
@@ -988,6 +989,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher_COD_Debit.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_COD_DEBIT));
             PreVoucher_COD_Debit.Summary = "COD Debit";
             PreVoucher_COD_Debit.ToPay = RemainingAfterWallet;
+            PreVoucher_COD_Debit.Type = enuPreVoucherType::CODDebit;
             PreVoucher_COD_Debit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Debit.toJson()).toJson()).toBase64());
 
             quint64 COD_DebitVoucherID = Voucher::instance().Create(
@@ -1023,6 +1025,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         MustPay = NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount);
 
         Voucher.Info.UserID = CurrentUserID;
+        Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, 0 /*_walID*/));
         Voucher.Info.Summary = "Increase wallet";
         Voucher.Info.ToPay = MustPay;
@@ -1211,7 +1214,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 )) {
     _domain = URLHelper::domain(_domain, true);
 
-    auto [PaymentID, VoucherID, TargetWalletID] = PaymentLogic::approveOnlinePayment(
+    auto [PaymentID, VoucherID, TargetWalletID, PaymentAmount] = PaymentLogic::approveOnlinePayment(
             APICALLBOOM_PARAM,
             _paymentKey,
             _pgResponse,
@@ -1273,11 +1276,17 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
         quint64 TotalPayed = 0;
         quint64 TotalFreezed = 0;
 
+        stuPreVoucher PreVoucher;
+
         if (VoucherDTO.vchType == enuVoucherType::Invoice) {
+            PreVoucher.fromJson(VoucherDTO.vchDesc.object());
+
             TotalAmount = VoucherDTO.vchTotalAmount;
             TotalPayed = NULLABLE_GET_OR_DEFAULT(VoucherDTO.vchTotalPayed, 0);
             TotalFreezed = VoucherInfo["TotalFreezed"].toUInt();
         } else {
+            PreVoucher.fromJson(RootVoucherDTO.vchDesc.object());
+
             TotalAmount = RootVoucherDTO.vchTotalAmount;
             TotalPayed = NULLABLE_GET_OR_DEFAULT(RootVoucherDTO.vchTotalPayed, 0);
             TotalFreezed = RootVoucherInfo["TotalFreezed"].toUInt();
@@ -1313,7 +1322,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
                                      { "iUserID",     CurrentUserID },
                                      { "iWalletID",   TargetWalletID },
                                      { "iVoucherID",  MainExpenseVoucherID },
-                                     { "ioAmount",    0 }, //freeze all avaiable amount of wallet
+                                     { "ioAmount",    PaymentAmount }, //0:freeze all avaiable amount of wallet
                                  });
         spOutputs = DACResult2.spDirectOutputs();
         TotalFreezed += spOutputs.value("ioAmount").toInt();
@@ -1332,7 +1341,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
             Voucher.ID = MainExpenseVoucherID;
 //            Voucher.ID = VoucherID;
-//            Voucher.Info : stuPreVoucher
+            Voucher.Info = PreVoucher;
 //            Voucher.PaymentLink
 //            Voucher.PaymentKey
             Voucher.Payed = TotalPayed + TotalFreezed;
@@ -1535,6 +1544,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         Targoman::API::AAA::stuVoucher Voucher;
 
         Voucher.Info.UserID = _APICALLBOOM.getUserID();
+        Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
         Voucher.Info.ToPay = OfflinePaymentClaimDTO.ofpcAmount;

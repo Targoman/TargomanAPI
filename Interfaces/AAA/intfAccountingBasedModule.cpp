@@ -585,6 +585,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
 
     _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
     _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 
@@ -837,6 +838,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
 
     _lastPreVoucher.Round = static_cast<quint16>(FinalPrice % 1000);
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
+    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
     _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
 

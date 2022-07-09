@@ -37,6 +37,20 @@
 
 namespace Targoman::API::AAA {
 
+TARGOMAN_DEFINE_ENUM(enuPreVoucherType,
+                     Withdrawal,
+                     Invoice,
+                     Income,
+                     IncreaseWallet,
+                     CODCreadit,
+                     CODDebit,
+                     Prize,
+                     TransferFrom,
+                     TransferTo,
+                     Freeze,
+                     UnFreeze
+                     )
+
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
                      Invoice        = 'E', //Expense -> Invoice
@@ -74,6 +88,7 @@ TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
 
 } //namespace Targoman::API::AAA
 
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuPreVoucherType);          // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
@@ -851,6 +866,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
 //typedef QList<stuVoucherItem> InvItems_t;
 
 TAPI_DEFINE_STRUCT(stuPreVoucher,
+    SF_NULLABLE_Enum    (Type, enuPreVoucherType),
     SF_quint64          (UserID),
     SF_QListOfVarStruct (Items, stuVoucherItem),
 //    SF _ Struct           (Prize, stuPrize, v.Desc.size()),

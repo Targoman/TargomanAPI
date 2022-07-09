@@ -136,9 +136,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     if (_gatewayType == Targoman::API::AccountModule::enuPaymentGatewayType::COD)
         throw exHTTPBadRequest("requestIncrease is just for Online payments. For offline increase use claimOfflinePayment");
 
-    Targoman::API::AAA::stuVoucher Voucher;
+    stuVoucher Voucher;
 
     Voucher.Info.UserID = _APICALLBOOM.getUserID();
+    Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
     Voucher.Info.ToPay = _amount;
