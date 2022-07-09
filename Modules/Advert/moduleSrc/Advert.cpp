@@ -146,19 +146,22 @@ void Advert::computeReferrer(
     if (_oldVoucherItem != nullptr) {
         if (_oldVoucherItem->Qty != _assetItem.Qty) {
             //remove old
-            for (QList<stuPendingVoucher>::iterator it = _assetItem.PendingVouchers.begin();
-                 it != _assetItem.PendingVouchers.end();
-                 it++
-            ) {
+            QList<stuPendingVoucher>::iterator it = _assetItem.Private.PendingVouchers.begin();
+            while (it != _assetItem.Private.PendingVouchers.end()) {
                 if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
-                        && (it->Info.contains("referrer")))
-                    it = _assetItem.PendingVouchers.erase(it);
+                    && (it->Info.contains("referrer"))
+                ) {
+                    it = _assetItem.Private.PendingVouchers.erase(it);
+                    continue;
+                }
+
+                ++it;
             }
         }
     }
 
     if (_assetItem.Qty > 0) {
-        _assetItem.PendingVouchers.append({
+        _assetItem.Private.PendingVouchers.append({
             /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
             /* Type     */ enuVoucherType::Prize, //Credit,
             /* Amount   */ 2000 * _assetItem.Qty,
