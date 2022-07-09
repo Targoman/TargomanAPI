@@ -139,7 +139,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     stuVoucher Voucher;
 
     Voucher.Info.UserID = _APICALLBOOM.getUserID();
-    Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
+//    Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
     Voucher.Info.ToPay = _amount;
