@@ -34,11 +34,11 @@ COPY . .
 
 ARG TAG
 RUN echo $TAG
-RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j 4 && cp -r out/submodules/conf ./out/ && rm -rf out/build out/submodules/ out/unitTest out/test
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j                                                                                                                                                                                                                                                             && rm -rf out/build out/submodules/ out/unitTest out/test
 
 FROM  targoman/api-devel:1 as builder-mt
 COPY ./MT/ .
-RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j 4 && du -sh out/
+RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j && rm -rf out/build out/submodules/ out/unitTest out/test
 FROM targoman/api-devel:1-build
 
 
