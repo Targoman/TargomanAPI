@@ -875,7 +875,12 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
 
 //typedef QList<stuVoucherItem> InvItems_t;
 
+/**
+ * @brief TAPI_DEFINE_STRUCT
+ * in case of changing fields, must be increase version and complete migratePreVoucher
+ */
 TAPI_DEFINE_STRUCT(stuPreVoucher,
+    SF_quint8           (Version, 1),
 //    SF_NULLABLE_Enum    (Type, enuPreVoucherType),
     SF_quint64          (UserID),
     SF_QListOfVarStruct (Items, stuVoucherItem),
@@ -888,9 +893,9 @@ TAPI_DEFINE_STRUCT(stuPreVoucher,
 );
 
 TAPI_DEFINE_STRUCT(stuVoucher,
-    SF_quint64          (ID, 0, v>0),
     SF_Struct           (Info, stuPreVoucher, v.ToPay),
 //    SF_Struct           (PreVoucher, stuPreVoucher, v.ToPay),
+    SF_quint64          (ID, 0, v>0),
     SF_QString          (PaymentLink),
     SF_QString          (PaymentKey),
     SF_quint32          (Payed),

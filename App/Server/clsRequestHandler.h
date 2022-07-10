@@ -91,15 +91,18 @@ class clsRequestHandler : public QObject
     {
         qhttp::TStatusCode StatusCode;
         QVariant Result;
+        QJsonObject AdditionalInfo;
         QVariantMap ResponseHeader;
 
         stuResult(
             const QVariant &_result = {},
+            const QJsonObject &_additionalInfo = {},
             const QVariantMap &_responseHeaders = {},
             qhttp::TStatusCode _code = qhttp::ESTATUS_OK
         ) :
             StatusCode(_code),
             Result(_result),
+            AdditionalInfo(_additionalInfo),
             ResponseHeader(_responseHeaders)
         { ; }
     };
@@ -118,7 +121,8 @@ public:
     void findAndCallAPI(QString _api);
 
     void sendError(qhttp::TStatusCode _code,
-            const QString& _message,
+            const QString &_message,
+            const QJsonObject &_additionalInfo = {},
             QVariantMap _responseHeaders = {},
             bool _closeConnection = false
         );

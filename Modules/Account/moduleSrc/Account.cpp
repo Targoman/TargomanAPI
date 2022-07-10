@@ -725,6 +725,17 @@ ORDER BY wlt_walID, wltID -- , wltDateTime
 -- wlt_walID, wltID
 */
 
+/**
+ * @brief migratePreVoucher
+ * migrate by version field to the latest version
+ * @param _preVoucher
+ */
+void migratePreVoucher(
+    Targoman::API::AAA::stuPreVoucher &_preVoucher
+) {
+
+}
+
 ///@TODO: select gateway (null|single|multiple) from service
 ///@TODO: check for common gateway voucher
 /**
@@ -733,12 +744,16 @@ ORDER BY wlt_walID, wltID -- , wltDateTime
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
-    enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
-    qint64 _walID,
+    enuPaymentGatewayType::Type _gatewayType,
+    qint64 _payAmount, //-1: MIN(possible gateway amount, rest of voucher's remained amount)
     QString _paymentVerifyCallback,
+    qint64 _walID,
+    qint64 _walletAmount, //-1: MIN(available amount in wallet, rest of voucher's remained amount)
     bool _allowChargeWallet
 )) {
+    migratePreVoucher(_preVoucher);
+
     _domain = URLHelper::domain(_domain, true);
 
     ///scenario:
@@ -750,24 +765,24 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
     if (_gatewayType != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
-            throw exHTTPBadRequest("callback for non COD is mandatory");
+            throw exHTTPBadRequest("callback for non COD is mandatory", stuVoucher(_preVoucher).toJson());
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 #ifndef QT_DEBUG
     if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
-        throw exHTTPBadRequest("DeveloperTest not available");
+        throw exHTTPBadRequest("DeveloperTest not available", stuVoucher(_preVoucher).toJson());
 #endif
 
     if (_preVoucher.Items.isEmpty())
-        throw exHTTPBadRequest("Pre-Voucher is empty");
+        throw exHTTPBadRequest("Pre-Voucher is empty", stuVoucher(_preVoucher).toJson());
 
     checkPreVoucherSanity(_preVoucher);
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     if (_preVoucher.UserID != CurrentUserID)
-        throw exHTTPBadRequest("invalid pre-Voucher owner");
+        throw exHTTPBadRequest("invalid pre-Voucher owner", stuVoucher(_preVoucher).toJson());
 
     ///1: create main expense voucher
 //    Targoman::API::AAA::stuVoucher Voucher;
@@ -811,10 +826,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             VoucherDTO.fromJson(QJsonObject::fromVariantMap(VoucherInfo));
 
             if (VoucherDTO.vchStatus != enuVoucherStatus::New)
-                throw exHTTPBadRequest("Only New vouchers allowed");
+                throw exHTTPBadRequest("Only New vouchers allowed", stuVoucher(_preVoucher).toJson());
 
             if (VoucherDTO.vchType != enuVoucherType::Invoice)
-                throw exHTTPBadRequest("Only Expense vouchers allowed");
+                throw exHTTPBadRequest("Only Expense vouchers allowed", stuVoucher(_preVoucher).toJson());
 
             Targoman::API::AAA::stuPreVoucher PreVoucher;
             PreVoucher.fromJson(VoucherDTO.vchDesc.object());
@@ -882,7 +897,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     RemainingAfterWallet -= TotalFreezed;
 
     if (RemainingAfterWallet < 0)
-        throw exHTTPInternalServerError("Remaining after wallet transaction is negative.");
+        throw exHTTPInternalServerError("Remaining after wallet transaction is negative.", stuVoucher(_preVoucher).toJson());
 
     quint64 MustFreeze = 0;
 
@@ -901,10 +916,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             _walID = UserWalletsDTO.walID;
 
         if (UserWalletsDTO.walStatus != enuUserWalletStatus::Active)
-            throw exHTTPInternalServerError("The selected wallet can not be used");
+            throw exHTTPInternalServerError("The selected wallet can not be used", stuVoucher(_preVoucher).toJson());
 
 //        if (UserWalletsDTO.walBalance < 0)
-//            throw exHTTPInternalServerError("Wallet balance is negative");
+//            throw exHTTPInternalServerError("Wallet balance is negative", stuVoucher(_preVoucher).toJson());
 
         qint64 WalletAvailableAmount =
                 UserWalletsDTO.walBalance
@@ -912,14 +927,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                 - static_cast<qint64>(UserWalletsDTO.walMinBalance);
 
         if (WalletAvailableAmount <= 0)
-            throw exHTTPInternalServerError("Not enough credit in your wallet.");
+            throw exHTTPInternalServerError("Not enough credit in your wallet.", stuVoucher(_preVoucher).toJson());
 
         MustFreeze = qMin(RemainingAfterWallet, WalletAvailableAmount);
 
         RemainingAfterWallet -= MustFreeze;
 
         if (RemainingAfterWallet < 0)
-            throw exHTTPInternalServerError("Remaining after wallet transaction is negative.");
+            throw exHTTPInternalServerError("Remaining after wallet transaction is negative.", stuVoucher(_preVoucher).toJson());
     }
 
     //process voucher
@@ -944,7 +959,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 //            RemainingAfterWallet -= Result.spDirectOutputs().value("ioAmount").toUInt();
 
 //            if (RemainingAfterWallet != 0)
-//                throw exHTTPInternalServerError("Error in wallet transaction");
+//                throw exHTTPInternalServerError("Error in wallet transaction", stuVoucher(_preVoucher).toJson());
         }
 
         if ((_gatewayType == enuPaymentGatewayType::COD) && (RemainingAfterWallet > 0)) {
@@ -1026,7 +1041,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         && (RemainingAfterWallet > NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount))
     ) {
         if (_allowChargeWallet == false)
-            throw exHTTPInternalServerError("Permission to charge the wallet is not given");
+            throw exHTTPInternalServerError("Permission to charge the wallet is not given", stuVoucher(_preVoucher).toJson());
 
         MustPay = NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount);
 
@@ -1946,8 +1961,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         //--------------------------
         return stuVoucher(
-                    _voucherID,
                     PreVoucher,
+                    _voucherID,
                     QString(),
                     QString(),
                     VoucherDTO.vchTotalAmount,
