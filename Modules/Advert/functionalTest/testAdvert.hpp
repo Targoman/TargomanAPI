@@ -261,18 +261,6 @@ private slots:
     }
 
     /***************************************************/
-//    void removeBasketItem_v1() {
-//        callUserAPI(
-//            RESTClientHelper::POST,
-//            "Advert/removeBasketItem_v1",
-//            {},
-//            {
-//                { "itemUUID", "4fc1849756f6c4f6b57031a7c6172ccd" },
-//                { "lastPreVoucher", "{\"items\": [{\"desc\": \"fixture saleable 3381473638 name\",\"disAmount\": 0,\"orderID\": 195,\"qty\": 1,\"service\": \"Advert\",\"sign\":\"bA8fP3XLLuzmd5NieJ5JoVu0bRWy6R8duRFGzUrUquY=\",\"subTotal\": 12000,\"uUID\": \"a7875e24c51449e516233d8b001eff04\",\"unitPrice\": 12000,\"vATAmount\": 0,\"vATPercent\":0},{\"desc\": \"fixture saleable 3381473638 name\",\"disAmount\": 0,\"orderID\": 197,\"qty\": 1,\"service\": \"Advert\",\"sign\":\"KPi9KMXoH2Aakbass8WnJiOGWqi+jpR7q9UMJMSCmdU=\",\"subTotal\": 12000,\"uUID\": \"4fc1849756f6c4f6b57031a7c6172ccd\",\"unitPrice\": 12000,\"vATAmount\": 0,\"vATPercent\": 0}],\"round\": 360,\"sign\": \"RJQjl1FiueP+puJzFFXb/+MWt5J71WRq4cr006w/4+g=\",\"summary\": \"3 items\",\"toPay\": 35640}" }
-//            }
-//        );
-//    }
-
     void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
@@ -306,8 +294,8 @@ private slots:
                     { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::Fields::prdName,          "test product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-                    { tblAccountProducts::ExtraFields::prdExType,              Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::ExtraFields::prdEx_locID,            this->LocationID },
+                    { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prdEx_locID,     this->LocationID },
                 }
             );
 
@@ -546,7 +534,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 13'800);
@@ -575,7 +565,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             QVERIFY(this->LastPreVoucher.Items.length() < ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 0);
@@ -605,7 +597,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 22'080);
@@ -636,7 +630,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 27'600);
@@ -667,7 +663,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 6'000);
@@ -701,7 +699,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 38'640);
@@ -735,7 +735,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
             QVERIFY(item.DisAmount == 41'400);
@@ -1063,7 +1065,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 000);
@@ -1096,7 +1100,9 @@ private slots:
                 }
             );
 
-            this->LastPreVoucher.fromJson(Result.toJsonObject());
+            stuBasketActionResult BasketActionResult;
+            BasketActionResult.fromJson(Result.toJsonObject());
+            this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 000);
@@ -1235,6 +1241,16 @@ private slots:
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
         }
+    }
+
+    void getAccountProducts_with_translate() {
+        QVariant Result = callAdminAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountProducts",
+            {},
+            {
+            }
+        );
     }
 
 };

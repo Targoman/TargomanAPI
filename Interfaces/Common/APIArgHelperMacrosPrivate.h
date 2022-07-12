@@ -521,10 +521,10 @@ inline QString toCammel(const QString& _name) {
     TAPI_REGISTER_TARGOMAN_ENUM_IMPL( \
         /* namespace          */ _namespace, \
         /* enum               */ _enum, \
-        /* fnToVariant    */ [](_namespace::_enum::Type _value) -> QVariant { \
+        /* fnToVariant        */ [](_namespace::_enum::Type _value) -> QVariant { \
             return _namespace::_enum::toStr(_value); \
         }, \
-        /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_enum::Type { \
+        /* fnFromVariant      */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_enum::Type { \
             QVariant _val = (_value.userType() == QMetaType::QString ? _value : _namespace::_enum::toStr(_value.value<_namespace::_enum::Type>())); \
             if (_namespace::_enum::options().contains(_val.toString())) \
                 return _namespace::_enum::toEnum(_val.toString()); \

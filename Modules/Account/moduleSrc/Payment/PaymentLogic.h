@@ -95,7 +95,7 @@ public:
             QTextStream Out(&File);
             Out << QDateTime::currentDateTime().toString(Qt::ISODateWithMs)
                 << QString("[%1:%2:%3] ").arg(_gw, _function).arg(_line)
-                << QJsonDocument::fromVariant(_info).toJson();
+                << QJsonDocument::fromVariant(_info).toJson(QJsonDocument::Compact);
         }
     }
 

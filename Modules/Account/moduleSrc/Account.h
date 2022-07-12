@@ -327,6 +327,18 @@ private slots:
 //        "Remove all items from pre-Voucher"
 //    )
 
+    void internalCheckBasketVoucherExpirity(
+        const Targoman::API::AccountModule::ORM::tblVoucher::DTO &_voucherDTO
+    );
+
+    bool REST_GET(
+        checkBasketVoucherExpirity,
+        (
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM
+        ),
+        "Check Vouchers for expirity. called by garbage collector"
+    )
+
     bool REST_POST(
         cancelVoucher,
         (
@@ -341,10 +353,12 @@ private slots:
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher _preVoucher,
-            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
-            qint64 _walID = -1,
+            Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
+//            qint64 _payAmount = -1, //-1: MIN(possible gateway amount, rest of voucher's remained amount)
             QString _paymentVerifyCallback = {},
+            qint64 _walID = -1,
+//            qint64 _walletAmount = -1, //-1: MIN(available amount in wallet, rest of voucher's remained amount)
             bool _allowChargeWallet = false
         ),
         "create a voucher based on preVoucher. "

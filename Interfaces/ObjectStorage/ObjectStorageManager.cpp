@@ -40,11 +40,9 @@ using namespace Targoman::API::Helpers;
 #include "QHttp/qhttpfwd.hpp"
 using namespace qhttp;
 
-//TAPI_REGISTER_METATYPE(
-//    /* complexity      */ COMPLEXITY_Object,
+//TAPI_REGISTER_METATYPE_TYPE_STRUCT(
 //    /* namespace       */ Targoman::API::ObjectStorage,
-//    /* type            */ stuSaveFileResult,
-//    /* fnToVariant */ [](const stuSaveFileResult& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+//    /* type            */ stuSaveFileResult
 //);
 
 namespace Targoman::API::ObjectStorage {
@@ -172,7 +170,7 @@ quint64 ObjectStorageManager::saveFile(
 
         if (UploadedFileID > 0) {
             try {
-                _uploadFiles.DeleteByPks(_uploadFiles, APICALLBOOM_PARAM, QString::number(UploadedFileID));
+                _uploadFiles.DeleteByPks(APICALLBOOM_PARAM, QString::number(UploadedFileID));
             } catch (...) { ; }
         }
 

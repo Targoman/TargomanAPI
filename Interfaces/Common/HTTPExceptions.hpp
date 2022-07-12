@@ -23,6 +23,7 @@
 #ifndef TAPI_HTTPEXCEPTIONS_H
 #define TAPI_HTTPEXCEPTIONS_H
 
+#include <QJsonObject>
 #include "libTargomanCommon/exTargomanBase.h"
 #include "QHttp/qhttpfwd.hpp"
 
@@ -35,31 +36,36 @@ namespace API {
 
 class exHTTPError : public Targoman::Common::exTargomanBase {
 public:
-    exHTTPError(const QString& _definition, quint16 _errorCode, const QString& _message) :
+    exHTTPError(const QString& _definition, quint16 _errorCode, const QString& _message, const QJsonObject &_additionalInfo = {}) :
         Targoman::Common::exTargomanBase(_message, _errorCode),
-        Definition(_definition)
+        Definition(_definition),
+        AdditionalInfo(_additionalInfo)
     { ; }
 
-    virtual void toEnsureAvoidanceOfUsingBaseClass()=0;
+    virtual void toEnsureAvoidanceOfUsingBaseClass() = 0;
 
-    inline const QString definition() const{return this->Definition;}
+    inline const QString definition() const { return this->Definition; }
+    inline const QJsonObject additionalInfo() const { return this->AdditionalInfo; }
+
     inline const QString fullError() {
-        return QString("%1(%2): %3").arg(
-                    this->definition()).arg(
-                    this->code()).arg(
-                    this->what());}
+        return QString("%1(%2): %3")
+                .arg(this->definition())
+                .arg(this->code())
+                .arg(this->what());
+    }
 
 protected:
-  QString    Definition;
+    QString Definition;
+    QJsonObject AdditionalInfo;
 };
 
 /*******************************************************************************/
-#define TAPI_ADD_HTTP_EXCEPTION(_code,_name) \
-    class _name : public exHTTPError{\
-    public: _name (const QString& _message = "") : \
-            exHTTPError (QString(TARGOMAN_M2STR(_name)).mid(2), _code, _message) \
-            {} \
-            void toEnsureAvoidanceOfUsingBaseClass() { ; } \
+#define TAPI_ADD_HTTP_EXCEPTION(_code, _name) \
+    class _name : public exHTTPError { \
+    public: \
+        _name (const QString& _message = "", const QJsonObject &_additionalInfo = {}) : \
+            exHTTPError(QString(TARGOMAN_M2STR(_name)).mid(2), _code, _message, _additionalInfo) {} \
+        void toEnsureAvoidanceOfUsingBaseClass() { ; } \
     }
 
 /*******************************************************************************/

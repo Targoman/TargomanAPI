@@ -40,134 +40,37 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_Object,
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
-    /* type               */ stuVoucherItem,
-    /* fnToVariant    */ [](const stuVoucherItem& _value) -> QVariant {
-//        qDebug() << "stuVoucherItem(1) ================================= round:" << _value.Round;
-        return _value.toJson().toVariantMap();
-    },
-    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItem {
-//        qDebug() << "stuVoucherItem(2) =================================" << _paramName << ":" << _value;
-        if (_value.isValid() == false) {
-//            qDebug() << "stuVoucherItem(2.1) =================================" << _paramName << ":" << _value;
-            return stuVoucherItem();
-        }
-
-        if (_value.canConvert<QVariantMap>()
-//                || _value.canConvert<QVariantList>()
-//                || _value.canConvert<double>()
-            ) {
-            auto ret = QJsonDocument::fromVariant(_value);
-//            qDebug() << "stuVoucherItem(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
-            return stuVoucherItem().fromJson(ret.object());
-        }
-
-        if (_value.toString().isEmpty()) {
-//            qDebug() << "stuVoucherItem(2.3) =================================" << _paramName << ":" << _value;
-            return stuVoucherItem();
-        }
-
-        QJsonParseError Error;
-        QJsonDocument Doc;
-        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-//        qDebug() << "stuVoucherItem(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
-
-        if (Error.error != QJsonParseError::NoError)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
-        if (Doc.isObject() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
-        return stuVoucherItem().fromJson(Doc.object());
-    }
+    /* type               */ stuVoucherItem
 );
 
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_Object,
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
-    /* type               */ stuPreVoucher,
-    /* fnToVariant    */ [](const stuPreVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuPreVoucher {
-        if (_value.isValid() == false) {
-            return stuPreVoucher();
-        }
-
-        if (_value.canConvert<QVariantMap>()
-//                || _value.canConvert<QVariantList>()
-//                || _value.canConvert<double>()
-            ) {
-            auto ret = QJsonDocument::fromVariant(_value);
-            return stuPreVoucher().fromJson(ret.object());
-        }
-
-        if (_value.toString().isEmpty()) {
-            return stuPreVoucher();
-        }
-
-        QJsonParseError Error;
-        QJsonDocument Doc;
-        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-
-        if (Error.error != QJsonParseError::NoError)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher: <"+_value.toString()+">" + Error.errorString());
-        if (Doc.isObject() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid Prevoucher object: <"+_value.toString()+">");
-        return stuPreVoucher().fromJson(Doc.object());
-    }
+    /* type               */ stuPreVoucher
 );
 
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_Complex,
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
-    /* type               */ stuVoucher,
-    /* fnToVariant    */ [](const stuVoucher& _value) -> QVariant { return _value.toJson().toVariantMap(); }
+    /* type               */ stuBasketActionResult
 );
 
-TAPI_REGISTER_METATYPE(
-    /* complexity         */ COMPLEXITY_Complex,
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
-    /* type               */ stuVoucherItemForTrustedAction,
-    /* fnToVariant    */ [](const stuVoucherItemForTrustedAction& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuVoucherItemForTrustedAction {
-    //        qDebug() << "stuVoucherItemForTrustedAction(2) =================================" << _paramName << ":" << _value;
-        if (_value.isValid() == false) {
-    //            qDebug() << "stuVoucherItemForTrustedAction(2.1) =================================" << _paramName << ":" << _value;
-            return stuVoucherItemForTrustedAction();
-        }
+    /* type               */ stuVoucher
+);
 
-        if (_value.canConvert<QVariantMap>()
-    //                || _value.canConvert<QVariantList>()
-    //                || _value.canConvert<double>()
-            ) {
-            auto ret = QJsonDocument::fromVariant(_value);
-    //            qDebug() << "stuVoucherItemForTrustedAction(2.2) =================================" << _paramName << ":" << _value << "=" << ret.object();
-            return stuVoucherItemForTrustedAction().fromJson(ret.object());
-        }
-
-        if (_value.toString().isEmpty()) {
-    //            qDebug() << "stuVoucherItemForTrustedAction(2.3) =================================" << _paramName << ":" << _value;
-            return stuVoucherItemForTrustedAction();
-        }
-
-        QJsonParseError Error;
-        QJsonDocument Doc;
-        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-    //        qDebug() << "stuVoucherItemForTrustedAction(2.4) =================================" << _paramName << ":" << _value << "=" << Doc;
-
-        if (Error.error != QJsonParseError::NoError)
-            throw exHTTPBadRequest(_paramName + " is not a valid VoucherItemForTrustedAction: <"+_value.toString()+">" + Error.errorString());
-        if (Doc.isObject() == false)
-            throw exHTTPBadRequest(_paramName + " is not a valid VoucherItemForTrustedAction object: <"+_value.toString()+">");
-        return stuVoucherItemForTrustedAction().fromJson(Doc.object());
-    }
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
+    /* namespace          */ Targoman::API::AAA,
+    /* type               */ stuVoucherItemForTrustedAction
 );
 
 TAPI_REGISTER_METATYPE(
     /* complexity         */ COMPLEXITY_Complex,
     /* namespace          */ Targoman::API::AAA,
     /* type               */ OrderAdditives_t,
-    /* fnToVariant    */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
-    /* fnFromVariant  */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
+    /* fnToVariant        */ [](const OrderAdditives_t& _value) -> QVariant { return QVariant::fromValue(_value); },
+    /* fnFromVariant      */ [](const QVariant& _value, const QByteArray&) -> OrderAdditives_t {
         auto Map = _value.toMap();
         OrderAdditives_t Additives;
         for (auto Iter = Map.begin(); Iter != Map.end(); ++Iter)
@@ -195,6 +98,8 @@ namespace Targoman::API::AAA {
 //constexpr char ASA_LIMITSONPARENT[] = "LP";
 
 /******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountProducts::intfAccountProducts(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
@@ -208,6 +113,35 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
+
+SelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    //left join (
+    //select *
+    //from tblAccountProducts_translate
+    //where tblAccountProducts_translate.language = 'en'
+    //) lng_tblAccountProducts
+    //on lng_tblAccountProducts.pid = tblAccountProducts.prdID
+
+    intfAccountProductsTranslate::myInstance->prepareFiltersList();
+
+    return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
+//            .addCols(this->SelectableColumnNames())
+//            .leftJoin(SelectQuery(*intfAccountProductsTranslate::myInstance)
+//                      .where({ tblAccountProductsTranslateBase::Fields::language, enuConditionOperator::Equal, _APICALLBOOM.language() })
+//                      , "lng_tblAccountProducts"
+//                      , { "lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::pid,
+//                          enuConditionOperator::Equal,
+//                          tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
+//                      }
+//                     )
+//            .addCol(enuConditionalAggregation::IF,
+//                    { "lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdName, enuConditionOperator::Null },
+//                    R(tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdName),
+//                    R("lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdName),
+//                    tblAccountProductsBase::Fields::prdName
+//                   )
+    ;
+}
 
 QVariant IMPL_ORMGET(intfAccountProducts) {
     Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
@@ -234,6 +168,27 @@ bool IMPL_ORMDELETE(intfAccountProducts) {
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
+/******************************************************************/
+intfAccountProductsTranslate* intfAccountProductsTranslate::myInstance;
+
+intfAccountProductsTranslate::intfAccountProductsTranslate(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountProductsTranslateBase::Name,
+        tblAccountProductsTranslateBase::Private::ORMFields + _exclusiveCols,
+        tblAccountProductsTranslateBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountProductsTranslateBase::Private::Indexes + _exclusiveIndexes
+) {
+    intfAccountProductsTranslate::myInstance = this;
+}
+
+/******************************************************************/
+/******************************************************************/
 /******************************************************************/
 intfAccountSaleables::intfAccountSaleables(
     const QString& _schema,

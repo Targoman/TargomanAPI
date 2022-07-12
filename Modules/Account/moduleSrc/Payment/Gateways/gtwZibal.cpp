@@ -73,7 +73,7 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
             throw exPayment("The trackID is empty");
 
         return {
-            Json.toJson(),
+            Json.toJson(QJsonDocument::Compact),
             Response.value("trackId").toString(),
             QString(URL_GTW_PAY).replace("{{track_id}}", Response.value("trackId").toString())
         };
@@ -144,7 +144,7 @@ std::tuple<QString, QString> gtwZibal::verifyAndSettle(
                             .arg(this->errorString(Result)));
 
         return {
-            Json.toJson(),
+            Json.toJson(QJsonDocument::Compact),
             Response.value("refNumber").toString()
         };
 

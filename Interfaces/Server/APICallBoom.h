@@ -87,6 +87,7 @@ public:
     QString requestAPIPath() const;
     QString host() const;
     quint16 port() const;
+    QString language() const;
 
     void setResponseHeaders(const QVariantMap &_headers);
     QVariantMap getResponseHeaders();

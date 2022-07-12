@@ -75,28 +75,58 @@
 #define _DEBUG_TAPI_REGISTER_METATYPE_5(_type, ...)
 #endif
 
-#define TAPI_REGISTER_JSON_DERIVED_METATYPE(_complexity, _namespace, _type) \
+#define TAPI_REGISTER_METATYPE_TYPE_STRUCT(_namespace, _type) \
     TAPI_REGISTER_METATYPE( \
-        /* complexity     */ _complexity, \
-        /* namespace      */ _namespace, \
-        /* type           */ _type, \
-        /* fnToVariant    */ [](const _type& _value) -> QVariant { \
+        /* complexity         */ COMPLEXITY_Object, \
+        /* namespace          */ _namespace, \
+        /* type               */ _type, \
+        /* fnToVariant        */ [](const _namespace::_type& _value) -> QVariant { \
+            _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "fnToVariant", _value.toJson()); \
+            return _value.toJson().toVariantMap(); \
+        }, \
+        /* fnFromVariant      */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_type { \
+            _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fnFromVariant", _paramName, _value); \
+            if (_value.isValid() == false) \
+                return _namespace::_type(); \
+            if (_value.canConvert<QVariantMap>()) { \
+                auto ret = QJsonDocument::fromVariant(_value); \
+                return _namespace::_type().fromJson(ret.object()); \
+            } \
+            if (_value.toString().isEmpty()) \
+                return _namespace::_type(); \
+            QJsonParseError Error; \
+            QJsonDocument Doc; \
+            Doc = Doc.fromJson(_value.toString().toUtf8(), &Error); \
+            if (Error.error != QJsonParseError::NoError) \
+                throw exHTTPBadRequest(_paramName + " is not a valid : <" + _value.toString() + ">" + Error.errorString()); \
+            if (Doc.isObject() == false) \
+                throw exHTTPBadRequest(_paramName + " is not a valid object: <" + _value.toString() + ">"); \
+            return _namespace::_type().fromJson(Doc.object()); \
+        } \
+    )
+
+#define TAPI_REGISTER_METATYPE_TYPE_JSON_DERIVED(_namespace, _type) \
+    TAPI_REGISTER_METATYPE( \
+        /* complexity         */ COMPLEXITY_Object, \
+        /* namespace          */ _namespace, \
+        /* type               */ _type, \
+        /* fnToVariant        */ [](const _namespace::_type& _value) -> QVariant { \
             _DEBUG_TAPI_REGISTER_METATYPE_2(_type, "fnToVariant", _value); \
             return _value; \
         }, \
-        /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _type { \
+        /* fnFromVariant      */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> _namespace::_type { \
             _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "fnFromVariant", _paramName, _value); \
-            return _type::fromVariant(_value); \
+            return _namespace::_type::fromVariant(_value); \
         }, \
-        /* fnDescription  */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
-        /* fnToORMValue   */ [](const QVariant& _value) { \
+        /* fnDescription      */ [](const QList<Targoman::API::DBM::clsORMField>&) { return "A valid JSON object"; }, \
+        /* fnToORMValue       */ [](const QVariant& _value) { \
             _namespace::_type t; \
             /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)>>> ===========================" << _value << " -> " << t;*/  \
             TAPI::setFromVariant(t, _value); \
             /*qDebug() << "====== JSON_t" << #_namespace << ":" << #_type << "(fnToORMValue)<<< ===========================" << _value << " -> " << t;*/  \
             return t; \
         }, \
-        /* fnFromORMValue */ [](const QVariant& _value) { \
+        /* fnFromORMValue     */ [](const QVariant& _value) { \
             QString ret = QJsonDocument::fromVariant(_value).toJson(QJsonDocument::Compact).constData(); \
             /*qDebug() << "JSON_t(5) =================================" << _value << " -> " << ret;*/  \
             return ret; \

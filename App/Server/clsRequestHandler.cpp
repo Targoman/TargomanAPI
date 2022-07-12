@@ -136,9 +136,9 @@ void clsRequestHandler::process(const QString& _api) {
                             else if (JSONObjectIter.value().isNull())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QString());
                             else if (JSONObjectIter.value().isArray())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson());
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson(QJsonDocument::Compact));
                             else if (JSONObjectIter.value().isObject())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson(QJsonDocument::Compact));
                             else if (JSONObjectIter.value().isDouble())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QString::number(JSONObjectIter.value().toDouble()));
                             else
@@ -197,14 +197,16 @@ void clsRequestHandler::process(const QString& _api) {
             foreach (auto val, this->Request->userDefinedValues()) {
                 TargomanLogInfo(7, val.first << " : " << val.second);
             }
+        } catch (exHTTPError& ex) {
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.additionalInfo(), {}, ex.httpCode() >= 500);
         } catch (exTargomanBase& ex) {
-            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, {}, ex.httpCode() >= 500);
         } catch (exQFVRequiredParam &ex) {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, {}, false);
         } catch (exQFVInvalidValue &ex) {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, {}, false);
         } catch (std::exception &ex) {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, {}, true);
         }
     });
 
@@ -214,16 +216,18 @@ void clsRequestHandler::process(const QString& _api) {
                 this->sendCORSOptions();
             else
                 this->findAndCallAPI (_api);
+        } catch (exHTTPError& ex) {
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.additionalInfo(), {}, ex.httpCode() >= 500);
         } catch (exTargomanBase& ex) {
-            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, ex.httpCode() >= 500);
+            this->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), {}, {}, ex.httpCode() >= 500);
         } catch (exQFVRequiredParam &ex) {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, {}, false);
         } catch (exQFVInvalidValue &ex) {
-            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, false);
+            this->sendError(qhttp::ESTATUS_BAD_REQUEST, ex.what(), {}, {}, false);
         } catch (std::exception &ex) {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, {}, true);
         } catch (...) {
-            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", {}, true);
+            this->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, "", {}, {}, true);
         }
     });
 }
@@ -424,17 +428,19 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                               _pksByPath
                               );
 
-        return stuResult(Result, APICALLBOOM->getResponseHeaders());
+        return stuResult(Result, {}, APICALLBOOM->getResponseHeaders());
+    } catch (exHTTPError& ex) {
+        return stuResult(ex.what(), ex.additionalInfo(), APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exTargomanBase& ex) {
-        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exQFVRequiredParam &ex) {
-        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (exQFVInvalidValue &ex) {
-        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (std::exception &ex) {
-        return stuResult(ex.what(), APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     } catch (...) {
-        return stuResult("INTERNAL SERVER ERROR!!!", APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -490,6 +496,7 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
         return this->sendError(qhttp::ESTATUS_NOT_FOUND,
                                QString("API not found [%1] (%2)").arg(MethodString).arg(_api),
                                {},
+                               {},
                                true);
 
     if (ServerConfigs::MultiThreaded.value()) {
@@ -505,7 +512,7 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
             if (Result.StatusCode == qhttp::ESTATUS_OK)
                 this->sendResponse(StatusCodeOnMethod[this->Request->method()], Result.Result, Result.ResponseHeader);
             else
-                this->sendError(Result.StatusCode, Result.Result.toString(), Result.ResponseHeader, Result.StatusCode >= 500);
+                this->sendError(Result.StatusCode, Result.Result.toString(), Result.AdditionalInfo, Result.ResponseHeader, Result.StatusCode >= 500);
         });
 
         this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath, _api));
@@ -518,20 +525,32 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
 
 void clsRequestHandler::sendError(
     qhttp::TStatusCode _code,
-    const QString& _message,
+    const QString &_message,
+    const QJsonObject &_additionalInfo,
     QVariantMap _responseHeaders,
     bool _closeConnection
 ) {
     gServerStats.Errors.inc();
+
+    QJsonObject Error({
+                          { "error", QJsonObject({
+                                { "code", _code },
+                                { "message", _message },
+                            })
+                          }
+                      });
+
+    if (_additionalInfo.isEmpty() == false)
+        Error.insert("additionalInfo", _additionalInfo);
+//    for (QJsonObject::const_iterator it = _additionalInfo.constBegin();
+//         it != _additionalInfo.constEnd();
+//         it++
+//    ) {
+//        Error.insert(it.key(), it.value());
+//    }
+
     this->sendResponseBase(_code,
-                           QJsonObject({
-                                           {"error",
-                                            QJsonObject({
-                                                {"code", _code},
-                                                {"message", _message}
-                                            })
-                                           }
-                                       }),
+                           Error,
                            _responseHeaders,
                            _closeConnection);
 }
@@ -862,9 +881,9 @@ void clsMultipartFormDataRequestHandler::onMultiPartBegin(const MultipartHeaders
         } else
             throw exHTTPBadRequest("No Content-Disposition header provided");
     } catch (exHTTPError& ex) {
-        Self->pRequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what(), {}, ex.code() >= 500);
+        Self->pRequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.code()), ex.what(), ex.additionalInfo(), {}, ex.code() >= 500);
     } catch (exTargomanBase& ex) {
-        Self->pRequestHandler->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, true);
+        Self->pRequestHandler->sendError(qhttp::ESTATUS_INTERNAL_SERVER_ERROR, ex.what(), {}, {}, true);
     }
 
 }

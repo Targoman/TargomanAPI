@@ -36,7 +36,8 @@ class APICallBoomData : public QSharedData
 public:
     APICallBoomData(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
         QSharedData(),
-        FNTiming(_fnTiming)
+        FNTiming(_fnTiming),
+        AcceptLanguage("en")
     { ; }
 
     APICallBoomData(const APICallBoomData &_other) :
@@ -48,7 +49,8 @@ public:
         RequestCookies(_other.RequestCookies),
         JWT(_other.JWT),
         IP(_other.IP),
-        ResponseHeaders(_other.ResponseHeaders)
+        ResponseHeaders(_other.ResponseHeaders),
+        AcceptLanguage(_other.AcceptLanguage)
     { ; }
 
     virtual ~APICallBoomData() { ; }
@@ -63,6 +65,7 @@ public:
     TAPI::JWT_t JWT;
     TAPI::RemoteIP_t IP;
     QVariantMap ResponseHeaders;
+    QString AcceptLanguage;
 };
 
 intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) : Data(new APICallBoomData(_fnTiming)) { ; }
@@ -81,6 +84,13 @@ void intfAPICallBoom::initialize(
     this->Data->RequestCookies = _cookies;
     this->Data->JWT = _JWT;
     this->Data->IP = _ip;
+
+    this->Data->AcceptLanguage = "en";
+
+    if (this->Data->RequestHeaders.contains("accept-language")) {
+        QStringList Languages = this->Data->RequestHeaders["accept-language"].toString().split(',');
+        this->Data->AcceptLanguage = Languages.at(0).split(';').at(0);
+    }
 }
 
 void intfAPICallBoom::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
@@ -131,6 +141,10 @@ quint16 intfAPICallBoom::port() const {
         return 80;
 
     return Host.mid(idx+1).toUInt();
+}
+
+QString intfAPICallBoom::language() const {
+    return this->Data->AcceptLanguage;
 }
 
 //void intfAPICallBoom::setResponseHeaders(const QVariantMap &_headers) {

@@ -55,21 +55,21 @@ public:
 
 private:
     QVariantMap SelectOne(
-            clsTable& _table,
+//            clsTable& _table,
             GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
         );
     QVariantList SelectAll(
-            clsTable& _table,
+//            clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
             std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
         );
     TAPI::stuTable SelectAllWithCount(
-            clsTable& _table,
+//            clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
@@ -77,13 +77,19 @@ private:
         );
 
 public:
-    QVariant Select(
-            clsTable& _table,
-            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const clsCondition& _extraFilters = {},
-            quint16 _cacheTime = 0,
-            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
-        );
+//    SelectQuery GetSelectQuery(clsTable& _table);
+    virtual SelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual CreateQuery GetCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
+    virtual UpdateQuery GetUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual DeleteQuery GetDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+
+//    QVariant Select(
+//            clsTable& _table,
+//            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
+//            const clsCondition& _extraFilters = {},
+//            quint16 _cacheTime = 0,
+//            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+//        );
     QVariant Select(
             GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
@@ -93,33 +99,17 @@ public:
 
 //    quint64 Create(
 //            clsTable& _table,
-//            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
+//            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
 //        );
-//    quint64 Create(
-//            CREATE_METHOD_ARGS_DECL_INTERNAL_USER
-//        );
-    quint64 Create(
-            clsTable& _table,
-            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
-        );
     quint64 Create(
             CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
         );
 
 //    bool Update(
 //            clsTable& _table,
-//            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
 //            const QVariantMap& _extraFilters = {}
 //        );
-//    bool Update(
-//            UPDATE_METHOD_ARGS_DECL_INTERNAL_USER,
-//            const QVariantMap& _extraFilters = {}
-//        );
-    bool Update(
-            clsTable& _table,
-            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const QVariantMap& _extraFilters = {}
-        );
     bool Update(
             UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {}
@@ -127,21 +117,10 @@ public:
 
 //    bool DeleteByPks(
 //            clsTable& _table,
-//            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
+//            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
 //            const QVariantMap& _extraFilters = {},
 //            bool _realDelete = false
 //        );
-//    bool DeleteByPks(
-//            DELETE_METHOD_ARGS_DECL_INTERNAL_USER,
-//            const QVariantMap& _extraFilters = {},
-//            bool _realDelete = false
-//        );
-    bool DeleteByPks(
-            clsTable& _table,
-            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const QVariantMap& _extraFilters = {},
-            bool _realDelete = false
-        );
     bool DeleteByPks(
             DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const QVariantMap& _extraFilters = {},

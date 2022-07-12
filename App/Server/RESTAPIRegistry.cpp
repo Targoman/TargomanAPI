@@ -448,7 +448,7 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
 
 QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input) {
     if (_typeID == 0 || _typeID == QMetaType::User) // || _typeID == QMetaType::User)
-        return  "is not registered with Qt MetaTypes";
+        return "is not registered with Qt MetaTypes";
 
     if (_typeID < TAPI_BASE_USER_DEFINED_TYPEID && (_typeID >= gOrderedMetaTypeInfo.size() || gOrderedMetaTypeInfo.at(_typeID) == nullptr))
         return "is complex type and not supported";
@@ -478,12 +478,15 @@ QString RESTAPIRegistry::isValidType(int _typeID, bool _validate4Input) {
 
 void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
     if (_method.parameterCount() > 10)
-        throw exRESTRegistry("Unable to register methods with more than 10 input args <"+_method.name()+">");
+        throw exRESTRegistry("Unable to register methods with more than 10 input args <" + _method.name() + ">");
 
     QString ErrMessage;
 
     if ((ErrMessage = RESTAPIRegistry::isValidType(_method.returnType(), false)).size())
-        throw exRESTRegistry(QString("Invalid return type(%1): %2").arg(_method.typeName()).arg(ErrMessage));
+        throw exRESTRegistry(QString("Invalid return type(%1) of %2: %3")
+                             .arg(_method.typeName())
+                             .arg(_method.name().toStdString().c_str())
+                             .arg(ErrMessage));
 
     ErrMessage.clear();
 
