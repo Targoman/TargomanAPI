@@ -136,9 +136,9 @@ void clsRequestHandler::process(const QString& _api) {
                             else if (JSONObjectIter.value().isNull())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QString());
                             else if (JSONObjectIter.value().isArray())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson());
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toArray()).toJson(QJsonDocument::Compact));
                             else if (JSONObjectIter.value().isObject())
-                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson());
+                                this->Request->addUserDefinedData(JSONObjectIter.key(), QJsonDocument(JSONObjectIter.value().toObject()).toJson(QJsonDocument::Compact));
                             else if (JSONObjectIter.value().isDouble())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), QString::number(JSONObjectIter.value().toDouble()));
                             else
@@ -539,12 +539,15 @@ void clsRequestHandler::sendError(
                             })
                           }
                       });
-    for (QJsonObject::const_iterator it = _additionalInfo.constBegin();
-         it != _additionalInfo.constEnd();
-         it++
-    ) {
-        Error.insert(it.key(), it.value());
-    }
+
+    if (_additionalInfo.isEmpty() == false)
+        Error.insert("additionalInfo", _additionalInfo);
+//    for (QJsonObject::const_iterator it = _additionalInfo.constBegin();
+//         it != _additionalInfo.constEnd();
+//         it++
+//    ) {
+//        Error.insert(it.key(), it.value());
+//    }
 
     this->sendResponseBase(_code,
                            Error,

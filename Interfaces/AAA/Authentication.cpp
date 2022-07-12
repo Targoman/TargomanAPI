@@ -202,7 +202,7 @@ stuOAuthInfo retrieveGoogleUserInfo(const QString& _authToken)
     if (Obj.contains("email") == false
             || Obj.contains("email_verified") == false
             || Obj.value("email_verified").toBool() == false )
-        throw exAuthentication("Invalid Google Token: " + Doc.toJson());
+        throw exAuthentication("Invalid Google Token: " + Doc.toJson(QJsonDocument::Compact));
 
     Info.Type   = TAPI::enuOAuthType::Google;
     Info.ID     = Obj.value("kid").toString();
@@ -227,7 +227,7 @@ stuOAuthInfo retrieveLinkedinUserInfo(const QString& _authToken)
     QJsonObject Obj = Doc.object();
 
     if (Obj.contains("id") == false)
-        throw exAuthentication("Invalid Linkedin Token: " + Doc.toJson());
+        throw exAuthentication("Invalid Linkedin Token: " + Doc.toJson(QJsonDocument::Compact));
 
     Info.Type   = TAPI::enuOAuthType::Linkedin;
     Info.ID     = Obj.value("id").toString();

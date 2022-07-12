@@ -41,6 +41,7 @@ protected:
         const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
         intfAccountProducts* _products,
+        intfAccountProductsTranslate* _productsTranslate,
         intfAccountSaleables* _saleables,
         intfAccountUserAssets* _userAssets,
         intfAccountAssetUsage* _assetUsages,
@@ -176,7 +177,7 @@ protected:
     };
 
 protected slots:
-    Targoman::API::AAA::stuPreVoucher REST_POST(
+    Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
             APICALLBOOM_TYPE_JWT_DECL               &APICALLBOOM_PARAM,
@@ -192,7 +193,7 @@ protected slots:
         "add an item to the basket and return updated pre-Voucher"
     )
 
-    Targoman::API::AAA::stuPreVoucher REST_POST(
+    Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
             APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
@@ -204,7 +205,7 @@ protected slots:
         "Update a basket item and return updated pre-Voucher."
     )
 
-    Targoman::API::AAA::stuPreVoucher REST_POST(
+    Targoman::API::AAA::stuBasketActionResult REST_POST(
         removeBasketItem,
         (
             APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
@@ -216,7 +217,7 @@ protected slots:
     )
 
 protected:
-    Targoman::API::AAA::stuPreVoucher internalUpdateBasketItem(
+    Targoman::API::AAA::stuBasketActionResult internalUpdateBasketItem(
         INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
         Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
         stuVoucherItem                      &_voucherItem,
@@ -247,6 +248,7 @@ protected:
     QString ServiceName;
 
     QScopedPointer<intfAccountProducts> AccountProducts;
+    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
     QScopedPointer<intfAccountAssetUsage> AccountAssetUsages;

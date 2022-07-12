@@ -27,33 +27,9 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
 using namespace Targoman::API::TicketingModule;
 
-//TAPI_REGISTER_METATYPE(
-//    /* complexity         */ COMPLEXITY_Object,
+//TAPI_REGISTER_METATYPE_TYPE_STRUCT(
 //    /* namespace          */ Targoman::API::TicketingModule,
-//    /* type               */ stuTicketScope,
-//    /* fnToVariant    */ [](const stuTicketScope& _value) -> QVariant { return _value.toJson().toVariantMap(); },
-//    /* fnFromVariant  */ [](const QVariant& _value, Q_DECL_UNUSED const QString& _paramName = "") -> stuTicketScope {
-//        if (_value.isValid() == false)
-//            return stuTicketScope();
-
-//        if (_value.canConvert<QVariantMap>())
-//            return stuTicketScope().fromJson(QJsonDocument::fromVariant(_value).object());
-
-//        if (_value.toString().isEmpty())
-//            return stuTicketScope();
-
-//        QJsonParseError Error;
-//        QJsonDocument Doc;
-//        Doc = Doc.fromJson(_value.toString().toUtf8(), &Error);
-
-//        if (Error.error != QJsonParseError::NoError)
-//            throw exHTTPBadRequest(_paramName + " is not a valid stuTicketScope: <" + _value.toString() + ">" + Error.errorString());
-
-//        if (Doc.isObject() == false)
-//            throw exHTTPBadRequest(_paramName + " is not a valid stuTicketScope object: <" + _value.toString() + ">");
-
-//        return stuTicketScope().fromJson(Doc.object());
-//    }
+//    /* type               */ stuTicketScope
 //);
 
 namespace Targoman::API::TicketingModule::ORM {

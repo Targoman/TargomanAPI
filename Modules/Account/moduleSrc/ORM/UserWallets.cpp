@@ -143,7 +143,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
     Voucher.Info.ToPay = _amount;
-    Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
+    Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
     Voucher.ID = Voucher::instance().Create(
                      _APICALLBOOM,
@@ -175,8 +175,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
             Voucher.PaymentKey = PaymentKey;
         }
     } catch (...) {
-        this->Update(Voucher::instance(),
-                     APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        Voucher::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                      {},
                      TAPI::ORMFields_t({
                         { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }

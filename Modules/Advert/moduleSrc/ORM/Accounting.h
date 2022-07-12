@@ -274,6 +274,14 @@ class AccountProducts : public intfAccountProducts
 public:
 };
 
+class AccountProductsTranslate : public intfAccountProductsTranslate
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProductsTranslate)
+
+public:
+};
+
 /******************************************************/
 class AccountSaleables : public intfAccountSaleables
 {

@@ -57,14 +57,14 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
 
     QString Sign = _preVoucher.Sign;
     _preVoucher.Sign.clear();
-    if (Sign != QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64()))
+    if (Sign != QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
         throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
 
     foreach (auto VoucherItem, _preVoucher.Items) {
         QString Sign = VoucherItem.Sign;
         VoucherItem.Sign.clear();
 
-        if (Sign != QString(voucherSign(QJsonDocument(VoucherItem.toJson()).toJson()).toBase64()))
+        if (Sign != QString(voucherSign(QJsonDocument(VoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
 }
@@ -102,6 +102,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     const QString& _schema,
     AssetUsageLimitsCols_t _AssetUsageLimitsCols,
     intfAccountProducts* _products,
+    intfAccountProductsTranslate* _productsTranslate,
     intfAccountSaleables* _saleables,
     intfAccountUserAssets* _userAssets,
     intfAccountAssetUsage* _assetUsages,
@@ -111,6 +112,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
+    AccountProductsTranslate(_productsTranslate),
     AccountSaleables(_saleables),
     AccountUserAssets(_userAssets),
     AccountAssetUsages(_assetUsages),
@@ -333,7 +335,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
     APICALLBOOM_TYPE_JWT_IMPL               &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
@@ -571,7 +573,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     PreVoucherItem.OrderID = qry.execute(CurrentUserID);
 
     //-- --------------------------------
-    PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson()).toBase64());
+    PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
     //-- --------------------------------
     ///@TODO: PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
@@ -613,12 +615,14 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, addT
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
 //    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
-    return _lastPreVoucher;
+    return stuBasketActionResult(
+                _lastPreVoucher,
+                PreVoucherItem.UUID);
 }
 
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
     APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID,
@@ -646,7 +650,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, upda
     throw exHTTPNotFound("item not found");
 }
 
-Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
     APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID
@@ -665,7 +669,7 @@ Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(intfAccountingBasedModule, remo
   *     updateBasketItem
   *     removeBasketItem
   */
-Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBasketItem(
+Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpdateBasketItem(
     INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
     stuVoucherItem                      &_voucherItem,
@@ -683,12 +687,15 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
 
     **/
 
+    //no change?
     if ((_newQty == _voucherItem.Qty)
             && (NULLABLE_IS_NULL(_newDiscountCode)
                 || (NULLABLE_VALUE(_newDiscountCode) == _voucherItem.CouponDiscount.Code)
             )
         )
-        return _lastPreVoucher; //no change
+        return stuBasketActionResult(
+                    _lastPreVoucher,
+                    _voucherItem.UUID);
 
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
@@ -855,7 +862,7 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
 
         //-- --------------------------------
         _voucherItem.Sign.clear();
-        _voucherItem.Sign = QString(voucherSign(QJsonDocument(_voucherItem.toJson()).toJson()).toBase64());
+        _voucherItem.Sign = QString(voucherSign(QJsonDocument(_voucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
         _lastPreVoucher.Items.replace(VoucherItemIndex, _voucherItem);
     }
@@ -873,9 +880,11 @@ Targoman::API::AAA::stuPreVoucher intfAccountingBasedModule::internalUpdateBaske
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
 //    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson()).toBase64());
+    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
-    return _lastPreVoucher;
+    return stuBasketActionResult(
+                _lastPreVoucher,
+                _voucherItem.UUID);
 }
 
 /**
@@ -1482,14 +1491,14 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 
     QString Sign = _data.Sign;
     _data.Sign.clear();
-    if (Sign != QString(voucherSign(QJsonDocument(_data.toJson()).toJson()).toBase64()))
+    if (Sign != QString(voucherSign(QJsonDocument(_data.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
         throw exHTTPBadRequest("Invalid sign");
 
     //--------------------
     Sign = _data.VoucherItem.Sign;
     _data.VoucherItem.Sign.clear();
 
-    if (Sign != QString(voucherSign(QJsonDocument(_data.VoucherItem.toJson()).toJson()).toBase64()))
+    if (Sign != QString(voucherSign(QJsonDocument(_data.VoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
         throw exHTTPBadRequest("Invalid voucher item sign");
 }
 

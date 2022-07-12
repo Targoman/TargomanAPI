@@ -42,11 +42,35 @@ public:
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
+public:
+    virtual SelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+
 private slots:
     QVariant ORMGET("Get Available Products")
     bool ORMDELETE("Delete a Product")
     bool ORMUPDATE("Update a Product info by priviledged user")
     quint32 ORMCREATE("Create a new Product by priviledged user")
+};
+
+class intfAccountProductsTranslate : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountProductsTranslate(const QString& _schema,
+                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
+                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+private slots:
+//    QVariant ORMGET("Get Available Products")
+//    bool ORMDELETE("Delete a Product")
+//    bool ORMUPDATE("Update a Product info by priviledged user")
+//    quint32 ORMCREATE("Create a new Product by priviledged user")
+
+protected:
+    static intfAccountProductsTranslate* myInstance;
+    friend class intfAccountProducts;
 };
 
 /******************************************************/

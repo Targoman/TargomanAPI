@@ -96,8 +96,7 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::Fields::tkt_untID, _unitID);
 
-    quint64 TicketID = this->Create(Tickets::instance(),
-                                    APICALLBOOM_PARAM,
+    quint64 TicketID = Tickets::instance().Create(APICALLBOOM_PARAM,
                                     CreateFields
                                     );
 

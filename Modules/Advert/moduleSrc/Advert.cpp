@@ -49,12 +49,10 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuBannerSize);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
 
-TAPI_REGISTER_METATYPE(
-    COMPLEXITY_Complex,
+//    COMPLEXITY_Complex,
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     Targoman::API::AdvertModule,
-    stuAdvert,
-    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant { return _value.toJson(); }
-//    [](const Targoman::API::AdvertModule::stuAdvert& _value) -> QVariant { return _value.toVariant(); }
+    stuAdvert
 );
 
 //using namespace Targoman::API::AAA;
@@ -78,6 +76,7 @@ Advert::Advert() :
             { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
         &AccountProducts::instance(),
+        &AccountProductsTranslate::instance(),
         &AccountSaleables::instance(),
         &AccountUserAssets::instance(),
         &AccountAssetUsage::instance(),
@@ -88,6 +87,7 @@ Advert::Advert() :
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 
     this->addSubModule(AccountProducts.data());
+    this->addSubModule(AccountProductsTranslate.data());
     this->addSubModule(AccountSaleables.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountAssetUsages.data());
@@ -447,7 +447,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     stuVoucher ApproveOnlinePaymentVoucher;
 
     //-- add to basket --------------------------------------
-    LastPreVoucher = this->apiPOSTaddToBasket(
+    stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
         _APICALLBOOM,
         /* saleableCode        */ SaleableCode,
         /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
@@ -457,6 +457,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         /* referrerParams */ {},
         /* lastPreVoucher      */ LastPreVoucher
     );
+    LastPreVoucher = BasketActionResult.PreVoucher;
     Result.insert("LastPreVoucher", LastPreVoucher.toJson());
 
     //-- finalize basket --------------------------------------

@@ -31,7 +31,6 @@
 #include "ORM/ApprovalRequest.h"
 #include "ORM/BlockingRules.h"
 #include "ORM/ForgotPassRequest.h"
-#include "ORM/Voucher.h"
 #include "ORM/IPBin.h"
 #include "ORM/Roles.h"
 #include "ORM/IPStats.h"
@@ -692,6 +691,37 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 
 //}
 
+void Account::internalCheckBasketVoucherExpirity(
+    const tblVoucher::DTO &_voucherDTO
+) {
+    if (_voucherDTO.vchStatus != enuVoucherStatus::New)
+        throw exHTTPBadRequest("Only New vouchers allowed");
+
+    if (_voucherDTO.vchType != enuVoucherType::Invoice)
+        throw exHTTPBadRequest("Only Expense vouchers allowed");
+
+    Targoman::API::AAA::stuPreVoucher PreVoucher;
+    PreVoucher.fromJson(_voucherDTO.vchDesc.object());
+
+    foreach (auto Item, PreVoucher.Items) {
+        ///@TODO: complete this
+
+    }
+}
+
+bool IMPL_REST_GET(Account, checkBasketVoucherExpirity, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+)) {
+    ///@TODO: must be implemented
+
+
+
+
+
+
+
+}
+
 bool IMPL_REST_POST(Account, cancelVoucher, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
@@ -746,10 +776,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     Targoman::API::AAA::stuPreVoucher _preVoucher,
     QString _domain,
     enuPaymentGatewayType::Type _gatewayType,
-    qint64 _payAmount, //-1: MIN(possible gateway amount, rest of voucher's remained amount)
+//    qint64 _payAmount, //-1: MIN(possible gateway amount, rest of voucher's remained amount)
     QString _paymentVerifyCallback,
     qint64 _walID,
-    qint64 _walletAmount, //-1: MIN(available amount in wallet, rest of voucher's remained amount)
+//    qint64 _walletAmount, //-1: MIN(available amount in wallet, rest of voucher's remained amount)
     bool _allowChargeWallet
 )) {
     migratePreVoucher(_preVoucher);
@@ -765,24 +795,24 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
     if (_gatewayType != enuPaymentGatewayType::COD) {
         if (_paymentVerifyCallback.isEmpty())
-            throw exHTTPBadRequest("callback for non COD is mandatory", stuVoucher(_preVoucher).toJson());
+            throw exHTTPBadRequest("callback for non COD is mandatory" /*, stuVoucher(_preVoucher).toJson() */);
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 #ifndef QT_DEBUG
     if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
-        throw exHTTPBadRequest("DeveloperTest not available", stuVoucher(_preVoucher).toJson());
+        throw exHTTPBadRequest("DeveloperTest not available" /*, stuVoucher(_preVoucher).toJson() */);
 #endif
 
     if (_preVoucher.Items.isEmpty())
-        throw exHTTPBadRequest("Pre-Voucher is empty", stuVoucher(_preVoucher).toJson());
+        throw exHTTPBadRequest("Pre-Voucher is empty" /*, stuVoucher(_preVoucher).toJson() */);
 
     checkPreVoucherSanity(_preVoucher);
 
     quint64 CurrentUserID = _APICALLBOOM.getUserID();
 
     if (_preVoucher.UserID != CurrentUserID)
-        throw exHTTPBadRequest("invalid pre-Voucher owner", stuVoucher(_preVoucher).toJson());
+        throw exHTTPBadRequest("invalid pre-Voucher owner" /*, stuVoucher(_preVoucher).toJson() */);
 
     ///1: create main expense voucher
 //    Targoman::API::AAA::stuVoucher Voucher;
@@ -826,10 +856,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             VoucherDTO.fromJson(QJsonObject::fromVariantMap(VoucherInfo));
 
             if (VoucherDTO.vchStatus != enuVoucherStatus::New)
-                throw exHTTPBadRequest("Only New vouchers allowed", stuVoucher(_preVoucher).toJson());
+                throw exHTTPBadRequest("Only New vouchers allowed" /*, stuVoucher(_preVoucher).toJson() */);
 
             if (VoucherDTO.vchType != enuVoucherType::Invoice)
-                throw exHTTPBadRequest("Only Expense vouchers allowed", stuVoucher(_preVoucher).toJson());
+                throw exHTTPBadRequest("Only Expense vouchers allowed" /*, stuVoucher(_preVoucher).toJson() */);
 
             Targoman::API::AAA::stuPreVoucher PreVoucher;
             PreVoucher.fromJson(VoucherDTO.vchDesc.object());
@@ -843,6 +873,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                    });
                 _preVoucher.VoucherID = 0;
             } else {
+                this->internalCheckBasketVoucherExpirity(VoucherDTO);
+
                 TotalPayed = NULLABLE_GET_OR_DEFAULT(VoucherDTO.vchTotalPayed, 0);
 
                 if (VoucherInfo.contains("TotalFreezed") && VoucherInfo["TotalFreezed"].isValid())
@@ -863,7 +895,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                       }));
 
         _preVoucher.Sign.clear();
-        _preVoucher.Sign = QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson()).toBase64());
+        _preVoucher.Sign = QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
         Voucher::instance().Update(_APICALLBOOM,
                                   {},
@@ -897,7 +929,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     RemainingAfterWallet -= TotalFreezed;
 
     if (RemainingAfterWallet < 0)
-        throw exHTTPInternalServerError("Remaining after wallet transaction is negative.", stuVoucher(_preVoucher).toJson());
+        throw exHTTPInternalServerError("Remaining after wallet transaction is negative." /*, stuVoucher(_preVoucher).toJson() */);
 
     quint64 MustFreeze = 0;
 
@@ -916,10 +948,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             _walID = UserWalletsDTO.walID;
 
         if (UserWalletsDTO.walStatus != enuUserWalletStatus::Active)
-            throw exHTTPInternalServerError("The selected wallet can not be used", stuVoucher(_preVoucher).toJson());
+            throw exHTTPInternalServerError("The selected wallet can not be used" /*, stuVoucher(_preVoucher).toJson() */);
 
 //        if (UserWalletsDTO.walBalance < 0)
-//            throw exHTTPInternalServerError("Wallet balance is negative", stuVoucher(_preVoucher).toJson());
+//            throw exHTTPInternalServerError("Wallet balance is negative" /*, stuVoucher(_preVoucher).toJson() */);
 
         qint64 WalletAvailableAmount =
                 UserWalletsDTO.walBalance
@@ -927,14 +959,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                 - static_cast<qint64>(UserWalletsDTO.walMinBalance);
 
         if (WalletAvailableAmount <= 0)
-            throw exHTTPInternalServerError("Not enough credit in your wallet.", stuVoucher(_preVoucher).toJson());
+            throw exHTTPInternalServerError("Not enough credit in your wallet." /*, stuVoucher(_preVoucher).toJson() */);
 
         MustFreeze = qMin(RemainingAfterWallet, WalletAvailableAmount);
 
         RemainingAfterWallet -= MustFreeze;
 
         if (RemainingAfterWallet < 0)
-            throw exHTTPInternalServerError("Remaining after wallet transaction is negative.", stuVoucher(_preVoucher).toJson());
+            throw exHTTPInternalServerError("Remaining after wallet transaction is negative." /*, stuVoucher(_preVoucher).toJson() */);
     }
 
     //process voucher
@@ -959,7 +991,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 //            RemainingAfterWallet -= Result.spDirectOutputs().value("ioAmount").toUInt();
 
 //            if (RemainingAfterWallet != 0)
-//                throw exHTTPInternalServerError("Error in wallet transaction", stuVoucher(_preVoucher).toJson());
+//                throw exHTTPInternalServerError("Error in wallet transaction" /*, stuVoucher(_preVoucher).toJson() */);
         }
 
         if ((_gatewayType == enuPaymentGatewayType::COD) && (RemainingAfterWallet > 0)) {
@@ -972,7 +1004,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher_COD_Credit.Summary = "COD Credit";
             PreVoucher_COD_Credit.ToPay = RemainingAfterWallet;
 //            PreVoucher_COD_Credit.Type = enuPreVoucherType::CODCreadit;
-            PreVoucher_COD_Credit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson()).toBase64());
+            PreVoucher_COD_Credit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
 //            quint64 COD_CreditVoucherID = Voucher::instance().Create(
 //                                              _APICALLBOOM,
@@ -992,7 +1024,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                     { "iByUserID",      CurrentUserID },
                                     { "iType",          QString(static_cast<char>(enuVoucherType::Credit)) },
                                     { "iAmount",        PreVoucher_COD_Credit.ToPay },
-                                    { "iDesc",          QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson() },
+                                    { "iDesc",          QJsonDocument(PreVoucher_COD_Credit.toJson()).toJson(QJsonDocument::Compact) },
                                     { "iRootVoucherID", _preVoucher.VoucherID },
                                 }).spDirectOutputs().value("oVoucherID").toULongLong();
 
@@ -1011,7 +1043,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
             PreVoucher_COD_Debit.Summary = "COD Debit";
             PreVoucher_COD_Debit.ToPay = RemainingAfterWallet;
 //            PreVoucher_COD_Debit.Type = enuPreVoucherType::CODDebit;
-            PreVoucher_COD_Debit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Debit.toJson()).toJson()).toBase64());
+            PreVoucher_COD_Debit.Sign = QString(voucherSign(QJsonDocument(PreVoucher_COD_Debit.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
             quint64 COD_DebitVoucherID = Voucher::instance().Create(
                                               _APICALLBOOM,
@@ -1041,7 +1073,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         && (RemainingAfterWallet > NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount))
     ) {
         if (_allowChargeWallet == false)
-            throw exHTTPInternalServerError("Permission to charge the wallet is not given", stuVoucher(_preVoucher).toJson());
+            throw exHTTPInternalServerError("Permission to charge the wallet is not given" /*, stuVoucher(_preVoucher).toJson() */);
 
         MustPay = NULLABLE_VALUE(PaymentGatewayTypesDTO.pgtMaxRequestAmount);
 
@@ -1050,7 +1082,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, 0 /*_walID*/));
         Voucher.Info.Summary = "Increase wallet";
         Voucher.Info.ToPay = MustPay;
-        Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
+        Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
         Voucher.ID = Voucher::instance().Create(
                          _APICALLBOOM,
@@ -1478,9 +1510,8 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     if (_walID > 0)
         CreateParams.insert("ofpcTarget_walID", _walID);
 
-    return this->Create(OfflinePaymentClaims::instance(),
-                        _APICALLBOOM,
-                        TAPI::ORMFields_t(CreateParams));
+    return OfflinePaymentClaims::instance().Create(_APICALLBOOM,
+                                                   TAPI::ORMFields_t(CreateParams));
 }
 
 /**
@@ -1515,15 +1546,14 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     if (OfflinePaymentClaimDTO.ofpcStatus != enuPaymentStatus::New)
         throw exAuthorization("Only new offline payments are allowed.");
 
-    this->Update(OfflinePaymentClaims::instance(),
-                 _APICALLBOOM,
-                 {},
-                 TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Rejected }
-                 }),
-                 {
-                     { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
-                 });
+    OfflinePaymentClaims::instance().Update(_APICALLBOOM,
+                {},
+                TAPI::ORMFields_t({
+                    { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Rejected }
+                }),
+                {
+                    { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
+                });
 
     return true;
 }
@@ -1569,18 +1599,17 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
         Voucher.Info.ToPay = OfflinePaymentClaimDTO.ofpcAmount;
-        Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson()).toBase64());
+        Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
-        Voucher.ID = this->Create(Voucher::instance(),
-                                  _APICALLBOOM,
-                                  TAPI::ORMFields_t({
-                                                        { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
-    //                                                    { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
-                                                        { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
-                                                        { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
-                                                        { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
-                                                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
-                                                    }));
+        Voucher.ID = Voucher::instance().Create(_APICALLBOOM,
+                         TAPI::ORMFields_t({
+                                               { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+//                                                   { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact).constData() },
+                                               { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
+                                               { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
+                                               { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
+                                               { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
+                                           }));
 
         VoucherID = Voucher.ID;
     } else
@@ -1599,12 +1628,10 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID))
             CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID));
 
-    quint64 PaymentID = this->Create(OfflinePayments::instance(),
-                 _APICALLBOOM,
+    quint64 PaymentID = OfflinePayments::instance().Create(_APICALLBOOM,
                  TAPI::ORMFields_t(CreateParams));
 
-    this->Update(OfflinePaymentClaims::instance(),
-                 _APICALLBOOM,
+    OfflinePaymentClaims::instance().Update(_APICALLBOOM,
                  {},
                  TAPI::ORMFields_t({
                      { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Succeded }
@@ -1631,8 +1658,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         return Account::processVoucher(_APICALLBOOM, VoucherID);
 
     }  catch (...) {
-        this->Update(OfflinePaymentClaims::instance(),
-                     _APICALLBOOM,
+        OfflinePaymentClaims::instance().Update(_APICALLBOOM,
                      {},
                      TAPI::ORMFields_t({
                          { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Error }
@@ -1641,8 +1667,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                          { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
                      });
 
-        this->Update(OfflinePayments::instance(),
-                     _APICALLBOOM,
+        OfflinePayments::instance().Update(_APICALLBOOM,
                      {},
                      TAPI::ORMFields_t({
                          { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Error }
@@ -1844,7 +1869,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                 VoucherItemForTrustedAction.VoucherID = _voucherID;
                                 VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                                 VoucherItemForTrustedAction.Sign.clear();
-                                VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
+                                VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
                                 QVariant Result = RESTClientHelper::callAPI(
                                     RESTClientHelper::POST,
@@ -2026,7 +2051,7 @@ void Account::tryCancelVoucher(
                                     VoucherItemForTrustedAction.VoucherID = _voucherID;
                                     VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                                     VoucherItemForTrustedAction.Sign.clear();
-                                    VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson()).toBase64());
+                                    VoucherItemForTrustedAction.Sign = QString(voucherSign(QJsonDocument(VoucherItemForTrustedAction.toJson()).toJson(QJsonDocument::Compact)).toBase64());
 
                                     QVariant Result = RESTClientHelper::callAPI(
                                         RESTClientHelper::POST,

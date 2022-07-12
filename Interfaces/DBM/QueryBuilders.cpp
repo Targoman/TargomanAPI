@@ -2770,10 +2770,6 @@ QVariantList SelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint6
         Result = DAC.execQuery("", QueryString)
                             .toJson(false, this->Data->Table.Converters);
 
-//    TargomanDebug(5, "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result.toJson());
-
-//    qDebug() << "--- SelectQuery::all()" << __FILE__ << __LINE__ << Result;
-
     return Result.toVariant().toList();
 }
 

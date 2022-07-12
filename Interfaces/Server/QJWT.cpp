@@ -141,11 +141,11 @@ QString QJWT::createSigned(
         _privatePayload.remove("cip");
 
     if (_privatePayload.isEmpty() == false)
-        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson());
+        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson(QJsonDocument::Compact));
     else
         PayloadForSign.remove("prv");
 
-    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(PayloadForSign).toJson().toBase64();
+    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(PayloadForSign).toJson(QJsonDocument::Compact).toBase64();
 
     return Data + "." + QJWT::hash(Data).toBase64();
 }

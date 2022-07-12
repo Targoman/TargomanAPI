@@ -73,8 +73,24 @@ intfSQLBasedModule::intfSQLBasedModule(
         _dbProperties
     ) { ; }
 
+SelectQuery intfSQLBasedModule::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return SelectQuery(*this, _alias);
+}
+
+CreateQuery intfSQLBasedModule::GetCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
+    return CreateQuery(*this);
+}
+
+UpdateQuery intfSQLBasedModule::GetUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return UpdateQuery(*this, _alias);
+}
+
+DeleteQuery intfSQLBasedModule::GetDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return DeleteQuery(*this, _alias);
+}
+
 QVariantMap intfSQLBasedModule::SelectOne(
-    clsTable& _table,
+//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -82,11 +98,11 @@ QVariantMap intfSQLBasedModule::SelectOne(
 ) {
     Q_UNUSED(_reportCount)
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
-    SelectQuery Query = SelectQuery(_table)
+    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
         .setPksByPath(_pksByPath)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
@@ -117,7 +133,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 }
 
 QVariantList intfSQLBasedModule::SelectAll(
-    clsTable& _table,
+//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -125,9 +141,9 @@ QVariantList intfSQLBasedModule::SelectAll(
 ) {
     Q_UNUSED(_reportCount)
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
-    SelectQuery Query = SelectQuery(_table)
+    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -158,7 +174,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 }
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
-    clsTable& _table,
+//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -166,9 +182,9 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 ) {
     Q_UNUSED(_reportCount)
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
-    SelectQuery Query = SelectQuery(_table)
+    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -199,7 +215,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 }
 
 QVariant intfSQLBasedModule::Select(
-    clsTable& _table,
+//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -210,7 +226,7 @@ QVariant intfSQLBasedModule::Select(
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
-                        _table,
+//                        _table,
                         GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                         _extraFilters,
                         _cacheTime,
@@ -220,7 +236,7 @@ QVariant intfSQLBasedModule::Select(
                 ;
 
         return this->SelectAll(
-                    _table,
+//                    _table,
                     GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                     _extraFilters,
                     _cacheTime,
@@ -229,7 +245,7 @@ QVariant intfSQLBasedModule::Select(
     }
 
     return this->SelectOne(
-                _table,
+//                _table,
                 GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
@@ -237,55 +253,30 @@ QVariant intfSQLBasedModule::Select(
                 );
 }
 
-QVariant intfSQLBasedModule::Select(
-    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-    const clsCondition& _extraFilters,
-    quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _fnTouchQuery
-) {
-    return this->Select(
-                *this,
-                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
-                _extraFilters,
-                _cacheTime,
-                _fnTouchQuery
-            );
-}
-
-//quint64 intfSQLBasedModule::Create(
-//    clsTable& _table,
-//    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
+//QVariant intfSQLBasedModule::Select(
+//    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+//    const clsCondition& _extraFilters,
+//    quint16 _cacheTime,
+//    std::function<void(SelectQuery &_query)> _fnTouchQuery
 //) {
-//    _table.prepareFiltersList();
-
-//    CreateQuery query = CreateQuery(_table);
-
-//    for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
-//        query.addCol(arg.key());
-
-//    query.values(_createInfo);
-
-//    return query.execute(_userID);
-//}
-
-//quint64 intfSQLBasedModule::Create(
-//    CREATE_METHOD_ARGS_IMPL_INTERNAL_USER
-//) {
-//    return this->Create(
+//    return this->Select(
 //                *this,
-//                CREATE_METHOD_ARGS_CALL_INTERNAL_USER
-//                );
+//                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+//                _extraFilters,
+//                _cacheTime,
+//                _fnTouchQuery
+//            );
 //}
 
 quint64 intfSQLBasedModule::Create(
-    clsTable& _table,
+//    clsTable& _table,
     CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
     auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "create");
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
-    CreateQuery query = CreateQuery(_table);
+    CreateQuery query = this->GetCreateQuery(_APICALLBOOM);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
         query.addCol(arg.key());
@@ -295,70 +286,23 @@ quint64 intfSQLBasedModule::Create(
     return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID);
 }
 
-quint64 intfSQLBasedModule::Create(
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
-) {
-    return this->Create(
-        *this,
-        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM
-    );
-}
-
-//bool intfSQLBasedModule::Update(
-//    clsTable& _table,
-//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
-//    const QVariantMap& _extraFilters
+//quint64 intfSQLBasedModule::Create(
+//    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 //) {
-//    _table.prepareFiltersList();
-
-//    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
-//        throw exHTTPBadRequest("No key provided to update");
-
-//    if (_updateInfo.isEmpty())
-//        throw exHTTPBadRequest("No change provided to update");
-
-//    UpdateQuery query = UpdateQuery(_table)
-//        .setPksByPath(_pksByPath)
-////        .addFilters(_extraFilters)
-//    ;
-
-//    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
-//        if (FilterIter->isValid() == false)
-//            continue;
-//        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
-//        if (relatedORMField.Col.isFilterable() == false)
-//            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-//        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
-//    }
-
-//    for (QVariantMap::const_iterator arg = _updateInfo.constBegin(); arg != _updateInfo.constEnd(); ++arg) {
-//        if (arg->isValid()) {
-//            query.set(arg.key(), arg.value());
-//        }
-//    }
-
-//    return query.execute(_userID) > 0;
-//}
-
-//bool intfSQLBasedModule::Update(
-//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER,
-//    const QVariantMap& _extraFilters
-//) {
-//    return this->Update(
-//                *this,
-//                UPDATE_METHOD_ARGS_CALL_INTERNAL_USER,
-//                _extraFilters
-//                );
+//    return this->Create(
+//        *this,
+//        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM
+//    );
 //}
 
 bool intfSQLBasedModule::Update(
-    clsTable& _table,
+//    clsTable& _table,
     UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
     auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "update");
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
         throw exHTTPBadRequest("No key provided to update");
@@ -366,7 +310,7 @@ bool intfSQLBasedModule::Update(
     if (_updateInfo.isEmpty())
         throw exHTTPBadRequest("No change provided to update");
 
-    UpdateQuery query = UpdateQuery(_table)
+    UpdateQuery query = this->GetUpdateQuery(_APICALLBOOM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -374,7 +318,7 @@ bool intfSQLBasedModule::Update(
     for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
         if (FilterIter->isValid() == false)
             continue;
-        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
         if (relatedORMField.Col.isFilterable() == false)
             throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
@@ -389,78 +333,26 @@ bool intfSQLBasedModule::Update(
     return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID) > 0;
 }
 
-bool intfSQLBasedModule::Update(
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-    const QVariantMap& _extraFilters
-) {
-    return this->Update(
-        *this,
-        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM,
-        _extraFilters
-    );
-}
-
-//bool intfSQLBasedModule::DeleteByPks(
-//    clsTable& _table,
-//    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
-//    const QVariantMap& _extraFilters,
-//    bool _realDelete
+//bool intfSQLBasedModule::Update(
+//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+//    const QVariantMap& _extraFilters
 //) {
-//    _table.prepareFiltersList();
-
-//    if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
-//        throw exHTTPBadRequest("No key provided to delete");
-
-////    QString statusColumn = _table.getStatusColumnName();
-////    if (statusColumn.isEmpty() == false) {
-////        if (Update(_table, _userID, _pksByPath, TAPI::ORMFields_t({
-////                { statusColumn, "Removed" }
-////            }), _extraFilters) == 0)
-////            return false;
-////    }
-
-////    if (_realDelete == false)
-////        return true;
-
-//    DeleteQuery query = DeleteQuery(_table)
-//        .setPksByPath(_pksByPath)
-////        .addFilters(_extraFilters)
-//    ;
-
-//    for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
-//        if (FilterIter->isValid() == false)
-//            continue;
-//        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
-//        if (relatedORMField.Col.isFilterable() == false)
-//            throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
-//        query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
-//    }
-
-//    return query.execute(_userID, {}, _realDelete) > 0;
-//}
-
-//bool intfSQLBasedModule::DeleteByPks(
-//    DELETE_METHOD_ARGS_IMPL_INTERNAL_USER,
-//    const QVariantMap& _extraFilters,
-//    bool _realDelete
-//) {
-//    return this->DeleteByPks(
+//    return this->Update(
 //        *this,
-//        DELETE_METHOD_ARGS_CALL_INTERNAL_USER,
-//        _extraFilters,
-//        _realDelete
-//        );
+//        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM,
+//        _extraFilters
+//    );
 //}
 
 bool intfSQLBasedModule::DeleteByPks(
-    clsTable& _table,
+//    clsTable& _table,
     DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
     auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "delete");
 
-    _table.prepareFiltersList();
+    this->prepareFiltersList();
 
     if (_pksByPath.isEmpty() && _extraFilters.isEmpty())
         throw exHTTPBadRequest("No key provided to delete");
@@ -476,7 +368,7 @@ bool intfSQLBasedModule::DeleteByPks(
 //    if (_realDelete == false)
 //        return true;
 
-    DeleteQuery query = DeleteQuery(_table)
+    DeleteQuery query = this->GetDeleteQuery(_APICALLBOOM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -484,7 +376,7 @@ bool intfSQLBasedModule::DeleteByPks(
     for (auto FilterIter = _extraFilters.begin(); FilterIter != _extraFilters.end(); FilterIter++) {
         if (FilterIter->isValid() == false)
             continue;
-        const stuRelatedORMField& relatedORMField = _table.SelectableColsMap[FilterIter.key()];
+        const stuRelatedORMField& relatedORMField = this->SelectableColsMap[FilterIter.key()];
         if (relatedORMField.Col.isFilterable() == false)
             throw exHTTPInternalServerError("Invalid non-filterable column <" + FilterIter.key() + ">");
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
@@ -493,17 +385,17 @@ bool intfSQLBasedModule::DeleteByPks(
     return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID, {}, _realDelete) > 0;
 }
 
-bool intfSQLBasedModule::DeleteByPks(
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-    const QVariantMap& _extraFilters,
-    bool _realDelete
-) {
-    return this->DeleteByPks(
-        *this,
-        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM,
-        _extraFilters,
-        _realDelete
-        );
-}
+//bool intfSQLBasedModule::DeleteByPks(
+//    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+//    const QVariantMap& _extraFilters,
+//    bool _realDelete
+//) {
+//    return this->DeleteByPks(
+//        *this,
+//        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM,
+//        _extraFilters,
+//        _realDelete
+//        );
+//}
 
 } // namespace Targoman::API::API

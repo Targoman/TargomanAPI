@@ -38,6 +38,14 @@ AccountProducts::AccountProducts() :
         tblAccountProducts::Private::ExtraIndexes
 ) { ; }
 
+AccountProductsTranslate::AccountProductsTranslate() :
+    intfAccountProductsTranslate(
+        AdvertSchema,
+        tblAccountProducts::Private::ExtraORMFields,
+        tblAccountProducts::Private::ExtraRelations,
+        tblAccountProducts::Private::ExtraIndexes
+) { ; }
+
 /******************************************************/
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
