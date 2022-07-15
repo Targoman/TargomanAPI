@@ -103,7 +103,7 @@ using namespace Targoman::API::Server;
 #define GET_METHOD_ARGS_IMPL_INTERNAL_BOOM          INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLBOOM_IMPL)
 
 #define GET_METHOD_ARGS_CALL_INTERNAL_BOOM \
-    _APICALLBOOM, \
+    APICALLBOOM_PARAM, \
     _pksByPath, \
     _pageIndex, \
     _pageSize, \
@@ -133,9 +133,9 @@ using namespace Targoman::API::Server;
 
 #define CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
 #define CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _createInfo
+#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM       APICALLBOOM_PARAM, _createInfo
 
-//#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _createInfo
+//#define CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  APICALLBOOM_PARAM.getUserID(), _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
@@ -157,9 +157,9 @@ using namespace Targoman::API::Server;
 
 #define UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
 #define UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
-#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _pksByPath, _updateInfo
+#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM       APICALLBOOM_PARAM, _pksByPath, _updateInfo
 
-//#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath, _updateInfo
+//#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  APICALLBOOM_PARAM.getUserID(), _pksByPath, _updateInfo
 
 /**********************************************************************\
 |** DELETE ************************************************************|
@@ -181,9 +181,9 @@ using namespace Targoman::API::Server;
 
 #define DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
 #define DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
-#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM       _APICALLBOOM, _pksByPath
+#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM       APICALLBOOM_PARAM, _pksByPath
 
-//#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  _APICALLBOOM.getUserID(), _pksByPath
+//#define DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  APICALLBOOM_PARAM.getUserID(), _pksByPath
 
 /**********************************************************************/
 namespace TAPI {

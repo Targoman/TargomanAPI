@@ -66,10 +66,10 @@ QVariant Tickets::apiGET(
     TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
 
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
     clsCondition ExtraFilters = {};
 
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
             .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })
@@ -78,7 +78,7 @@ QVariant Tickets::apiGET(
                 .andCond({ tblTickets::Fields::tktType, enuConditionOperator::Equal, enuTicketType::Broadcast })
             );
 
-    auto fnTouchQuery = [&_baseTicketID, _inReplyTicketID](SelectQuery &_query) {
+    auto fnTouchQuery = [&APICALLBOOM_PARAM, &_baseTicketID, _inReplyTicketID](ORMSelectQuery &_query) {
         _query
             .addCols({
                          tblTickets::Fields::tktID,
@@ -115,7 +115,7 @@ QVariant Tickets::apiGET(
         }
 
         _query
-            .leftJoin(SelectQuery(Tickets::instance())
+            .nestedLeftJoin(Tickets::instance().GetSelectQuery(APICALLBOOM_PARAM)
                       .addCol(tblTickets::Fields::tktBase_tktID)
                       .addCol(enuAggregation::COUNT, tblTickets::Fields::tktID, "_cnt")
                       .addCol(enuAggregation::MAX, tblTickets::Fields::tktCreationDateTime, "_maxdate")

@@ -57,7 +57,7 @@ class intfAPIObject {
 public:
     virtual ~intfAPIObject();
     virtual void invokeMethod(
-        INTFAPICALLBOOM_DECL *_APICALLBOOM,
+        INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
         const QVariantList& _arguments,
         QGenericReturnArgument _returnArg
 //        /*OUT*/ QVariantMap &_responseHeaders
@@ -105,7 +105,7 @@ public:
     virtual QGenericArgument makeGenericArgument(const QVariant& _val, const QByteArray& _paramName, void** _argStorage) = 0;
     virtual QVariant invokeMethod(
         const intfAPIObject* _apiObject,
-        INTFAPICALLBOOM_DECL *_APICALLBOOM,
+        INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
         const QVariantList& _arguments
 //        /*OUT*/ QVariantMap &_responseHeaders
     ) = 0;

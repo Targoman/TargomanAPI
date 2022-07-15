@@ -35,10 +35,10 @@ Clicks::Clicks() :
 ) { ; }
 
 QVariant IMPL_ORMGET(Clicks) {
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::Fields::binID, _APICALLBOOM.getUserID()}}, _filters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
-    auto fnTouchQuery = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
     };
 

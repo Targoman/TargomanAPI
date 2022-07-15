@@ -35,8 +35,8 @@ Voucher::Voucher() :
 ) { ; }
 
 QVariant IMPL_ORMGET(Voucher) {
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, _filters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -44,11 +44,11 @@ QVariant IMPL_ORMGET(Voucher) {
 bool IMPL_ORMDELETE(Voucher) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::toStr(Targoman::API::AAA::enuVoucherType::Withdrawal));
 
-        ExtraFilters.insert(tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID());
-//        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID());
+//        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
     }
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);

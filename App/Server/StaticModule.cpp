@@ -41,8 +41,8 @@ TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
 
     return TAPI::RawData_t(
                 QJsonDocument(OpenAPIGenerator::retrieveJson(
-                    _APICALLBOOM.host(),
-                    _APICALLBOOM.port()
+                    APICALLBOOM_PARAM.host(),
+                    APICALLBOOM_PARAM.port()
                 )).toJson(QJsonDocument::Compact),
                 "application/json; charset=utf-8"
                 );
@@ -62,7 +62,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
     if (ServerConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
 
-    QString API = _APICALLBOOM.requestAPIPath();
+    QString API = APICALLBOOM_PARAM.requestAPIPath();
 
     QString File = API.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
 

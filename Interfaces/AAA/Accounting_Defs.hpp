@@ -97,12 +97,6 @@ TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus) // -
 
 namespace Targoman::API::AAA {
 
-inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
-extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
-extern QByteArray voucherSign(const QByteArray& _data);
-extern Targoman::Common::Configuration::tmplConfigurable<quint64> SimpleCryptKey;
-extern clsSimpleCrypt* simpleCryptInstance();
-
 constexpr char VOUCHER_ITEM_NAME_INC_WALLET[]           = "INC_WALLET";
 constexpr char VOUCHER_ITEM_NAME_COD_CREDIT[]           = "COD_CREDIT";
 constexpr char VOUCHER_ITEM_NAME_COD_DEBIT[]            = "COD_DEBIT";
@@ -184,6 +178,18 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
     }
+}
+
+namespace tblAccountSaleablesTranslateBase {
+    constexpr char Name[] = "tblAccountSaleables_translate";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(id);
+        TARGOMAN_CREATE_CONSTEXPR(pid);
+        TARGOMAN_CREATE_CONSTEXPR(language);
+        TARGOMAN_CREATE_CONSTEXPR(slbName);
+        TARGOMAN_CREATE_CONSTEXPR(slbDesc);
+    } //namespace Fields
 }
 
 namespace tblAccountUserAssetsBase {
@@ -268,36 +274,36 @@ namespace tblAccountProductsBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName                       Type                            Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::prdID,                ORM_PRIMARYKEY_32 },
-            { Fields::prdCode,              S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner },
-            { Fields::prdName,              S(QString),                     QFV,                                    QRequired,  UPOwner },
-            { Fields::prdDesc,              S(QString),                     QFV,                                    QNull,      UPOwner },
-            { Fields::prdValidFromDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
-            { Fields::prdValidToDate,       S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
-            { Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
-            { Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
-            { Fields::prdPrivs,             S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner },
-            { Fields::prdVAT,               S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
-            { Fields::prdQtyIsDecimal,      S(bool),                        QFV,                                    false,      UPAdmin },
-            { Fields::prdInStockQty,        S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin },
-            { Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
-            { Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
-            { Fields::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { Fields::prdCreationDateTime,  ORM_CREATED_ON },
-            { Fields::prdCreatedBy_usrID,   ORM_CREATED_BY },
-            { Fields::prdUpdatedBy_usrID,   ORM_UPDATED_BY },
+            //          ColName                       Type                            Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
+            clsORMField(Fields::prdID,                ORM_PRIMARYKEY_32),
+            clsORMField(Fields::prdCode,              S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner),
+            clsORMField(Fields::prdName,              S(QString),                     QFV,                                    QRequired,  UPOwner).setMultiLanguage(),
+            clsORMField(Fields::prdDesc,              S(QString),                     QFV,                                    QNull,      UPOwner).setMultiLanguage(),
+            clsORMField(Fields::prdValidFromDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdValidToDate,       S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
+            clsORMField(Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
+            clsORMField(Fields::prdPrivs,             S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdVAT,               S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner),
+            clsORMField(Fields::prdQtyIsDecimal,      S(bool),                        QFV,                                    false,      UPAdmin),
+            clsORMField(Fields::prdInStockQty,        S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin),
+            clsORMField(Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
+            clsORMField(Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
+            clsORMField(Fields::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
+            clsORMField(ORM_INVALIDATED_AT_FIELD),
+            clsORMField(Fields::prdCreationDateTime,  ORM_CREATED_ON),
+            clsORMField(Fields::prdCreatedBy_usrID,   ORM_CREATED_BY),
+            clsORMField(Fields::prdUpdatedBy_usrID,   ORM_UPDATED_BY),
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 ///<  Col                                           Reference Table    ForeignCol          Rename     LeftJoin
                 { Relation::Saleable,
                     { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
-//                { Fields::prdID, R(_schema, tblAccountProductsTranslateBase::Name), tblAccountProductsTranslateBase::Fields::pid },
+                { Fields::prdID, R(_schema, tblAccountProductsTranslateBase::Name), tblAccountProductsTranslateBase::Fields::pid },
             };
         };
 
@@ -357,7 +363,7 @@ namespace tblAccountProductsTranslateBase {
             { Fields::prdDesc,      S(QString),         QFV,        QNull,      UPOwner },
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {};
         };
 
@@ -365,6 +371,17 @@ namespace tblAccountProductsTranslateBase {
         };
 
     } //namespace Private
+
+#define SF_tblAccountProductsTranslateBase_DTO \
+    SF_ORM_PRIMARYKEY_64        (id), \
+    SF_quint32                  (pid), \
+    SF_QString                  (language), \
+    SF_QString                  (prdName), \
+    SF_QString                  (prdDesc)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountProductsTranslateBase_DTO
+    );
 }
 
 namespace tblAccountSaleablesBase {
@@ -376,31 +393,30 @@ namespace tblAccountSaleablesBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName                           Type                                Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
-            { Fields::slbID,                    ORM_PRIMARYKEY_32 },
-            { Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),       QRequired,  UPOwner },
-            { Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                             QRequired,  UPOwner },
-            { Fields::slbName,                  S(QString),                         QFV,                             QRequired,  UPOwner },
-            { Fields::slbDesc,                  S(QString),                         QFV,                             QNull,      UPOwner },
-            { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-            { Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                             QNow,       UPOwner },
-            { Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                             QNull,      UPOwner },
-            { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                             QNull,      UPOwner },
-            { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),          QRequired,  UPOwner },
-            { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                             QNull,      UPOwner },
-            //{ Fields::slbProductCount,          S(quint32),                        QFV.integer().minValue(1),       QRequired,  UPOwner},
-            { Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                             QNull,      UPOwner},
-            { Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
-            { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
-            { Fields::slbVoucherTemplate,       S(QString),                         QFV,                             QNull,      UPOwner },
-            { Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-            { ORM_INVALIDATED_AT_FIELD },
-            { Fields::slbCreationDateTime,      ORM_CREATED_ON },
-            { Fields::slbCreatedBy_usrID,       ORM_CREATED_BY },
-            { Fields::slbUpdatedBy_usrID,       ORM_UPDATED_BY },
+            clsORMField(Fields::slbID,                    ORM_PRIMARYKEY_32),
+            clsORMField(Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),       QRequired,  UPOwner),
+            clsORMField(Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                             QRequired,  UPOwner),
+            clsORMField(Fields::slbName,                  S(QString),                         QFV,                             QRequired,  UPOwner).setMultiLanguage(),
+            clsORMField(Fields::slbDesc,                  S(QString),                         QFV,                             QNull,      UPOwner).setMultiLanguage(),
+            clsORMField(Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                             TAPI::enuSaleableType::Normal, UPOwner),
+            clsORMField(Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                             QNow,       UPOwner),
+            clsORMField(Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                             QNull,      UPOwner),
+            clsORMField(Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                             QNull,      UPOwner),
+            clsORMField(Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),          QRequired,  UPOwner),
+            clsORMField(Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                             QNull,      UPOwner),
+            clsORMField(Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                             QNull,      UPOwner),
+            clsORMField(Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),       QRequired,  UPAdmin),
+            clsORMField(Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin),
+            clsORMField(Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin),
+            clsORMField(Fields::slbVoucherTemplate,       S(QString),                         QFV,                             QNull,      UPOwner),
+            clsORMField(Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
+            clsORMField(ORM_INVALIDATED_AT_FIELD),
+            clsORMField(Fields::slbCreationDateTime,      ORM_CREATED_ON),
+            clsORMField(Fields::slbCreatedBy_usrID,       ORM_CREATED_BY),
+            clsORMField(Fields::slbUpdatedBy_usrID,       ORM_UPDATED_BY),
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 ///<  Relation Name Col                                 Reference Table                           ForeignCol                    Rename LeftJoin
                 { Relation::Product,
@@ -409,6 +425,7 @@ namespace tblAccountSaleablesBase {
                     { Fields::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_slbID } },
                 ORM_RELATION_OF_CREATOR(Fields::slbCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::slbUpdatedBy_usrID),
+                { Fields::slbID, R(_schema, tblAccountSaleablesTranslateBase::Name), tblAccountSaleablesTranslateBase::Fields::pid },
             };
         };
 
@@ -455,6 +472,41 @@ namespace tblAccountSaleablesBase {
     );
 }
 
+namespace tblAccountSaleablesTranslateBase {
+    namespace Relation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::id,           ORM_PRIMARYKEY_64 },
+            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPOwner },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::slbName,      S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::slbDesc,      S(QString),         QFV,        QNull,      UPOwner },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {};
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountSaleablesTranslateBase_DTO \
+    SF_ORM_PRIMARYKEY_64        (id), \
+    SF_quint32                  (pid), \
+    SF_QString                  (language), \
+    SF_QString                  (slbName), \
+    SF_QString                  (slbDesc)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountSaleablesTranslateBase_DTO
+    );
+}
+
 namespace tblAccountUserAssetsBase {
     namespace Relation {
         constexpr char Saleable[] = "Saleable";
@@ -479,7 +531,7 @@ namespace tblAccountUserAssetsBase {
             { Fields::uasUpdatedBy_usrID,   ORM_UPDATED_BY },
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
                 { Fields::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::Fields::usrID,                 "Owner_" },
@@ -540,7 +592,7 @@ namespace tblAccountAssetUsageBase {
             { Fields::usg_uasID, ORM_PRIMARYKEY_64},
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
                 { Fields::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID},
@@ -590,7 +642,7 @@ namespace tblAccountCouponsBase {
             { Fields::cpnUpdatedBy_usrID,         ORM_UPDATED_BY },
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 ///Col                           Reference Table                             ForeignCol                              Rename    LeftJoin
                 { Fields::cpnID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_cpnID,    "",       true },
@@ -656,7 +708,7 @@ namespace tblAccountPrizesBase {
             { Fields::przUpdatedBy_usrID,         ORM_UPDATED_BY },
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {};
         };
 
@@ -701,7 +753,7 @@ namespace tblAccountReferralsBase {
         const QList<clsORMField> ORMFields = {
         };
 
-        inline const QList<stuRelation> Relations(const QString& _schema) {
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {};
         };
 
@@ -828,7 +880,7 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
 
     SF_QJsonObject      (AdditionalInfo), //per service
 
-    SF_Struct           (Private, stuVoucherItemPrivate, [](auto v) { return true; } (v))
+    SF_Struct           (Private, stuVoucherItemPrivate, [](Q_DECL_UNUSED auto v) { return true; } (v))
 //    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
 );
 
@@ -904,7 +956,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
 
 //    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher),
     SF_QString          (Private), //encrypted + base64
-//    SF_Struct           (Private, stuVoucherItemPrivate, [](auto v) { return true; } (v)),
+//    SF_Struct           (Private, stuVoucherItemPrivate, [](Q_DECL_UNUSED auto v) { return true; } (v)),
     SF_QListOfVarStruct (SubItems, stuVoucherItem),
 
     SF_QString          (Sign)
@@ -962,6 +1014,14 @@ TAPI_DEFINE_STRUCT(stuVoucherItemForTrustedAction,
 typedef QMap<QString, qint32> ServiceUsage_t;
 
 extern void checkPreVoucherSanity(stuPreVoucher _preVoucher);
+
+inline QString makeConfig(const QString& _name) { return "/Module_Account/" + _name; }
+extern Targoman::Common::Configuration::tmplConfigurable<QString> Secret;
+extern QByteArray sign(stuPreVoucher _preVoucher);
+extern QByteArray sign(stuVoucherItem _voucherItem);
+extern QByteArray sign(stuVoucherItemForTrustedAction _voucherItemForTrustedAction);
+extern Targoman::Common::Configuration::tmplConfigurable<quint64> SimpleCryptKey;
+extern clsSimpleCrypt* simpleCryptInstance();
 
 } //namespace Targoman::API::AAA
 

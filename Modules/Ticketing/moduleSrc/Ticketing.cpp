@@ -101,7 +101,7 @@ quint64 Ticketing::insertTicket(
                                     );
 
     if (_files.isEmpty() == false) {
-        CreateQuery QueryCreateAttachments = CreateQuery(TicketAttachments::instance())
+        ORMCreateQuery QueryCreateAttachments = TicketAttachments::instance().GetCreateQuery(APICALLBOOM_PARAM)
                                              .addCol(tblTicketAttachments::Fields::tat_tktID)
                                              .addCol(tblTicketAttachments::Fields::tat_uplID)
                                              ;
@@ -143,14 +143,14 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     quint32 _unitID,
     const TAPI::stuFileInfo &_file
 )) {
-//    Authorization::checkPriv(_APICALLBOOM, { this->moduleBaseName() + ":canPUTNewMessage" });
+//    Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     if (_file.Size > 0)
         Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _APICALLBOOM,
+                     APICALLBOOM_PARAM,
                      _targetUserID,
                      _serviceID,
                      0,
@@ -175,7 +175,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     quint64 _inReplyTicketID,
     const TAPI::stuFileInfo &_file
 )) {
-    Authorization::checkPriv(_APICALLBOOM, {});
+    Authorization::checkPriv(APICALLBOOM_PARAM, {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
         throw exHTTPBadRequest("Reply tickets must have reply type");
@@ -189,7 +189,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
         Files.append(_file);
 
     quint64 ID = this->insertTicket(
-                     _APICALLBOOM,
+                     APICALLBOOM_PARAM,
                      0,
                      _serviceID,
                      _inReplyTicketID,
@@ -250,7 +250,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                 { Gateways::NFSMetaInfoJsonKey::Path, ".../ticketing" },
                             })},
                         })
-                .execute(_APICALLBOOM.getUserID())
+                .execute(APICALLBOOM_PARAM.getUserID())
                 ;
         Result.insert("NFS", res);
     }
@@ -272,14 +272,14 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                   { Gateways::AWSS3MetaInfoJsonKey::AccessKey, "1" },
                             })},
                         })
-                .execute(_APICALLBOOM.getUserID())
+                .execute(APICALLBOOM_PARAM.getUserID())
                 ;
         Result.insert("S3", res);
     }
 */
     //-- newMessage
     QVariant res = RESTClientHelper::callAPI(
-        _APICALLBOOM,
+        APICALLBOOM_PARAM,
        RESTClientHelper::PUT,
        "Ticketing/newMessage",
        {},
@@ -297,7 +297,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 
     //-- newFeedback(1)
     res = RESTClientHelper::callAPI(
-        _APICALLBOOM,
+        APICALLBOOM_PARAM,
         RESTClientHelper::PUT,
         "Ticketing/newFeedback",
         {},
@@ -317,7 +317,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 
     //-- newFeedback(2)
     res = RESTClientHelper::callAPI(
-        _APICALLBOOM,
+        APICALLBOOM_PARAM,
         RESTClientHelper::PUT,
         "Ticketing/newFeedback",
         {},

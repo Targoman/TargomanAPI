@@ -70,16 +70,31 @@ public:
                     bool _isVirtual,
                     bool _isPrimaryKey,
                     bool _isSelectable,
+                    bool _isMultiLanguage,
                     const QString& _renameAs);
     clsORMFieldData(const clsORMFieldData& _o);
     ~clsORMFieldData() { ; }
 
-    inline bool isSortable()        { return this->Privs & 0x01; }
-    inline bool isFilterable()      { return this->Privs & 0x02; }
-    inline bool isSelfIdentifier()  { return this->Privs & 0x04; }
-    inline bool isPrimaryKey()      { return this->Privs & 0x08; }
-    inline bool isVirtual()         { return this->Privs & 0x10; }
-    inline bool isSelectable()      { return this->Privs & 0x20; }
+    enum enuBitLocation : quint16 {
+        Sortable        = 0x0001,
+        Filterable      = 0x0002,
+        SelfIdentifier  = 0x0004,
+        PrimaryKey      = 0x0008,
+        Virtual         = 0x0010,
+        Selectable      = 0x0020,
+        MultiLanguage   = 0x0040,
+    };
+
+    inline bool isSortable()        { return this->Privs & enuBitLocation::Sortable; }
+    inline bool isFilterable()      { return this->Privs & enuBitLocation::Filterable; }
+    inline bool isSelfIdentifier()  { return this->Privs & enuBitLocation::SelfIdentifier; }
+    inline bool isPrimaryKey()      { return this->Privs & enuBitLocation::PrimaryKey; }
+    inline bool isVirtual()         { return this->Privs & enuBitLocation::Virtual; }
+    inline bool isSelectable()      { return this->Privs & enuBitLocation::Selectable; }
+    inline bool isMultiLanguage()   { return this->Privs & enuBitLocation::MultiLanguage; }
+
+    inline void setSelectable(bool _value)      { if (_value) this->Privs |= enuBitLocation::Selectable; else this->Privs &= ~enuBitLocation::Selectable; }
+    inline void setMultiLanguage(bool _value)   { if (_value) this->Privs |= enuBitLocation::MultiLanguage; else this->Privs &= ~enuBitLocation::MultiLanguage; }
 
 public:
     QMetaType::Type         ParameterType;
@@ -92,7 +107,7 @@ public:
     QString                 MasterName;
 
 private:
-    quint32         Privs;
+    quint16         Privs;
 };
 
 class clsORMField
@@ -135,7 +150,15 @@ public:
     QString                toString(const QVariant& _value);
     QVariant               fromDB(const QString& _value);
     QVariant               toDB(const QVariant& _value);
+
     const intfAPIArgManipulator& argSpecs();
+
+    inline clsORMField& setMultiLanguage() {
+        this->Data->setMultiLanguage(true);
+        this->Data->setSelectable(false);
+        return *this;
+    }
+    inline bool isMultiLanguage() { return this->Data->isMultiLanguage(); }
 
 private:
     QExplicitlySharedDataPointer<clsORMFieldData> Data;

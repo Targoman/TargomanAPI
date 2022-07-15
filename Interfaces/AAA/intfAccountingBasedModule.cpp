@@ -47,8 +47,17 @@ Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
     "Secret to be used for signing voucher and prevoucher",
     "fcy^E?a*4<;auY?>^6s@");
 
-QByteArray voucherSign(const QByteArray& _data) {
+QByteArray signWithSecret(const QByteArray& _data) {
    return QMessageAuthenticationCode::hash(_data, Secret.value().toUtf8(), QCryptographicHash::Sha256);
+}
+QByteArray sign(stuPreVoucher _preVoucher) {
+    return signWithSecret(QJsonDocument(_preVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64();
+}
+QByteArray sign(stuVoucherItem _voucherItem) {
+    return signWithSecret(QJsonDocument(_voucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64();
+}
+QByteArray sign(stuVoucherItemForTrustedAction _voucherItemForTrustedAction) {
+    return signWithSecret(QJsonDocument(_voucherItemForTrustedAction.toJson()).toJson(QJsonDocument::Compact)).toBase64();
 }
 
 void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
@@ -57,14 +66,14 @@ void checkPreVoucherSanity(stuPreVoucher _preVoucher) {
 
     QString Sign = _preVoucher.Sign;
     _preVoucher.Sign.clear();
-    if (Sign != QString(voucherSign(QJsonDocument(_preVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
+    if (Sign != QString(sign(_preVoucher)))
         throw exHTTPBadRequest("Invalid sign found on pre-Voucher items");
 
     foreach (auto VoucherItem, _preVoucher.Items) {
         QString Sign = VoucherItem.Sign;
         VoucherItem.Sign.clear();
 
-        if (Sign != QString(voucherSign(QJsonDocument(VoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
+        if (Sign != QString(sign(VoucherItem)))
             throw exHTTPBadRequest("at least one of pre-Voucher items has invalid sign");
     }
 }
@@ -102,7 +111,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     const QString& _schema,
     AssetUsageLimitsCols_t _AssetUsageLimitsCols,
     intfAccountProducts* _products,
-    intfAccountProductsTranslate* _productsTranslate,
+//    intfAccountProductsTranslate* _productsTranslate,
     intfAccountSaleables* _saleables,
     intfAccountUserAssets* _userAssets,
     intfAccountAssetUsage* _assetUsages,
@@ -112,8 +121,9 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountProducts(_products),
-    AccountProductsTranslate(_productsTranslate),
+//    AccountProductsTranslate(_productsTranslate),
     AccountSaleables(_saleables),
+//    AccountSaleablesTranslate(_productsTranslate),
     AccountUserAssets(_userAssets),
     AccountAssetUsages(_assetUsages),
     AccountCoupons(_discounts),
@@ -147,12 +157,12 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage
 ) {
-    QJsonObject Privs = _APICALLBOOM.getJWTPrivsObject();
+    QJsonObject Privs = APICALLBOOM_PARAM.getJWTPrivsObject();
 
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(_APICALLBOOM.getUserID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getUserID(), _requestedUsage);
 
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -358,7 +368,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     if (_lastPreVoucher.Items.isEmpty())
         _lastPreVoucher.UserID = CurrentUserID;
@@ -403,7 +413,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
                 continue;
         }
 
-        QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+        QVariantMap UserAssetInfo = this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
             .addCols(this->AccountUserAssets->SelectableColumnNames())
             .addCols(this->AccountSaleables->SelectableColumnNames())
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
@@ -434,7 +444,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     }
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap SaleableInfo = SelectQuery(*this->AccountSaleables)
+    QVariantMap SaleableInfo = this->AccountSaleables->GetSelectQuery(APICALLBOOM_PARAM)
         .addCols(this->AccountSaleables->SelectableColumnNames())
         .addCols(this->AccountProducts->SelectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
@@ -484,7 +494,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processItemForBasket(_APICALLBOOM, AssetItem);
+    this->processItemForBasket(APICALLBOOM_PARAM, AssetItem);
 
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
@@ -517,7 +527,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     PreVoucherItem.Referrer = AssetItem.Referrer;
     PreVoucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
-    CreateQuery qry = CreateQuery(*this->AccountUserAssets)
+    ORMCreateQuery qry = this->AccountUserAssets->GetCreateQuery(APICALLBOOM_PARAM)
         .addCols({
                      tblAccountUserAssetsBase::Fields::uas_usrID,
                      tblAccountUserAssetsBase::Fields::uas_slbID,
@@ -557,7 +567,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     }
 
     //-- CustomUserAssetFields
-    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(_APICALLBOOM, AssetItem);
+    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, AssetItem);
     for (QVariantMap::const_iterator it = CustomFields.constBegin();
          it != CustomFields.constEnd();
          it++
@@ -573,7 +583,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     PreVoucherItem.OrderID = qry.execute(CurrentUserID);
 
     //-- --------------------------------
-    PreVoucherItem.Sign = QString(voucherSign(QJsonDocument(PreVoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64());
+    PreVoucherItem.Sign = QString(sign(PreVoucherItem));
 
     //-- --------------------------------
     ///@TODO: PreVoucherItem.DMInfo : json {"type":"adver", "additives":[{"color":"red"}, {"size":"m"}, ...]}
@@ -615,7 +625,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
 //    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64());
+    _lastPreVoucher.Sign = QString(sign(_lastPreVoucher));
 
     return stuBasketActionResult(
                 _lastPreVoucher,
@@ -700,7 +710,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPBadRequest("Pre-Voucher is empty");
@@ -721,7 +731,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
         throw exHTTPBadRequest("Item not found in pre-Voucher");
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap UserAssetInfo = SelectQuery(*this->AccountSaleables)
+    QVariantMap UserAssetInfo = this->AccountSaleables->GetSelectQuery(APICALLBOOM_PARAM)
         .addCols(this->AccountSaleables->SelectableColumnNames())
         .addCols(this->AccountProducts->SelectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
@@ -780,7 +790,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processItemForBasket(_APICALLBOOM, AssetItem, &_voucherItem);
+    this->processItemForBasket(APICALLBOOM_PARAM, AssetItem, &_voucherItem);
 
     //-- --------------------------------
     qint64 FinalPrice = _lastPreVoucher.ToPay + _lastPreVoucher.Round;
@@ -835,7 +845,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
         _voucherItem.Referrer = AssetItem.Referrer;
         _voucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
-        UpdateQuery qry = UpdateQuery(*this->AccountUserAssets)
+        ORMUpdateQuery qry = this->AccountUserAssets->GetUpdateQuery(APICALLBOOM_PARAM)
                           .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                           .set(tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, _voucherItem.toJson().toVariantMap())
                           .set(tblAccountUserAssetsBase::Fields::uasQty, _newQty)
@@ -849,7 +859,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
             qry.setNull(tblAccountUserAssetsBase::Fields::uas_cpnID);
 
         //-- CustomUserAssetFields
-        QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(_APICALLBOOM, AssetItem, &_voucherItem);
+        QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, AssetItem, &_voucherItem);
         for (QVariantMap::const_iterator it = CustomFields.constBegin();
              it != CustomFields.constEnd();
              it++
@@ -862,7 +872,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 
         //-- --------------------------------
         _voucherItem.Sign.clear();
-        _voucherItem.Sign = QString(voucherSign(QJsonDocument(_voucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64());
+        _voucherItem.Sign = QString(sign(_voucherItem));
 
         _lastPreVoucher.Items.replace(VoucherItemIndex, _voucherItem);
     }
@@ -880,7 +890,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     _lastPreVoucher.ToPay = static_cast<quint32>(FinalPrice) - _lastPreVoucher.Round;
 //    _lastPreVoucher.Type = enuPreVoucherType::Invoice;
     _lastPreVoucher.Sign.clear();
-    _lastPreVoucher.Sign = QString(voucherSign(QJsonDocument(_lastPreVoucher.toJson()).toJson(QJsonDocument::Compact)).toBase64());
+    _lastPreVoucher.Sign = QString(sign(_lastPreVoucher));
 
     return stuBasketActionResult(
                 _lastPreVoucher,
@@ -913,7 +923,7 @@ void intfAccountingBasedModule::processItemForBasket(
     **/
 
     //-- --------------------------------
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     //-- --------------------------------
     if ((_oldVoucherItem == nullptr) && (_assetItem.Qty == 0))
@@ -970,11 +980,11 @@ void intfAccountingBasedModule::processItemForBasket(
     ///@TODO: 2 ta bekhar 3 ta bebar:
 
     //-- --------------------------------
-    this->computeAdditives(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    this->computeAdditives(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeAdditives");
 
     //-- --------------------------------
-    this->computeReferrer(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    this->computeReferrer(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeReferrer");
 
     //-- --------------------------------
@@ -983,14 +993,14 @@ void intfAccountingBasedModule::processItemForBasket(
     //-- discount --------------------------------
     ///@TODO: what if some one uses discount code and at the same time will pay by prize credit
 
-    this->computeSystemDiscount(_APICALLBOOM, _assetItem, {}, _oldVoucherItem);
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {}, _oldVoucherItem);
     fnComputeTotalPrice("after computeSystemDiscount");
 
-    this->computeCouponDiscount(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    this->computeCouponDiscount(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
     fnComputeTotalPrice("after applyCouponBasedDiscount");
 
     //-- --------------------------------
-    this->digestPrivs(_APICALLBOOM, _assetItem, _oldVoucherItem);
+    this->digestPrivs(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
 
     //-- reserve and un-reserve saleable and product ------------------------------------
     ///@TODO: call spSaleable_unReserve by cron
@@ -1091,7 +1101,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     /**
       * discount code:
@@ -1147,10 +1157,10 @@ void intfAccountingBasedModule::computeCouponDiscount(
                                     _oldVoucherItem->OrderID });
     }
 
-    QVariantMap DiscountInfo = SelectQuery(*this->AccountCoupons)
+    QVariantMap DiscountInfo = this->AccountCoupons->GetSelectQuery(APICALLBOOM_PARAM)
         .addCols(this->AccountCoupons->SelectableColumnNames())
 
-        .leftJoin(SelectQuery(*this->AccountUserAssets)
+        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
                   .addCols({
                                tblAccountUserAssetsBase::Fields::uas_cpnID,
                                tblAccountUserAssetsBase::Fields::uas_vchID,
@@ -1169,7 +1179,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
         )
         .addCol("tmp_cpn_count._discountUsedCount")
 
-        .leftJoin(SelectQuery(*this->AccountUserAssets)
+        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
                   .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
@@ -1426,7 +1436,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem))
         return false;
 
-    QVariantMap UserAssetInfo = SelectQuery(*this->AccountUserAssets)
+    QVariantMap UserAssetInfo = this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
                                 .addCols({
                                              tblAccountUserAssetsBase::Fields::uasID,
                                              tblAccountUserAssetsBase::Fields::uas_slbID,
@@ -1491,14 +1501,14 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 
     QString Sign = _data.Sign;
     _data.Sign.clear();
-    if (Sign != QString(voucherSign(QJsonDocument(_data.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
+    if (Sign != QString(sign(_data)))
         throw exHTTPBadRequest("Invalid sign");
 
     //--------------------
     Sign = _data.VoucherItem.Sign;
     _data.VoucherItem.Sign.clear();
 
-    if (Sign != QString(voucherSign(QJsonDocument(_data.VoucherItem.toJson()).toJson(QJsonDocument::Compact)).toBase64()))
+    if (Sign != QString(sign(_data.VoucherItem)))
         throw exHTTPBadRequest("Invalid voucher item sign");
 }
 

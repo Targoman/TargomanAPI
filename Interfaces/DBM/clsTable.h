@@ -60,17 +60,17 @@ template <class itmplDerived> class tmplQueryWhereTrait;
 template <class itmplDerived> class clsQueryGroupAndHavingTraitData;
 template <class itmplDerived> class tmplQueryGroupAndHavingTrait;
 
-class clsSelectQueryData;
-class SelectQuery;
+class clsORMSelectQueryData;
+class ORMSelectQuery;
 
-class clsCreateQueryData;
-class CreateQuery;
+class clsORMCreateQueryData;
+class ORMCreateQuery;
 
-class clsUpdateQueryData;
-class UpdateQuery;
+class clsORMUpdateQueryData;
+class ORMUpdateQuery;
 
-class clsDeleteQueryData;
-class DeleteQuery;
+class clsORMDeleteQueryData;
+class ORMDeleteQuery;
 
 extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true, bool _lookupFromRegistryFirst = true);
 
@@ -205,6 +205,11 @@ public:
 
     const QStringList SelectableColumnNames(QString _tableAlias = "") const;
 
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMCreateQuery GetCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
+    virtual ORMUpdateQuery GetUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMDeleteQuery GetDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+
 protected:
     /*inline */const QString domain();
 
@@ -249,14 +254,14 @@ protected:
     template <class itmplDerived>                  friend class tmplQueryWhereTrait;
     template <class itmplDerived>                  friend class clsQueryGroupAndHavingTraitData;
     template <class itmplDerived>                  friend class tmplQueryGroupAndHavingTrait;
-    friend clsSelectQueryData;
-    friend SelectQuery;
-    friend clsCreateQueryData;
-    friend CreateQuery;
-    friend clsUpdateQueryData;
-    friend UpdateQuery;
-    friend clsDeleteQueryData;
-    friend DeleteQuery;
+    friend clsORMSelectQueryData;
+    friend ORMSelectQuery;
+    friend clsORMCreateQueryData;
+    friend ORMCreateQuery;
+    friend clsORMUpdateQueryData;
+    friend ORMUpdateQuery;
+    friend clsORMDeleteQueryData;
+    friend ORMDeleteQuery;
     friend QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, bool _lookupFromRegistryFirst);
 
     friend testQueryBuilders;

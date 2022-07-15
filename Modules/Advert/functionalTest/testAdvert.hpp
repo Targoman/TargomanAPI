@@ -201,6 +201,21 @@ private slots:
     /***************************************************************************************/
     /* tests *******************************************************************************/
     /***************************************************************************************/
+    void getAccountProducts_with_translate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountProducts"
+        );
+    }
+
+    void getAccountSaleable_join_product_with_translate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountSaleables"
+        );
+    }
+
+//private:
     void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -1241,16 +1256,6 @@ private slots:
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
         }
-    }
-
-    void getAccountProducts_with_translate() {
-        QVariant Result = callAdminAPI(
-            RESTClientHelper::GET,
-            "Advert/AccountProducts",
-            {},
-            {
-            }
-        );
     }
 
 };

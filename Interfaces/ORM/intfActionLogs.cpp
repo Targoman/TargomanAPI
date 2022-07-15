@@ -43,8 +43,8 @@ intfSQLBasedModule(
 ) { ; }
 
 QVariant IMPL_ORMGET(intfActionLogs) {
-//    Authorization::checkPriv(_APICALLBOOM, { this->ModuleName + ":ActionLogs:CRUD~0100" });
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":ActionLogs:CRUD~0100" });
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }

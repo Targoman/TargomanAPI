@@ -90,7 +90,7 @@ QVariant RESTClientHelper::callAPI(
     QString _aPIURL,
     QVariantMap *_outResponseHeaders
 ) {
-    TAPI::JWT_t JWT = _APICALLBOOM.getJWT();
+    TAPI::JWT_t JWT = APICALLBOOM_PARAM.getJWT();
 
     QString OldEncodedJWT = JWT["encodedJWT"].toString();
     QVariantMap ResponseHeaders;
@@ -109,8 +109,8 @@ QVariant RESTClientHelper::callAPI(
 #ifdef TARGOMAN_API_ENABLE_JWT_DASTRESHTE
     if (OldEncodedJWT != JWT["encodedJWT"].toString())
     {
-        _APICALLBOOM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
-        _APICALLBOOM.setJWT(JWT);
+        APICALLBOOM_PARAM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
+        APICALLBOOM_PARAM.setJWT(JWT);
     }
 #endif
 

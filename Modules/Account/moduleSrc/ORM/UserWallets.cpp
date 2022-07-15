@@ -43,25 +43,25 @@ UserWallets::UserWallets() :
 ) { ; }
 
 QVariant IMPL_ORMGET(UserWallets) {
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _filters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getUserID() } }, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint64 IMPL_ORMCREATE(UserWallets) {
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
-//        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID() } }, _createInfo);
-        _createInfo.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
+//        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getUserID() } }, _createInfo);
+        _createInfo.insert(tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getUserID());
     }
 
     return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(UserWallets) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
@@ -69,9 +69,9 @@ bool IMPL_ORMUPDATE(UserWallets) {
 bool IMPL_ORMDELETE(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblUserWallets::Fields::walDefault, 0);
-        ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _APICALLBOOM.getUserID());
+        ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getUserID());
     }
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
@@ -86,11 +86,11 @@ bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _walID
 )) {
-    bool IsPrivileged = Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    bool IsPrivileged = Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWallet_SetAsDefault", {
-                     { "iUserID", (IsPrivileged ? 0 : _APICALLBOOM.getUserID()) },
+                     { "iUserID", (IsPrivileged ? 0 : APICALLBOOM_PARAM.getUserID()) },
                      { "iWalID", _walID },
                  });
 
@@ -112,7 +112,7 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWallet_Transfer", {
-                     { "iFromUserID", _APICALLBOOM.getUserID() },
+                     { "iFromUserID", APICALLBOOM_PARAM.getUserID() },
                      { "iPass", _pass },
                      { "iSalt", _salt },
                      { "iFromWalID", _fromWalID },
@@ -138,17 +138,17 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
 
     stuVoucher Voucher;
 
-    Voucher.Info.UserID = _APICALLBOOM.getUserID();
+    Voucher.Info.UserID = APICALLBOOM_PARAM.getUserID();
 //    Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
     Voucher.Info.ToPay = _amount;
-    Voucher.Info.Sign = QString(voucherSign(QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact)).toBase64());
+    Voucher.Info.Sign = QString(sign(Voucher.Info));
 
     Voucher.ID = Voucher::instance().Create(
-                     _APICALLBOOM,
+                     APICALLBOOM_PARAM,
                      TAPI::ORMFields_t({
-                                           { tblVoucher::Fields::vch_usrID, _APICALLBOOM.getUserID() },
+                                           { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID() },
                                            { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
 //                                           { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                            { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
@@ -198,8 +198,8 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
     return this->callSP(APICALLBOOM_PARAM,
                         "spWithdrawal_Request", {
                             { "iWalletID", _walID },
-                            { "iForUsrID", _APICALLBOOM.getUserID() },
-                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iForUsrID", APICALLBOOM_PARAM.getUserID() },
+                            { "iByUserID", APICALLBOOM_PARAM.getUserID() },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
@@ -215,13 +215,13 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
     quint64 _targetUsrID,
     const QString &_desc
 )) {
-    Authorization::checkPriv(_APICALLBOOM, { "AAA:requestWithdrawal" });
+    Authorization::checkPriv(APICALLBOOM_PARAM, { "AAA:requestWithdrawal" });
 
     return this->callSP(APICALLBOOM_PARAM,
                         "spWithdrawal_Request", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
-                            { "iByUserID", _APICALLBOOM.getUserID() },
+                            { "iByUserID", APICALLBOOM_PARAM.getUserID() },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
@@ -235,12 +235,12 @@ bool IMPL_REST_POST(UserWallets, acceptWithdrawal, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
-    Authorization::checkPriv(_APICALLBOOM, { "AAA:acceptWithdrawal" });
+    Authorization::checkPriv(APICALLBOOM_PARAM, { "AAA:acceptWithdrawal" });
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWithdrawal_Accept", {
                      { "iVoucherID", _voucherID },
-                     { "iOperator_usrID", _APICALLBOOM.getUserID() },
+                     { "iOperator_usrID", APICALLBOOM_PARAM.getUserID() },
                  });
 
     return true;

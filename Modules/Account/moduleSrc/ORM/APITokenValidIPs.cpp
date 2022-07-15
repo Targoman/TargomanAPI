@@ -36,10 +36,10 @@ APITokenValidIPs::APITokenValidIPs() :
     ) { ; }
 
 QVariant IMPL_ORMGET(APITokenValidIPs) {
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, _filters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
-    auto fnTouchQuery = [](SelectQuery &_query) {
+    auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblAPITokens::Name);
     };
 
@@ -47,17 +47,17 @@ QVariant IMPL_ORMGET(APITokenValidIPs) {
 }
 
 quint64 IMPL_ORMCREATE(APITokenValidIPs) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMUPDATE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID());
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID());
 
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
 }
@@ -65,9 +65,9 @@ bool IMPL_ORMUPDATE(APITokenValidIPs) {
 bool IMPL_ORMDELETE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID());
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, _APICALLBOOM.getUserID()}}, ExtraFilters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID());
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

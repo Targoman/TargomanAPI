@@ -42,7 +42,9 @@ class User : public intfSQLBasedModule
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
 
-    SelectQuery getPhotoQuery(quint64 _usrID);
+    ORMSelectQuery getPhotoQuery(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _usrID);
     
 private slots:
     QVariant ORMGET("Get user information")

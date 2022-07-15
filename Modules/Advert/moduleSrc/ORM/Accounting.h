@@ -100,6 +100,34 @@ namespace tblAccountProducts {
     );
 }
 
+namespace tblAccountProductsTranslate {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountProductsTranslateBase_DTO
+    );
+}
+
 namespace tblAccountSaleables {
 
     namespace ExtraFields {
@@ -140,6 +168,34 @@ namespace tblAccountSaleables {
         SF_quint32                  (slbExClicksPerDay),
         SF_quint32                  (slbExClicksPerMonth),
         SF_quint64                  (slbExClicksTotal)
+    );
+}
+
+namespace tblAccountSaleablesTranslate {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountSaleablesTranslateBase_DTO
     );
 }
 
@@ -271,7 +327,8 @@ class AccountProducts : public intfAccountProducts
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
 
-public:
+protected:
+    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
 };
 
 class AccountProductsTranslate : public intfAccountProductsTranslate
@@ -287,6 +344,15 @@ class AccountSaleables : public intfAccountSaleables
 {
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
+
+protected:
+    QScopedPointer<intfAccountSaleablesTranslate> AccountSaleablesTranslate;
+};
+
+class AccountSaleablesTranslate : public intfAccountSaleablesTranslate
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesTranslate)
 
 public:
 };
