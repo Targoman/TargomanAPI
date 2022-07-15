@@ -46,8 +46,8 @@ class testQueryBuilders;
 namespace Targoman::API::DBM {
 
 class clsTable;
-class clsCreateQueryData;
-class clsSelectQueryData;
+class clsORMCreateQueryData;
+class clsORMSelectQueryData;
 
 //extern QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex = true);
 
@@ -175,7 +175,7 @@ public:
 protected:
     QSharedDataPointer<DBExpressionData> Data;
 
-    friend clsSelectQueryData;
+    friend clsORMSelectQueryData;
 };
 
 class DBExpressionCase;
@@ -316,6 +316,7 @@ public:
         /*OUT*/ bool *_isStatusColumn = nullptr
     );
 
+    const QString name() const;
     const QString renameAs() const;
 
 protected:
@@ -342,9 +343,11 @@ class tmplBaseQuery
 public:
     tmplBaseQuery();
     tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other);
-    tmplBaseQuery(clsTable& _table, const QString& _alias = {});
+    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
     virtual ~tmplBaseQuery();
     bool isValid();
+
+    virtual itmplDerived& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs) { return (itmplDerived&)*this; }
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -364,7 +367,7 @@ protected:
 };
 
 /***************************************************************************************/
-class SelectQuery;
+class ORMSelectQuery;
 
 template <class itmplDerived>
 class tmplQueryJoinTrait
@@ -374,33 +377,47 @@ public:
     tmplQueryJoinTrait(itmplDerived* _owner);
     virtual ~tmplQueryJoinTrait();
 
-    itmplDerived& join(enuJoinType::Type _joinType, QString _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
+    itmplDerived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
+    itmplDerived& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& leftJoin(const QString& _foreignTable, const clsCondition& _on = {});
     itmplDerived& leftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& rightJoin(const QString& _foreignTable, const clsCondition& _on = {});
     itmplDerived& rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    itmplDerived& innerJoin(const QString& _foreignTable, const clsCondition& _on = {});
-    itmplDerived& innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    itmplDerived& crossJoin(const QString& _foreignTable, const QString& _alias = {});
+    itmplDerived& join(enuJoinType::Type _joinType, QString _foreignTable, const QString& _alias = {}, const clsCondition& _on = {});
 
+    //-- -------------------------
+    itmplDerived& crossJoin(const clsTable& _foreignTable, const QString& _alias = {});
+    itmplDerived& innerJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& leftJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
     itmplDerived& leftJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
     itmplDerived& rightJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
     itmplDerived& rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    itmplDerived& innerJoin(const clsTable& _foreignTable, const clsCondition& _on = {});
-    itmplDerived& innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on = {});
-    itmplDerived& crossJoin(const clsTable& _foreignTable, const QString& _alias = {});
+    itmplDerived& join(enuJoinType::Type _joinType, clsTable _foreignTable, const QString _alias, const clsCondition& _on = {});
 
-    itmplDerived& join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on = {});
-    itmplDerived& leftJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-    itmplDerived& rightJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-    itmplDerived& innerJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
-    itmplDerived& crossJoin(SelectQuery& _nestedQuery, const QString _alias);
+    //-- inline -------------------------
+    itmplDerived& inlineCrossJoin(const QString& _foreignTable, const QString& _alias = {});
+    itmplDerived& inlineInnerJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& inlineInnerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& inlineLeftJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& inlineLeftJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& inlineRightJoin(const QString& _foreignTable, const clsCondition& _on = {});
+    itmplDerived& inlineRightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on = {});
+    itmplDerived& inlineJoin(enuJoinType::Type _joinType, QString _foreignTable, const QString _alias, const clsCondition& _on = {});
 
-    itmplDerived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
+    //-- nested -------------------------
+    itmplDerived& nestedCrossJoin(ORMSelectQuery& _nestedQuery, const QString _alias);
+    itmplDerived& nestedInnerJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& nestedLeftJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& nestedRightJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on);
+    itmplDerived& nestedJoin(enuJoinType::Type _joinType, ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on = {});
+
+    //-- with -------------------------
+    itmplDerived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
     itmplDerived& leftJoinWith(const QString& _relationName, const QString& _alias = {});
     itmplDerived& rightJoinWith(const QString& _relationName, const QString& _alias = {});
-    itmplDerived& innerJoinWith(const QString& _relationName, const QString& _alias = {});
+    itmplDerived& joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias = {});
 
 protected:
     virtual void iAmAbstract() = 0;
@@ -460,52 +477,63 @@ protected:
 };
 
 /***************************************************************************************/
-class UpdateQuery;
-class DeleteQuery;
-//class clsUpdateQueryData;
-//class clsDeleteQueryData;
+class ORMUpdateQuery;
+class ORMDeleteQuery;
+//class clsORMUpdateQueryData;
+//class clsORMDeleteQueryData;
 
-class SelectQuery :
-    public tmplBaseQuery<SelectQuery, clsSelectQueryData>,
-    public tmplQueryJoinTrait<SelectQuery>,
-    public tmplQueryWhereTrait<SelectQuery>,
-    public tmplQueryGroupAndHavingTrait<SelectQuery>
+class ORMSelectQuery :
+    public tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>,
+    public tmplQueryJoinTrait<ORMSelectQuery>,
+    public tmplQueryWhereTrait<ORMSelectQuery>,
+    public tmplQueryGroupAndHavingTrait<ORMSelectQuery>
 {
 public:
-    SelectQuery();
-    SelectQuery(const SelectQuery& _other);
-    SelectQuery(clsTable& _table, const QString& _alias = {});
-    virtual ~SelectQuery();
+    ORMSelectQuery();
+    ORMSelectQuery(const ORMSelectQuery& _other);
+    ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    virtual ~ORMSelectQuery();
 
-    SelectQuery& addCol(const clsColSpecs& _colSpecs);
+    virtual ORMSelectQuery& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs) {
+        this->addCols(_colsSpecs);
+        return *this;
+    }
+
+    ORMSelectQuery& addCol(const clsColSpecs& _colSpecs);
+    ORMSelectQuery& addCols(const QList<clsColSpecs>& _colsSpecs);
     //TAPI::Cols_t -> QString
-    SelectQuery& addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-    SelectQuery& addCols(const QStringList& _cols);
-    SelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
-    SelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});
-    SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
-    SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
-    SelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
+    ORMSelectQuery& addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator=","); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    ORMSelectQuery& addCols(const QStringList& _cols);
+    ORMSelectQuery& addCol(const QString& _col, const QString& _renameAs = {});
+    ORMSelectQuery& addCol(const DBExpression& _expr, const QString& _renameAs = {});
+    ORMSelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs = {});
+    ORMSelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs = {});
+    ORMSelectQuery& addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs = {});
 
-//    SelectQuery& addCols(const QString& _tableAlias, const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-//    SelectQuery& addCols(const QString& _tableAlias, const QStringList& _cols);
-//    SelectQuery& addCol(const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
-//    SelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
+    ORMSelectQuery& removeCols(const QStringList& _cols);
+    ORMSelectQuery& removeCol(const QString& _col);
 
-//    SelectQuery& from(const QString _table, const QString& _renameAs = {});
-//    SelectQuery& from(const SelectQuery& _nestedQuery, const QString _alias);
+//    ORMSelectQuery& addCols(const QString& _tableAlias, const TAPI::Cols_t& _cols); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+//    ORMSelectQuery& addCols(const QString& _tableAlias, const QStringList& _cols);
+//    ORMSelectQuery& addCol(const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
+//    ORMSelectQuery& addCol(enuAggregation::Type _aggFunc, const QString& _tableAlias, const QString& _col, const QString& _renameAs = {});
 
-    SelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
+//    ORMSelectQuery& from(const QString _table, const QString& _renameAs = {});
+//    ORMSelectQuery& from(const ORMSelectQuery& _nestedQuery, const QString _alias);
 
-    SelectQuery& addUnion(SelectQuery& _query);
-    SelectQuery& addUnionAll(SelectQuery& _query);
-    SelectQuery& addUnionDistinct(SelectQuery& _query);
+    ORMSelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
 
-    SelectQuery& pageIndex(quint16 _pageIndex); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-    SelectQuery& pageSize(quint16 _pageSize); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    ORMSelectQuery& addUnion(ORMSelectQuery& _query);
+    ORMSelectQuery& addUnionAll(ORMSelectQuery& _query);
+    ORMSelectQuery& addUnionDistinct(ORMSelectQuery& _query);
 
-    SelectQuery& setCacheTime(quint16 _cacheTime);
+    ORMSelectQuery& pageIndex(quint16 _pageIndex); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+    ORMSelectQuery& pageSize(quint16 _pageSize); //-> used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
+
+    ORMSelectQuery& setCacheTime(quint16 _cacheTime);
     void clearCache(QVariantMap _args = {});
+
+    bool isPure();
 
     QVariantMap one(QVariantMap _args = {});
     template <typename T> inline T one(QVariantMap _args = {}) {
@@ -534,36 +562,37 @@ public:
 
 private:
     virtual void iAmAbstract() { ; }
+    void prepare(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, bool _checkStatusCol = false);
     QString buildQueryString(QVariantMap _args = {}, bool _selectOne = false, bool _reportCount = false, bool _checkStatusCol = false);
 
-    friend clsSelectQueryData;
-    friend clsCreateQueryData;
-    friend tmplQueryJoinTrait<SelectQuery>;
-    friend tmplQueryJoinTrait<UpdateQuery>;
-    friend tmplQueryJoinTrait<DeleteQuery>;
-//    friend clsUpdateQueryData;
-//    friend UpdateQuery;
-//    friend clsDeleteQueryData;
-//    friend DeleteQuery;
+    friend clsORMSelectQueryData;
+    friend clsORMCreateQueryData;
+    friend tmplQueryJoinTrait<ORMSelectQuery>;
+    friend tmplQueryJoinTrait<ORMUpdateQuery>;
+    friend tmplQueryJoinTrait<ORMDeleteQuery>;
+//    friend clsORMUpdateQueryData;
+//    friend ORMUpdateQuery;
+//    friend clsORMDeleteQueryData;
+//    friend ORMDeleteQuery;
     friend testQueryBuilders;
 };
 
 /***************************************************************************************/
-class CreateQuery :
-    public tmplBaseQuery<CreateQuery, clsCreateQueryData>
+class ORMCreateQuery :
+    public tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>
 {
 public:
-    CreateQuery(const CreateQuery& _other);
-    CreateQuery(clsTable& _table, const QString& _alias = {});
-    virtual ~CreateQuery();
+    ORMCreateQuery(const ORMCreateQuery& _other);
+    ORMCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    virtual ~ORMCreateQuery();
 
 public:
-    CreateQuery& options_ignore();
-    CreateQuery& addCols(const QStringList& _cols);
-    CreateQuery& addCol(const QString& _col);
-    CreateQuery& values(const QVariantMap& _oneRecordValues);
-    CreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
-    CreateQuery& select(const SelectQuery& _selectQuery);
+    ORMCreateQuery& options_ignore();
+    ORMCreateQuery& addCols(const QStringList& _cols);
+    ORMCreateQuery& addCol(const QString& _col);
+    ORMCreateQuery& values(const QVariantMap& _oneRecordValues);
+    ORMCreateQuery& values(const QList<QVariantMap>& _multipleRecordValues);
+    ORMCreateQuery& select(const ORMSelectQuery& _selectQuery);
 
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
@@ -574,57 +603,57 @@ private:
 };
 
 /***************************************************************************************/
-class clsUpdateQueryData;
+class clsORMUpdateQueryData;
 
-class UpdateQuery :
-    public tmplBaseQuery<UpdateQuery, clsUpdateQueryData>,
-    public tmplQueryJoinTrait<UpdateQuery>,
-    public tmplQueryWhereTrait<UpdateQuery>
+class ORMUpdateQuery :
+    public tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>,
+    public tmplQueryJoinTrait<ORMUpdateQuery>,
+    public tmplQueryWhereTrait<ORMUpdateQuery>
 {
 public:
-    UpdateQuery(const UpdateQuery& _other);
-    UpdateQuery(clsTable& _table, const QString& _alias = {});
-    virtual ~UpdateQuery();
+    ORMUpdateQuery(const ORMUpdateQuery& _other);
+    ORMUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    virtual ~ORMUpdateQuery();
 
-    UpdateQuery& setNull(const QString& _col);
-    UpdateQuery& set(const QString& _col, const QVariant& _value);
-    UpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
-//    UpdateQuery& increament(const QString& _col, quint64 _value);
-    UpdateQuery& increament(const QString& _col, qreal _value);
-//    UpdateQuery& decreament(const QString& _col, quint64 _value);
-    UpdateQuery& decreament(const QString& _col, qreal _value);
+    ORMUpdateQuery& setNull(const QString& _col);
+    ORMUpdateQuery& set(const QString& _col, const QVariant& _value);
+    ORMUpdateQuery& set(const QString& _col, const QString& _otherTable, const QString& _otherCol);
+//    ORMUpdateQuery& increament(const QString& _col, quint64 _value);
+    ORMUpdateQuery& increament(const QString& _col, qreal _value);
+//    ORMUpdateQuery& decreament(const QString& _col, quint64 _value);
+    ORMUpdateQuery& decreament(const QString& _col, qreal _value);
 
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
 
 private:
     virtual void iAmAbstract() { ; }
     stuBoundQueryString buildQueryString(quint64 _currentUserID, QVariantMap _args = {}, bool _useBinding = true);
-    friend tmplQueryJoinTrait<UpdateQuery>;
+    friend tmplQueryJoinTrait<ORMUpdateQuery>;
     friend testQueryBuilders;
 };
 
 /***************************************************************************************/
-class clsDeleteQueryData;
+class clsORMDeleteQueryData;
 
-class DeleteQuery :
-    public tmplBaseQuery<DeleteQuery, clsDeleteQueryData>,
-    public tmplQueryJoinTrait<DeleteQuery>,
-    public tmplQueryWhereTrait<DeleteQuery>
+class ORMDeleteQuery :
+    public tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>,
+    public tmplQueryJoinTrait<ORMDeleteQuery>,
+    public tmplQueryWhereTrait<ORMDeleteQuery>
 {
 public:
-    DeleteQuery(const DeleteQuery& _other);
-    DeleteQuery(clsTable& _table, const QString& _alias = {});
-    virtual ~DeleteQuery();
+    ORMDeleteQuery(const ORMDeleteQuery& _other);
+    ORMDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    virtual ~ORMDeleteQuery();
 
 public:
-    DeleteQuery& addTarget(const QString& _targetTableName);
+    ORMDeleteQuery& addTarget(const QString& _targetTableName);
 
     quint64 execute(quint64 _currentUserID, QVariantMap _args = {}, bool _realDelete = false);
 
 private:
     virtual void iAmAbstract() { ; }
     QString buildQueryString(quint64 _currentUserID, QVariantMap _args = {});
-    friend tmplQueryJoinTrait<DeleteQuery>;
+    friend tmplQueryJoinTrait<ORMDeleteQuery>;
     friend testQueryBuilders;
 };
 

@@ -31,6 +31,7 @@
 #include "Interfaces/AAA/AAADefs.hpp"
 //#include "libTargomanCommon/Configuration/intfConfigurableModule.hpp"
 #include "Interfaces/API/intfPureModule.h"
+#include "Interfaces/DBM/QueryBuilders.h"
 
 using namespace Targoman::DBManager;
 using namespace Targoman::API;
@@ -270,6 +271,22 @@ const QStringList clsTable::SelectableColumnNames(QString _tableAlias) const {
     return ColNames;
 }
 
+ORMSelectQuery clsTable::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return ORMSelectQuery(APICALLBOOM_PARAM, *this, _alias);
+}
+
+ORMCreateQuery clsTable::GetCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
+    return ORMCreateQuery(APICALLBOOM_PARAM, *this);
+}
+
+ORMUpdateQuery clsTable::GetUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return ORMUpdateQuery(APICALLBOOM_PARAM, *this, _alias);
+}
+
+ORMDeleteQuery clsTable::GetDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    return ORMDeleteQuery(APICALLBOOM_PARAM, *this, _alias);
+}
+
 const QString clsTable::domain() {
     if (this->Domain.length())
         return this->Domain;
@@ -297,7 +314,7 @@ clsDACResult clsTable::callSP(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "sp");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSP({}, _spName, _spArgs, _purpose, _executionTime);
@@ -311,7 +328,7 @@ clsDACResult clsTable::callSPCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable sp");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSPCacheable(_maxCacheTime, {}, _spName, _spArgs, _purpose, _executionTime);
@@ -324,7 +341,7 @@ clsDACResult clsTable::execQuery(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "exec list");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
@@ -337,7 +354,7 @@ clsDACResult clsTable::execQuery(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "exec map");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
@@ -351,7 +368,7 @@ clsDACResult clsTable::execQueryCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable exec list");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
@@ -365,7 +382,7 @@ clsDACResult clsTable::execQueryCacheable(
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "cachable exec map");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);

@@ -53,7 +53,8 @@ intfSQLBasedModule::intfSQLBasedModule(
         _relations,
         _indexes,
         _dbProperties
-    ) { ; }
+    )
+{ ; }
 
 intfSQLBasedModule::intfSQLBasedModule(
         const QString& _schema,
@@ -71,30 +72,15 @@ intfSQLBasedModule::intfSQLBasedModule(
         _relations,
         _indexes,
         _dbProperties
-    ) { ; }
-
-SelectQuery intfSQLBasedModule::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
-    return SelectQuery(*this, _alias);
-}
-
-CreateQuery intfSQLBasedModule::GetCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
-    return CreateQuery(*this);
-}
-
-UpdateQuery intfSQLBasedModule::GetUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
-    return UpdateQuery(*this, _alias);
-}
-
-DeleteQuery intfSQLBasedModule::GetDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
-    return DeleteQuery(*this, _alias);
-}
+    )
+{ ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
 //    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _fnTouchQuery
+    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
@@ -102,7 +88,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
-    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
+    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
@@ -119,15 +105,15 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     QVariantMap Result = Query.one();
 
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
@@ -137,13 +123,13 @@ QVariantList intfSQLBasedModule::SelectAll(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _fnTouchQuery
+    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
     this->prepareFiltersList();
 
-    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
+    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -160,15 +146,15 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     QVariantList Result = Query.all();
 
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.count()));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.count() / _pageSize)));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
@@ -178,13 +164,13 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _fnTouchQuery
+    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
 ) {
     Q_UNUSED(_reportCount)
 
     this->prepareFiltersList();
 
-    SelectQuery Query = this->GetSelectQuery(_APICALLBOOM)
+    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -201,15 +187,15 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     TAPI::stuTable Result = Query.allWithCount();
 
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
-//    _APICALLBOOM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE);
+//    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PER_PAGE);
 
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
-//    _APICALLBOOM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT, QString::number(Result.TotalRows));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT, QString::number(ceil((double)Result.TotalRows / _pageSize)));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_CURRENT_PAGE, QString::number(_pageIndex));
+//    APICALLBOOM_PARAM.addResponseHeader(RESPONSE_HEADER_X_PAGINATION_PER_PAGE, QString::number(_pageSize));
 
     return Result;
 }
@@ -219,9 +205,9 @@ QVariant intfSQLBasedModule::Select(
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
-    std::function<void(SelectQuery &_query)> _fnTouchQuery
+    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "read");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "read");
 
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
@@ -257,7 +243,7 @@ QVariant intfSQLBasedModule::Select(
 //    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
 //    const clsCondition& _extraFilters,
 //    quint16 _cacheTime,
-//    std::function<void(SelectQuery &_query)> _fnTouchQuery
+//    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
 //) {
 //    return this->Select(
 //                *this,
@@ -272,18 +258,18 @@ quint64 intfSQLBasedModule::Create(
 //    clsTable& _table,
     CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "create");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "create");
 
     this->prepareFiltersList();
 
-    CreateQuery query = this->GetCreateQuery(_APICALLBOOM);
+    ORMCreateQuery query = this->GetCreateQuery(APICALLBOOM_PARAM);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
         query.addCol(arg.key());
 
     query.values(_createInfo);
 
-    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID);
+    return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID));
 }
 
 //quint64 intfSQLBasedModule::Create(
@@ -300,7 +286,7 @@ bool intfSQLBasedModule::Update(
     UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "update");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "update");
 
     this->prepareFiltersList();
 
@@ -310,7 +296,7 @@ bool intfSQLBasedModule::Update(
     if (_updateInfo.isEmpty())
         throw exHTTPBadRequest("No change provided to update");
 
-    UpdateQuery query = this->GetUpdateQuery(_APICALLBOOM)
+    ORMUpdateQuery query = this->GetUpdateQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -330,7 +316,7 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID) > 0;
+    return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID)) > 0;
 }
 
 //bool intfSQLBasedModule::Update(
@@ -350,7 +336,7 @@ bool intfSQLBasedModule::DeleteByPks(
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
-    auto ServerTiming = _APICALLBOOM.createScopeTiming("db", "delete");
+    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "delete");
 
     this->prepareFiltersList();
 
@@ -368,7 +354,7 @@ bool intfSQLBasedModule::DeleteByPks(
 //    if (_realDelete == false)
 //        return true;
 
-    DeleteQuery query = this->GetDeleteQuery(_APICALLBOOM)
+    ORMDeleteQuery query = this->GetDeleteQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -382,7 +368,7 @@ bool intfSQLBasedModule::DeleteByPks(
         query.andWhere({ relatedORMField.Col.name(), enuConditionOperator::Equal, FilterIter.value() });
     }
 
-    return query.execute(_APICALLBOOM.getUserID() | SYSTEM_USER_ID, {}, _realDelete) > 0;
+    return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID), {}, _realDelete) > 0;
 }
 
 //bool intfSQLBasedModule::DeleteByPks(

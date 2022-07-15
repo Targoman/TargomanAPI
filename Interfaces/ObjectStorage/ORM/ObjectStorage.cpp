@@ -65,7 +65,7 @@ intfUploadFiles::intfUploadFiles(
 ) { ; }
 
 QVariant IMPL_ORMGET(intfUploadFiles) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
@@ -86,12 +86,12 @@ intfUploadGateways::intfUploadGateways(
 ) { ; }
 
 QVariant IMPL_ORMGET(intfUploadGateways) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 quint32 IMPL_ORMCREATE(intfUploadGateways) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    if (_createInfo.contains(tblintfUploadGateways::Fields::ugwAllowedDomainName))
 //        _createInfo[tblintfUploadGateways::Fields::ugwAllowedDomainName] = URLHelper::domain(_createInfo[tblUploadGateways::Fields::ugwAllowedDomainName].toString());
@@ -100,12 +100,12 @@ quint32 IMPL_ORMCREATE(intfUploadGateways) {
 }
 
 bool IMPL_ORMUPDATE(intfUploadGateways) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(intfUploadGateways) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
@@ -126,7 +126,7 @@ intfUploadQueue::intfUploadQueue(
 ) { ; }
 
 QVariant IMPL_ORMGET(intfUploadQueue) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 

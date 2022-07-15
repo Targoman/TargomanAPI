@@ -97,7 +97,7 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
 }
 
 QVariant clsAPIObject::invoke(
-    INTFAPICALLBOOM_IMPL *_APICALLBOOM,
+    INTFAPICALLBOOM_IMPL *APICALLBOOM_PARAM,
     bool _isUpdateMethod,
     const QStringList& _args,
 //    /*OUT*/ QVariantMap &_responseHeaders,
@@ -250,7 +250,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
+            APICALLBOOM_PARAM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -261,7 +261,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            _APICALLBOOM->setResponseHeaders(Map.value("headers").toMap());
+            APICALLBOOM_PARAM->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -282,14 +282,14 @@ QVariant clsAPIObject::invoke(
 
     QVariant Result = APIMethod->invokeMethod(
                           this,
-                          _APICALLBOOM,
+                          APICALLBOOM_PARAM,
                           Arguments
 //                          _responseHeaders
                           );
 
     QVariantMap ResultWithHeader = QVariantMap({
                                                    { "result", Result },
-                                                   { "headers", _APICALLBOOM->getResponseHeaders() },
+                                                   { "headers", APICALLBOOM_PARAM->getResponseHeaders() },
                                                });
     if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
@@ -302,7 +302,7 @@ QVariant clsAPIObject::invoke(
 }
 
 void clsAPIObject::invokeMethod(
-    INTFAPICALLBOOM_IMPL *_APICALLBOOM,
+    INTFAPICALLBOOM_IMPL *APICALLBOOM_PARAM,
     const QVariantList& _arguments,
     QGenericReturnArgument _returnArg
 //    /*OUT*/ QVariantMap &_responseHeaders
@@ -343,7 +343,7 @@ void clsAPIObject::invokeMethod(
     };
 
     try {
-        QGenericArgument _APICALLBOOM_ARG("_APICALLBOOM", _APICALLBOOM);
+        QGenericArgument _APICALLBOOM_ARG("APICALLBOOM_PARAM", APICALLBOOM_PARAM);
 
         QGenericArgument Arguments[9];
 
@@ -361,7 +361,7 @@ void clsAPIObject::invokeMethod(
             parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
-            _APICALLBOOM_ARG, //Q_ARG(intfAPICallBoom, *_APICALLBOOM),
+            _APICALLBOOM_ARG, //Q_ARG(intfAPICallBoom, *APICALLBOOM_PARAM),
             Arguments[0],
             Arguments[1],
             Arguments[2],
@@ -399,12 +399,12 @@ bool clsAPIObject::isPolymorphic(const QMetaMethodExtended& _method) {
 }
 
 void clsAPIObject::updateDefaultValues(const QMetaMethodExtended& _method) {
-    ///-1: for _APICALLBOOM
+    ///-1: for APICALLBOOM_PARAM
     if ((_method.parameterNames().size() - 1) < this->RequiredParamsCount) {
         this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size() - 1);
 
         QMetaMethodExtended Method = _method;
-        Method.DefaultValues.removeAt(0); //for _APICALLBOOM
+        Method.DefaultValues.removeAt(0); //for APICALLBOOM_PARAM
         this->LessArgumentMethods.append(Method);
     }
 }

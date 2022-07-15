@@ -99,7 +99,7 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            INTFAPICALLBOOM_DECL *_APICALLBOOM,
+            INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
             const QVariantList& _arguments
 //            /*OUT*/ QVariantMap &_responseHeaders
         ) final
@@ -107,7 +107,7 @@ public:
         _itmplType Result;
 
         _apiObject->invokeMethod(
-                    _APICALLBOOM,
+                    APICALLBOOM_PARAM,
                     _arguments,
                     QReturnArgument<_itmplType>(this->RealTypeName, Result)
 //                    _responseHeaders

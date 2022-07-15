@@ -36,14 +36,16 @@ AccountProducts::AccountProducts() :
         tblAccountProducts::Private::ExtraORMFields,
         tblAccountProducts::Private::ExtraRelations,
         tblAccountProducts::Private::ExtraIndexes
-) { ; }
+) {
+    AccountProductsTranslate::instance();
+}
 
 AccountProductsTranslate::AccountProductsTranslate() :
     intfAccountProductsTranslate(
         AdvertSchema,
-        tblAccountProducts::Private::ExtraORMFields,
-        tblAccountProducts::Private::ExtraRelations,
-        tblAccountProducts::Private::ExtraIndexes
+        tblAccountProductsTranslate::Private::ExtraORMFields,
+        tblAccountProductsTranslate::Private::ExtraRelations,
+        tblAccountProductsTranslate::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
@@ -53,6 +55,16 @@ AccountSaleables::AccountSaleables() :
         tblAccountSaleables::Private::ExtraORMFields,
         tblAccountSaleables::Private::ExtraRelations,
         tblAccountSaleables::Private::ExtraIndexes
+) {
+    AccountSaleablesTranslate::instance();
+}
+
+AccountSaleablesTranslate::AccountSaleablesTranslate() :
+    intfAccountSaleablesTranslate(
+        AdvertSchema,
+        tblAccountSaleablesTranslate::Private::ExtraORMFields,
+        tblAccountSaleablesTranslate::Private::ExtraRelations,
+        tblAccountSaleablesTranslate::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/

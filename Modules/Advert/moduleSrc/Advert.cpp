@@ -76,8 +76,9 @@ Advert::Advert() :
             { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
         &AccountProducts::instance(),
-        &AccountProductsTranslate::instance(),
+//        &AccountProductsTranslate::instance(),
         &AccountSaleables::instance(),
+//        &AccountSaleablesTranslate::instance(),
         &AccountUserAssets::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
@@ -87,8 +88,9 @@ Advert::Advert() :
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 
     this->addSubModule(AccountProducts.data());
-    this->addSubModule(AccountProductsTranslate.data());
+//    this->addSubModule(AccountProductsTranslate.data());
     this->addSubModule(AccountSaleables.data());
+//    this->addSubModule(AccountSaleablesTranslate.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountAssetUsages.data());
     this->addSubModule(AccountCoupons.data());
@@ -172,7 +174,7 @@ void Advert::computeReferrer(
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(_APICALLBOOM, _assetItem, {
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -287,7 +289,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblLocations::Fields::locPlaceCode,  "FIX" },
     };
 
-    quint32 LocationID = CreateQuery(Locations::instance())
+    quint32 LocationID = Locations::instance().GetCreateQuery(APICALLBOOM_PARAM)
                          .addCols({
                                       tblLocations::Fields::locURL,
                                       tblLocations::Fields::locPlaceCode,
@@ -310,7 +312,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountProducts::ExtraFields::prdEx_locID,       LocationID },
     };
 
-    quint32 ProductID = CreateQuery(*this->AccountProducts)
+    quint32 ProductID = this->AccountProducts->GetCreateQuery(APICALLBOOM_PARAM)
                         .addCols({
 //                                     tblAccountProductsBase::Fields::prdID,
                                      tblAccountProductsBase::Fields::prdCode,
@@ -356,7 +358,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
     };
 
-    quint32 SaleableID = CreateQuery(*this->AccountSaleables)
+    quint32 SaleableID = this->AccountSaleables->GetCreateQuery(APICALLBOOM_PARAM)
                          .addCols({
 //                                      tblAccountSaleablesBase::Fields::slbID,
                                       tblAccountSaleablesBase::Fields::slb_prdID,
@@ -417,7 +419,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //        { tblAccountCouponsBase::Fields::cpnStatus,  },
     };
 
-    quint32 CouponID = CreateQuery(*this->AccountCoupons)
+    quint32 CouponID = this->AccountCoupons->GetCreateQuery(APICALLBOOM_PARAM)
                        .addCols({
 //                                    tblAccountCouponsBase::Fields::cpnID,
                                     tblAccountCouponsBase::Fields::cpnCode,
@@ -448,7 +450,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 
     //-- add to basket --------------------------------------
     stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
-        _APICALLBOOM,
+        APICALLBOOM_PARAM,
         /* saleableCode        */ SaleableCode,
         /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
         /* qty                 */ 1,
@@ -462,7 +464,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 
     //-- finalize basket --------------------------------------
     QVariant res = RESTClientHelper::callAPI(
-        _APICALLBOOM,
+        APICALLBOOM_PARAM,
         RESTClientHelper::POST,
         "Account/finalizeBasket",
         {},
@@ -480,7 +482,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentKey.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
-            _APICALLBOOM,
+            APICALLBOOM_PARAM,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},

@@ -32,6 +32,21 @@ using namespace Targoman::API::API;
 namespace Targoman::API::AAA {
 
 /******************************************************/
+class intfAccountProductsTranslate : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountProductsTranslate(const QString& _schema,
+                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
+                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+protected:
+    static intfAccountProductsTranslate* myInstance;
+    friend class intfAccountProducts;
+};
+
 class intfAccountProducts : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -43,37 +58,36 @@ public:
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual SelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
 
 private slots:
+#ifdef QT_DEBUG
+    QVariant ANONYMOUSE_ORMGET("Get Available Products")
+#else
     QVariant ORMGET("Get Available Products")
+#endif
+
     bool ORMDELETE("Delete a Product")
     bool ORMUPDATE("Update a Product info by priviledged user")
     quint32 ORMCREATE("Create a new Product by priviledged user")
 };
 
-class intfAccountProductsTranslate : public intfSQLBasedModule
+/******************************************************/
+class intfAccountSaleablesTranslate : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsTranslate(const QString& _schema,
-                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-private slots:
-//    QVariant ORMGET("Get Available Products")
-//    bool ORMDELETE("Delete a Product")
-//    bool ORMUPDATE("Update a Product info by priviledged user")
-//    quint32 ORMCREATE("Create a new Product by priviledged user")
+    intfAccountSaleablesTranslate(const QString& _schema,
+                                  const QList<DBM::clsORMField>& _exclusiveCols = {},
+                                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountProductsTranslate* myInstance;
-    friend class intfAccountProducts;
+    static intfAccountSaleablesTranslate* myInstance;
+    friend class intfAccountSaleables;
 };
 
-/******************************************************/
 class intfAccountSaleables : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -84,8 +98,16 @@ public:
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
+public:
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+
 private slots:
+#ifdef QT_DEBUG
+    QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
+#else
     QVariant ORMGET("Get Available Saleables")
+#endif
+
     bool ORMDELETE("Delete a Saleable")
     bool ORMUPDATE("Update a Saleable info by priviledged user")
     quint32 ORMCREATE("Create a new Saleable by priviledged user")

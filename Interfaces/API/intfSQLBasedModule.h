@@ -59,42 +59,36 @@ private:
             GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
-            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
         );
     QVariantList SelectAll(
 //            clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
-            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
         );
     TAPI::stuTable SelectAllWithCount(
 //            clsTable& _table,
             GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
-            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
         );
 
 public:
-//    SelectQuery GetSelectQuery(clsTable& _table);
-    virtual SelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
-    virtual CreateQuery GetCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
-    virtual UpdateQuery GetUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
-    virtual DeleteQuery GetDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
-
 //    QVariant Select(
 //            clsTable& _table,
 //            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
 //            const clsCondition& _extraFilters = {},
 //            quint16 _cacheTime = 0,
-//            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+//            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
 //        );
     QVariant Select(
             GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
             const clsCondition& _extraFilters = {},
             quint16 _cacheTime = 0,
-            std::function<void(SelectQuery &_query)> _fnTouchQuery = nullptr
+            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
         );
 
 //    quint64 Create(

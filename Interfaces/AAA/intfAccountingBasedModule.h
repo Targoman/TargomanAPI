@@ -41,7 +41,7 @@ protected:
         const QString& _schema,
         AssetUsageLimitsCols_t _AssetUsageLimitsCols,
         intfAccountProducts* _products,
-        intfAccountProductsTranslate* _productsTranslate,
+//        intfAccountProductsTranslate* _productsTranslate,
         intfAccountSaleables* _saleables,
         intfAccountUserAssets* _userAssets,
         intfAccountAssetUsage* _assetUsages,
@@ -248,8 +248,9 @@ protected:
     QString ServiceName;
 
     QScopedPointer<intfAccountProducts> AccountProducts;
-    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
+//    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
     QScopedPointer<intfAccountSaleables> AccountSaleables;
+//    QScopedPointer<intfAccountSaleablesTranslate> AccountSaleablesTranslate;
     QScopedPointer<intfAccountUserAssets> AccountUserAssets;
     QScopedPointer<intfAccountAssetUsage> AccountAssetUsages;
     QScopedPointer<intfAccountCoupons> AccountCoupons;

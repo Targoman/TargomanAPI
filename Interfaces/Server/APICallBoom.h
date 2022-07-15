@@ -52,8 +52,9 @@
 //just for use in NON-api methods (.cpp)
 #define INTFAPICALLBOOM_IMPL                Q_DECL_UNUSED intfAPICallBoom
 
-#define APICALLBOOM_PARAM                   _APICALLBOOM
-#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
+//#define APICALLBOOM_PARAM                   _APICALLBOOM
+//#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
+#define APICALLBOOM_PARAM_STR               "APICALLBOOM_PARAM"
 
 namespace Targoman::API::Server {
 
@@ -78,7 +79,7 @@ public:
     virtual bool needJWT() = 0;
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
-    quint64 getUserID();
+    quint64 getUserID(quint64 _default=0);
     QJsonObject getJWTPrivsObject();
 
     QString getIP();

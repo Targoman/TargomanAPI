@@ -48,7 +48,8 @@ clsORMFieldData::clsORMFieldData(const clsORMFieldData& _o) :
     ExtraValidator(_o.ExtraValidator),
     RenameAs(_o.RenameAs),
     UpdatableBy(_o.UpdatableBy),
-    Privs(_o.Privs) {
+    Privs(_o.Privs)
+{
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
             .replace("(", "<")
@@ -71,6 +72,7 @@ clsORMFieldData::clsORMFieldData(
     bool _isVirtual,
     bool _isPrimaryKey,
     bool _isSelectable,
+    bool _isMultiLanguage,
     const QString& _renameAs
 ) :
     ParameterType(static_cast<QMetaType::Type>(QMetaType::type(_type.toUtf8()))),
@@ -80,12 +82,13 @@ clsORMFieldData::clsORMFieldData(
     ExtraValidator(_extraValidator),
     RenameAs(_renameAs),
     UpdatableBy(_updatableBy),
-    Privs((_isSortable ? 0x01 : 0) +
-          (_isFilterable ? 0x02 : 0) +
-          (_isSelfIdentifier ? 0x4 : 0) +
-          (_isPrimaryKey ? 0x8 : 0) +
-          (_isVirtual ? 0x10 : 0) +
-          (_isSelectable ? 0x20 : 0)
+    Privs((_isSortable          ? enuBitLocation::Sortable       : 0) +
+          (_isFilterable        ? enuBitLocation::Filterable     : 0) +
+          (_isSelfIdentifier    ? enuBitLocation::SelfIdentifier : 0) +
+          (_isPrimaryKey        ? enuBitLocation::PrimaryKey     : 0) +
+          (_isVirtual           ? enuBitLocation::Virtual        : 0) +
+          (_isSelectable        ? enuBitLocation::Selectable     : 0) +
+          (_isMultiLanguage     ? enuBitLocation::MultiLanguage  : 0)
 ) {
     if (this->ParamTypeName.startsWith("NULLABLE_TYPE(")) {
         this->ParamTypeName
@@ -138,6 +141,7 @@ clsORMField::clsORMField(
              _isVirtual,
              _isPrimaryKey,
              _isSelectable,
+             false,
              _renameAs
              )
 ) { ; }

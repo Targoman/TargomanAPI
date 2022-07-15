@@ -392,6 +392,11 @@ clsColSpecs::clsColSpecs(
     this->Data->FalseValue = _falseValue;
 }
 
+const QString clsColSpecs::name() const
+{
+    return this->Data->Name;
+}
+
 const QString clsColSpecs::renameAs() const
 {
     return this->Data->RenameAs;
@@ -1122,11 +1127,11 @@ TARGOMAN_DEFINE_ENUM(enuUnionType,
                      Distinct)
 
 struct stuUnion {
-    SelectQuery Query;
+    ORMSelectQuery Query;
     enuUnionType::Type UnionType;
 
     stuUnion(const stuUnion& _other) : Query(_other.Query), UnionType(_other.UnionType) { ; }
-    stuUnion(const SelectQuery& _query, enuUnionType::Type _unionType) : Query(_query), UnionType(_unionType) { ; }
+    stuUnion(const ORMSelectQuery& _query, enuUnionType::Type _unionType) : Query(_query), UnionType(_unionType) { ; }
 };
 
 /***************************************************************************************/
@@ -1142,8 +1147,10 @@ template <class itmplDerived>
 class clsBaseQueryData : public QSharedData
 {
 public:
-    clsBaseQueryData(clsTable& _table, const QString& _alias = {}) :
-        Table(_table), Alias(_alias)
+    clsBaseQueryData(INTFAPICALLBOOM_IMPL &_APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
+        APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
+        Table(_table),
+        Alias(_alias)
     { ; }
 
     virtual ~clsBaseQueryData()
@@ -1171,6 +1178,7 @@ public:
     friend clsQueryGroupAndHavingTraitData<itmplDerived>;
 
 public:
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM;
     clsTable&   Table;
     QString     Alias;
     stuBaseQueryPreparedItems BaseQueryPreparedItems;
@@ -1188,8 +1196,9 @@ tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(const tmplBaseQuery<itmplD
     Data(_other.Data) { ; }
 
 template <class itmplDerived, class itmplData>
-tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(clsTable& _table, const QString& _alias) :
-    Data(new itmplData(_table, _alias)) {
+tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
+    Data(new itmplData(APICALLBOOM_PARAM, _table, _alias))
+{
     if (_table.AllCols.isEmpty())
         throw exQueryBuilder(QString("Call prepareFiltersList on table (%1) before creating a QueryBuilder").arg(_table.Name));
 }
@@ -1358,7 +1367,7 @@ public:
 //                    bool Joined = false;
 //                    if (this->RequiredCols.isEmpty())
 //                        foreach (auto Col, ForeignTable->BaseCols)
-//                            this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true, Relation));
+//                            this->ORMSelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true, Relation));
 //                    else
 //                        foreach (auto RequiredCol, this->RequiredCols)
 //                            if (addCol(RequiredCol, Relation))
@@ -1378,6 +1387,259 @@ public:
 };
 
 /***************************************************************************************/
+/* clsORMSelectQueryData ******************************************************************/
+/***************************************************************************************/
+struct stuORMSelectQueryPreparedItems {
+    QStringList Cols;
+    QStringList OrderBy;
+    QStringList Unions;
+    bool        IsPrepared = false;
+};
+
+class clsORMSelectQueryData : public clsBaseQueryData<ORMSelectQuery>
+{
+public:
+    clsORMSelectQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
+        clsBaseQueryData<ORMSelectQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
+//    clsORMSelectQueryData(const clsORMSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
+//    ~clsORMSelectQueryData() { ; }
+
+    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
+        if (this->ORMSelectQueryPreparedItems.IsPrepared)
+            return;
+        this->ORMSelectQueryPreparedItems.IsPrepared = true;
+
+        clsBaseQueryData<ORMSelectQuery>::prepare(_currentUserID, _useBinding );
+
+        /****************************************************************************/
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+
+        /****************************************************************************/
+        auto addCol = [this](clsColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
+            this->ORMSelectQueryPreparedItems.Cols.append(
+                _col.buildColNameString(
+                    this->Table.Name,
+                    this->Alias,
+                    "",
+                    this->Table.SelectableColsMap,
+                    this->Table.FilterableColsMap,
+                    true,
+                    this->BaseQueryPreparedItems.RenamedCols,
+                    true,
+                    _relation
+                )
+            );
+
+            if (_col.renameAs().size())
+                this->BaseQueryPreparedItems.RenamedCols.append(_col.renameAs());
+
+            return true;
+        }; //addCol
+
+        if (this->RequiredCols.isEmpty()) {
+            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
+                if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isSelectable())
+                    this->ORMSelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, true));
+            }
+        } else {
+//            qDebug() << MainTableNameOrAlias << "has RequiredCols";
+//            int i = 0;
+            foreach (clsColSpecs Col, this->RequiredCols) {
+//                qDebug() << i++;
+                addCol(Col);
+            }
+        }
+
+//        QSet<stuRelation> UsedJoins;
+//        foreach (stuRelation Relation, this->Table.Relations) {
+//            clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
+//            if (ForeignTable == nullptr)
+//                throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
+
+//            bool Joined = false;
+//            if (this->RequiredCols.isEmpty())
+//                foreach (auto Col, ForeignTable->BaseCols)
+//                    this->ORMSelectQueryPreparedItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
+//            else
+//                foreach (auto RequiredCol, this->RequiredCols)
+//                    if (addCol(RequiredCol, Relation))
+//                        Joined = true;
+
+//            if (Joined)
+//                UsedJoins.insert(Relation);
+//        }
+
+        if (this->ORMSelectQueryPreparedItems.Cols.isEmpty())
+            throw exHTTPBadRequest("No columns found to be reported");
+
+//        if (RequiredCols.size() && RequiredCols.size() > this->ORMSelectQueryPreparedItems.Cols.size())
+//            throw exHTTPBadRequest("Seems that some columns could not be resolved: Active Cols are: [" + this->ORMSelectQueryPreparedItems.Cols.join(", ") + "]");
+
+        /****************************************************************************/
+/*
+        quint8 OpenParenthesis = 0;
+        bool StatusColHasCriteria = false;
+        bool CanStartWithLogical = false;
+        QString LastLogical = "";
+        _filters = _filters.replace("\\ ", "$SPACE$");
+        foreach (auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
+            QString Rule;
+            Filter = Filter.trimmed ();
+            if (Filter == ")") {
+                if (OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
+                Rule = " )";
+                OpenParenthesis--;
+                CanStartWithLogical = true;
+            } else if (Filter == "(") {
+                Rule = LastLogical + "(";
+                CanStartWithLogical = false;
+                LastLogical.clear();
+                OpenParenthesis++;
+            } else if (Filter == '+' || Filter == '|' || Filter == '*') {
+                if (CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
+                if (Filter == '+') LastLogical = "AND ";
+                else if (Filter == '|') LastLogical = "OR ";
+                else if (Filter == '*') LastLogical = "XOR ";
+
+                CanStartWithLogical = false;
+                continue;
+            } else {
+                static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
+                Filter = Filter.replace("$SPACE$", " ");
+                QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
+                if (PatternMatches.lastCapturedIndex() != 3)
+                    throw exHTTPBadRequest("Invalid filter set: " + Filter);
+
+                Rule = LastLogical;
+
+                stuRelatedORMField relatedORMField = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
+                if (relatedORMField.isValid())
+                    Rule+=makeColName(this->Name, relatedORMField.Col, false, relatedORMField.Relation);
+                else
+                    throw exHTTPBadRequest("Invalid column for filtering:::: " + PatternMatches.captured(1));
+
+                if (relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__)
+                    StatusColHasCriteria = true;
+
+                if (relatedORMField.Relation.Column.size() && UsedJoins.contains(relatedORMField.Relation) == false)
+                    UsedJoins.insert(relatedORMField.Relation);
+
+                if (PatternMatches.captured(3) == "NULL") {
+                    if (PatternMatches.captured(2) == "=")
+                        Rule += " IS NULL";
+                    else if (PatternMatches.captured(2) == "!=")
+                        Rule += " IS NOT NULL";
+                    else
+                        throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
+
+                    SelectItems.Where.append(Rule);
+                    CanStartWithLogical = true;
+                    LastLogical.clear();
+                    continue;
+                }
+
+                if (PatternMatches.captured(2) == "<") Rule += " < ";
+                else if (PatternMatches.captured(2) == "<=") Rule += " <= ";
+                else if (PatternMatches.captured(2) == ">") Rule += " > ";
+                else if (PatternMatches.captured(2) == ">=") Rule += " >= ";
+                else if (PatternMatches.captured(2) == "!=") Rule += " != ";
+                else if (PatternMatches.captured(2) == "~=") Rule += " LIKE ";
+                else if (PatternMatches.captured(2) == "=") Rule += " = ";
+                else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
+
+                Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
+                QString Value = PatternMatches.captured(3);
+                if (Value == "NOW()"
+                   || Value.startsWith("DATE_ADD(")
+                   || Value.startsWith("DATE_SUB(")
+                   )
+                    Rule += Value.replace("$SPACE$", " ");
+                else {
+                    relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
+                    Rule += relatedORMField.Col.toDB(Value).toString();
+                }
+                Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
+
+                CanStartWithLogical = true;
+                LastLogical.clear();
+            }
+            SelectItems.Where.append(Rule);
+        }
+
+        if (OpenParenthesis != 0)
+            throw exHTTPBadRequest("count of open and closed parenthesises does not match");
+
+        if (SelectItems.Where.isEmpty())
+            SelectItems.Where.append("TRUE");
+
+        if (StatusColHasCriteria == false)
+            foreach (auto FCol, this->FilterableColsMap)
+                if (FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__) {
+                    if (FCol.Relation.LeftJoin)
+                        SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
+                    else
+                        SelectItems.Where.append(QString("AND %1!='R'").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
+                    if (FCol.Relation.Column.size())
+                        UsedJoins.insert(FCol.Relation);
+                }
+*/
+
+        /****************************************************************************/
+        if (this->OrderByCols.length()) {
+            foreach (auto orderBy, this->OrderByCols) {
+                if (orderBy.Dir == enuOrderDir::Ascending)
+                    this->ORMSelectQueryPreparedItems.OrderBy.append(orderBy.Col);
+                else
+                    this->ORMSelectQueryPreparedItems.OrderBy.append(QString("%1 DESC").arg(orderBy.Col));
+            }
+        }
+
+        /****************************************************************************/
+        if (this->UnionParts.length()) {
+            foreach (auto unionPart, this->UnionParts) {
+                QString cmd;
+                switch (unionPart.UnionType) {
+                    case enuUnionType::Normal:
+                        cmd = "UNION";
+                        break;
+                    case enuUnionType::All:
+                        cmd = "UNION ALL";
+                        break;
+                    case enuUnionType::Distinct:
+                        cmd = "UNION DISTINCT";
+                        break;
+                }
+
+                if (SQLPrettyLen)
+                    this->ORMSelectQueryPreparedItems.Unions.append(cmd.rightJustified(SQLPrettyLen));
+                else
+                    this->ORMSelectQueryPreparedItems.Unions.append(cmd);
+
+                this->ORMSelectQueryPreparedItems.Unions.append(unionPart.Query.buildQueryString({}, false, false, true));
+            }
+        }
+
+        /****************************************************************************/
+    }
+
+//    clsORMField colByName(const QString& _col) {
+//        return this->Table.SelectableColsMap[_col];
+//    }
+
+public:
+    QList<clsColSpecs>  RequiredCols;
+    QList<stuOrderBy>   OrderByCols;
+    QList<stuUnion>     UnionParts;
+
+    quint16             PageIndex = 0;
+    quint16             PageSize = 20;
+
+    quint16             CahceTime = 0;
+
+    stuORMSelectQueryPreparedItems ORMSelectQueryPreparedItems;
+};
+
+/***************************************************************************************/
 /* tmplQueryJoinTrait ******************************************************************/
 /***************************************************************************************/
 template <class itmplDerived>
@@ -1394,6 +1656,14 @@ tmplQueryJoinTrait<itmplDerived>::~tmplQueryJoinTrait() { ; }
 /***********************\
 |* Join                *|
 \***********************/
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
+
 template <class itmplDerived>
 itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, QString _foreignTable, const QString& _alias, const clsCondition& _on) {
     if (_foreignTable.isEmpty())
@@ -1470,25 +1740,75 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     return (itmplDerived&)*this;
 }
 
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable, {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable, {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+//-- -------------------------
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const clsTable& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable, _alias);      }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
 
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::LEFT,  _foreignTable.name(), {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin (const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::LEFT,  _foreignTable.name(), _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::RIGHT, _foreignTable.name(), {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _foreignTable.name(), _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const clsCondition& _on)                        { return this->join(enuJoinType::INNER, _foreignTable.name(), {},     _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(const clsTable& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _foreignTable.name(), _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(const clsTable& _foreignTable, const QString& _alias)                          { return this->join(enuJoinType::CROSS, _foreignTable.name(), _alias);      }
+template <class itmplDerived>
+itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, clsTable _foreignTable, const QString _alias, const clsCondition& _on) {
+    return this->join(_joinType, _foreignTable.name(), _alias, _on);
+}
+
+//-- inline -------------------------
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineCrossJoin(const QString& _foreignTable, const QString& _alias)                          { return this->inlineJoin(enuJoinType::CROSS, _foreignTable, _alias);      }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineInnerJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->inlineJoin(enuJoinType::INNER, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineInnerJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->inlineJoin(enuJoinType::INNER, _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineLeftJoin (const QString& _foreignTable, const clsCondition& _on)                        { return this->inlineJoin(enuJoinType::LEFT,  _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineLeftJoin (const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->inlineJoin(enuJoinType::LEFT,  _foreignTable, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineRightJoin(const QString& _foreignTable, const clsCondition& _on)                        { return this->inlineJoin(enuJoinType::RIGHT, _foreignTable, {},     _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineRightJoin(const QString& _foreignTable, const QString& _alias, const clsCondition& _on) { return this->inlineJoin(enuJoinType::RIGHT, _foreignTable, _alias, _on); }
+
+template <class itmplDerived>
+itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _joinType, QString _foreignTable, const QString _alias, const clsCondition& _on) {
+    if (_foreignTable.isEmpty())
+        throw exHTTPInternalServerError("Foreign Table is empty.");
+
+    if (_foreignTable.indexOf('.') < 0)
+        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->Table.Schema).arg(_foreignTable);
+
+    if (clsTable::Registry.contains(_foreignTable) == false)
+        throw exHTTPInternalServerError("Reference table has not been registered: " + _foreignTable);
+
+    clsTable* ForeignTable = clsTable::Registry[_foreignTable];
+
+    ORMSelectQuery Query = ForeignTable->GetSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM, _alias);
+
+    //no union, no where, no group by, no having
+    if (Query.isPure()) {
+        Query.Data->prepare(0, false);
+
+        this->JoinTraitData->Joins.append({ _joinType, Query.Data->BaseQueryPreparedItems.From, _alias, _on });
+
+        foreach (auto Join, Query.JoinTraitData->Joins) {
+            this->JoinTraitData->Joins.append({
+                                                  Join.JoinType,
+                                                  Join.ForeignTable,
+                                                  Join.Alias,
+                                                  Join.On
+                                              });
+        }
+
+        this->JoinTraitData->Owner->addColsFromInlineJoinCols(Query.Data->RequiredCols);
+
+        return (itmplDerived&)*this;
+    }
+
+    return this->nestedJoin(enuJoinType::INNER, Query, _alias, _on);
+}
 
 //-- nested -------------------------
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedCrossJoin(ORMSelectQuery& _nestedQuery, const QString _alias)                          { return this->nestedJoin(enuJoinType::CROSS, _nestedQuery, _alias); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedInnerJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::INNER, _nestedQuery, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedLeftJoin (ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::LEFT,  _nestedQuery, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedRightJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::RIGHT, _nestedQuery, _alias, _on); }
+
 template <class itmplDerived>
-itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType, SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
+itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedJoin(enuJoinType::Type _joinType, ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
     if (_alias.length())
         this->JoinTraitData->Owner->Data->BaseQueryPreparedItems.RenamedCols.append(_alias);
 
@@ -1514,12 +1834,12 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
 
     return (itmplDerived&)*this;
 }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on)  { return this->join(enuJoinType::LEFT,  _nestedQuery, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->join(enuJoinType::RIGHT, _nestedQuery, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoin(SelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->join(enuJoinType::INNER, _nestedQuery, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::crossJoin(SelectQuery& _nestedQuery, const QString _alias)                          { return this->join(enuJoinType::CROSS, _nestedQuery, _alias); }
 
 //-- with -------------------------
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::INNER, _relationName, _alias); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoinWith (const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::LEFT,  _relationName, _alias); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::RIGHT, _relationName, _alias); }
+
 template <class itmplDerived>
 itmplDerived& tmplQueryJoinTrait<itmplDerived>::joinWith(enuJoinType::Type _joinType, const QString& _relationName, const QString& _alias) {
     if (_relationName.isEmpty())
@@ -1532,8 +1852,8 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::joinWith(enuJoinType::Type _join
 
     for (QList<stuRelation>::iterator iter = this->JoinTraitData->Owner->Data->Table.Relations.begin();
          iter != this->JoinTraitData->Owner->Data->Table.Relations.end();
-         iter++) {
-
+         iter++
+    ) {
         stuRelation Rel = *iter;
 
         if (Rel.RelationName.length() && (Rel.RelationName == _relationName)) {
@@ -1566,12 +1886,11 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::joinWith(enuJoinType::Type _join
         Relation->Column
     );
 
-    this->join(_joinType, Relation->ReferenceTable, _alias, On);
+    this->inlineJoin(_joinType, Relation->ReferenceTable, _alias, On);
+//    this->join(_joinType, Relation->ReferenceTable, _alias, On);
+
     return (itmplDerived&)*this;
 }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::leftJoinWith (const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::LEFT,  _relationName, _alias); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::rightJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::RIGHT, _relationName, _alias); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::innerJoinWith(const QString& _relationName, const QString& _alias) { return this->joinWith(enuJoinType::INNER, _relationName, _alias); }
 
 /***************************************************************************************/
 /* clsQueryWhereTraitData **************************************************************/
@@ -2055,296 +2374,61 @@ itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::xorHaving(const clsCon
 }
 
 /***************************************************************************************/
-/* clsSelectQueryData ******************************************************************/
+/* ORMSelectQuery *************************************************************************/
 /***************************************************************************************/
-struct stuSelectQueryPreparedItems {
-    QStringList Cols;
-    QStringList OrderBy;
-    QStringList Unions;
-    bool        IsPrepared = false;
-};
-
-class clsSelectQueryData : public clsBaseQueryData<SelectQuery>
-{
-public:
-    clsSelectQueryData(clsTable& _table, const QString& _alias = {}) : clsBaseQueryData<SelectQuery>(_table, _alias) { ; }
-//    clsSelectQueryData(const clsSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
-//    ~clsSelectQueryData() { ; }
-
-    virtual void prepare(quint64 _currentUserID, bool _useBinding) {
-        if (this->SelectQueryPreparedItems.IsPrepared)
-            return;
-        this->SelectQueryPreparedItems.IsPrepared = true;
-
-        clsBaseQueryData<SelectQuery>::prepare(_currentUserID, _useBinding );
-
-        /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
-
-        /****************************************************************************/
-        auto addCol = [this](clsColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
-            this->SelectQueryPreparedItems.Cols.append(
-                _col.buildColNameString(
-                    this->Table.Name,
-                    this->Alias,
-                    "",
-                    this->Table.SelectableColsMap,
-                    this->Table.FilterableColsMap,
-                    true,
-                    this->BaseQueryPreparedItems.RenamedCols,
-                    true,
-                    _relation
-                )
-            );
-
-            if (_col.renameAs().size())
-                this->BaseQueryPreparedItems.RenamedCols.append(_col.renameAs());
-
-            return true;
-        }; //addCol
-
-        if (this->RequiredCols.isEmpty()) {
-            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
-                if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isSelectable())
-                    this->SelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, true));
-            }
-        } else {
-//            qDebug() << MainTableNameOrAlias << "has RequiredCols";
-//            int i = 0;
-            foreach (clsColSpecs Col, this->RequiredCols) {
-//                qDebug() << i++;
-                addCol(Col);
-            }
-        }
-
-//        QSet<stuRelation> UsedJoins;
-//        foreach (stuRelation Relation, this->Table.Relations) {
-//            clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
-//            if (ForeignTable == nullptr)
-//                throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
-
-//            bool Joined = false;
-//            if (this->RequiredCols.isEmpty())
-//                foreach (auto Col, ForeignTable->BaseCols)
-//                    this->SelectQueryPreparedItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
-//            else
-//                foreach (auto RequiredCol, this->RequiredCols)
-//                    if (addCol(RequiredCol, Relation))
-//                        Joined = true;
-
-//            if (Joined)
-//                UsedJoins.insert(Relation);
-//        }
-
-        if (this->SelectQueryPreparedItems.Cols.isEmpty())
-            throw exHTTPBadRequest("No columns found to be reported");
-
-//        if (RequiredCols.size() && RequiredCols.size() > this->SelectQueryPreparedItems.Cols.size())
-//            throw exHTTPBadRequest("Seems that some columns could not be resolved: Active Cols are: [" + this->SelectQueryPreparedItems.Cols.join(", ") + "]");
-
-        /****************************************************************************/
-/*
-        quint8 OpenParenthesis = 0;
-        bool StatusColHasCriteria = false;
-        bool CanStartWithLogical = false;
-        QString LastLogical = "";
-        _filters = _filters.replace("\\ ", "$SPACE$");
-        foreach (auto Filter, _filters.split(" ", QString::SkipEmptyParts)) {
-            QString Rule;
-            Filter = Filter.trimmed ();
-            if (Filter == ")") {
-                if (OpenParenthesis <= 0) throw exHTTPBadRequest("Invalid close parenthesis without any open");
-                Rule = " )";
-                OpenParenthesis--;
-                CanStartWithLogical = true;
-            } else if (Filter == "(") {
-                Rule = LastLogical + "(";
-                CanStartWithLogical = false;
-                LastLogical.clear();
-                OpenParenthesis++;
-            } else if (Filter == '+' || Filter == '|' || Filter == '*') {
-                if (CanStartWithLogical == false) throw exHTTPBadRequest("Invalid logical expression prior to any rule");
-                if (Filter == '+') LastLogical = "AND ";
-                else if (Filter == '|') LastLogical = "OR ";
-                else if (Filter == '*') LastLogical = "XOR ";
-
-                CanStartWithLogical = false;
-                continue;
-            } else {
-                static QRegularExpression rxFilterPattern("([a-zA-Z0-9\\_]+)([<>!=~]=?)(.+)");
-                Filter = Filter.replace("$SPACE$", " ");
-                QRegularExpressionMatch PatternMatches = rxFilterPattern.match(Filter);
-                if (PatternMatches.lastCapturedIndex() != 3)
-                    throw exHTTPBadRequest("Invalid filter set: " + Filter);
-
-                Rule = LastLogical;
-
-                stuRelatedORMField relatedORMField = this->FilterableColsMap.value(PatternMatches.captured(1).trimmed());
-                if (relatedORMField.isValid())
-                    Rule+=makeColName(this->Name, relatedORMField.Col, false, relatedORMField.Relation);
-                else
-                    throw exHTTPBadRequest("Invalid column for filtering:::: " + PatternMatches.captured(1));
-
-                if (relatedORMField.Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                    StatusColHasCriteria = true;
-
-                if (relatedORMField.Relation.Column.size() && UsedJoins.contains(relatedORMField.Relation) == false)
-                    UsedJoins.insert(relatedORMField.Relation);
-
-                if (PatternMatches.captured(3) == "NULL") {
-                    if (PatternMatches.captured(2) == "=")
-                        Rule += " IS NULL";
-                    else if (PatternMatches.captured(2) == "!=")
-                        Rule += " IS NOT NULL";
-                    else
-                        throw exHTTPBadRequest("Invalid filter with NULL expression: " + Filter);
-
-                    SelectItems.Where.append(Rule);
-                    CanStartWithLogical = true;
-                    LastLogical.clear();
-                    continue;
-                }
-
-                if (PatternMatches.captured(2) == "<") Rule += " < ";
-                else if (PatternMatches.captured(2) == "<=") Rule += " <= ";
-                else if (PatternMatches.captured(2) == ">") Rule += " > ";
-                else if (PatternMatches.captured(2) == ">=") Rule += " >= ";
-                else if (PatternMatches.captured(2) == "!=") Rule += " != ";
-                else if (PatternMatches.captured(2) == "~=") Rule += " LIKE ";
-                else if (PatternMatches.captured(2) == "=") Rule += " = ";
-                else throw exHTTPBadRequest("Invalid filter criteria: " + Filter);
-
-                Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
-                QString Value = PatternMatches.captured(3);
-                if (Value == "NOW()"
-                   || Value.startsWith("DATE_ADD(")
-                   || Value.startsWith("DATE_SUB(")
-                   )
-                    Rule += Value.replace("$SPACE$", " ");
-                else {
-                    relatedORMField.Col.argSpecs().validate(Value, PatternMatches.captured(1).trimmed().toLatin1());
-                    Rule += relatedORMField.Col.toDB(Value).toString();
-                }
-                Rule += relatedORMField.Col.argSpecs().isPrimitiveType() ? "" : "'";
-
-                CanStartWithLogical = true;
-                LastLogical.clear();
-            }
-            SelectItems.Where.append(Rule);
-        }
-
-        if (OpenParenthesis != 0)
-            throw exHTTPBadRequest("count of open and closed parenthesises does not match");
-
-        if (SelectItems.Where.isEmpty())
-            SelectItems.Where.append("TRUE");
-
-        if (StatusColHasCriteria == false)
-            foreach (auto FCol, this->FilterableColsMap)
-                if (FCol.Col.updatableBy() == enuUpdatableBy::__STATUS__) {
-                    if (FCol.Relation.LeftJoin)
-                        SelectItems.Where.append(QString("AND (ISNULL(%1) OR %1!='R')").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
-                    else
-                        SelectItems.Where.append(QString("AND %1!='R'").arg(makeColName(this->Name, FCol.Col, false, FCol.Relation)));
-                    if (FCol.Relation.Column.size())
-                        UsedJoins.insert(FCol.Relation);
-                }
-*/
-
-        /****************************************************************************/
-        if (this->OrderByCols.length()) {
-            foreach (auto orderBy, this->OrderByCols) {
-                if (orderBy.Dir == enuOrderDir::Ascending)
-                    this->SelectQueryPreparedItems.OrderBy.append(orderBy.Col);
-                else
-                    this->SelectQueryPreparedItems.OrderBy.append(QString("%1 DESC").arg(orderBy.Col));
-            }
-        }
-
-        /****************************************************************************/
-        if (this->UnionParts.length()) {
-            foreach (auto unionPart, this->UnionParts) {
-                QString cmd;
-                switch (unionPart.UnionType) {
-                    case enuUnionType::Normal:
-                        cmd = "UNION";
-                        break;
-                    case enuUnionType::All:
-                        cmd = "UNION ALL";
-                        break;
-                    case enuUnionType::Distinct:
-                        cmd = "UNION DISTINCT";
-                        break;
-                }
-
-                if (SQLPrettyLen)
-                    this->SelectQueryPreparedItems.Unions.append(cmd.rightJustified(SQLPrettyLen));
-                else
-                    this->SelectQueryPreparedItems.Unions.append(cmd);
-
-                this->SelectQueryPreparedItems.Unions.append(unionPart.Query.buildQueryString({}, false, false, true));
-            }
-        }
-
-        /****************************************************************************/
-    }
-
-//    clsORMField colByName(const QString& _col) {
-//        return this->Table.SelectableColsMap[_col];
-//    }
-
-public:
-    QList<clsColSpecs>  RequiredCols;
-    QList<stuOrderBy>   OrderByCols;
-    QList<stuUnion>     UnionParts;
-
-    quint16             PageIndex = 0;
-    quint16             PageSize = 20;
-
-    quint16             CahceTime = 0;
-
-    stuSelectQueryPreparedItems SelectQueryPreparedItems;
-};
-
-/***************************************************************************************/
-/* SelectQuery *************************************************************************/
-/***************************************************************************************/
-SelectQuery::SelectQuery() :
-    tmplBaseQuery<SelectQuery, clsSelectQueryData>(),
-    tmplQueryJoinTrait<SelectQuery>(this),
-    tmplQueryWhereTrait<SelectQuery>(this),
-    tmplQueryGroupAndHavingTrait<SelectQuery>(this) {
-    tmplQueryJoinTrait<SelectQuery>::JoinTraitData->Owner = this;
-    tmplQueryWhereTrait<SelectQuery>::WhereTraitData->Owner = this;
-    tmplQueryGroupAndHavingTrait<SelectQuery>::GroupAndHavingTraitData->Owner = this;
+ORMSelectQuery::ORMSelectQuery() :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(),
+    tmplQueryJoinTrait<ORMSelectQuery>(this),
+    tmplQueryWhereTrait<ORMSelectQuery>(this),
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this) {
+    tmplQueryJoinTrait<ORMSelectQuery>::JoinTraitData->Owner = this;
+    tmplQueryWhereTrait<ORMSelectQuery>::WhereTraitData->Owner = this;
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>::GroupAndHavingTraitData->Owner = this;
 }
-SelectQuery::SelectQuery(const SelectQuery& _other) :
-    tmplBaseQuery<SelectQuery, clsSelectQueryData>(_other),
-    tmplQueryJoinTrait<SelectQuery>(_other),
-    tmplQueryWhereTrait<SelectQuery>(_other),
-    tmplQueryGroupAndHavingTrait<SelectQuery>(_other) {
-    tmplQueryJoinTrait<SelectQuery>::JoinTraitData->Owner = this;
-    tmplQueryWhereTrait<SelectQuery>::WhereTraitData->Owner = this;
-    tmplQueryGroupAndHavingTrait<SelectQuery>::GroupAndHavingTraitData->Owner = this;
+ORMSelectQuery::ORMSelectQuery(const ORMSelectQuery& _other) :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(_other),
+    tmplQueryJoinTrait<ORMSelectQuery>(_other),
+    tmplQueryWhereTrait<ORMSelectQuery>(_other),
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(_other) {
+    tmplQueryJoinTrait<ORMSelectQuery>::JoinTraitData->Owner = this;
+    tmplQueryWhereTrait<ORMSelectQuery>::WhereTraitData->Owner = this;
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>::GroupAndHavingTraitData->Owner = this;
 }
-SelectQuery::SelectQuery(clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<SelectQuery, clsSelectQueryData>(_table, _alias),
-    tmplQueryJoinTrait<SelectQuery>(this),
-    tmplQueryWhereTrait<SelectQuery>(this),
-    tmplQueryGroupAndHavingTrait<SelectQuery>(this) { ; }
-SelectQuery::~SelectQuery() { ; }
+ORMSelectQuery::ORMSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(APICALLBOOM_PARAM, _table, _alias),
+    tmplQueryJoinTrait<ORMSelectQuery>(this),
+    tmplQueryWhereTrait<ORMSelectQuery>(this),
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this) { ; }
+ORMSelectQuery::~ORMSelectQuery() { ; }
 
 /***********************\
 |* Columns             *|
 \***********************/
-SelectQuery& SelectQuery::addCol(const clsColSpecs& _colSpecs) {
+ORMSelectQuery& ORMSelectQuery::addCol(const clsColSpecs& _colSpecs) {
+
+    //check duplicates
+    foreach (auto Col, this->Data->RequiredCols) {
+        if ((Col.name() == _colSpecs.name())
+            && (Col.renameAs() == _colSpecs.renameAs())
+        )
+            return *this;
+    }
+
     this->Data->RequiredCols.append(_colSpecs);
+
+    return *this;
+}
+
+ORMSelectQuery& ORMSelectQuery::addCols(const QList<clsColSpecs>& _colsSpecs) {
+    foreach (clsColSpecs Col, _colsSpecs)
+        this->addCol(Col);
+
     return *this;
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
 //TAPI::Cols_t -> QString
-SelectQuery& SelectQuery::addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator) {
+ORMSelectQuery& ORMSelectQuery::addCSVCols(const QString& _commaSeperatedCols, const QString& _seperator) {
     QString sCols = _commaSeperatedCols.trimmed();
 
     if (sCols.isEmpty())
@@ -2358,7 +2442,7 @@ SelectQuery& SelectQuery::addCSVCols(const QString& _commaSeperatedCols, const Q
     return this->addCols(cols);
 }
 
-SelectQuery& SelectQuery::addCols(const QStringList& _cols) {
+ORMSelectQuery& ORMSelectQuery::addCols(const QStringList& _cols) {
     if (_cols.length()) {
         foreach (QString col, _cols) {
             if (col.isEmpty() == false)
@@ -2369,7 +2453,7 @@ SelectQuery& SelectQuery::addCols(const QStringList& _cols) {
     return *this;
 }
 
-SelectQuery& SelectQuery::addCol(const QString& _col, const QString& _renameAs) {
+ORMSelectQuery& ORMSelectQuery::addCol(const QString& _col, const QString& _renameAs) {
 //    Q_ASSERT(_col.isEmpty() == false);
 
     if (_col.isEmpty() == false)
@@ -2378,13 +2462,13 @@ SelectQuery& SelectQuery::addCol(const QString& _col, const QString& _renameAs) 
     return *this;
 }
 
-SelectQuery& SelectQuery::addCol(const DBExpression& _expr, const QString& _renameAs) {
+ORMSelectQuery& ORMSelectQuery::addCol(const DBExpression& _expr, const QString& _renameAs) {
     this->addCol({ _expr, _renameAs });
 
     return *this;
 }
 
-SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs) {
+ORMSelectQuery& ORMSelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _col, const QString& _renameAs) {
     Q_ASSERT(_col.isEmpty() == false);
 
     this->addCol({ _aggFunc, _col, _renameAs });
@@ -2392,7 +2476,7 @@ SelectQuery& SelectQuery::addCol(enuAggregation::Type _aggFunc, const QString& _
     return *this;
 }
 
-SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs) {
+ORMSelectQuery& ORMSelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, const QString& _renameAs) {
     if (_aggFunc == enuConditionalAggregation::COUNTIF)
         this->addCol({ _aggFunc, _condition, _renameAs, 1, DBExpression::NIL() });
     else
@@ -2400,8 +2484,35 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
 
     return *this;
 }
-SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs) {
+ORMSelectQuery& ORMSelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const clsCondition& _condition, QVariant _trueValue, QVariant _falseValue, const QString& _renameAs) {
     this->addCol({ _aggFunc, _condition, _renameAs, _trueValue, _falseValue });
+
+    return *this;
+}
+
+ORMSelectQuery& ORMSelectQuery::removeCols(const QStringList& _cols) {
+    if (_cols.length()) {
+        foreach (QString col, _cols) {
+            if (col.isEmpty() == false)
+                this->removeCol(col);
+        }
+    }
+
+    return *this;
+}
+
+ORMSelectQuery& ORMSelectQuery::removeCol(const QString& _col) {
+    if (_col.isEmpty() == false) {
+        for (QList<clsColSpecs>::iterator it = this->Data->RequiredCols.begin();
+             it != this->Data->RequiredCols.end();
+             it++
+        ) {
+            if (it->name() == _col) {
+                it = this->Data->RequiredCols.erase(it);
+                break;
+            }
+        }
+    }
 
     return *this;
 }
@@ -2409,13 +2520,13 @@ SelectQuery& SelectQuery::addCol(enuConditionalAggregation::Type _aggFunc, const
 /***********************\
 |* From                *|
 \***********************/
-//SelectQuery& from(const QString _table, const QString& _renameAs = {});
-//SelectQuery& from(const SelectQuery& _nestedQuery);
+//ORMSelectQuery& from(const QString _table, const QString& _renameAs = {});
+//ORMSelectQuery& from(const ORMSelectQuery& _nestedQuery);
 
 /***********************\
 |* Order               *|
 \***********************/
-SelectQuery& SelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir) {
+ORMSelectQuery& ORMSelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir) {
     if (_col.isEmpty() == false)
         this->Data->OrderByCols.append({ _col, _dir });
     return *this;
@@ -2424,15 +2535,15 @@ SelectQuery& SelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir) {
 /***********************\
 |* Union               *|
 \***********************/
-SelectQuery& SelectQuery::addUnion(SelectQuery& _query) {
+ORMSelectQuery& ORMSelectQuery::addUnion(ORMSelectQuery& _query) {
     this->Data->UnionParts.append({ _query, enuUnionType::Normal });
     return *this;
 }
-SelectQuery& SelectQuery::addUnionAll(SelectQuery& _query) {
+ORMSelectQuery& ORMSelectQuery::addUnionAll(ORMSelectQuery& _query) {
     this->Data->UnionParts.append({ _query, enuUnionType::All });
     return *this;
 }
-SelectQuery& SelectQuery::addUnionDistinct(SelectQuery& _query) {
+ORMSelectQuery& ORMSelectQuery::addUnionDistinct(ORMSelectQuery& _query) {
     this->Data->UnionParts.append({ _query, enuUnionType::Distinct });
     return *this;
 }
@@ -2441,25 +2552,35 @@ SelectQuery& SelectQuery::addUnionDistinct(SelectQuery& _query) {
 |* Other               *|
 \***********************/
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-SelectQuery& SelectQuery::pageIndex(quint16 _pageIndex) {
+ORMSelectQuery& ORMSelectQuery::pageIndex(quint16 _pageIndex) {
     this->Data->PageIndex = _pageIndex;
     return *this;
 }
 
 //used by APPLY_GET_METHOD_CALL_ARGS_APICALL_TO_QUERY
-SelectQuery& SelectQuery::pageSize(quint16 _pageSize) {
+ORMSelectQuery& ORMSelectQuery::pageSize(quint16 _pageSize) {
     this->Data->PageSize = _pageSize;
     return *this;
 }
 
-SelectQuery& SelectQuery::setCacheTime(quint16 _cacheTime) {
+ORMSelectQuery& ORMSelectQuery::setCacheTime(quint16 _cacheTime) {
     this->Data->CahceTime = _cacheTime;
     return *this;
 }
 
-void SelectQuery::clearCache(QVariantMap _args) {
+void ORMSelectQuery::clearCache(QVariantMap _args) {
     QString QueryString = this->buildQueryString(_args, true, false, true);
     clsDAC::invalidateCache(QueryString);
+}
+
+//no union, no where, no group by, no having
+bool ORMSelectQuery::isPure() {
+    return (/*this->JoinTraitData->Joins.isEmpty()
+            &&*/ this->Data->UnionParts.isEmpty()
+            && this->WhereTraitData->WhereClauses.isEmpty()
+            && this->GroupAndHavingTraitData->GroupByCols.isEmpty()
+            && this->GroupAndHavingTraitData->HavingClauses.isEmpty()
+            );
 }
 
 /***********************\
@@ -2502,13 +2623,17 @@ into_option: {
 }
 */
 
-QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _reportCount, bool _checkStatusCol) {
+void ORMSelectQuery::prepare(Q_DECL_UNUSED QVariantMap _args, Q_DECL_UNUSED bool _selectOne, Q_DECL_UNUSED bool _reportCount, Q_DECL_UNUSED bool _checkStatusCol) {
     //this->Data->Table.prepareFiltersList();
     this->Data->prepare(0, false);
     this->WhereTraitData->prepare(_checkStatusCol);
     this->GroupAndHavingTraitData->prepare();
     //it should be the last preparation call, as the previous preparation may cause an automatic join
     this->JoinTraitData->prepare();
+}
+
+QString ORMSelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _reportCount, bool _checkStatusCol) {
+    this->prepare(_args, _selectOne, _reportCount, _checkStatusCol);
 
     //push
     quint16 PageIndex = this->Data->PageIndex;
@@ -2526,10 +2651,10 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     if (SQLPrettyLen) {
         QueryParts.append(QString("SELECT").rightJustified(SQLPrettyLen)
                           + " "
-                          + this->Data->SelectQueryPreparedItems.Cols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+                          + this->Data->ORMSelectQueryPreparedItems.Cols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
     } else {
         QueryParts.append("SELECT");
-        QueryParts.append(this->Data->SelectQueryPreparedItems.Cols.join(","));
+        QueryParts.append(this->Data->ORMSelectQueryPreparedItems.Cols.join(","));
     }
 
     //-----------
@@ -2591,14 +2716,14 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     }
 
     //-----------
-    if (this->Data->SelectQueryPreparedItems.OrderBy.size()) {
+    if (this->Data->ORMSelectQueryPreparedItems.OrderBy.size()) {
         if (SQLPrettyLen) {
             QueryParts.append(QString("ORDER BY").rightJustified(SQLPrettyLen)
                               + " "
-                              + this->Data->SelectQueryPreparedItems.OrderBy.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+                              + this->Data->ORMSelectQueryPreparedItems.OrderBy.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
         } else {
             QueryParts.append("ORDER BY");
-            QueryParts.append(this->Data->SelectQueryPreparedItems.OrderBy.join(","));
+            QueryParts.append(this->Data->ORMSelectQueryPreparedItems.OrderBy.join(","));
         }
     }
 
@@ -2638,9 +2763,9 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
     //-----------
     if (this->Data->UnionParts.length()) {
         if (SQLPrettyLen)
-            QueryParts.append(this->Data->SelectQueryPreparedItems.Unions.join("\n"));
+            QueryParts.append(this->Data->ORMSelectQueryPreparedItems.Unions.join("\n"));
         else
-            QueryParts.append(this->Data->SelectQueryPreparedItems.Unions.join(" "));
+            QueryParts.append(this->Data->ORMSelectQueryPreparedItems.Unions.join(" "));
     }
 
     //-----------
@@ -2680,7 +2805,7 @@ QString SelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, bool _
 }
 
 /*
-quint64 SelectQuery::count(QVariantMap _args) {
+quint64 ORMSelectQuery::count(QVariantMap _args) {
     QString QueryString = this->buildQueryString(_currentUserID, _args, false, true, true);
 
     //execute
@@ -2691,7 +2816,7 @@ quint64 SelectQuery::count(QVariantMap _args) {
 }
 */
 
-QVariantMap SelectQuery::one(QVariantMap _args) {
+QVariantMap ORMSelectQuery::one(QVariantMap _args) {
     QString QueryString = this->buildQueryString(_args, true, false, true);
 
 #ifdef QT_DEBUG
@@ -2713,15 +2838,15 @@ QVariantMap SelectQuery::one(QVariantMap _args) {
     if (Result.object().isEmpty())
         throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(PrependSchema(this->Data->Table.Schema)).arg(this->Data->Table.Name));
 
-//    qDebug() << "--- SelectQuery::one()" << __FILE__ << __LINE__ << Result;
-//    qDebug() << "--- SelectQuery::one() {tovariant}" << __FILE__ << __LINE__ << Result.toVariant();
-//    qDebug() << "--- SelectQuery::one() {tovariant.tomap}" << __FILE__ << __LINE__ << Result.toVariant().toMap();
+//    qDebug() << "--- ORMSelectQuery::one()" << __FILE__ << __LINE__ << Result;
+//    qDebug() << "--- ORMSelectQuery::one() {tovariant}" << __FILE__ << __LINE__ << Result.toVariant();
+//    qDebug() << "--- ORMSelectQuery::one() {tovariant.tomap}" << __FILE__ << __LINE__ << Result.toVariant().toMap();
 
     return Result.toVariant().toMap();
 }
 
 //template <typename T>
-//T SelectQuery::one(QVariantMap _args)
+//T ORMSelectQuery::one(QVariantMap _args)
 //{
 //    QVariantMap info = this->one(_args);
 //    T t;
@@ -2729,7 +2854,7 @@ QVariantMap SelectQuery::one(QVariantMap _args) {
 //    return t;
 //}
 
-QVariantMap SelectQuery::tryOne(QVariantMap _args) {
+QVariantMap ORMSelectQuery::tryOne(QVariantMap _args) {
     QT_TRY {
         return this->one(_args);
     }
@@ -2738,7 +2863,7 @@ QVariantMap SelectQuery::tryOne(QVariantMap _args) {
     }
 }
 //template <typename T>
-//T SelectQuery::tryOne(QVariantMap _args) noexcept
+//T ORMSelectQuery::tryOne(QVariantMap _args) noexcept
 //{
 //    QT_TRY {
 //        QVariantMap info = this->one(_args);
@@ -2751,7 +2876,7 @@ QVariantMap SelectQuery::tryOne(QVariantMap _args) {
 //    }
 //}
 
-QVariantList SelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
+QVariantList ORMSelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
     QString QueryString = this->buildQueryString(_args, false, false, true);
 
 #ifdef QT_DEBUG
@@ -2773,7 +2898,7 @@ QVariantList SelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint6
     return Result.toVariant().toList();
 }
 
-TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
+TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
     QString QueryString = this->buildQueryString(_args, false, false, true);
     QString CountingQueryString = this->buildQueryString(_args, false, true, true);
 
@@ -2819,9 +2944,9 @@ TAPI::stuTable SelectQuery::allWithCount(QVariantMap _args) { //, quint16 _maxCo
 }
 
 /***************************************************************************************/
-/* clsCreateQueryData ******************************************************************/
+/* clsORMCreateQueryData ******************************************************************/
 /***************************************************************************************/
-struct stuCreateQueryPreparedItems {
+struct stuORMCreateQueryPreparedItems {
     QStringList         Cols;
     QList<QStringList>  Values;
     QString             Select;
@@ -2830,21 +2955,23 @@ struct stuCreateQueryPreparedItems {
     bool                IsPrepared = false;
 };
 
-class clsCreateQueryData : public clsBaseQueryData<CreateQuery>
+class clsORMCreateQueryData : public clsBaseQueryData<ORMCreateQuery>
 {
 public:
-    clsCreateQueryData(clsTable& _table, const QString& _alias = {}) : clsBaseQueryData<CreateQuery>(_table, _alias) { ; }
-//    clsCreateQueryData(const clsCreateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
-//    ~clsCreateQueryData() { ; }
+    clsORMCreateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
+        clsBaseQueryData<ORMCreateQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
+
+//    clsORMCreateQueryData(const clsORMCreateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
+//    ~clsORMCreateQueryData() { ; }
 
     virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
 
-        if (this->CreateQueryPreparedItems.IsPrepared)
+        if (this->ORMCreateQueryPreparedItems.IsPrepared)
             return;
-        this->CreateQueryPreparedItems.IsPrepared = true;
+        this->ORMCreateQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<CreateQuery>::prepare(_currentUserID, _useBinding );
+        clsBaseQueryData<ORMCreateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -2871,7 +2998,7 @@ public:
 
                     providedBaseCols.append(baseCol.Col);
 
-                    this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                    this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
 
                     found = true;
 
@@ -2891,12 +3018,12 @@ public:
 
                     if (baseCol.Col.updatableBy() == enuUpdatableBy::__CREATOR__) {
     //                    extraBaseCols.append(baseCol);
-                        this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
                         extraBaseColsValues.append(baseCol.Col.toDB(_currentUserID));
                     } else if (baseCol.Col.defaultValue() == QNow) {
                         //NOW() is defined as default value in db schema
 
-    //                    this->CreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol, false));
+    //                    this->ORMCreateQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, baseCol, false));
     //                    extraBaseColsValues.append(DBExpression::NOW().toString());
                     } else if ((baseCol.Col.defaultValue() != QNull)
                              && (baseCol.Col.defaultValue() != QInvalid)
@@ -2904,14 +3031,14 @@ public:
                              && (baseCol.Col.defaultValue() != QDBInternal)
                         ) {
     //                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol, false) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
-                        this->CreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
                         extraBaseColsValues.append(baseCol.Col.toDB(baseCol.Col.defaultValue()));
                     }
                 }
             }
         }
 
-        if (this->CreateQueryPreparedItems.Cols.isEmpty())
+        if (this->ORMCreateQueryPreparedItems.Cols.isEmpty())
             throw exQueryBuilder("Nothing to do");
 
         if (this->Values.length()) {
@@ -2943,7 +3070,7 @@ public:
 //                                QVariant v = makeValueAsVariant(val);
 //                                QString l = QString::fromUtf8(v.value<QJsonDocument>().toJson(QJsonDocument::Compact));
 //qDebug() << itr.key() << ": val(" << val << ") toDB(" << baseCol.toDB(val) << ")"; // << " lambda(" << l << ")";
-                                this->CreateQueryPreparedItems.BindingValues.append(baseCol.toDB(val));
+                                this->ORMCreateQueryPreparedItems.BindingValues.append(baseCol.toDB(val));
                             }
 
                             break;
@@ -2958,7 +3085,7 @@ public:
 
 //                        if (_useBinding) {
 //                            oneRecordToString.append("?");
-//                            this->CreateQueryPreparedItems.BindingValues.append(makeValueAsSQL(DBExpression::NIL()));
+//                            this->ORMCreateQueryPreparedItems.BindingValues.append(makeValueAsSQL(DBExpression::NIL()));
 //                        }
 //                        else
 //                            oneRecordToString.append(makeValueAsSQL(DBExpression::NIL()));
@@ -2972,7 +3099,7 @@ public:
                         if (_useBinding) {
                             oneRecordToString.append("?");
                             QVariant v = makeValueAsVariant(val);
-                            this->CreateQueryPreparedItems.BindingValues.append(v);
+                            this->ORMCreateQueryPreparedItems.BindingValues.append(v);
                         } else {
                             QString v = makeValueAsSQL(val, true);
 //                            qDebug() << val << v;
@@ -2981,9 +3108,9 @@ public:
                     }
                 }
 
-                this->CreateQueryPreparedItems.Values.append(oneRecordToString);
+                this->ORMCreateQueryPreparedItems.Values.append(oneRecordToString);
             }
-            if (this->CreateQueryPreparedItems.Values.isEmpty())
+            if (this->ORMCreateQueryPreparedItems.Values.isEmpty())
                 throw exQueryBuilder("Values is empty");
         } else if (this->Select.isValid()) {
             if (extraBaseColsValues.length()) {
@@ -2992,7 +3119,7 @@ public:
                 }
             }
 
-            this->CreateQueryPreparedItems.Select = this->Select.buildQueryString({}, false, false, false);
+            this->ORMCreateQueryPreparedItems.Select = this->Select.buildQueryString({}, false, false, false);
         } else
             throw exQueryBuilder("Values or Select not provided");
     }
@@ -3001,26 +3128,26 @@ public:
     bool Options_Ignore = false;
     QStringList Cols;
     QList<QVariantMap> Values;
-    SelectQuery Select;
+    ORMSelectQuery Select;
 
-    stuCreateQueryPreparedItems CreateQueryPreparedItems;
+    stuORMCreateQueryPreparedItems ORMCreateQueryPreparedItems;
 };
 
 /***************************************************************************************/
-/* CreateQuery *************************************************************************/
+/* ORMCreateQuery *************************************************************************/
 /***************************************************************************************/
-CreateQuery::CreateQuery(const CreateQuery& _other) :
-    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_other) { ; }
+ORMCreateQuery::ORMCreateQuery(const ORMCreateQuery& _other) :
+    tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(_other) { ; }
 
-CreateQuery::CreateQuery(clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<CreateQuery, clsCreateQueryData>(_table, _alias) { ; }
+ORMCreateQuery::ORMCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(APICALLBOOM_PARAM, _table, _alias) { ; }
 
-CreateQuery::~CreateQuery() { ; }
+ORMCreateQuery::~ORMCreateQuery() { ; }
 
 /***********************\
 |* Options             *|
 \***********************/
-CreateQuery& CreateQuery::options_ignore() {
+ORMCreateQuery& ORMCreateQuery::options_ignore() {
     this->Data->Options_Ignore = true;
     return *this;
 }
@@ -3028,7 +3155,7 @@ CreateQuery& CreateQuery::options_ignore() {
 /***********************\
 |* Columns             *|
 \***********************/
-CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
+ORMCreateQuery& ORMCreateQuery::addCols(const QStringList& _cols) {
 //    if (this->Data->Values.length())
 //        throw exQueryBuilder("Columns must be defined before values");
 
@@ -3040,7 +3167,7 @@ CreateQuery& CreateQuery::addCols(const QStringList& _cols) {
     return *this;
 }
 
-CreateQuery& CreateQuery::addCol(const QString& _col) {
+ORMCreateQuery& ORMCreateQuery::addCol(const QString& _col) {
 //    if (this->Data->Values.length())
 //        throw exQueryBuilder("Columns must be defined before values");
 
@@ -3053,7 +3180,7 @@ CreateQuery& CreateQuery::addCol(const QString& _col) {
 /***********************\
 |* Values              *|
 \***********************/
-CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
+ORMCreateQuery& ORMCreateQuery::values(const QVariantMap& _oneRecordValues) {
 
     if (this->Data->Cols.isEmpty())
         throw exQueryBuilder("Columns must be defined before values");
@@ -3067,7 +3194,7 @@ CreateQuery& CreateQuery::values(const QVariantMap& _oneRecordValues) {
 
     return *this;
 }
-CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues) {
+ORMCreateQuery& ORMCreateQuery::values(const QList<QVariantMap>& _multipleRecordValues) {
     if (this->Data->Cols.isEmpty())
         throw exQueryBuilder("Columns must be defined before values");
 
@@ -3081,7 +3208,7 @@ CreateQuery& CreateQuery::values(const QList<QVariantMap>& _multipleRecordValues
 /***********************\
 |* Select              *|
 \***********************/
-CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery) {
+ORMCreateQuery& ORMCreateQuery::select(const ORMSelectQuery& _selectQuery) {
     if (this->Data->Cols.isEmpty())
         throw exQueryBuilder("Columns must be defined before select query");
 
@@ -3096,13 +3223,13 @@ CreateQuery& CreateQuery::select(const SelectQuery& _selectQuery) {
 /***********************\
 |* Execute             *|
 \***********************/
-stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
+stuBoundQueryString ORMCreateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     stuBoundQueryString BoundQueryString;
 
     this->Data->prepare(_currentUserID, _useBinding);
 
     if (_useBinding)
-        BoundQueryString.BindingValues = this->Data->CreateQueryPreparedItems.BindingValues;
+        BoundQueryString.BindingValues = this->Data->ORMCreateQueryPreparedItems.BindingValues;
 
     QStringList QueryParts;
 
@@ -3127,7 +3254,7 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
                           + "(");
         QueryParts.append(QString(SQLPrettyLen, ' ')
                           + " "
-                          + this->Data->CreateQueryPreparedItems.Cols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+                          + this->Data->ORMCreateQueryPreparedItems.Cols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
         QueryParts.append(QString(SQLPrettyLen, ' ')
                           + " "
                           + ")");
@@ -3137,13 +3264,13 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
             QueryParts.append(options.join(" "));
         QueryParts.append("INTO");
         QueryParts.append(this->Data->BaseQueryPreparedItems.From);
-        QueryParts.append("(" + this->Data->CreateQueryPreparedItems.Cols.join(",") + ")");
+        QueryParts.append("(" + this->Data->ORMCreateQueryPreparedItems.Cols.join(",") + ")");
     }
 
     //-----------
-    if (this->Data->CreateQueryPreparedItems.Values.length()) {
+    if (this->Data->ORMCreateQueryPreparedItems.Values.length()) {
         QStringList rows;
-        foreach (QStringList row, this->Data->CreateQueryPreparedItems.Values) {
+        foreach (QStringList row, this->Data->ORMCreateQueryPreparedItems.Values) {
             if (SQLPrettyLen) {
                 if (_useBinding)
                     rows.append(row.join(", "));
@@ -3180,7 +3307,7 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
             QueryParts.append("VALUES(");
         }
     } else {
-        QueryParts.append(this->Data->CreateQueryPreparedItems.Select);
+        QueryParts.append(this->Data->ORMCreateQueryPreparedItems.Select);
     }
 
     //-----------
@@ -3196,7 +3323,7 @@ stuBoundQueryString CreateQuery::buildQueryString(quint64 _currentUserID, QVaria
     return BoundQueryString;
 }
 
-//void updateInvalidatedAt(SelectQuery& _select, const QString& invalidateQueryString)
+//void updateInvalidatedAt(ORMSelectQuery& _select, const QString& invalidateQueryString)
 //{
 //    throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
 //}
@@ -3260,7 +3387,7 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, 
 }
 
 ///@TODO: BUG: the create query may results more than one rows, but only last inserted id returns by .execute
-quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
+quint64 ORMCreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
     clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
@@ -3329,7 +3456,7 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
                                   BoundQueryString.BindingValues
                                   );
 
-//        qDebug() << "--- CreateQuery::execute()" << __FILE__ << __LINE__ << Result.toJson(false);
+//        qDebug() << "--- ORMCreateQuery::execute()" << __FILE__ << __LINE__ << Result.toJson(false);
 
         auto ret = Result.lastInsertId().toULongLong();
 
@@ -3344,29 +3471,31 @@ quint64 CreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
 }
 
 /***************************************************************************************/
-/* clsUpdateQueryData ******************************************************************/
+/* clsORMUpdateQueryData ******************************************************************/
 /***************************************************************************************/
-struct stuUpdateQueryPreparedItems {
+struct stuORMUpdateQueryPreparedItems {
     QStringList     SetCols;
 
     QVariantList    BindingValues;
     bool            IsPrepared = false;
 };
 
-class clsUpdateQueryData : public clsBaseQueryData<UpdateQuery>
+class clsORMUpdateQueryData : public clsBaseQueryData<ORMUpdateQuery>
 {
 public:
-    clsUpdateQueryData(clsTable& _table, const QString& _alias = {}) : clsBaseQueryData<UpdateQuery>(_table, _alias) { ; }
-//    clsUpdateQueryData(const clsUpdateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
-//    ~clsUpdateQueryData() { ; }
+    clsORMUpdateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
+        clsBaseQueryData<ORMUpdateQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
+
+//    clsORMUpdateQueryData(const clsORMUpdateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
+//    ~clsORMUpdateQueryData() { ; }
 
     virtual void prepare(quint64 _currentUserID, bool _useBinding) {
-        if (this->UpdateQueryPreparedItems.IsPrepared)
+        if (this->ORMUpdateQueryPreparedItems.IsPrepared)
             return;
 
-        this->UpdateQueryPreparedItems.IsPrepared = true;
+        this->ORMUpdateQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<UpdateQuery>::prepare(_currentUserID, _useBinding );
+        clsBaseQueryData<ORMUpdateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
@@ -3419,9 +3548,9 @@ public:
                 QString colName = l.at(1);
 
                 if (tableName.isEmpty())
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(colName));
+                    this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(colName));
                 else
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3.%4").arg(colName).arg(equalSign).arg(tableName).arg(colName));
+                    this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2%3.%4").arg(colName).arg(equalSign).arg(tableName).arg(colName));
             } else {
                 providedCols.append(key);
 
@@ -3429,14 +3558,14 @@ public:
                     relatedORMField.Col.validate(val);
 
                 if (CanSetValueAsNull(relatedORMField.Col, val))
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2NULL").arg(colName).arg(equalSign));
+                    this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2NULL").arg(colName).arg(equalSign));
                 else {
                     if (val.userType() == QMetaTypeId<DBExpression>::qt_metatype_id() || _useBinding == false) {
                         QString v = makeValueAsSQL(val, _useBinding == false, &relatedORMField.Col);
-                        this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
+                        this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(v));
                     } else {
-                        this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
-                        this->UpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(val));
+                        this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
+                        this->ORMUpdateQueryPreparedItems.BindingValues.append(relatedORMField.Col.toDB(val));
                     }
                 }
             }
@@ -3450,10 +3579,10 @@ public:
                 auto colName = makeColName(this->Table.Name, this->Alias, baseCol.Col, false);
 
                 if (_useBinding == false)
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.Col.toDB(_currentUserID).toString()));
+                    this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.Col.toDB(_currentUserID).toString()));
                 else {
-                    this->UpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
-                    this->UpdateQueryPreparedItems.BindingValues.append(baseCol.Col.toDB(_currentUserID));
+                    this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2?").arg(colName).arg(equalSign));
+                    this->ORMUpdateQueryPreparedItems.BindingValues.append(baseCol.Col.toDB(_currentUserID));
                 }
             }
         }
@@ -3465,54 +3594,54 @@ public:
 //    QVariantHash SetMaps; error in key order: sorted by QHash iterator
     QList<QPair<QString, QVariant>> SetMaps;
 
-    stuUpdateQueryPreparedItems UpdateQueryPreparedItems;
+    stuORMUpdateQueryPreparedItems ORMUpdateQueryPreparedItems;
 };
 
 /***************************************************************************************/
-/* UpdateQuery *************************************************************************/
+/* ORMUpdateQuery *************************************************************************/
 /***************************************************************************************/
-UpdateQuery::UpdateQuery(const UpdateQuery& _other) :
-    tmplBaseQuery<UpdateQuery, clsUpdateQueryData>(_other),
-    tmplQueryJoinTrait<UpdateQuery>(_other),
-    tmplQueryWhereTrait<UpdateQuery>(_other) {
-    tmplQueryJoinTrait<UpdateQuery>::JoinTraitData->Owner = this;
-    tmplQueryWhereTrait<UpdateQuery>::WhereTraitData->Owner = this;
+ORMUpdateQuery::ORMUpdateQuery(const ORMUpdateQuery& _other) :
+    tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>(_other),
+    tmplQueryJoinTrait<ORMUpdateQuery>(_other),
+    tmplQueryWhereTrait<ORMUpdateQuery>(_other) {
+    tmplQueryJoinTrait<ORMUpdateQuery>::JoinTraitData->Owner = this;
+    tmplQueryWhereTrait<ORMUpdateQuery>::WhereTraitData->Owner = this;
 }
-UpdateQuery::UpdateQuery(clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<UpdateQuery, clsUpdateQueryData>(_table, _alias),
-    tmplQueryJoinTrait<UpdateQuery>(this),
-    tmplQueryWhereTrait<UpdateQuery>(this) { ; }
-UpdateQuery::~UpdateQuery() { ; }
+ORMUpdateQuery::ORMUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>(APICALLBOOM_PARAM, _table, _alias),
+    tmplQueryJoinTrait<ORMUpdateQuery>(this),
+    tmplQueryWhereTrait<ORMUpdateQuery>(this) { ; }
+ORMUpdateQuery::~ORMUpdateQuery() { ; }
 
 /***********************\
 |* Set                 *|
 \***********************/
-UpdateQuery& UpdateQuery::setNull(const QString& _col) {
+ORMUpdateQuery& ORMUpdateQuery::setNull(const QString& _col) {
     return this->set(_col, DBExpression::NIL());
 }
-UpdateQuery& UpdateQuery::set(const QString& _col, const QVariant& _value) {
+ORMUpdateQuery& ORMUpdateQuery::set(const QString& _col, const QVariant& _value) {
     this->Data->SetMaps.append({ _col, _value });
     return *this;
 }
-UpdateQuery& UpdateQuery::set(const QString& _col, const QString& _otherTable, const QString& _otherCol) {
+ORMUpdateQuery& ORMUpdateQuery::set(const QString& _col, const QString& _otherTable, const QString& _otherCol) {
     this->Data->SetMaps.append({ _col, QStringList({ _otherTable, _otherCol }) });
     return *this;
 }
-//UpdateQuery& UpdateQuery::increament(const QString& _col, quint64 _value)
+//ORMUpdateQuery& ORMUpdateQuery::increament(const QString& _col, quint64 _value)
 //{
 //    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 + %2").arg(_col).arg(_value)) });
 //    return *this;
 //}
-UpdateQuery& UpdateQuery::increament(const QString& _col, qreal _value) {
+ORMUpdateQuery& ORMUpdateQuery::increament(const QString& _col, qreal _value) {
     this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 + %2").arg(_col).arg(_value)) });
     return *this;
 }
-//UpdateQuery& UpdateQuery::decreament(const QString& _col, quint64 _value)
+//ORMUpdateQuery& ORMUpdateQuery::decreament(const QString& _col, quint64 _value)
 //{
 //    this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 - %2").arg(_col).arg(_value)) });
 //    return *this;
 //}
-UpdateQuery& UpdateQuery::decreament(const QString& _col, qreal _value) {
+ORMUpdateQuery& ORMUpdateQuery::decreament(const QString& _col, qreal _value) {
     this->Data->SetMaps.append({ _col, DBExpression::VALUE(QString("%1 - %2").arg(_col).arg(_value)) });
     return *this;
 }
@@ -3520,7 +3649,7 @@ UpdateQuery& UpdateQuery::decreament(const QString& _col, qreal _value) {
 /***********************\
 |* Execute             *|
 \***********************/
-stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
+stuBoundQueryString ORMUpdateQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     if (this->WhereTraitData->isEmpty())
         throw exQueryBuilderWhereClauseNotProvided("Where conditions of update query is empty. This is very dangerous.");
 
@@ -3535,7 +3664,7 @@ stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVaria
         throw exQueryBuilderWhereClauseNotProvided("Where cluase of update query is empty. This is very dangerous.");
 
     if (_useBinding)
-        BoundQueryString.BindingValues = this->Data->UpdateQueryPreparedItems.BindingValues;
+        BoundQueryString.BindingValues = this->Data->ORMUpdateQueryPreparedItems.BindingValues;
 
     QStringList QueryParts;
 
@@ -3560,10 +3689,10 @@ stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVaria
     if (SQLPrettyLen) {
         QueryParts.append(QString("SET").rightJustified(SQLPrettyLen)
                           + " "
-                          + this->Data->UpdateQueryPreparedItems.SetCols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+                          + this->Data->ORMUpdateQueryPreparedItems.SetCols.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
     } else {
         QueryParts.append("SET");
-        QueryParts.append(this->Data->UpdateQueryPreparedItems.SetCols.join(","));
+        QueryParts.append(this->Data->ORMUpdateQueryPreparedItems.SetCols.join(","));
     }
 
     //-----------
@@ -3597,7 +3726,7 @@ stuBoundQueryString UpdateQuery::buildQueryString(quint64 _currentUserID, QVaria
     return BoundQueryString;
 }
 
-quint64 UpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
+quint64 ORMUpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
 #ifdef QT_DEBUG
@@ -3629,63 +3758,65 @@ quint64 UpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _us
 }
 
 /***************************************************************************************/
-/* clsDeleteQueryData ******************************************************************/
+/* clsORMDeleteQueryData ******************************************************************/
 /***************************************************************************************/
-struct stuDeleteQueryPreparedItems {
+struct stuORMDeleteQueryPreparedItems {
     QStringList Targets;
     bool        IsPrepared = false;
 };
 
-class clsDeleteQueryData : public clsBaseQueryData<DeleteQuery>
+class clsORMDeleteQueryData : public clsBaseQueryData<ORMDeleteQuery>
 {
 public:
-    clsDeleteQueryData(clsTable& _table, const QString& _alias = {}) : clsBaseQueryData<DeleteQuery>(_table, _alias) { ; }
-//    clsDeleteQueryData(const clsDeleteQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
-//    ~clsDeleteQueryData() { ; }
+    clsORMDeleteQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
+        clsBaseQueryData<ORMDeleteQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
+
+//    clsORMDeleteQueryData(const clsORMDeleteQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
+//    ~clsORMDeleteQueryData() { ; }
 
     virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
 
-        if (this->DeleteQueryPreparedItems.IsPrepared)
+        if (this->ORMDeleteQueryPreparedItems.IsPrepared)
             return;
-        this->DeleteQueryPreparedItems.IsPrepared = true;
+        this->ORMDeleteQueryPreparedItems.IsPrepared = true;
 
-        clsBaseQueryData<DeleteQuery>::prepare(_currentUserID, _useBinding );
+        clsBaseQueryData<ORMDeleteQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
         QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
 
         /****************************************************************************/
-        this->DeleteQueryPreparedItems.Targets = this->Targets;
+        this->ORMDeleteQueryPreparedItems.Targets = this->Targets;
 
         /****************************************************************************/
     }
 
 public:
     QStringList Targets;
-    stuDeleteQueryPreparedItems DeleteQueryPreparedItems;
+    stuORMDeleteQueryPreparedItems ORMDeleteQueryPreparedItems;
 };
 
 /***************************************************************************************/
-/* DeleteQuery *************************************************************************/
+/* ORMDeleteQuery *************************************************************************/
 /***************************************************************************************/
-DeleteQuery::DeleteQuery(const DeleteQuery& _other) :
-    tmplBaseQuery<DeleteQuery, clsDeleteQueryData>(_other),
-    tmplQueryJoinTrait<DeleteQuery>(_other),
-    tmplQueryWhereTrait<DeleteQuery>(_other) {
-    tmplQueryJoinTrait<DeleteQuery>::JoinTraitData->Owner = this;
-    tmplQueryWhereTrait<DeleteQuery>::WhereTraitData->Owner = this;
+ORMDeleteQuery::ORMDeleteQuery(const ORMDeleteQuery& _other) :
+    tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>(_other),
+    tmplQueryJoinTrait<ORMDeleteQuery>(_other),
+    tmplQueryWhereTrait<ORMDeleteQuery>(_other) {
+    tmplQueryJoinTrait<ORMDeleteQuery>::JoinTraitData->Owner = this;
+    tmplQueryWhereTrait<ORMDeleteQuery>::WhereTraitData->Owner = this;
 }
-DeleteQuery::DeleteQuery(clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<DeleteQuery, clsDeleteQueryData>(_table, _alias),
-    tmplQueryJoinTrait<DeleteQuery>(this),
-    tmplQueryWhereTrait<DeleteQuery>(this) { ; }
-DeleteQuery::~DeleteQuery() { ; }
+ORMDeleteQuery::ORMDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>(APICALLBOOM_PARAM, _table, _alias),
+    tmplQueryJoinTrait<ORMDeleteQuery>(this),
+    tmplQueryWhereTrait<ORMDeleteQuery>(this) { ; }
+ORMDeleteQuery::~ORMDeleteQuery() { ; }
 
 /***********************\
 |* Target              *|
 \***********************/
-DeleteQuery& DeleteQuery::addTarget(const QString& _targetTableName) {
+ORMDeleteQuery& ORMDeleteQuery::addTarget(const QString& _targetTableName) {
     this->Data->Targets.append(_targetTableName);
     return *this;
 }
@@ -3693,7 +3824,7 @@ DeleteQuery& DeleteQuery::addTarget(const QString& _targetTableName) {
 /***********************\
 |* Execute             *|
 \***********************/
-QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args) {
+QString ORMDeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args) {
     if (this->WhereTraitData->isEmpty())
         throw exQueryBuilderWhereClauseNotProvided("Where conditions of delete query is empty. This is very dangerous.");
 
@@ -3714,11 +3845,11 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
                           + " "
                           + this->Data->BaseQueryPreparedItems.From);
 
-        if (this->Data->DeleteQueryPreparedItems.Targets.length())
+        if (this->Data->ORMDeleteQueryPreparedItems.Targets.length())
             QueryParts.append(QString(SQLPrettyLen - 1, ' ')
                               + ","
                               + " "
-                              + this->Data->DeleteQueryPreparedItems.Targets.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
+                              + this->Data->ORMDeleteQueryPreparedItems.Targets.join("\n" + QString(SQLPrettyLen - 1, ' ') + "," + " "));
 
         QueryParts.append(QString("FROM").rightJustified(SQLPrettyLen)
                           + " "
@@ -3727,8 +3858,8 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
         QueryParts.append("DELETE");
         QueryParts.append(this->Data->BaseQueryPreparedItems.From);
 
-        if (this->Data->DeleteQueryPreparedItems.Targets.length())
-            QueryParts.append("," + this->Data->DeleteQueryPreparedItems.Targets.join(","));
+        if (this->Data->ORMDeleteQueryPreparedItems.Targets.length())
+            QueryParts.append("," + this->Data->ORMDeleteQueryPreparedItems.Targets.join(","));
 
         QueryParts.append("FROM");
         QueryParts.append(this->Data->BaseQueryPreparedItems.From);
@@ -3773,7 +3904,7 @@ QString DeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _args)
     return QueryString;
 }
 
-quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _realDelete) {
+quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _realDelete) {
     QString QueryString = this->buildQueryString(_currentUserID, _args);
 
     clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
@@ -3795,7 +3926,7 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 
         //2: soft delete this
         QT_TRY {
-            quint64 rowsAffected = UpdateQuery(this->Data->Table)
+            quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->Table)
                     .set(statusFieldName, "Removed")
                     .where(this->WhereTraitData->WhereClauses)
                     .setPksByPath(this->WhereTraitData->PksByPath)
@@ -3839,20 +3970,20 @@ quint64 DeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _re
 
 /***************************************************************************************/
 
-template class tmplBaseQuery<SelectQuery, clsSelectQueryData>;
-template class tmplQueryJoinTrait<SelectQuery>;
-template class tmplQueryWhereTrait<SelectQuery>;
-template class tmplQueryGroupAndHavingTrait<SelectQuery>;
+template class tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>;
+template class tmplQueryJoinTrait<ORMSelectQuery>;
+template class tmplQueryWhereTrait<ORMSelectQuery>;
+template class tmplQueryGroupAndHavingTrait<ORMSelectQuery>;
 
-template class tmplBaseQuery<CreateQuery, clsCreateQueryData>;
+template class tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>;
 
-template class tmplBaseQuery<UpdateQuery, clsUpdateQueryData>;
-template class tmplQueryJoinTrait<UpdateQuery>;
-template class tmplQueryWhereTrait<UpdateQuery>;
+template class tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>;
+template class tmplQueryJoinTrait<ORMUpdateQuery>;
+template class tmplQueryWhereTrait<ORMUpdateQuery>;
 
-template class tmplBaseQuery<DeleteQuery, clsDeleteQueryData>;
-template class tmplQueryJoinTrait<DeleteQuery>;
-template class tmplQueryWhereTrait<DeleteQuery>;
+template class tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>;
+template class tmplQueryJoinTrait<ORMDeleteQuery>;
+template class tmplQueryWhereTrait<ORMDeleteQuery>;
 
 } //namespace Targoman::API::DBM
 

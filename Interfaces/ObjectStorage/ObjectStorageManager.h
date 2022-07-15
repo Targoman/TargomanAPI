@@ -84,7 +84,8 @@ public:
 //            );
 
     static void applyGetFileUrlInQuery(
-        SelectQuery &_query,
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        ORMSelectQuery &_query,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
@@ -102,6 +103,7 @@ public:
 
 private:
     struct stuProcessQueueParams {
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM;
         quint64 CurrentUserID;
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &UploadFiles;
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &UploadQueue;
@@ -110,6 +112,7 @@ private:
         quint16 MaxItemsCount = 100;
 
         stuProcessQueueParams(
+            INTFAPICALLBOOM_DECL &_APICALLBOOM_PARAM,
             quint64 _currentUserID,
             Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
             Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
@@ -117,6 +120,7 @@ private:
             quint64 _uploadedFileID = 0,
             quint16 _maxItemsCount = 100
         ) :
+            APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
             CurrentUserID(_currentUserID),
             UploadFiles(_uploadFiles),
             UploadQueue(_uploadQueue),
@@ -126,9 +130,12 @@ private:
         { ; }
     };
 
-    static bool processQueue(const stuProcessQueueParams &_processQueueParams);
+    static bool processQueue(
+        const stuProcessQueueParams &_processQueueParams);
 
-    static bool storeFileToGateway(const ORM::Private::stuProcessUploadQueueInfo &_queueInfo);
+    static bool storeFileToGateway(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const ORM::Private::stuProcessUploadQueueInfo &_queueInfo);
 };
 
 } //namespace Targoman::API::ObjectStorage

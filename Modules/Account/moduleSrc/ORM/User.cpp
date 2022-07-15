@@ -61,8 +61,8 @@ User::User() :
 }
 
 QVariant IMPL_ORMGET(User) {
-    if (_APICALLBOOM.getUserID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(_APICALLBOOM, { "Account:User:CRUD~0100" });
+    if (APICALLBOOM_PARAM.getUserID() != _pksByPath.toULongLong())
+        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -100,7 +100,7 @@ QVariant IMPL_ORMGET(User) {
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                         {},
                         0,
-                        [](SelectQuery &_query) {
+                        [](ORMSelectQuery &_query) {
                             _query.leftJoinWith(tblUser::Relation::ExtraInfo);
                         });
 
@@ -110,7 +110,7 @@ QVariant IMPL_ORMGET(User) {
 }
 
 quint64 IMPL_ORMCREATE(User) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
@@ -121,22 +121,25 @@ quint64 IMPL_ORMCREATE(User) {
  * this method only can call by admin user
  */
 bool IMPL_ORMUPDATE(User) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_ORMDELETE(User) {
-    Authorization::checkPriv(_APICALLBOOM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
-SelectQuery User::getPhotoQuery(quint64 _usrID) {
+ORMSelectQuery User::getPhotoQuery(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _usrID
+) {
 
     UserExtraInfo::instance().prepareFiltersList();
 
-    return SelectQuery(UserExtraInfo::instance())
+    return UserExtraInfo::instance().GetSelectQuery(APICALLBOOM_PARAM)
         .addCol(tblUserExtraInfo::Fields::ueiPhoto)
         .where({ tblUserExtraInfo::Fields::uei_usrID, enuConditionOperator::Equal, _usrID })
     ;
@@ -146,12 +149,12 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     if (CurrentUserID != _usrID)
-        Authorization::checkPriv(_APICALLBOOM, { "Account:User:photo:CRUD~0100" });
+        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:photo:CRUD~0100" });
 
-    auto Photo = getPhotoQuery(_usrID)
+    auto Photo = getPhotoQuery(APICALLBOOM_PARAM, _usrID)
             .setCacheTime(30)
             .one()
             .value(tblUserExtraInfo::Fields::ueiPhoto).toString().toLatin1();
@@ -164,7 +167,7 @@ bool IMPL_REST_UPDATE(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     QString qry = QString()
           + "INSERT INTO"
@@ -187,7 +190,7 @@ bool IMPL_REST_UPDATE(User, photo, (
     bool OK = Result.numRowsAffected() > 0;
 
     if (OK)
-        getPhotoQuery(CurrentUserID).clearCache();
+        getPhotoQuery(APICALLBOOM_PARAM, CurrentUserID).clearCache();
 
     return OK;
 }
@@ -195,7 +198,7 @@ bool IMPL_REST_UPDATE(User, photo, (
 bool IMPL_REST_POST(User, deletePhoto, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     QString qry = QString()
           + "UPDATE"
@@ -214,7 +217,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
     bool OK = Result.numRowsAffected() > 0;
 
     if (OK)
-        getPhotoQuery(CurrentUserID).clearCache();
+        getPhotoQuery(APICALLBOOM_PARAM, CurrentUserID).clearCache();
 
     return OK;
 }
@@ -225,7 +228,7 @@ bool IMPL_REST_UPDATE(User, email, (
     TAPI::MD5_t     _psw,
     QString         _salt
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     _email = _email.toLower().trimmed();
 
@@ -258,7 +261,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
     TAPI::MD5_t     _psw,
     QString         _salt
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -294,7 +297,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     NULLABLE_TYPE(bool) _enableEmailAlerts,
     NULLABLE_TYPE(bool) _enableSMSAlerts
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     QVariantMap ToUpdate;
 
@@ -306,7 +309,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::Fields::usrEnableSMSAlerts, *_enableSMSAlerts ? 1 : 0);
 
     if (ToUpdate.size())
-        this->Update(_APICALLBOOM,
+        this->Update(APICALLBOOM_PARAM,
                      QString::number(CurrentUserID),
                      ToUpdate
                      );
@@ -319,7 +322,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     QStringList ToUpdate;
     QVariantList Params;
@@ -366,7 +369,7 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 //        QString         _language,
     QString         _theme
 )) {
-    quint64 CurrentUserID = _APICALLBOOM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     QVariantMap ToUpdateJson;
     QStringList ToRemoveJson;
@@ -502,7 +505,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _sheba, _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID() }
+//                              { _sheba, APICALLBOOM_PARAM.getUserID(), APICALLBOOM_PARAM.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
@@ -516,7 +519,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _etherAddress, _APICALLBOOM.getUserID(), _APICALLBOOM.getUserID() }
+//                              { _etherAddress, APICALLBOOM_PARAM.getUserID(), APICALLBOOM_PARAM.getUserID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
