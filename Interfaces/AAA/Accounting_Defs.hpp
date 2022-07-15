@@ -981,8 +981,9 @@ TAPI_DEFINE_STRUCT(stuPreVoucher,
     SF_QString          (Sign)
 );
 
+//v.Items.isEmpty() == false
 TAPI_DEFINE_STRUCT(stuBasketActionResult,
-    SF_Struct           (PreVoucher, stuPreVoucher, v.Items.isEmpty() == false),
+    SF_Struct           (PreVoucher, stuPreVoucher, [](Q_DECL_UNUSED auto v) { return true; }(v)),
     SF_MD5_t            (TargetItemKey)
 );
 
