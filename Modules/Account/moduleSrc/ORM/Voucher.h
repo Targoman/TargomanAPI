@@ -111,6 +111,9 @@ class Voucher : public intfSQLBasedModule
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 
+public:
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+
 private slots:
     QVariant ORMGET("Get Voucher information")
     bool ORMDELETE("Delete a Voucher. Take note that User can just delete Vouchers with Payoff type")

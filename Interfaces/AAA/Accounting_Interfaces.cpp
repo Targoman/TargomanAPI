@@ -133,7 +133,7 @@ intfAccountUnits::intfAccountUnits(
         tblAccountUnitsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountUnits::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+ORMSelectQuery intfAccountUnits::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountUnitsTranslate::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
@@ -217,7 +217,7 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountProductsTranslate::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
@@ -324,7 +324,7 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountSaleablesTranslate::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)

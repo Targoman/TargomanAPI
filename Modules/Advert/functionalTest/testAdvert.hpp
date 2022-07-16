@@ -215,7 +215,7 @@ private slots:
         );
     }
 
-private:
+//private:
     void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -946,6 +946,20 @@ private:
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
+        }
+    }
+
+    void getvoucherinfo_1() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                QString("Account/Voucher/%1").arg(this->LastPreVoucher.VoucherID),
+                {},
+                {}
+            );
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
