@@ -105,6 +105,7 @@ public: \
 protected: \
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
             TAPI::MD5_t _paymentKey, \
             qint64 _amount, \
@@ -112,10 +113,10 @@ protected: \
             const QString &_desc \
             ); \
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle( \
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
             const Targoman::API::AccountModule::ORM::tblOnlinePayments::DTO &_onlinePayment, \
-            const TAPI::JSON_t &_pgResponse, \
-            const QString &_domain \
+            const TAPI::JSON_t &_pgResponse \
             ); \
     friend Targoman::API::AccountModule::Payment::PaymentLogic; \
 private: \
@@ -141,19 +142,26 @@ class intfPaymentGateway
 protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
 //    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
-    virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest(
+
+    /*[Response, TrackID, PaymentLink]*/
+    virtual std::tuple<QString, QString, QString> prepareAndRequest(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
             TAPI::MD5_t _paymentKey,
             qint64 _amount,
             const QString &_callback,
             const QString &_desc
             ) = 0;
-    virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle(
+
+    /*[Response, refNumber]*/
+    virtual std::tuple<QString, QString> verifyAndSettle(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
             const ORM::tblOnlinePayments::DTO &_onlinePayment,
-            const TAPI::JSON_t &_pgResponse,
-            const QString &_domain
+            const TAPI::JSON_t &_pgResponse
+//            const QString &_domain
             ) = 0;
+
     virtual QString errorString(int _errCode) { return QString("unknown error %1").arg(_errCode); }
 
     static QJsonDocument postJsonWithCurl(const QString _url, const QJsonDocument& _json, bool _jsonDecode = true) {

@@ -27,6 +27,8 @@
 #include "Interfaces/Helpers/URLHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
+#include "Interfaces/Server/ServerCommon.h"
+using namespace Targoman::API::Server;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
@@ -81,9 +83,14 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 
 */
 
+    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString ServerUrl = QString("https://%1%2")
+                        .arg(HostPort)
+                        .arg(ServerCommonConfigs::BasePathWithVersion);
+
     if (_callback.isEmpty())
         _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
-                    .arg("https://newapi.targoman.ir/rest/v1") //ClientConfigs::RESTServerAddress.value())
+                    .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                     .arg(_paymentKey)
                     ;
     else
@@ -168,7 +175,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
         {},
         {
             { "paymentKey",     _paymentKey },
-            { "domain",         "dev.test" },
+//            { "domain",         "dev.test" },
             { "pgResponse",     QVariantMap({
                   { "result",   _result },
             }) },
@@ -176,6 +183,32 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
     );
 }
 #endif
+
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey
+)) {
+    /*
+    new fields:
+        onpDomain
+        onpClientCallback
+
+    gather (GET) and (POST) params into (ResponseParams)
+    */
+
+    QVariantMap ResponseParams;
+
+    return RESTClientHelper::callAPI(
+        RESTClientHelper::POST,
+        "Account/approveOnlinePayment",
+        {},
+        {
+            { "paymentKey",     _paymentKey },
+//            { "domain",         "dev.test" },
+            { "pgResponse",     ResponseParams },
+        }
+    );
+}
 
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|

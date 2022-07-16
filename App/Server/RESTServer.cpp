@@ -59,7 +59,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 
     this->fnIPInBlackList = _fnIPInBlackList;
 
-    QString BasePath = ServerConfigs::BasePath.value();
+    QString BasePath = ServerCommonConfigs::BasePath.value();
 
     if (BasePath.endsWith('/') == false)
         BasePath += '/';
@@ -67,24 +67,24 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     if (BasePath.startsWith('/') == false)
         BasePath = '/' + BasePath;
 
-    if (ServerConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerConfigs::CacheConnector.value()).isValid() == false)
+    if (ServerCommonConfigs::CacheConnector.value().size() && QUrl::fromUserInput(ServerCommonConfigs::CacheConnector.value()).isValid() == false)
         throw exRESTRegistry("Invalid connector url specified for central cache");
 
 #ifdef TARGOMAN_API_ENABLE_REDIS_PROTOCOL
-    if (ServerConfigs::CacheConnector.value().startsWith(TARGOMAN_M2STR(QHTTP_REDIS_PROTOCOL)))
-        CentralCache::setup(new clsRedisConnector(ServerConfigs::CacheConnector.value()));
+    if (ServerCommonConfigs::CacheConnector.value().startsWith(TARGOMAN_M2STR(QHTTP_REDIS_PROTOCOL)))
+        CentralCache::setup(new clsRedisConnector(ServerCommonConfigs::CacheConnector.value()));
 #endif
 
-    if (ServerConfigs::CacheConnector.value().size() && CentralCache::isValid() == false)
+    if (ServerCommonConfigs::CacheConnector.value().size() && CentralCache::isValid() == false)
         throw exRESTRegistry("Unsupported cache connector protocol.");
 
-    ServerConfigs::BasePathWithVersion = BasePath + ServerConfigs::Version.value();
-    if (ServerConfigs::BasePathWithVersion.endsWith('/') == false)
-        ServerConfigs::BasePathWithVersion += '/';
+    ServerCommonConfigs::BasePathWithVersion = BasePath + ServerCommonConfigs::Version.value();
+    if (ServerCommonConfigs::BasePathWithVersion.endsWith('/') == false)
+        ServerCommonConfigs::BasePathWithVersion += '/';
 
     this->IsStarted = true;
 
-    if (ServerConfigs::StatisticsInterval.value()) {
+    if (ServerCommonConfigs::StatisticsInterval.value()) {
         gStatUpdateThread = new clsUpdateAndPruneThread();
         connect(gStatUpdateThread, &clsUpdateAndPruneThread::finished, gStatUpdateThread, &QObject::deleteLater);
         gStatUpdateThread->start();
@@ -98,26 +98,28 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             _con->killConnection();
     });
 
-    QHostAddress ListenAddress = ServerConfigs::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
+    QHostAddress ListenAddress = ServerCommonConfigs::JustLocal.value() ? QHostAddress::LocalHost : QHostAddress::Any;
 
     gHTTPServer.listen(ListenAddress, ServerCommonConfigs::ListenPort.value(), [&, BasePath](QHttpRequest* _req, QHttpResponse* _res) {
+
         clsRequestHandler* RequestHandler = new clsRequestHandler(_req, _res);
+
         try {
             QString Path = _req->url().adjusted(QUrl::NormalizePathSegments | QUrl::RemoveAuthority).path(QUrl::PrettyDecoded);
 
             if (Path != _req->url().path())
                 return RequestHandler->redirect(Path, false);
 
-            if (ServerConfigs::PublicPath.value().size() && QFile::exists(ServerConfigs::PublicPath.value() + Path))
-                return RequestHandler->sendFile(ServerConfigs::PublicPath.value(), Path);
+            if (ServerCommonConfigs::PublicPath.value().size() && QFile::exists(ServerCommonConfigs::PublicPath.value() + Path))
+                return RequestHandler->sendFile(ServerCommonConfigs::PublicPath.value(), Path);
 
             if (Path.startsWith(BasePath) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_FOUND, "Path not found: '" + Path + "'", {}, {}, true);
 
-            if (Path.startsWith(ServerConfigs::BasePathWithVersion) == false)
+            if (Path.startsWith(ServerCommonConfigs::BasePathWithVersion) == false)
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "Invalid Version or version not specified", {}, {}, true);
 
-            if (Path == ServerConfigs::BasePathWithVersion )
+            if (Path == ServerCommonConfigs::BasePathWithVersion )
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", {}, {}, true);
 
             TargomanLogInfo(7, QString(100, '*'));
@@ -143,7 +145,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             } catch (...) { ; }
 
             //----------------------------------
-            RequestHandler->process(Path.mid(ServerConfigs::BasePathWithVersion.size() - 1));
+            RequestHandler->process(Path.mid(ServerCommonConfigs::BasePathWithVersion.size() - 1));
         } catch (exHTTPError& ex) {
             RequestHandler->sendError(static_cast<qhttp::TStatusCode>(ex.httpCode()), ex.what(), ex.additionalInfo(), {}, ex.httpCode() >= 500);
         } catch (exTargomanBase& ex) {
@@ -152,7 +154,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
     });
 
     if (gHTTPServer.isListening()) {
-        TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerCommonConfigs::ListenPort.value()<<ServerConfigs::BasePathWithVersion);
+        TargomanLogInfo(1, "REST Server is listening on "<<ListenAddress.toString()<<":"<<ServerCommonConfigs::ListenPort.value()<<ServerCommonConfigs::BasePathWithVersion);
     } else {
         TargomanLogError("Unable to start server to listen on "<<ListenAddress.toString()<<":"<<ServerCommonConfigs::ListenPort.value());
         QCoreApplication::exit(-1);

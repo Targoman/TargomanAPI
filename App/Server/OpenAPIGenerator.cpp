@@ -32,14 +32,14 @@ using namespace DBM;
 QJsonObject OpenAPIGenerator::CachedJson;
 
 QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _port = 80) {
-    if (ServerConfigs::BaseOpenAPIObjectFile.value().size()) {
-        QFile File(ServerConfigs::BaseOpenAPIObjectFile.value());
+    if (ServerCommonConfigs::BaseOpenAPIObjectFile.value().size()) {
+        QFile File(ServerCommonConfigs::BaseOpenAPIObjectFile.value());
         File.open(QIODevice::ReadOnly);
         if (File.isReadable() == false)
-            throw exTargomanAPI("Unable to open: <" + ServerConfigs::BaseOpenAPIObjectFile.value() + "> for reading");
+            throw exTargomanAPI("Unable to open: <" + ServerCommonConfigs::BaseOpenAPIObjectFile.value() + "> for reading");
         QJsonDocument JsonDoc = QJsonDocument::fromBinaryData(File.readAll());
         if (JsonDoc.isNull() || JsonDoc.isObject() == false)
-            throw exTargomanAPI("Invalid json reading from: <" + ServerConfigs::BaseOpenAPIObjectFile.value() + ">");
+            throw exTargomanAPI("Invalid json reading from: <" + ServerCommonConfigs::BaseOpenAPIObjectFile.value() + ">");
         return JsonDoc.object();
     } else {
         QString HostPort;
@@ -51,10 +51,10 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
         return QJsonObject({
                                { "swagger", "2.0" },
                                { "info",QJsonObject({
-                                    { "version", ServerConfigs::Version.value() },
+                                    { "version", ServerCommonConfigs::Version.value() },
                                     { "title", "Targoman API" },
                                     { "description", "" },
-                                     { "contact", QJsonObject({ { "email", ServerConfigs::ContactEmail.value() } }) }
+                                     { "contact", QJsonObject({ { "email", ServerCommonConfigs::ContactEmail.value() } }) }
                                 }) },
                                { "host", HostPort },
                                { "securityDefinitions", QJsonObject({
@@ -70,7 +70,7 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
                                            "Bearer xxxxxx.yyyyyyy.zzzzzz" },
                                      }) }
                                 }) },
-                               { "basePath", ServerConfigs::BasePathWithVersion },
+                               { "basePath", ServerCommonConfigs::BasePathWithVersion },
                                { "definitions", QJsonObject() },
                                { "schemes", QJsonArray({"http", "https"}) },
                            });

@@ -312,12 +312,14 @@ QString PaymentLogic::createOnlinePaymentLink(
         QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentKey", onpMD5);
 
         //4: call driver::request
-        auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(PaymentGatewayDTO,
-                                                                                        onpMD5,
-                                                                                        _toPay,
-                                                                                        Callback,
-                                                                                        _invDesc
-                                                                                        );
+        auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(
+                APICALLBOOM_PARAM,
+                PaymentGatewayDTO,
+                onpMD5,
+                _toPay,
+                Callback,
+                _invDesc
+                );
 
         OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
                 {},
@@ -362,10 +364,10 @@ QString PaymentLogic::createOnlinePaymentLink(
 std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString& _paymentKey,
-    const TAPI::JSON_t& _pgResponse,
-    QString _domain
+    const TAPI::JSON_t& _pgResponse
+//    QString _domain
 ) {
-    _domain = URLHelper::domain(_domain, true);
+//    _domain = URLHelper::domain(_domain, true);
 
     if (_paymentKey.isEmpty())
         throw exPayment("paymentKey is empty");
@@ -387,10 +389,11 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
 
     try {
         auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(
+                APICALLBOOM_PARAM,
                 OnlinePayment.PaymentGateway,
                 OnlinePayment.OnlinePayment,
-                _pgResponse,
-                _domain
+                _pgResponse
+//                _domain
                 );
 
         //PaymentResponse.PaymentKey =?= _paymentKey

@@ -81,7 +81,7 @@ void clsRequestHandler::process(const QString& _api) {
             if (!ContentLength)
                 throw exHTTPLengthRequired("content-length seems to be zero");
 
-            if (ContentLength > ServerConfigs::MaxUploadSize.value())
+            if (ContentLength > ServerCommonConfigs::MaxUploadSize.value())
                 throw exHTTPPayloadTooLarge(QString("Content-Size is too large: %d").arg(ContentLength));
 
             switch (this->Request->method()) {
@@ -499,7 +499,7 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
                                {},
                                true);
 
-    if (ServerConfigs::MultiThreaded.value()) {
+    if (ServerCommonConfigs::MultiThreaded.value()) {
         this->connect(&this->FutureTimer, SIGNAL(timeout()), &this->FutureWatcher, SLOT(cancel()));
 
         this->connect(&this->FutureWatcher, &QFutureWatcher<stuResult>::canceled, [this]() {
@@ -517,7 +517,7 @@ void clsRequestHandler::findAndCallAPI(QString _api) {
 
         this->FutureWatcher.setFuture(QtConcurrent::run(this, &clsRequestHandler::run, APIObject, Queries, ExtraAPIPath, _api));
 
-        if (ServerConfigs::APICallTimeout.value() > -1)
+        if (ServerCommonConfigs::APICallTimeout.value() > -1)
             this->FutureTimer.start(APIObject->ttl());
     } else
         run(APIObject, Queries, ExtraAPIPath, _api);
@@ -694,7 +694,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 }
 
 void clsRequestHandler::sendCORSOptions() {
-    this->Response->addHeaderValue("Access-Control-Allow-Origin", ServerConfigs::AccessControl.value());
+    this->Response->addHeaderValue("Access-Control-Allow-Origin", ServerCommonConfigs::AccessControl.value());
     this->Response->addHeaderValue("Access-Control-Allow-Credentials", QStringLiteral("true"));
     this->Response->addHeaderValue("Access-Control-Allow-Methods",
                                    QStringLiteral("GET, POST, PUT, PATCH, DELETE"));
@@ -726,7 +726,7 @@ void clsRequestHandler::sendCORSOptions() {
 }
 
 void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet) {
-    QString Path = _appendBase ? ServerConfigs::BasePathWithVersion + _path : _path;
+    QString Path = _appendBase ? ServerCommonConfigs::BasePathWithVersion + _path : _path;
     Path = URLHelper::normalize(Path);
 
     this->Response->addHeaderValue("Location", Path);
@@ -747,7 +747,7 @@ void clsRequestHandler::sendResponseBase(
     if (!this->Request->connection()->tcpSocket())
       return;
 
-    QByteArray Data = QJsonDocument(_dataObject).toJson(ServerConfigs::IndentedJson.value()
+    QByteArray Data = QJsonDocument(_dataObject).toJson(ServerCommonConfigs::IndentedJson.value()
                                                         ? QJsonDocument::Indented
                                                         : QJsonDocument::Compact);
 
@@ -800,7 +800,7 @@ void clsRequestHandler::slotSendFileData() {
         return;
     }
 
-    this->Response->write(this->FileHandler->read(ServerConfigs::FileMaxChunk.value()));
+    this->Response->write(this->FileHandler->read(ServerCommonConfigs::FileMaxChunk.value()));
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
@@ -892,7 +892,7 @@ void clsMultipartFormDataRequestHandler::onMultiPartData(const char *_buffer, lo
     clsMultipartFormDataRequestHandler *Self = static_cast<clsMultipartFormDataRequestHandler*>(_userData);
     if (Self->LastTempFile.isNull() == false) {
         Self->LastWrittenBytes += Self->LastTempFile->write(_buffer, _size);
-        if (Self->LastWrittenBytes > ServerConfigs::MaxUploadedFileSize.value())
+        if (Self->LastWrittenBytes > ServerCommonConfigs::MaxUploadedFileSize.value())
             throw exHTTPPayloadTooLarge("Max file size limit reached");
     } else
         Self->LastValue = QString::fromUtf8(_buffer, static_cast<int>(_size));
@@ -946,20 +946,20 @@ void clsUpdateAndPruneThread::run() {
 
     QTimer Timer;
     QObject::connect(&Timer, &QTimer::timeout, []() {
-        gServerStats.Connections.snapshot(ServerConfigs::StatisticsInterval.value());
-        gServerStats.WSConnections.snapshot(ServerConfigs::StatisticsInterval.value());
-        gServerStats.Errors.snapshot(ServerConfigs::StatisticsInterval.value());
-        gServerStats.Blocked.snapshot(ServerConfigs::StatisticsInterval.value());
-        gServerStats.Success.snapshot(ServerConfigs::StatisticsInterval.value());
+        gServerStats.Connections.snapshot(ServerCommonConfigs::StatisticsInterval.value());
+        gServerStats.WSConnections.snapshot(ServerCommonConfigs::StatisticsInterval.value());
+        gServerStats.Errors.snapshot(ServerCommonConfigs::StatisticsInterval.value());
+        gServerStats.Blocked.snapshot(ServerCommonConfigs::StatisticsInterval.value());
+        gServerStats.Success.snapshot(ServerCommonConfigs::StatisticsInterval.value());
 
         for (auto ListIter = gServerStats.APICallsStats.begin ();
              ListIter != gServerStats.APICallsStats.end ();
              ++ListIter)
-            ListIter->snapshot(ServerConfigs::StatisticsInterval.value());
+            ListIter->snapshot(ServerCommonConfigs::StatisticsInterval.value());
         for (auto ListIter = gServerStats.APIInternalCacheStats.begin ();
              ListIter != gServerStats.APIInternalCacheStats.end ();
              ++ListIter)
-            ListIter->snapshot(ServerConfigs::StatisticsInterval.value());
+            ListIter->snapshot(ServerCommonConfigs::StatisticsInterval.value());
 
         QList<Cache_t::const_iterator> ToDeleteIters;
         for (auto CacheIter = InternalCache::Cache.begin();
@@ -975,7 +975,7 @@ void clsUpdateAndPruneThread::run() {
         }
     });
 
-    Timer.start(ServerConfigs::StatisticsInterval.value() * 1000);
+    Timer.start(ServerCommonConfigs::StatisticsInterval.value() * 1000);
     this->exec();
 }
 

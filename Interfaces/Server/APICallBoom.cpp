@@ -120,9 +120,9 @@ QString intfAPICallBoom::requestAPIPath() const {
     return this->Data->RequestAPIPath;
 }
 
-QString intfAPICallBoom::host() const {
+QString intfAPICallBoom::host(const QString &_default) const {
     if (this->Data->RequestHeaders.contains("host") == false)
-        return "127.0.0.1";
+        return _default;
 
     QString Host = this->Data->RequestHeaders["host"].toString();
 
@@ -144,6 +144,22 @@ quint16 intfAPICallBoom::port() const {
         return 80;
 
     return Host.mid(idx+1).toUInt();
+}
+
+QString intfAPICallBoom::hostAndPort(const QString &_defaultHost) const {
+    QString Host = this->host(_defaultHost);
+    quint16 Port = this->port();
+
+    if (Host.startsWith('/')) Host = Host.mid(1);
+    if (Host.endsWith('/')) Host = Host.chopped(1);
+
+    QString HostPort;
+    if ((Port == 80) || (Port == 443))
+        HostPort = Host;
+    else
+        HostPort = QString("%1:%2").arg(Host).arg(Port);
+
+    return HostPort;
 }
 
 QString intfAPICallBoom::language() const {

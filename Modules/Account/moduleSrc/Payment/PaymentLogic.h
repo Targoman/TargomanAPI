@@ -79,8 +79,8 @@ public:
     static std::tuple<quint64, quint64, quint64, quint64> approveOnlinePayment(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const QString& _paymentKey,
-        const TAPI::JSON_t& _pgResponse,
-        QString _domain
+        const TAPI::JSON_t& _pgResponse
+//        QString _domain
     );
 
 public:

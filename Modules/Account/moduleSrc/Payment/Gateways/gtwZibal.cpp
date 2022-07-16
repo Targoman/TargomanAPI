@@ -29,6 +29,7 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwZibal)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _paymentKey,
     qint64 _amount,
@@ -86,15 +87,16 @@ std::tuple<QString, QString, QString> gtwZibal::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwZibal::verifyAndSettle(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
     const ORM::tblOnlinePayments::DTO &_onlinePayment,
-    const TAPI::JSON_t& _pgResponse,
-    const QString& _domain
+    const TAPI::JSON_t& _pgResponse
+//    const QString& _domain
 ) {
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
     QString MerchantID = _paymentGateway.pgwMetaInfo[gtwZibal::METAINFO_KEY_MERCHANT_ID].toString();
 
-    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse, _domain });
+    PaymentLogic::log(gtwZibal::Name, __FUNCTION__, __LINE__, { _pgResponse/*, _domain*/ });
 
     try {
         if (_pgResponse.isObject() == false)

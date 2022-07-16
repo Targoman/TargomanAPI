@@ -35,11 +35,31 @@ TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase)
 
 struct ServerCommonConfigs
 {
-    static inline QString makeConfig(const QString& _name) {return "/Server/" + _name;}
+    static inline QString makeConfig(const QString& _name) { return "/Server/" + _name; }
 
-    static Targoman::Common::Configuration::tmplConfigurable<QString> InstanceID;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       BasePath;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       Version;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       ContactEmail;
+    static Targoman::Common::Configuration::tmplConfigurable<bool>          JustLocal;
+    static Targoman::Common::Configuration::tmplConfigurable<bool>          IndentedJson;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadSize;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<qint64>  MaxUploadedFileSize;
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t>    BaseOpenAPIObjectFile;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<quint8>  StatisticsInterval;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<quint32> MaxCachedItems;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       CacheConnector;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       AccessControl;
+    static Targoman::Common::Configuration::tmplConfigurable<bool>          MultiThreaded;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<qint32>  APICallTimeout;
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t>    PublicPath;
+    static Targoman::Common::Configuration::tmplConfigurable<FilePath_t>    SwaggerUI;
+    static Targoman::Common::Configuration::tmplRangedConfigurable<quint32> FileMaxChunk;
+
+    static QString BasePathWithVersion;
+
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       InstanceID;
     static Targoman::Common::Configuration::tmplRangedConfigurable<quint16> ListenPort;
-    static Targoman::Common::Configuration::tmplConfigurable<QString> DBPrefix;
+    static Targoman::Common::Configuration::tmplConfigurable<QString>       DBPrefix;
 };
 
 const QString PrependSchema(const QString &_schema);

@@ -24,6 +24,8 @@
 #include "gtwDevTest.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
+#include "Interfaces/Server/ServerCommon.h"
+using namespace Targoman::API::Server;
 
 namespace Targoman::API::AccountModule::Payment::Gateways {
 
@@ -31,6 +33,7 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _paymentKey,
     qint64 _amount,
@@ -54,8 +57,13 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 
     QString TrackID = "track_" + _paymentKey;
 
+    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString ServerUrl = QString("https://%1%2")
+                        .arg(HostPort)
+                        .arg(ServerCommonConfigs::BasePathWithVersion);
+
     QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
-                          .arg("https://newapi.targoman.ir/rest/v1") //ClientConfigs::RESTServerAddress.value())
+                          .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                           .arg(_paymentKey)
                           .arg(TrackID)
                           .arg(_callback)
@@ -74,13 +82,14 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
     const ORM::tblOnlinePayments::DTO &_onlinePayment,
-    const TAPI::JSON_t &_pgResponse,
-    const QString &_domain
+    const TAPI::JSON_t &_pgResponse
+//    const QString &_domain
 ) {
     Q_UNUSED(_pgResponse);
-    Q_UNUSED(_domain);
+//    Q_UNUSED(_domain);
 
 //    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 

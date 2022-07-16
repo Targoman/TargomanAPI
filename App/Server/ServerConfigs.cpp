@@ -30,190 +30,190 @@ namespace Targoman::API::Server {
 using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 
-QString ServerConfigs::BasePathWithVersion;
 TAPI::stuStatistics gServerStats;
+//QString ServerCommonConfigs::BasePathWithVersion;
 
-tmplConfigurable<QString> ServerConfigs::BasePath(
-        ServerConfigs::makeConfig("BasePath"),
-        "Base path to access the REST API",
-        "rest",
-        ReturnTrueCrossValidator(),
-        "",
-        "PATH",
-        "base-path",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<QString> ServerCommonConfigs::BasePath(
+//        ServerConfigs::makeConfig("BasePath"),
+//        "Base path to access the REST API",
+//        "rest",
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "PATH",
+//        "base-path",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> ServerConfigs::Version(
-        ServerConfigs::makeConfig("Version"),
-        "REST API version to be appended to base path",
-        "v1",
-        ReturnTrueCrossValidator(),
-        "",
-        "VERSION",
-        "version",
-        enuConfigSource::Arg | enuConfigSource::File);
-tmplConfigurable<QString> ServerConfigs::ContactEmail(
-        ServerConfigs::makeConfig("ContactEmail"),
-        "Contact Email",
-        "info@sample.dom",
-        ReturnTrueCrossValidator(),
-        "",
-        "EMAIL",
-        "contact-email",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<QString> ServerCommonConfigs::Version(
+//        ServerConfigs::makeConfig("Version"),
+//        "REST API version to be appended to base path",
+//        "v1",
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "VERSION",
+//        "version",
+//        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<QString> ServerCommonConfigs::ContactEmail(
+//        ServerConfigs::makeConfig("ContactEmail"),
+//        "Contact Email",
+//        "info@sample.dom",
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "EMAIL",
+//        "contact-email",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<bool> ServerConfigs::JustLocal(
-        ServerConfigs::makeConfig("JustLocal"),
-        "If set to true it will just listen to local connections",
-        false,
-        ReturnTrueCrossValidator(),
-        "",
-        "",
-        "just-local",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<bool> ServerCommonConfigs::JustLocal(
+//        ServerConfigs::makeConfig("JustLocal"),
+//        "If set to true it will just listen to local connections",
+//        false,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "",
+//        "just-local",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<quint8> ServerConfigs::StatisticsInterval(
-        ServerConfigs::makeConfig("StatisticsInterval"),
-        "Listen port for main REST server",
-        1,60,
-        10,
-        ReturnTrueCrossValidator(),
-        "",
-        "INTERVAL",
-        "stats-interval",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<quint8> ServerCommonConfigs::StatisticsInterval(
+//        ServerConfigs::makeConfig("StatisticsInterval"),
+//        "Listen port for main REST server",
+//        1,60,
+//        10,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "INTERVAL",
+//        "stats-interval",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<bool> ServerConfigs::IndentedJson(
-        ServerConfigs::makeConfig("IndentedJson"),
-        "If set to true Json outputs will be indented",
-        false,
-        ReturnTrueCrossValidator(),
-        "",
-        "",
-        "indented-json",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<bool> ServerCommonConfigs::IndentedJson(
+//        ServerConfigs::makeConfig("IndentedJson"),
+//        "If set to true Json outputs will be indented",
+//        false,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "",
+//        "indented-json",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<bool> ServerConfigs::MultiThreaded(
-        ServerConfigs::makeConfig("MultiThreaded"),
-        "If set to false then application will run in single-threaded mode and will be blocked on time-consuming API calls",
-        true,
-        ReturnTrueCrossValidator(),
-        "",
-        "",
-        "",
-        enuConfigSource::File);
+//tmplConfigurable<bool> ServerCommonConfigs::MultiThreaded(
+//        ServerConfigs::makeConfig("MultiThreaded"),
+//        "If set to false then application will run in single-threaded mode and will be blocked on time-consuming API calls",
+//        true,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "",
+//        "",
+//        enuConfigSource::File);
 
-tmplRangedConfigurable<qint32> ServerConfigs::APICallTimeout(
-        ServerConfigs::makeConfig("APICallTimeout"),
-        "default timeout for API Calls. It can be reconfigured on each API Call. set to -1 for infinite",
-        -1, 60 * 1000,
-        -1,
-        ReturnTrueCrossValidator(),
-        "",
-        "MILISECONDS",
-        "default-api-timeout",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<qint32> ServerCommonConfigs::APICallTimeout(
+//        ServerConfigs::makeConfig("APICallTimeout"),
+//        "default timeout for API Calls. It can be reconfigured on each API Call. set to -1 for infinite",
+//        -1, 60 * 1000,
+//        -1,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "MILISECONDS",
+//        "default-api-timeout",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<qint64> ServerConfigs::MaxUploadSize(
-        ServerConfigs::makeConfig("MaxUploadSize"),
-        "Max Upload size for any type of request",
-        10*1024, 10*1024*1024,
-        10*1024*1024,
-        ReturnTrueCrossValidator(),
-        "",
-        "SIZE",
-        "max-upload-size",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<qint64> ServerCommonConfigs::MaxUploadSize(
+//        ServerConfigs::makeConfig("MaxUploadSize"),
+//        "Max Upload size for any type of request",
+//        10*1024, 10*1024*1024,
+//        10*1024*1024,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "SIZE",
+//        "max-upload-size",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<quint32> ServerConfigs::FileMaxChunk(
-        ServerConfigs::makeConfig("FileMaxChunk"),
-        "Max file size to send on each chunk.",
-        10*1024, 10*1024*1024,
-        10*1024,
-        ReturnTrueCrossValidator(),
-        "",
-        "SIZE",
-        "chunk-size",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<quint32> ServerCommonConfigs::FileMaxChunk(
+//        ServerConfigs::makeConfig("FileMaxChunk"),
+//        "Max file size to send on each chunk.",
+//        10*1024, 10*1024*1024,
+//        10*1024,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "SIZE",
+//        "chunk-size",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<qint64> ServerConfigs::MaxUploadedFileSize(
-        ServerConfigs::makeConfig("MaxUploadedFileSize"),
-        "Max Upload size for files",
-        1*1024, 100*1024*1024,
-        100*1024*1024,
-        ReturnTrueCrossValidator(),
-        "",
-        "SIZE",
-        "max-file-upload-size",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<qint64> ServerCommonConfigs::MaxUploadedFileSize(
+//        ServerConfigs::makeConfig("MaxUploadedFileSize"),
+//        "Max Upload size for files",
+//        1*1024, 100*1024*1024,
+//        100*1024*1024,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "SIZE",
+//        "max-file-upload-size",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplRangedConfigurable<quint32> ServerConfigs::MaxCachedItems(
-        ServerConfigs::makeConfig("MaxCachedItems"),
-        "Maximum API calls to be cached",
-        0,65000,
-        5000,
-        ReturnTrueCrossValidator(),
-        "",
-        "SIZE",
-        "max-cache-size",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplRangedConfigurable<quint32> ServerCommonConfigs::MaxCachedItems(
+//        ServerConfigs::makeConfig("MaxCachedItems"),
+//        "Maximum API calls to be cached",
+//        0,65000,
+//        5000,
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "SIZE",
+//        "max-cache-size",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> ServerConfigs::CacheConnector(
-        ServerConfigs::makeConfig("CacheConnector"),
-        "Connection string to connect to Redis cache server",
-        "",
-        ReturnTrueCrossValidator(),
-        "",
-        "CONNECTION_STRING",
-        "cache-connector",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<QString> ServerCommonConfigs::CacheConnector(
+//        ServerConfigs::makeConfig("CacheConnector"),
+//        "Connection string to connect to Redis cache server",
+//        "",
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "CONNECTION_STRING",
+//        "cache-connector",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<QString> ServerConfigs::AccessControl(
-        ServerConfigs::makeConfig("AccessControl"),
-        "Default access control",
-        "*",
-        ReturnTrueCrossValidator(),
-        "",
-        "ACCESS-CONTROL-STRING",
-        "",
-        enuConfigSource::File);
+//tmplConfigurable<QString> ServerCommonConfigs::AccessControl(
+//        ServerConfigs::makeConfig("AccessControl"),
+//        "Default access control",
+//        "*",
+//        ReturnTrueCrossValidator(),
+//        "",
+//        "ACCESS-CONTROL-STRING",
+//        "",
+//        enuConfigSource::File);
 
-tmplConfigurable<FilePath_t>     ServerConfigs::BaseOpenAPIObjectFile(
-        ServerConfigs::makeConfig("BaseOpenAPIObjectFile"),
-        "Input file path where default OpenAPI object file resides",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
-        false>,
-        "",
-        "FILEPATH",
-        "openapi-file",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<FilePath_t>     ServerCommonConfigs::BaseOpenAPIObjectFile(
+//        ServerConfigs::makeConfig("BaseOpenAPIObjectFile"),
+//        "Input file path where default OpenAPI object file resides",
+//        "",
+//        Validators::tmplPathAccessValidator<
+//        TARGOMAN_PATH_ACCESS(enuPathAccess::File | enuPathAccess::Readable),
+//        false>,
+//        "",
+//        "FILEPATH",
+//        "openapi-file",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<FilePath_t>     ServerConfigs::SwaggerUI(
-        ServerConfigs::makeConfig("SwaggerUI"),
-        "Directory where swaggerUI files reside",
-        "",
-        Validators::tmplPathAccessValidator<
-        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
-        false>,
-        "",
-        "DIRECTORY",
-        "swaggerui-path",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<FilePath_t>     ServerCommonConfigs::SwaggerUI(
+//        ServerConfigs::makeConfig("SwaggerUI"),
+//        "Directory where swaggerUI files reside",
+//        "",
+//        Validators::tmplPathAccessValidator<
+//        TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
+//        false>,
+//        "",
+//        "DIRECTORY",
+//        "swaggerui-path",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
-tmplConfigurable<FilePath_t>     ServerConfigs::PublicPath(
-        ServerConfigs::makeConfig("PublicFolder"),
-        "Directory static files are stored",
-        "",
-        Validators::tmplPathAccessValidator<
-            TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
-            false
-        >,
-        "",
-        "DIRECTORY",
-        "public-path",
-        enuConfigSource::Arg | enuConfigSource::File);
+//tmplConfigurable<FilePath_t>     ServerCommonConfigs::PublicPath(
+//        ServerConfigs::makeConfig("PublicFolder"),
+//        "Directory static files are stored",
+//        "",
+//        Validators::tmplPathAccessValidator<
+//            TARGOMAN_PATH_ACCESS(enuPathAccess::Dir | enuPathAccess::Readable),
+//            false
+//        >,
+//        "",
+//        "DIRECTORY",
+//        "public-path",
+//        enuConfigSource::Arg | enuConfigSource::File);
 
 /****************************************************************************/
 tmplConfigurable<QString> ServerConfigs::MasterDB::Host(
