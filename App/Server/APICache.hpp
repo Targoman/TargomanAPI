@@ -52,7 +52,7 @@ class InternalCache
 public:
     static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl) {
         QMutexLocker Locker(&InternalCache::Lock);
-        if (InternalCache::Cache.size() < static_cast<qint32>(ServerConfigs::MaxCachedItems.value()))
+        if (InternalCache::Cache.size() < static_cast<qint32>(ServerCommonConfigs::MaxCachedItems.value()))
            InternalCache::Cache.insert(_key, stuCacheValue(_value, _ttl));
     }
     static QVariant storedValue(const QString& _key) {

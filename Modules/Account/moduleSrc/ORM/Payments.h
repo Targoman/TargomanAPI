@@ -130,6 +130,15 @@ class OnlinePayments : public intfSQLBasedModule
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
 
+    QVariant REST_GET_OR_POST(
+        paymentCallback,
+        (
+            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            QString _paymentKey
+        ),
+        "Payment callback proxy"
+    )
+
 #ifdef QT_DEBUG
     QVariant REST_GET_OR_POST(
         devTestPayPage,

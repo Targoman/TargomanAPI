@@ -121,7 +121,7 @@ void WebSocketServer::processTextMessage(QString _message) {
                                                 });
             pSocket->sendTextMessage(QJsonDocument(QJsonObject({{"error",
                                                                  ErrorInfo
-                                                                }})).toJson(ServerConfigs::IndentedJson.value() ?
+                                                                }})).toJson(ServerCommonConfigs::IndentedJson.value() ?
                                                                                 QJsonDocument::Indented :
                                                                                 QJsonDocument::Compact).data());
         };
@@ -162,7 +162,7 @@ void WebSocketServer::processTextMessage(QString _message) {
 
             QByteArray Data = QJsonDocument(QJsonObject({{"result",
                                                           QJsonValue::fromVariant(APIObject->invoke(false, Queries))
-                                                         }})).toJson(ServerConfigs::IndentedJson.value() ?
+                                                         }})).toJson(ServerCommonConfigs::IndentedJson.value() ?
                                                                          QJsonDocument::Indented :
                                                                          QJsonDocument::Compact);
             pSocket->sendTextMessage(Data.data());

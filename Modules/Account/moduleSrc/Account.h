@@ -389,7 +389,7 @@ private slots:
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _paymentKey,
-            QString _domain,
+//            QString _domain,
             TAPI::JSON_t _pgResponse
         ),
         "approve payment back from payment gateway"

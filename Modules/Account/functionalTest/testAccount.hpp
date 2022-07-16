@@ -934,7 +934,7 @@ private slots:
                     {},
                     {
                         { "paymentKey",     this->Voucher.PaymentKey },
-                        { "domain",         "dev.test" },
+//                        { "domain",         "dev.test" },
                         { "pgResponse",     QVariantMap({
                             { "result",     "ok" },
                         }) },

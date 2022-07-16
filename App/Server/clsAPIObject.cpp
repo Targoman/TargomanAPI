@@ -51,7 +51,7 @@ clsAPIObject::clsAPIObject(
     IsAsync(_async),
     Cache4Secs(_cache4Internal),
     Cache4SecsCentral(_cache4Central),
-    TTL(_ttl ? _ttl : ServerConfigs::APICallTimeout.value()),
+    TTL(_ttl ? _ttl : ServerCommonConfigs::APICallTimeout.value()),
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
     Parent(_module),

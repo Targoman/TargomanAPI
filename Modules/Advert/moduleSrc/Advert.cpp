@@ -494,7 +494,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
             {},
             {
                 { "paymentKey",     Voucher.PaymentKey },
-                { "domain",         "dev.test" },
+//                { "domain",         "dev.test" },
                 { "pgResponse",     QVariantMap({
                     { "result",     "ok" },
                 }) },

@@ -1262,16 +1262,17 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey,
-    QString _domain,
+//    QString _domain,
     TAPI::JSON_t _pgResponse
 )) {
-    _domain = URLHelper::domain(_domain, true);
+//    _domain = URLHelper::domain(_domain, true);
 
     auto [PaymentID, VoucherID, TargetWalletID, PaymentAmount] = PaymentLogic::approveOnlinePayment(
             APICALLBOOM_PARAM,
             _paymentKey,
-            _pgResponse,
-            _domain);
+            _pgResponse
+//            _domain
+            );
 
     //----------------------------------
     QVariantMap VoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)

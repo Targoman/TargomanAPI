@@ -59,7 +59,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
 QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
 )) {
-    if (ServerConfigs::SwaggerUI.value().isEmpty())
+    if (ServerCommonConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
 
     QString API = APICALLBOOM_PARAM.requestAPIPath();
@@ -72,7 +72,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
     if (File == "/")
         File = "index.html";
 
-    return TAPI::FileData_t(ServerConfigs::SwaggerUI.value() + "/" + File).toVariant();
+    return TAPI::FileData_t(ServerCommonConfigs::SwaggerUI.value() + "/" + File).toVariant();
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
@@ -105,8 +105,14 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
 )) {
     gServerStats.Success.inc();
 
+    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString ServerUrl = QString("https://%1%2")
+                        .arg(HostPort)
+                        .arg(ServerCommonConfigs::BasePathWithVersion);
+
     return QJsonObject({
                            { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
+                           { "server-host", ServerUrl },
                        });
 }
 
