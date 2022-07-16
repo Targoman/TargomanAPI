@@ -75,6 +75,8 @@ Advert::Advert() :
             { "show",  { "slbExShowPerDay",   {},    {},                  "slbExShowTotal" } },
             { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
+        &AccountUnits::instance(),
+//        &AccountUnitsTranslate::instance(),
         &AccountProducts::instance(),
 //        &AccountProductsTranslate::instance(),
         &AccountSaleables::instance(),
@@ -87,6 +89,8 @@ Advert::Advert() :
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 
+    this->addSubModule(AccountUnits.data());
+//    this->addSubModule(AccountUnitsTranslate.data());
     this->addSubModule(AccountProducts.data());
 //    this->addSubModule(AccountProductsTranslate.data());
     this->addSubModule(AccountSaleables.data());
@@ -308,8 +312,9 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountProductsBase::Fields::prdCode,          ProductCode },
         { tblAccountProductsBase::Fields::prdName,          FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
         { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-        { tblAccountProducts::ExtraFields::prdExType,         Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-        { tblAccountProducts::ExtraFields::prdEx_locID,       LocationID },
+        { tblAccountProductsBase::Fields::prd_untID,        1 },
+        { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prdEx_locID,     LocationID },
     };
 
     quint32 ProductID = this->AccountProducts->GetCreateQuery(APICALLBOOM_PARAM)
@@ -325,6 +330,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //                                     tblAccountProductsBase::Fields::prdPrivs,
 //                                     tblAccountProductsBase::Fields::prdVAT,
                                      tblAccountProductsBase::Fields::prdInStockQty,
+                                     tblAccountProductsBase::Fields::prd_untID,
 //                                     tblAccountProductsBase::Fields::prdOrderedQty,
 //                                     tblAccountProductsBase::Fields::prdReturnedQty,
 //                                     tblAccountProductsBase::Fields::prdStatus,

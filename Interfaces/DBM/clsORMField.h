@@ -185,6 +185,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_INVALIDATED_AT_FIELD_NAME "_InvalidatedAt"
 
 ///                                 type                                validator                   Default         UPBy    Sort  Filter Self  Virt   PK Sel
+#define ORM_PRIMARYKEY_16           S(quint16),                         QFV.integer().minValue(1),  ORM_PRIMARY_KEY
 #define ORM_PRIMARYKEY_32           S(quint32),                         QFV.integer().minValue(1),  ORM_PRIMARY_KEY
 #define ORM_PRIMARYKEY_64           S(quint64),                         QFV.integer().minValue(1),  ORM_PRIMARY_KEY
 #define ORM_CREATED_ON              S(TAPI::DateTime_t),                QFV,                        QAuto,          UPNone
@@ -207,6 +208,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 #define ORM_TABLE_DBPROPERTY_INVALIDATE_AT_FIELD_NAME   "InvalidatedAtFieldName"
 
 // used for TAPI_DEFINE_STRUCT
+#define SF_ORM_PRIMARYKEY_16(_name)           SF_quint16                  (_name)
 #define SF_ORM_PRIMARYKEY_32(_name)           SF_quint32                  (_name)
 #define SF_ORM_PRIMARYKEY_64(_name)           SF_quint64                  (_name)
 #define SF_ORM_CREATED_ON(_name)              SF_DateTime_t               (_name)

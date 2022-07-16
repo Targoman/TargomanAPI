@@ -215,7 +215,7 @@ private slots:
         );
     }
 
-//private:
+private:
     void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -309,6 +309,7 @@ private slots:
                     { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
                     { tblAccountProductsBase::Fields::prdName,          "test product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
+                    { tblAccountProductsBase::Fields::prd_untID,        1 },
                     { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
                     { tblAccountProducts::ExtraFields::prdEx_locID,     this->LocationID },
                 }
