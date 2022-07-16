@@ -34,6 +34,31 @@ Voucher::Voucher() :
         tblVoucher::Private::Indexes
 ) { ; }
 
+ORMSelectQuery Voucher::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+
+    ORMSelectQuery Query = intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias);
+
+    if (_isRoot) {
+        Query.addCols(this->SelectableColumnNames())
+             .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM, "", false)
+                             .addCol(tblVoucher::Fields::vch_rootVchID)
+                             .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "vchTotalFreezed")
+                             .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
+                                      .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
+                             .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
+                             .groupBy(tblVoucher::Fields::vch_rootVchID)
+                             , "tmpFreeze"
+                             , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
+                                 enuConditionOperator::Equal,
+                                 tblVoucher::Name, tblVoucher::Fields::vchID }
+                             )
+             .addCol("tmpFreeze.vchTotalFreezed")
+        ;
+    }
+
+    return Query;
+}
+
 QVariant IMPL_ORMGET(Voucher) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);

@@ -830,20 +830,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     //check prevoucher changes
     if (_preVoucher.VoucherID > 0) {
         QVariantMap VoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                     .addCols(Voucher::instance().SelectableColumnNames())
-                                     .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                               .addCol(tblVoucher::Fields::vch_rootVchID)
-                                               .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
-                                               .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
-                                                        .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
-                                               .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
-                                               .groupBy(tblVoucher::Fields::vch_rootVchID)
-                                               , "tmpFreeze"
-                                               , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
-                                                   enuConditionOperator::Equal,
-                                                   tblVoucher::Name, tblVoucher::Fields::vchID }
-                                     )
-                                     .addCol("tmpFreeze.TotalFreezed")
+//                                     .addCols(Voucher::instance().SelectableColumnNames())
+//                                     .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+//                                               .addCol(tblVoucher::Fields::vch_rootVchID)
+//                                               .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
+//                                               .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
+//                                                        .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
+//                                               .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
+//                                               .groupBy(tblVoucher::Fields::vch_rootVchID)
+//                                               , "tmpFreeze"
+//                                               , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
+//                                                   enuConditionOperator::Equal,
+//                                                   tblVoucher::Name, tblVoucher::Fields::vchID }
+//                                     )
+//                                     .addCol("tmpFreeze.TotalFreezed")
                                      .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _preVoucher.VoucherID })
                                      .tryOne();
 
@@ -877,8 +877,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
                 TotalPayed = NULLABLE_GET_OR_DEFAULT(VoucherDTO.vchTotalPayed, 0);
 
-                if (VoucherInfo.contains("TotalFreezed") && VoucherInfo["TotalFreezed"].isValid())
-                    TotalFreezed = VoucherInfo["TotalFreezed"].toUInt();
+                if (VoucherInfo.contains("vchTotalFreezed") && VoucherInfo["vchTotalFreezed"].isValid())
+                    TotalFreezed = VoucherInfo["vchTotalFreezed"].toUInt();
             }
         }
     }
@@ -1275,20 +1275,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
     //----------------------------------
     QVariantMap VoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                 .addCols(Voucher::instance().SelectableColumnNames())
-                                 .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                           .addCol(tblVoucher::Fields::vch_rootVchID)
-                                           .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
-                                           .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
-                                                    .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
-                                           .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
-                                           .groupBy(tblVoucher::Fields::vch_rootVchID)
-                                           , "tmpFreeze"
-                                           , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
-                                               enuConditionOperator::Equal,
-                                               tblVoucher::Name, tblVoucher::Fields::vchID }
-                                 )
-                                 .addCol("tmpFreeze.TotalFreezed")
+//                                 .addCols(Voucher::instance().SelectableColumnNames())
+//                                 .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+//                                           .addCol(tblVoucher::Fields::vch_rootVchID)
+//                                           .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
+//                                           .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
+//                                                    .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
+//                                           .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
+//                                           .groupBy(tblVoucher::Fields::vch_rootVchID)
+//                                           , "tmpFreeze"
+//                                           , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
+//                                               enuConditionOperator::Equal,
+//                                               tblVoucher::Name, tblVoucher::Fields::vchID }
+//                                 )
+//                                 .addCol("tmpFreeze.TotalFreezed")
                                  .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, VoucherID })
                                  .one();
 
@@ -1302,20 +1302,20 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     tblVoucher::DTO RootVoucherDTO;
     if (NULLABLE_HAS_VALUE(VoucherDTO.vch_rootVchID)) {
         RootVoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                          .addCols(Voucher::instance().SelectableColumnNames())
-                          .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                    .addCol(tblVoucher::Fields::vch_rootVchID)
-                                    .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
-                                    .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
-                                             .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
-                                    .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
-                                    .groupBy(tblVoucher::Fields::vch_rootVchID)
-                                    , "tmpFreeze"
-                                    , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
-                                        enuConditionOperator::Equal,
-                                        tblVoucher::Name, tblVoucher::Fields::vchID }
-                          )
-                          .addCol("tmpFreeze.TotalFreezed")
+//                          .addCols(Voucher::instance().SelectableColumnNames())
+//                          .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+//                                    .addCol(tblVoucher::Fields::vch_rootVchID)
+//                                    .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
+//                                    .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
+//                                             .arg(QChar(enuVoucherType::Freeze)).arg(QChar(enuVoucherType::UnFreeze)) })
+//                                    .andWhere({ tblVoucher::Fields::vch_rootVchID, enuConditionOperator::NotNull })
+//                                    .groupBy(tblVoucher::Fields::vch_rootVchID)
+//                                    , "tmpFreeze"
+//                                    , { "tmpFreeze", tblVoucher::Fields::vch_rootVchID,
+//                                        enuConditionOperator::Equal,
+//                                        tblVoucher::Name, tblVoucher::Fields::vchID }
+//                          )
+//                          .addCol("tmpFreeze.TotalFreezed")
                           .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, NULLABLE_VALUE(VoucherDTO.vch_rootVchID) })
                           .one();
 
@@ -1336,13 +1336,13 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
             TotalAmount = VoucherDTO.vchTotalAmount;
             TotalPayed = NULLABLE_GET_OR_DEFAULT(VoucherDTO.vchTotalPayed, 0);
-            TotalFreezed = VoucherInfo["TotalFreezed"].toUInt();
+            TotalFreezed = VoucherInfo["vchTotalFreezed"].toUInt();
         } else {
             PreVoucher.fromJson(RootVoucherDTO.vchDesc.object());
 
             TotalAmount = RootVoucherDTO.vchTotalAmount;
             TotalPayed = NULLABLE_GET_OR_DEFAULT(RootVoucherDTO.vchTotalPayed, 0);
-            TotalFreezed = RootVoucherInfo["TotalFreezed"].toUInt();
+            TotalFreezed = RootVoucherInfo["vchTotalFreezed"].toUInt();
         }
 
         //----------------------

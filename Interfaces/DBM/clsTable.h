@@ -205,7 +205,7 @@ public:
 
     const QStringList SelectableColumnNames(QString _tableAlias = "") const;
 
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
     virtual ORMCreateQuery GetCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
     virtual ORMUpdateQuery GetUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
     virtual ORMDeleteQuery GetDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});

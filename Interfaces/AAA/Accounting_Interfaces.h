@@ -58,7 +58,7 @@ public:
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Units")
@@ -94,7 +94,7 @@ public:
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
 #ifdef QT_DEBUG
@@ -135,7 +135,7 @@ public:
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
 #ifdef QT_DEBUG
