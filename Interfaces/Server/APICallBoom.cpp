@@ -49,6 +49,8 @@ public:
         RequestCookies(_other.RequestCookies),
         JWT(_other.JWT),
         IP(_other.IP),
+        Queries(_other.Queries),
+        UserDefinedValues(_other.UserDefinedValues),
         ResponseHeaders(_other.ResponseHeaders),
         AcceptLanguage(_other.AcceptLanguage)
     { ; }
@@ -64,6 +66,9 @@ public:
     QVariantMap RequestCookies;
     TAPI::JWT_t JWT;
     TAPI::RemoteIP_t IP;
+    QStringList Queries;
+    QList<QPair<QString, QString>> UserDefinedValues;
+
     QVariantMap ResponseHeaders;
     QString AcceptLanguage;
 };
@@ -77,13 +82,17 @@ void intfAPICallBoom::initialize(
     const QJsonObject &_JWT,
     const QVariantMap &_headers,
     const QVariantMap &_cookies,
-    const QString &_ip
+    const QString &_ip,
+    const QStringList &_queries,
+    const QList<QPair<QString, QString>> &_userDefinedValues
 ) {
     this->Data->RequestAPIPath = _apiPath;
     this->Data->RequestHeaders = _headers;
     this->Data->RequestCookies = _cookies;
     this->Data->JWT = _JWT;
     this->Data->IP = _ip;
+    this->Data->Queries = _queries;
+    this->Data->UserDefinedValues = _userDefinedValues;
 
     this->Data->AcceptLanguage = "en";
 
@@ -111,6 +120,14 @@ QJsonObject intfAPICallBoom::getJWTPrivsObject() {
 
 QString intfAPICallBoom::getIP() {
     return this->Data->IP;
+}
+
+QStringList intfAPICallBoom::getQueries() {
+    return this->Data->Queries;
+}
+
+QList<QPair<QString, QString>> intfAPICallBoom::getUserDefinedValues() {
+    return this->Data->UserDefinedValues;
 }
 
 //void intfAPICallBoom::setRequestAPIPath(const QString &_path) {

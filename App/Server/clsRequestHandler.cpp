@@ -98,8 +98,7 @@ void clsRequestHandler::process(const QString& _api) {
             static constexpr char MULTIPART_BOUNDARY_HEADER[] = "multipart/form-data; boundary=";
 
             switch (ContentType.at(0)) {
-                case 'a':
-                {
+                case 'a': {
                     if (ContentType != APPLICATION_JSON_HEADER && ContentType != APPLICATION_FORM_HEADER)
                         throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
 
@@ -164,8 +163,8 @@ void clsRequestHandler::process(const QString& _api) {
                     }
                     break;
                 }
-                case 'm':
-                {
+
+                case 'm': {
                     if (this->MultipartFormDataHandler.isNull()) {
                         if (ContentType.startsWith(MULTIPART_BOUNDARY_HEADER) == false)
                             throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType + " must be " + MULTIPART_BOUNDARY_HEADER).constData());
@@ -191,7 +190,7 @@ void clsRequestHandler::process(const QString& _api) {
                 }
                 default:
                     throw exHTTPBadRequest(("unsupported Content-Type: " + ContentType).constData());
-            }
+            } //switch
 
             TargomanLogInfo(7, "request user defined values: ");
             foreach (auto val, this->Request->userDefinedValues()) {
@@ -412,7 +411,9 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     JWT,
                     Headers.toVariant().toMap(),
                     Cookies.toVariant().toMap(),
-                    RemoteIP
+                    RemoteIP,
+                    _queries,
+                    this->Request->userDefinedValues()
                     );
 
         QVariant Result = _apiObject->invoke(

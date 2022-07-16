@@ -196,9 +196,38 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     gather (GET) and (POST) params into (ResponseParams)
     */
 
+//curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
+
     QVariantMap ResponseParams;
 
-    return RESTClientHelper::callAPI(
+    QStringList Queries = APICALLBOOM_PARAM.getQueries();
+    foreach (auto Item, Queries) {
+        QStringList Parts = Item.split('=');
+        QString Name = Parts.at(0);
+
+        if (Name == "paymentKey")
+            continue;
+
+        QString Value;
+        if (Parts.length() > 1) {
+            Parts.removeAt(0);
+            Value = Parts.join('=');
+        }
+
+        ResponseParams.insert(Name, Value);
+    }
+
+    QList<QPair<QString, QString>> UserDefinedValues = APICALLBOOM_PARAM.getUserDefinedValues();
+    foreach (auto Item, UserDefinedValues) {
+        ResponseParams.insert(Item.first, Item.second);
+    }
+
+    qDebug() << "ResponseParams:" << ResponseParams;
+
+    return true;
+
+
+    /*RESTClientHelper::callAPI(
         RESTClientHelper::POST,
         "Account/approveOnlinePayment",
         {},
@@ -207,7 +236,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 //            { "domain",         "dev.test" },
             { "pgResponse",     ResponseParams },
         }
-    );
+    );*/
 }
 
 /*****************************************************************\
