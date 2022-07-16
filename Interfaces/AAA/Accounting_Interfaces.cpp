@@ -100,6 +100,90 @@ namespace Targoman::API::AAA {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+intfAccountUnitsTranslate* intfAccountUnitsTranslate::myInstance;
+
+intfAccountUnitsTranslate::intfAccountUnitsTranslate(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountUnitsTranslateBase::Name,
+        tblAccountUnitsTranslateBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUnitsTranslateBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUnitsTranslateBase::Private::Indexes + _exclusiveIndexes
+) {
+    intfAccountUnitsTranslate::myInstance = this;
+}
+
+/******************************************************************/
+intfAccountUnits::intfAccountUnits(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountUnitsBase::Name,
+        tblAccountUnitsBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUnitsBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUnitsBase::Private::Indexes + _exclusiveIndexes
+) { ; }
+
+ORMSelectQuery intfAccountUnits::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+    intfAccountUnitsTranslate::myInstance->prepareFiltersList();
+
+    return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
+            .addCols(this->SelectableColumnNames())
+            .removeCols({
+                            tblAccountUnitsBase::Fields::untName
+                        })
+            .nestedLeftJoin(intfAccountUnitsTranslate::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+                      .where({ tblAccountUnitsTranslateBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
+                      , "lng_tblAccountUnits"
+                      , { "lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::pid,
+                          enuConditionOperator::Equal,
+                          tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
+                      }
+                     )
+            .addCol(enuConditionalAggregation::IF,
+                    { "lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::untName, enuConditionOperator::Null },
+                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias, tblAccountUnitsBase::Fields::untName)),
+                    DBExpression::VALUE(R("lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::untName)),
+                    tblAccountUnitsBase::Fields::untName
+                   )
+    ;
+}
+
+QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountUnits) {
+    constexpr quint16 CACHE_TIME = 15 * 60;
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
+}
+
+quint32 IMPL_ORMCREATE(intfAccountUnits) {
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMUPDATE(intfAccountUnits) {
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMDELETE(intfAccountUnits) {
+  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+
+  return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountProductsTranslate* intfAccountProductsTranslate::myInstance;
 
 intfAccountProductsTranslate::intfAccountProductsTranslate(
@@ -162,6 +246,15 @@ ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALL
                     DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdDesc)),
                     tblAccountProductsBase::Fields::prdDesc
                    )
+            .inlineInnerJoin(tblAccountUnitsBase::Name/*, tblAccountUnitsBase::Name*/, clsCondition(
+                             tblAccountUnitsBase::Name,
+                             tblAccountUnitsBase::Fields::untID,
+                             enuConditionOperator::Equal,
+                             tblAccountProductsBase::Name,
+                             tblAccountProductsBase::Fields::prd_untID
+                             ))
+//            .innerJoinWith(tblAccountProductsBase::Relation::Unit)
+//            .addCol(tblAccountUnitsBase::Fields::untName)
     ;
 }
 
@@ -173,6 +266,7 @@ QVariant IMPL_ORMGET(intfAccountProducts) {
 #endif
 
     constexpr quint16 CACHE_TIME = 15 * 60;
+
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
 }
 
@@ -279,14 +373,13 @@ QVariant IMPL_ORMGET(intfAccountSaleables) {
 
     constexpr quint16 CACHE_TIME = 15 * 60;
 
-    auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
-        if (_cols.isEmpty())
-            _query
-                .addCols(this->SelectableColumnNames())
-                ///@TODO: intfAccountProducts::instance()->SelectableColumnNames()
-//                .addCols(intfAccountProducts::instance()->SelectableColumnNames())
-            ;
-        else {
+    auto fnTouchQuery = [/*this, */&_cols](ORMSelectQuery &_query) {
+        if (_cols.isEmpty()) {
+//            _query
+                //will be adding in GetSelectQuery
+//                .addCols(this->SelectableColumnNames())
+//            ;
+        } else {
             _query.addCSVCols(_cols);
             _cols = {};
         }

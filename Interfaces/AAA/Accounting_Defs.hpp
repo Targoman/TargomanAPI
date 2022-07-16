@@ -107,6 +107,26 @@ constexpr char PENDING_VOUCHER_NAME_REFERRER_PRIZE[]    = "REFERRER_PRIZE";
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+namespace tblAccountUnitsBase {
+    constexpr char Name[] = "tblAccountUnits";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(untID);
+        TARGOMAN_CREATE_CONSTEXPR(untName);
+    } //namespace Fields
+}
+
+namespace tblAccountUnitsTranslateBase {
+    constexpr char Name[] = "tblAccountUnits_translate";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(id);
+        TARGOMAN_CREATE_CONSTEXPR(pid);
+        TARGOMAN_CREATE_CONSTEXPR(language);
+        TARGOMAN_CREATE_CONSTEXPR(untName);
+    } //namespace Fields
+}
+
 namespace tblAccountProductsBase {
     constexpr char Name[] = "tblAccountProducts";
 
@@ -121,6 +141,7 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
         TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
         TARGOMAN_CREATE_CONSTEXPR(prdVAT);
+        TARGOMAN_CREATE_CONSTEXPR(prd_untID);
         TARGOMAN_CREATE_CONSTEXPR(prdQtyIsDecimal);
 
         ///@TODO: create trigger for this 3 fields
@@ -267,33 +288,99 @@ namespace tblAccountPrizesBase {
 }
 
 //-- tbl inside
-namespace tblAccountProductsBase {
+namespace tblAccountUnitsBase {
     namespace Relation {
-        constexpr char Saleable[] = "saleable";
     }
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //          ColName                       Type                            Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
-            clsORMField(Fields::prdID,                ORM_PRIMARYKEY_32),
-            clsORMField(Fields::prdCode,              S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner),
-            clsORMField(Fields::prdName,              S(QString),                     QFV,                                    QRequired,  UPOwner).setMultiLanguage(),
-            clsORMField(Fields::prdDesc,              S(QString),                     QFV,                                    QNull,      UPOwner).setMultiLanguage(),
-            clsORMField(Fields::prdValidFromDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdValidToDate,       S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
-            clsORMField(Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
-            clsORMField(Fields::prdPrivs,             S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdVAT,               S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner),
-            clsORMField(Fields::prdQtyIsDecimal,      S(bool),                        QFV,                                    false,      UPAdmin),
-            clsORMField(Fields::prdInStockQty,        S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin),
-            clsORMField(Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
-            clsORMField(Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
-            clsORMField(Fields::prdStatus,            ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
+            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::untID,        ORM_PRIMARYKEY_16 },
+            { Fields::untName,      S(QString),         QFV,        QRequired,  UPOwner },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {
+                { Fields::untID, R(_schema, tblAccountUnitsTranslateBase::Name), tblAccountUnitsTranslateBase::Fields::pid },
+            };
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountUnitsBase_DTO \
+    SF_ORM_PRIMARYKEY_16        (untID), \
+    SF_QString                  (untName)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUnitsBase_DTO
+    );
+}
+
+namespace tblAccountUnitsTranslateBase {
+    namespace Relation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::id,           ORM_PRIMARYKEY_32 },
+            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPOwner },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::untName,      S(QString),         QFV,        QRequired,  UPOwner },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {};
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountUnitsTranslateBase_DTO \
+    SF_ORM_PRIMARYKEY_32        (id), \
+    SF_quint16                  (pid), \
+    SF_QString                  (language), \
+    SF_QString                  (untName)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUnitsTranslateBase_DTO
+    );
+}
+
+namespace tblAccountProductsBase {
+    namespace Relation {
+        constexpr char Saleable[] = "saleable";
+        constexpr char Unit[] = "unit";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //          ColName                     Type                            Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
+            clsORMField(Fields::prdID,              ORM_PRIMARYKEY_32),
+            clsORMField(Fields::prdCode,            S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner),
+            clsORMField(Fields::prdName,            S(QString),                     QFV,                                    QRequired,  UPOwner).setMultiLanguage(),
+            clsORMField(Fields::prdDesc,            S(QString),                     QFV,                                    QNull,      UPOwner).setMultiLanguage(),
+            clsORMField(Fields::prdValidFromDate,   S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdValidToDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdValidFromHour,   S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
+            clsORMField(Fields::prdValidToHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
+            clsORMField(Fields::prdPrivs,           S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdVAT,             S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner),
+            clsORMField(Fields::prd_untID,          S(NULLABLE_TYPE(quint16)),      QFV,                                    QNull,      UPOwner),
+            clsORMField(Fields::prdQtyIsDecimal,    S(bool),                        QFV,                                    false,      UPAdmin),
+            clsORMField(Fields::prdInStockQty,      S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin),
+            clsORMField(Fields::prdOrderedQty,      S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
+            clsORMField(Fields::prdReturnedQty,     S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
+            clsORMField(Fields::prdStatus,          ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
             clsORMField(ORM_INVALIDATED_AT_FIELD),
-            clsORMField(Fields::prdCreationDateTime,  ORM_CREATED_ON),
-            clsORMField(Fields::prdCreatedBy_usrID,   ORM_CREATED_BY),
-            clsORMField(Fields::prdUpdatedBy_usrID,   ORM_UPDATED_BY),
+            clsORMField(Fields::prdCreationDateTime,ORM_CREATED_ON),
+            clsORMField(Fields::prdCreatedBy_usrID, ORM_CREATED_BY),
+            clsORMField(Fields::prdUpdatedBy_usrID, ORM_UPDATED_BY),
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -304,6 +391,8 @@ namespace tblAccountProductsBase {
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
                 { Fields::prdID, R(_schema, tblAccountProductsTranslateBase::Name), tblAccountProductsTranslateBase::Fields::pid },
+                { Relation::Unit,
+                    { Fields::prd_untID, R(_schema, tblAccountUnitsBase::Name), tblAccountUnitsBase::Fields::untID } },
             };
         };
 
@@ -335,6 +424,7 @@ namespace tblAccountProductsBase {
     SF_NULLABLE_quint8          (prdValidToHour), \
     SF_JSON_t                   (prdPrivs), \
     SF_NULLABLE_qreal           (prdVAT), \
+    SF_NULLABLE_quint16         (prd_untID), \
     SF_bool                     (prdQtyIsDecimal), \
     SF_qreal                    (prdInStockQty), \
     SF_NULLABLE_qreal           (prdOrderedQty), \
@@ -981,8 +1071,9 @@ TAPI_DEFINE_STRUCT(stuPreVoucher,
     SF_QString          (Sign)
 );
 
+//v.Items.isEmpty() == false
 TAPI_DEFINE_STRUCT(stuBasketActionResult,
-    SF_Struct           (PreVoucher, stuPreVoucher, v.Items.isEmpty() == false),
+    SF_Struct           (PreVoucher, stuPreVoucher, [](Q_DECL_UNUSED auto v) { return true; }(v)),
     SF_MD5_t            (TargetItemKey)
 );
 

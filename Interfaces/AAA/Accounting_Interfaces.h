@@ -32,6 +32,42 @@ using namespace Targoman::API::API;
 namespace Targoman::API::AAA {
 
 /******************************************************/
+class intfAccountUnitsTranslate : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountUnitsTranslate(const QString& _schema,
+                              const QList<DBM::clsORMField>& _exclusiveCols = {},
+                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+protected:
+    static intfAccountUnitsTranslate* myInstance;
+    friend class intfAccountUnits;
+};
+
+class intfAccountUnits : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountUnits(const QString& _schema,
+                     const QList<DBM::clsORMField>& _exclusiveCols = {},
+                     const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                     const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+public:
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+
+private slots:
+    QVariant ANONYMOUSE_ORMGET("Get Available Units")
+    quint32 ORMCREATE("Create a new Unit by priviledged user")
+    bool ORMUPDATE("Update a Unit info by priviledged user")
+    bool ORMDELETE("Delete a Unit")
+};
+
+/******************************************************/
 class intfAccountProductsTranslate : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -67,9 +103,9 @@ private slots:
     QVariant ORMGET("Get Available Products")
 #endif
 
-    bool ORMDELETE("Delete a Product")
-    bool ORMUPDATE("Update a Product info by priviledged user")
     quint32 ORMCREATE("Create a new Product by priviledged user")
+    bool ORMUPDATE("Update a Product info by priviledged user")
+    bool ORMDELETE("Delete a Product")
 };
 
 /******************************************************/
@@ -108,9 +144,9 @@ private slots:
     QVariant ORMGET("Get Available Saleables")
 #endif
 
-    bool ORMDELETE("Delete a Saleable")
-    bool ORMUPDATE("Update a Saleable info by priviledged user")
     quint32 ORMCREATE("Create a new Saleable by priviledged user")
+    bool ORMUPDATE("Update a Saleable info by priviledged user")
+    bool ORMDELETE("Delete a Saleable")
 };
 
 /******************************************************/
@@ -172,9 +208,9 @@ public:
 
 private slots:
     QVariant ORMGET("Get Active Discounts")
-    bool ORMDELETE("Delete a Discount")
-    bool ORMUPDATE("Update a Discount info by priviledged user")
     quint32 ORMCREATE("Create a new Discount by priviledged user")
+    bool ORMUPDATE("Update a Discount info by priviledged user")
+    bool ORMDELETE("Delete a Discount")
 };
 
 /******************************************************/
@@ -189,9 +225,9 @@ public:
                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
     QVariant ORMGET("Get Active Prizes")
-    bool ORMDELETE("Delete a Prizes")
-    bool ORMUPDATE("Update a Prizes info by priviledged user")
     quint32 ORMCREATE("Create a new Prizes by priviledged user")
+    bool ORMUPDATE("Update a Prizes info by priviledged user")
+    bool ORMDELETE("Delete a Prizes")
 };
 
 } //namespace Targoman::API::AAA

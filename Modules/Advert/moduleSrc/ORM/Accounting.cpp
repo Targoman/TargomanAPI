@@ -30,6 +30,25 @@ using namespace Targoman::API::AAA;
 namespace Targoman::API::AdvertModule::ORM {
 
 /******************************************************/
+AccountUnits::AccountUnits() :
+    intfAccountUnits(
+        AdvertSchema,
+        tblAccountUnits::Private::ExtraORMFields,
+        tblAccountUnits::Private::ExtraRelations,
+        tblAccountUnits::Private::ExtraIndexes
+) {
+    AccountUnitsTranslate::instance();
+}
+
+AccountUnitsTranslate::AccountUnitsTranslate() :
+    intfAccountUnitsTranslate(
+        AdvertSchema,
+        tblAccountUnitsTranslate::Private::ExtraORMFields,
+        tblAccountUnitsTranslate::Private::ExtraRelations,
+        tblAccountUnitsTranslate::Private::ExtraIndexes
+) { ; }
+
+/******************************************************/
 AccountProducts::AccountProducts() :
     intfAccountProducts(
         AdvertSchema,

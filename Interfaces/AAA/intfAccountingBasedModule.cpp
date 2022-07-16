@@ -107,23 +107,28 @@ intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
 |** intfAccountingBasedModule **********************************************************************|
 \***************************************************************************************************/
 intfAccountingBasedModule::intfAccountingBasedModule(
-    const QString& _module,
-    const QString& _schema,
-    AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-    intfAccountProducts* _products,
+    const QString           &_module,
+    const QString           &_schema,
+    AssetUsageLimitsCols_t  _AssetUsageLimitsCols,
+    intfAccountUnits        *_units,
+//    intfAccountUnitsTranslate* _unitsTranslate,
+    intfAccountProducts     *_products,
 //    intfAccountProductsTranslate* _productsTranslate,
-    intfAccountSaleables* _saleables,
-    intfAccountUserAssets* _userAssets,
-    intfAccountAssetUsage* _assetUsages,
-    intfAccountCoupons* _discounts,
-    intfAccountPrizes* _prizes
+    intfAccountSaleables    *_saleables,
+//    intfAccountSaleablesTranslate* _saleablesTranslate,
+    intfAccountUserAssets   *_userAssets,
+    intfAccountAssetUsage   *_assetUsages,
+    intfAccountCoupons      *_discounts,
+    intfAccountPrizes       *_prizes
 ) :
     API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
+    AccountUnits(_units),
+//    AccountUnitsTranslate(_unitsTranslate),
     AccountProducts(_products),
 //    AccountProductsTranslate(_productsTranslate),
     AccountSaleables(_saleables),
-//    AccountSaleablesTranslate(_productsTranslate),
+//    AccountSaleablesTranslate(_saleablesTranslate),
     AccountUserAssets(_userAssets),
     AccountAssetUsages(_assetUsages),
     AccountCoupons(_discounts),

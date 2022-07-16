@@ -48,6 +48,62 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+namespace tblAccountUnits {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUnitsBase_DTO
+    );
+}
+
+namespace tblAccountUnitsTranslate {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUnitsTranslateBase_DTO
+    );
+}
+
 namespace tblAccountProducts {
 
     namespace ExtraFields {
@@ -320,6 +376,24 @@ namespace tblAccountCoupons {
 }
 
 #pragma GCC diagnostic pop
+
+/******************************************************/
+class AccountUnits : public intfAccountUnits
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnits)
+
+protected:
+    QScopedPointer<intfAccountUnitsTranslate> AccountUnitsTranslate;
+};
+
+class AccountUnitsTranslate : public intfAccountUnitsTranslate
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnitsTranslate)
+
+public:
+};
 
 /******************************************************/
 class AccountProducts : public intfAccountProducts

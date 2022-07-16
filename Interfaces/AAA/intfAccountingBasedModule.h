@@ -37,16 +37,19 @@ class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
 
 protected:
     intfAccountingBasedModule(
-        const QString& _module,
-        const QString& _schema,
-        AssetUsageLimitsCols_t _AssetUsageLimitsCols,
-        intfAccountProducts* _products,
-//        intfAccountProductsTranslate* _productsTranslate,
-        intfAccountSaleables* _saleables,
-        intfAccountUserAssets* _userAssets,
-        intfAccountAssetUsage* _assetUsages,
-        intfAccountCoupons* _discounts = nullptr,
-        intfAccountPrizes* _prizes = nullptr
+        const QString           &_module,
+        const QString           &_schema,
+        AssetUsageLimitsCols_t  _AssetUsageLimitsCols,
+        intfAccountUnits        *_units,
+    //    intfAccountUnitsTranslate* _unitsTranslate,
+        intfAccountProducts     *_products,
+    //    intfAccountProductsTranslate* _productsTranslate,
+        intfAccountSaleables    *_saleables,
+    //    intfAccountSaleablesTranslate* _saleablesTranslate,
+        intfAccountUserAssets   *_userAssets,
+        intfAccountAssetUsage   *_assetUsages,
+        intfAccountCoupons      *_discounts = nullptr,
+        intfAccountPrizes       *_prizes = nullptr
     );
 
 //    virtual ~intfAccountingBasedModule();
@@ -247,14 +250,16 @@ protected slots:
 protected:
     QString ServiceName;
 
-    QScopedPointer<intfAccountProducts> AccountProducts;
+    QScopedPointer<intfAccountUnits>        AccountUnits;
+//    QScopedPointer<intfAccountUnitsTranslate> AccountUnitsTranslate;
+    QScopedPointer<intfAccountProducts>     AccountProducts;
 //    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
-    QScopedPointer<intfAccountSaleables> AccountSaleables;
+    QScopedPointer<intfAccountSaleables>    AccountSaleables;
 //    QScopedPointer<intfAccountSaleablesTranslate> AccountSaleablesTranslate;
-    QScopedPointer<intfAccountUserAssets> AccountUserAssets;
-    QScopedPointer<intfAccountAssetUsage> AccountAssetUsages;
-    QScopedPointer<intfAccountCoupons> AccountCoupons;
-    QScopedPointer<intfAccountPrizes> AccountPrizes;
+    QScopedPointer<intfAccountUserAssets>   AccountUserAssets;
+    QScopedPointer<intfAccountAssetUsage>   AccountAssetUsages;
+    QScopedPointer<intfAccountCoupons>      AccountCoupons;
+    QScopedPointer<intfAccountPrizes>       AccountPrizes;
 
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
     QStringList AssetUsageLimitsColsName;
