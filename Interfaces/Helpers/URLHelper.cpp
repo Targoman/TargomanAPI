@@ -60,6 +60,22 @@ QString URLHelper::addParameter(const QString &_url, const QString& _paramName, 
     return Url.toString();
 }
 
+QString URLHelper::addParameters(const QString& _url, const QVariantMap& _params) {
+    QUrl Url = QUrl(_url);
+
+    QUrlQuery UrlQuery = QUrlQuery(Url);
+
+    for (QVariantMap::const_iterator it = _params.constBegin();
+         it != _params.constEnd();
+         it++
+    ) {
+        UrlQuery.addQueryItem(it.key(), it.value().toString());
+    }
+
+    Url.setQuery(UrlQuery);
+    return Url.toString();
+}
+
 QString URLHelper::normalize(const QString &_url) {
     QUrl Url = QUrl(_url);
     QString Schema = Url.scheme();

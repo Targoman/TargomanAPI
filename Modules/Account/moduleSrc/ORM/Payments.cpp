@@ -69,6 +69,49 @@ QVariant IMPL_ORMGET(OnlinePayments) {
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
 }
 
+/**
+  * this proxy received GERT and POST and make GET call to the clients callback
+  */
+QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
+    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    QString _paymentKey
+)) {
+//curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
+
+    _paymentKey = _paymentKey.trimmed();
+    if (_paymentKey.isEmpty())
+        throw exTargomanBase("paymentKey is empty", ESTATUS_INTERNAL_SERVER_ERROR);
+
+    tblOnlinePayments::DTO OnlinePaymentDTO = OnlinePayments::instance().GetSelectQuery(APICALLBOOM_PARAM)
+//            .addCols(OnlinePayments::instance().SelectableColumnNames())
+//            .addCols(PaymentGateways::instance().SelectableColumnNames())
+//            .innerJoinWith("paymentGateway")
+            .addCol(tblOnlinePayments::Fields::onpCallbackUrl)
+            .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
+            .one<tblOnlinePayments::DTO>();
+
+    //-------------------------------------------------
+    QVariantMap ResponseParams;
+
+    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
+    foreach (auto Item, RequestQueryParams) {
+//        if (Item.first == "paymentKey")
+//            continue;
+        ResponseParams.insert(Item.first, Item.second);
+    }
+
+    QList<QPair<QString, QString>> RequestBodyParams = APICALLBOOM_PARAM.getRequestBodyParams();
+    foreach (auto Item, RequestBodyParams) {
+        ResponseParams.insert(Item.first, Item.second);
+    }
+
+    //-------------------------------------------------
+    QString Callback = OnlinePaymentDTO.onpCallbackUrl;
+    Callback = URLHelper::addParameters(Callback, ResponseParams);
+
+    return TAPI::ResponseRedirect_t(Callback, false).toVariant();
+}
+
 #ifdef QT_DEBUG
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
@@ -138,7 +181,8 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
                 <div style='white-space: nowrap;'>Voucher ID:</div><div>{VOUCHER_ID}</div>
                 <div style='white-space: nowrap;'>Wallet ID:</div><div>{WALLET_ID}</div>
                 <div style='white-space: nowrap;'>Amount:</div><div>{AMOUNT}</div>
-                <div style='white-space: nowrap;'>Callback Url:</div><div>{CALLBACK_URL}</div>
+                <div style='white-space: nowrap;'>API Callback Url:</div><div>{API_CALLBACK_URL}</div>
+                <div style='white-space: nowrap;'>UI Callback Url:</div><div>{UI_CALLBACK_URL}</div>
             </div>
         </div>
     </body>
@@ -155,7 +199,8 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
               .replace("{VOUCHER_ID}", QString::number(OnlinePaymentsDTO.onp_vchID).toLatin1())
               .replace("{WALLET_ID}", QString::number(NULLABLE_GET_OR_DEFAULT(OnlinePaymentsDTO.onpTarget_walID, 0)).toLatin1())
               .replace("{AMOUNT}", QString::number(OnlinePaymentsDTO.onpAmount).toLatin1())
-              .replace("{CALLBACK_URL}", _callback.toLatin1())
+              .replace("{API_CALLBACK_URL}", _callback.toLatin1())
+              .replace("{UI_CALLBACK_URL}", OnlinePaymentsDTO.onpCallbackUrl.toLatin1())
     ;
 
     return TAPI::RawData_t(Content,
@@ -170,6 +215,15 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
     QString _paymentKey,
     QString _result
 )) {
+    QVariantMap ResponseParams;
+    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
+    foreach (auto Item, RequestQueryParams) {
+        if (Item.first == "paymentKey")
+            continue;
+        ResponseParams.insert(Item.first, Item.second);
+    }
+    ResponseParams.insert("result", _result);
+
     return RESTClientHelper::callAPI(
         RESTClientHelper::POST,
         "Account/approveOnlinePayment",
@@ -177,54 +231,11 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
         {
             { "paymentKey",     _paymentKey },
 //            { "domain",         "dev.test" },
-            { "pgResponse",     QVariantMap({
-                  { "result",   _result },
-            }) },
+            { "pgResponse",     ResponseParams },
         }
     );
 }
 #endif
-
-QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    QString _paymentKey
-)) {
-//curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
-
-    QVariantMap ResponseParams;
-
-    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
-    foreach (auto Item, RequestQueryParams) {
-        if (Item.first == "paymentKey")
-            continue;
-
-        ResponseParams.insert(Item.first, Item.second);
-    }
-
-    QList<QPair<QString, QString>> RequestBodyParams = APICALLBOOM_PARAM.getRequestBodyParams();
-    foreach (auto Item, RequestBodyParams) {
-        ResponseParams.insert(Item.first, Item.second);
-    }
-
-    return true;
-
-//    Account::instance()->apiPOSTapproveOnlinePayment(
-//                APICALLBOOM_PARAM,
-//                _paymentKey,
-//                ResponseParams
-//                );
-
-//    RESTClientHelper::callAPI(
-//        RESTClientHelper::POST,
-//        "Account/approveOnlinePayment",
-//        {},
-//        {
-//            { "paymentKey",     _paymentKey },
-////            { "domain",         "dev.test" },
-//            { "pgResponse",     ResponseParams },
-//        }
-//    );
-}
 
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|
