@@ -160,8 +160,11 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
     return CurrCheckingPriv;
 }
 
-stuActiveAccount PrivHelpers::processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess, const QStringList& _services) {
-
+stuActiveAccount PrivHelpers::processUserObject(
+        QJsonObject& _userObj,
+        const QStringList& _requiredAccess,
+        const QStringList& _services
+) {
     if (_userObj.contains(DBM_SPRESULT_ROWS))
         _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 

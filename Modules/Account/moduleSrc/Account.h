@@ -206,7 +206,7 @@ private slots:
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::enuOAuthType::Type _type,
             QString _oAuthToken,
-            TAPI::CommaSeparatedStringList_t _services,
+            TAPI::CommaSeparatedStringList_t _services = {},
             TAPI::JSON_t _sessionInfo = TAPI::JSON_t(),
             TAPI::MD5_t _fingerprint = {}
         ),
