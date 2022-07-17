@@ -62,7 +62,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);
 
-    QString PaymentLink = QString("%1/Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
+    QString PaymentLink = QString("%1Account/OnlinePayments/devTestPayPage?paymentKey=%2&trackID=%3&callback=%4")
                           .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                           .arg(_paymentKey)
                           .arg(TrackID)

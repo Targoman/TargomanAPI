@@ -68,6 +68,7 @@ namespace tblOnlinePayments {
         TARGOMAN_CREATE_CONSTEXPR(onp_pgwID);
         TARGOMAN_CREATE_CONSTEXPR(onpTrackNumber);
         TARGOMAN_CREATE_CONSTEXPR(onpAmount);
+        TARGOMAN_CREATE_CONSTEXPR(onpCallbackUrl);
         TARGOMAN_CREATE_CONSTEXPR(onpTarget_walID);
         TARGOMAN_CREATE_CONSTEXPR(onpResult);
         TARGOMAN_CREATE_CONSTEXPR(onpStatus);
@@ -88,6 +89,7 @@ namespace tblOnlinePayments {
             { Fields::onp_pgwID,             S(quint32),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
             { Fields::onpTrackNumber,        S(QString),             QFV.allwaysValid().maxLenght(50),   QNull,      UPAdmin },
             { Fields::onpAmount,             S(quint64),             QFV.integer().minValue(1),          QRequired,  UPAdmin },
+            { Fields::onpCallbackUrl,        S(QString),             QFV.allwaysValid().maxLenght(2048), QRequired,  UPAdmin },
             { Fields::onpTarget_walID,       S(quint64),             QFV,                                QNull,      UPNone },
             { Fields::onpResult,             S(QString),             QFV,                                QNull,      UPAdmin, false, false },
             { Fields::onpStatus,             ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
@@ -113,6 +115,7 @@ namespace tblOnlinePayments {
         SF_quint32                  (onp_pgwID),
         SF_QString                  (onpTrackNumber),
         SF_quint32                  (onpAmount),
+        SF_QString                  (onpCallbackUrl),
         SF_NULLABLE_quint64         (onpTarget_walID),
         SF_QString                  (onpResult),
         SF_ORM_STATUS_FIELD         (onpStatus, Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending),
@@ -130,13 +133,16 @@ class OnlinePayments : public intfSQLBasedModule
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
 
-    QVariant REST_GET_OR_POST(
+    QVariant EXREST_GET_OR_POST(
         paymentCallback,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _paymentKey
         ),
-        "Payment callback proxy"
+        "Payment callback proxy",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
     )
 
 #ifdef QT_DEBUG
