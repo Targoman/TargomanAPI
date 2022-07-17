@@ -302,7 +302,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                                                                { "iVoucherID", _vchID },
                                                                { "iGatewayID", PaymentGatewayDTO.pgwID },
                                                                { "iAmount", _toPay },
-//                                                               { "iCallbackUrl", _paymentVerifyCallback },
+                                                               { "iCallbackUrl", _paymentVerifyCallback },
                                                                { "iTargetWalID", _walID },
                                                            })
                          .spDirectOutputs()
@@ -313,12 +313,12 @@ QString PaymentLogic::createOnlinePaymentLink(
     try {
         _outPaymentKey = onpMD5;
 
-//        QString Callback = QString("https://%1%2Account/OnlinePayments/paymentCallback?paymentKey=%3")
-//                           .arg(APICALLBOOM_PARAM.hostAndPort())
-//                           .arg(ServerCommonConfigs::BasePathWithVersion)
-//                           .arg(onpMD5);
+        QString Callback = QString("https://%1%2Account/OnlinePayments/paymentCallback?paymentKey=%3")
+                           .arg(APICALLBOOM_PARAM.hostAndPort())
+                           .arg(ServerCommonConfigs::BasePathWithVersion)
+                           .arg(onpMD5);
 
-        QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentKey", onpMD5);
+//        QString Callback = URLHelper::addParameter(_paymentVerifyCallback, "paymentKey", onpMD5);
 
         //4: call driver::request
         auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(
