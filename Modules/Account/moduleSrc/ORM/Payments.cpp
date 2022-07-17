@@ -200,25 +200,16 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 
     QVariantMap ResponseParams;
 
-    QStringList Queries = APICALLBOOM_PARAM.getQueries();
-    foreach (auto Item, Queries) {
-        QStringList Parts = Item.split('=');
-        QString Name = Parts.at(0);
-
-        if (Name == "paymentKey")
+    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
+    foreach (auto Item, RequestQueryParams) {
+        if (Item.first == "paymentKey")
             continue;
 
-        QString Value;
-        if (Parts.length() > 1) {
-            Parts.removeAt(0);
-            Value = Parts.join('=');
-        }
-
-        ResponseParams.insert(Name, Value);
+        ResponseParams.insert(Item.first, Item.second);
     }
 
-    QList<QPair<QString, QString>> UserDefinedValues = APICALLBOOM_PARAM.getUserDefinedValues();
-    foreach (auto Item, UserDefinedValues) {
+    QList<QPair<QString, QString>> RequestBodyParams = APICALLBOOM_PARAM.getRequestBodyParams();
+    foreach (auto Item, RequestBodyParams) {
         ResponseParams.insert(Item.first, Item.second);
     }
 

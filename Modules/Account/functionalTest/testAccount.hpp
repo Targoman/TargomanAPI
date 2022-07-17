@@ -492,7 +492,7 @@ private slots:
                                   {},
                                   {
                                       { "email", UT_UserEmail },
-                                      { "uuid", Code },
+                                      { "code", Code },
                                       { "autoLogin", false },
                                   });
 //        qDebug() << Result;
@@ -512,7 +512,7 @@ private slots:
                                   {},
                                   {
                                       { "email", UT_AdminUserEmail },
-                                      { "uuid", Code },
+                                      { "code", Code },
                                       { "autoLogin", false },
                                   });
         QVERIFY(Result.isValid());

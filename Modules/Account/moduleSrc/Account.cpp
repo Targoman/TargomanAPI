@@ -292,7 +292,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _email,
-    TAPI::MD5_t _uuid,
+    TAPI::MD5_t _code,
     bool _autoLogin,
     TAPI::CommaSeparatedStringList_t _services,
     bool _rememberMe,
@@ -307,7 +307,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
                                         "spApproval_Accept", {
                                             { "iBy", "E" },
                                             { "iKey", _email },
-                                            { "iCode", _uuid },
+                                            { "iCode", _code },
                                             { "iLogin", _autoLogin ? 1 : 0 },
                                             { "iLoginIP", APICALLBOOM_PARAM.getIP() },
                                             { "iLoginInfo", _sessionInfo.object() },

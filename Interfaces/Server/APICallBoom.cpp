@@ -49,8 +49,8 @@ public:
         RequestCookies(_other.RequestCookies),
         JWT(_other.JWT),
         IP(_other.IP),
-        Queries(_other.Queries),
-        UserDefinedValues(_other.UserDefinedValues),
+        RequestQueryParams(_other.RequestQueryParams),
+        RequestBodyParams(_other.RequestBodyParams),
         ResponseHeaders(_other.ResponseHeaders),
         AcceptLanguage(_other.AcceptLanguage)
     { ; }
@@ -66,8 +66,8 @@ public:
     QVariantMap RequestCookies;
     TAPI::JWT_t JWT;
     TAPI::RemoteIP_t IP;
-    QStringList Queries;
-    QList<QPair<QString, QString>> UserDefinedValues;
+    QList<QPair<QString, QString>> RequestQueryParams;
+    QList<QPair<QString, QString>> RequestBodyParams;
 
     QVariantMap ResponseHeaders;
     QString AcceptLanguage;
@@ -83,16 +83,28 @@ void intfAPICallBoom::initialize(
     const QVariantMap &_headers,
     const QVariantMap &_cookies,
     const QString &_ip,
-    const QStringList &_queries,
-    const QList<QPair<QString, QString>> &_userDefinedValues
+    const QStringList &_requestQueryParams,
+    const QList<QPair<QString, QString>> &_requestBodyParams
 ) {
     this->Data->RequestAPIPath = _apiPath;
     this->Data->RequestHeaders = _headers;
     this->Data->RequestCookies = _cookies;
     this->Data->JWT = _JWT;
     this->Data->IP = _ip;
-    this->Data->Queries = _queries;
-    this->Data->UserDefinedValues = _userDefinedValues;
+
+    foreach (auto Item, _requestQueryParams) {
+        QStringList Parts = Item.split('=');
+        QString Name = Parts.at(0);
+
+        QString Value;
+        if (Parts.length() > 1) {
+            Parts.removeAt(0);
+            Value = QUrl::fromPercentEncoding(Parts.join('=').toUtf8());
+        }
+
+        this->Data->RequestQueryParams.append({ Name, Value });
+    }
+    this->Data->RequestBodyParams = _requestBodyParams;
 
     this->Data->AcceptLanguage = "en";
 
@@ -122,12 +134,12 @@ QString intfAPICallBoom::getIP() {
     return this->Data->IP;
 }
 
-QStringList intfAPICallBoom::getQueries() {
-    return this->Data->Queries;
+QList<QPair<QString, QString>> intfAPICallBoom::getRequestQueryParams() {
+    return this->Data->RequestQueryParams;
 }
 
-QList<QPair<QString, QString>> intfAPICallBoom::getUserDefinedValues() {
-    return this->Data->UserDefinedValues;
+QList<QPair<QString, QString>> intfAPICallBoom::getRequestBodyParams() {
+    return this->Data->RequestBodyParams;
 }
 
 //void intfAPICallBoom::setRequestAPIPath(const QString &_path) {
