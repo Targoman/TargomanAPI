@@ -89,7 +89,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
                         .arg(ServerCommonConfigs::BasePathWithVersion);
 
     if (_callback.isEmpty())
-        _callback = QString("%1/Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
+        _callback = QString("%1Account/OnlinePayments/devTestCallbackPage?paymentKey=%2")
                     .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                     .arg(_paymentKey)
                     ;
@@ -214,6 +214,14 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     }
 
     qDebug() << "ResponseParams:" << ResponseParams;
+
+
+    QString Callback = QString("https://%1%2Account/OnlinePayments/paymentCallback?paymentKey=%3")
+                       .arg(APICALLBOOM_PARAM.hostAndPort())
+                       .arg(ServerCommonConfigs::BasePathWithVersion)
+                       .arg("onpMD5");
+
+    qDebug() << "Callback" << Callback;
 
     return true;
 
