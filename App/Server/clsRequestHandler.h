@@ -135,7 +135,7 @@ public:
         );
     void sendCORSOptions();
 
-    void redirect(const QString _path, bool _appendBase = true, bool _permananet = false);
+    void redirect(const QString _path, bool _appendBase = true, qhttp::TStatusCode _statusCode = qhttp::ESTATUS_TEMPORARY_REDIRECT);//bool _permananet = false);
 
     QString host() const;
     quint16 port() const;

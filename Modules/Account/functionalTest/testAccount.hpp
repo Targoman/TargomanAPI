@@ -312,7 +312,7 @@ private slots:
 
         QVERIFY(Result.toBool());
     }
-private:
+//private:
     void ApproveMobile_And_Login_0999_888_1010() {
         clsDAC DAC;
         QJsonObject AprInfo = DAC.execQuery("",

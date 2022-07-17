@@ -684,7 +684,7 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 
     } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
         TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
-        this->redirect(ResponseRedirect.url(), ResponseRedirect.appendBase(), ResponseRedirect.permananet());
+        this->redirect(ResponseRedirect.url(), ResponseRedirect.appendBase(), ResponseRedirect.statusCode());
 
     } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
         TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
@@ -726,13 +726,13 @@ void clsRequestHandler::sendCORSOptions() {
     this->deleteLater();
 }
 
-void clsRequestHandler::redirect(const QString _path, bool _appendBase, bool _permananet) {
+void clsRequestHandler::redirect(const QString _path, bool _appendBase, qhttp::TStatusCode _statusCode) { //bool _permananet) {
     QString Path = _appendBase ? ServerCommonConfigs::BasePathWithVersion + _path : _path;
     Path = URLHelper::normalize(Path);
 
     this->Response->addHeaderValue("Location", Path);
 
-    this->Response->setStatusCode(_permananet ?  qhttp::ESTATUS_MOVED_PERMANENTLY : qhttp::ESTATUS_TEMPORARY_REDIRECT);
+    this->Response->setStatusCode(_statusCode); //_permananet ?  qhttp::ESTATUS_MOVED_PERMANENTLY : qhttp::ESTATUS_TEMPORARY_REDIRECT);
 
     this->Response->end();
 

@@ -178,16 +178,16 @@ public:
     ResponseRedirect_t &operator=(const ResponseRedirect_t &) = default;
     ResponseRedirect_t(const QString &_url,
                        bool _appendBase,
-                       bool _permananet = false);
+                       qhttp::TStatusCode _statusCode = qhttp::ESTATUS_TEMPORARY_REDIRECT);
     QVariant toVariant() const;
     const QString &url() { return this->Url; }
     bool appendBase() { return this->AppendBase; }
-    bool permananet() { return this->Permananet; }
+    qhttp::TStatusCode statusCode() { return this->StatusCode; }
 
 private:
     QString Url;
     bool AppendBase;
-    bool Permananet;
+    qhttp::TStatusCode StatusCode;
 };
 
 /**********************************************************************/

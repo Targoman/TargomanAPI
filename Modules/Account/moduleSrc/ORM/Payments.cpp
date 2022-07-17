@@ -109,7 +109,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     QString Callback = OnlinePaymentDTO.onpCallbackUrl;
     Callback = URLHelper::addParameters(Callback, ResponseParams);
 
-    return TAPI::ResponseRedirect_t(Callback, false).toVariant();
+    return TAPI::ResponseRedirect_t(Callback, false, qhttp::ESTATUS_SEE_OTHER).toVariant();
 }
 
 #ifdef QT_DEBUG
