@@ -29,6 +29,7 @@
 using namespace Targoman::API::Helpers;
 #include "Interfaces/Server/ServerCommon.h"
 using namespace Targoman::API::Server;
+#include "Account.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuPaymentStatus);
 
@@ -188,14 +189,6 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey
 )) {
-    /*
-    new fields:
-        onpDomain
-        onpClientCallback
-
-    gather (GET) and (POST) params into (ResponseParams)
-    */
-
 //curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
 
     QVariantMap ResponseParams;
@@ -213,29 +206,24 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
         ResponseParams.insert(Item.first, Item.second);
     }
 
-    qDebug() << "ResponseParams:" << ResponseParams;
-
-
-    QString Callback = QString("https://%1%2Account/OnlinePayments/paymentCallback?paymentKey=%3")
-                       .arg(APICALLBOOM_PARAM.hostAndPort())
-                       .arg(ServerCommonConfigs::BasePathWithVersion)
-                       .arg("onpMD5");
-
-    qDebug() << "Callback" << Callback;
-
     return true;
 
+//    Account::instance()->apiPOSTapproveOnlinePayment(
+//                APICALLBOOM_PARAM,
+//                _paymentKey,
+//                ResponseParams
+//                );
 
-    /*RESTClientHelper::callAPI(
-        RESTClientHelper::POST,
-        "Account/approveOnlinePayment",
-        {},
-        {
-            { "paymentKey",     _paymentKey },
-//            { "domain",         "dev.test" },
-            { "pgResponse",     ResponseParams },
-        }
-    );*/
+//    RESTClientHelper::callAPI(
+//        RESTClientHelper::POST,
+//        "Account/approveOnlinePayment",
+//        {},
+//        {
+//            { "paymentKey",     _paymentKey },
+////            { "domain",         "dev.test" },
+//            { "pgResponse",     ResponseParams },
+//        }
+//    );
 }
 
 /*****************************************************************\
