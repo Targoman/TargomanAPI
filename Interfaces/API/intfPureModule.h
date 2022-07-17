@@ -442,9 +442,9 @@ private: \
 public: \
     _name(); \
     virtual void setInstancePointer() { _name::InstancePointer = this; } \
+    static _name* instance() { return _name::InstancePointer; } \
 protected: \
-    static _name* InstancePointer; \
-    static _name* instance() { return _name::InstancePointer; }
+    static _name* InstancePointer;
 
 #define TARGOMAN_IMPL_API_MODULE(_name) \
     _name* _name::InstancePointer;
