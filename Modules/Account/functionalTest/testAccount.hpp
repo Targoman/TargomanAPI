@@ -303,8 +303,8 @@ private slots:
                                   { "mobile", "0999-888-1010" },
                                   { "signupIfNotExists", true },
                                   { "signupRole", UT_RoleName },
-                                  { "signupEnableEmailAlerts", false },
-                                  { "signupEnableSMSAlerts", false },
+                                  { "signupEnableEmailAlerts", true },
+                                  { "signupEnableSMSAlerts", true },
                                })
                           ;
 
@@ -312,7 +312,7 @@ private slots:
 
         QVERIFY(Result.toBool());
     }
-
+private:
     void ApproveMobile_And_Login_0999_888_1010() {
         clsDAC DAC;
         QJsonObject AprInfo = DAC.execQuery("",
