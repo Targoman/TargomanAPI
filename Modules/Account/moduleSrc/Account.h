@@ -104,7 +104,7 @@ private slots:
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
             QString _email,
-            TAPI::MD5_t _uuid,
+            TAPI::MD5_t _code,
             bool _autoLogin = false,
             TAPI::CommaSeparatedStringList_t _services = {},
             bool _rememberMe = false,

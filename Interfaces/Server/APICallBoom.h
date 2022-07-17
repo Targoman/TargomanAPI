@@ -73,7 +73,9 @@ public:
         const QJsonObject &_JWT,
         const QVariantMap &_headers,
         const QVariantMap &_cookies,
-        const QString &_ip
+        const QString &_ip,
+        const QStringList &_requestQueryParams,
+        const QList<QPair<QString, QString>> &_requestBodyParams
     );
 
     virtual bool needJWT() = 0;
@@ -83,6 +85,9 @@ public:
     QJsonObject getJWTPrivsObject();
 
     QString getIP();
+
+    QList<QPair<QString, QString>> getRequestQueryParams();
+    QList<QPair<QString, QString>> getRequestBodyParams();
 
 //    void setRequestAPIPath(const QString &_path);
     QString requestAPIPath() const;

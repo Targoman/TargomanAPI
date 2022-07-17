@@ -49,6 +49,8 @@ public:
         RequestCookies(_other.RequestCookies),
         JWT(_other.JWT),
         IP(_other.IP),
+        RequestQueryParams(_other.RequestQueryParams),
+        RequestBodyParams(_other.RequestBodyParams),
         ResponseHeaders(_other.ResponseHeaders),
         AcceptLanguage(_other.AcceptLanguage)
     { ; }
@@ -64,6 +66,9 @@ public:
     QVariantMap RequestCookies;
     TAPI::JWT_t JWT;
     TAPI::RemoteIP_t IP;
+    QList<QPair<QString, QString>> RequestQueryParams;
+    QList<QPair<QString, QString>> RequestBodyParams;
+
     QVariantMap ResponseHeaders;
     QString AcceptLanguage;
 };
@@ -77,13 +82,29 @@ void intfAPICallBoom::initialize(
     const QJsonObject &_JWT,
     const QVariantMap &_headers,
     const QVariantMap &_cookies,
-    const QString &_ip
+    const QString &_ip,
+    const QStringList &_requestQueryParams,
+    const QList<QPair<QString, QString>> &_requestBodyParams
 ) {
     this->Data->RequestAPIPath = _apiPath;
     this->Data->RequestHeaders = _headers;
     this->Data->RequestCookies = _cookies;
     this->Data->JWT = _JWT;
     this->Data->IP = _ip;
+
+    foreach (auto Item, _requestQueryParams) {
+        QStringList Parts = Item.split('=');
+        QString Name = Parts.at(0);
+
+        QString Value;
+        if (Parts.length() > 1) {
+            Parts.removeAt(0);
+            Value = QUrl::fromPercentEncoding(Parts.join('=').toUtf8());
+        }
+
+        this->Data->RequestQueryParams.append({ Name, Value });
+    }
+    this->Data->RequestBodyParams = _requestBodyParams;
 
     this->Data->AcceptLanguage = "en";
 
@@ -111,6 +132,14 @@ QJsonObject intfAPICallBoom::getJWTPrivsObject() {
 
 QString intfAPICallBoom::getIP() {
     return this->Data->IP;
+}
+
+QList<QPair<QString, QString>> intfAPICallBoom::getRequestQueryParams() {
+    return this->Data->RequestQueryParams;
+}
+
+QList<QPair<QString, QString>> intfAPICallBoom::getRequestBodyParams() {
+    return this->Data->RequestBodyParams;
 }
 
 //void intfAPICallBoom::setRequestAPIPath(const QString &_path) {
