@@ -446,10 +446,10 @@ QVariant FileData_t::toVariant() const {
 /**********************************************************************************/
 ResponseRedirect_t::ResponseRedirect_t(const QString &_url,
                                        bool _appendBase,
-                                       bool _permananet) :
+                                       qhttp::TStatusCode _statusCode) :
     Url(_url),
     AppendBase(_appendBase),
-    Permananet(_permananet)
+    StatusCode(_statusCode)
 {
     this->Url = URLHelper::normalize(_url);
 }

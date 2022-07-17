@@ -108,7 +108,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             QString Path = _req->url().adjusted(QUrl::NormalizePathSegments | QUrl::RemoveAuthority).path(QUrl::PrettyDecoded);
 
             if (Path != _req->url().path())
-                return RequestHandler->redirect(Path, false);
+                return RequestHandler->redirect(Path);
 
             if (ServerCommonConfigs::PublicPath.value().size() && QFile::exists(ServerCommonConfigs::PublicPath.value() + Path))
                 return RequestHandler->sendFile(ServerCommonConfigs::PublicPath.value(), Path);
