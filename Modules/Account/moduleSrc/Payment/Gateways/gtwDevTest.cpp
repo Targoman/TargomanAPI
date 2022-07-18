@@ -22,6 +22,7 @@
  */
 
 #include "gtwDevTest.h"
+#include "Interfaces/Helpers/URLHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
 #include "Interfaces/Server/ServerCommon.h"
@@ -66,7 +67,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
                           .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                           .arg(_paymentKey)
                           .arg(TrackID)
-                          .arg(_callback)
+                          .arg(URLHelper::encode(_callback))
                           ;
 
     return {

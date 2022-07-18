@@ -274,6 +274,26 @@ private slots:
     /***************************************************************************************/
     /* tests *******************************************************************************/
     /***************************************************************************************/
+//    void checkUrl() {
+//        QString u = QUrl::toPercentEncoding("https://callback.com?a=1&b=2");
+//        qDebug() << 1 << u;
+
+//        u = QUrl::toPercentEncoding(u);
+//        qDebug() << 2 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 3 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 4 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 5 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 6 << u;
+//    }
+//private:
     void NormalizePhoneNumber() {
         try {
             QVariant Result = callUserAPI(
@@ -889,7 +909,7 @@ private slots:
             {
                 { "amount", 10'000 },
                 { "gatewayType", "_DeveloperTest" },
-                { "domain", "dev.test" },
+//                { "domain", "dev.test" },
                 { "walID", 0 },
                 { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
             }

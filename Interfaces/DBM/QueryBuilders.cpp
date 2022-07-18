@@ -2836,7 +2836,11 @@ QVariantMap ORMSelectQuery::one(QVariantMap _args) {
                             .toJson(true, this->Data->Table.Converters);
 
     if (Result.object().isEmpty())
+#ifdef QT_DEBUG
         throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(PrependSchema(this->Data->Table.Schema)).arg(this->Data->Table.Name));
+#else
+        throw exHTTPNotFound("No item could be found");
+#endif
 
 //    qDebug() << "--- ORMSelectQuery::one()" << __FILE__ << __LINE__ << Result;
 //    qDebug() << "--- ORMSelectQuery::one() {tovariant}" << __FILE__ << __LINE__ << Result.toVariant();
