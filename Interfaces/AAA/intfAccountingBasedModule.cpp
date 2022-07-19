@@ -408,13 +408,15 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
           * 5 |  x  |  y  | NOK (don't update. will be added as a new item in basket)
           */
 
+        QString NewDiscountCode = _discountCode;
+
         //C3,C4,C5:
         if (it->CouponDiscount.ID > 0) {
             //C3:
-            if (_discountCode.isEmpty())
-                _discountCode = it->CouponDiscount.Code;
+            if (NewDiscountCode.isEmpty())
+                NewDiscountCode = it->CouponDiscount.Code;
             //C5:
-            else if (it->CouponDiscount.Code != _discountCode)
+            else if (it->CouponDiscount.Code != NewDiscountCode)
                 continue;
         }
 
@@ -445,8 +447,8 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
             _lastPreVoucher,
             *it,
             it->Qty + _qty,
-            _discountCode);
-    }
+            NewDiscountCode);
+    } //find duplicates
 
     //-- fetch SLB & PRD --------------------------------
     QVariantMap SaleableInfo = this->AccountSaleables->GetSelectQuery(APICALLBOOM_PARAM)
