@@ -79,6 +79,8 @@ clsTable::clsTable(const QString& _domain,
                                    ///name                      type                 extraValidator defaultValue updatableBy isSortable isFilterable isSelfIdentifier isVirtual isPrimaryKey isSelectable renameAs
     this->BaseCols.append(clsORMField(CURRENT_TIMESTAMP + "()", S(TAPI::DateTime_t), QFV,           QNull,       UPNone,     false,     false,       false,           true,     false,       true,        CURRENT_TIMESTAMP));
 
+//    TargomanDebug(5).noLabel() << "register clsTable derived:" << Schema + "." + Name;
+
     clsTable::Registry.insert(Schema + "." + Name, this);
 }
 
@@ -158,6 +160,8 @@ void clsTable::updateFilterParamType(const QString& _fieldTypeName, QMetaType::T
 void clsTable::prepareFiltersList() {
     if (this->AllCols.size())
         return;
+
+//    TargomanDebug(5).noLabel() << "prepareFiltersList:" << this->Schema + "." + this->Name;
 
     foreach (clsORMField Col, this->BaseCols) {
         if (Col.isPrimaryKey())

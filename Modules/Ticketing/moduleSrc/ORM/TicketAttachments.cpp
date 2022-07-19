@@ -92,8 +92,8 @@ QVariant IMPL_ORMGET(TicketAttachments) {
                     APICALLBOOM_PARAM,
                     _query,
                     UploadFiles::instance(),
-                    UploadQueue::instance(),
                     UploadGateways::instance(),
+                    UploadQueue::instance(),
                     tblTicketAttachments::Name,
                     tblTicketAttachments::Fields::tat_uplID
                     );

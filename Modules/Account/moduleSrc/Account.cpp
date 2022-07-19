@@ -46,6 +46,11 @@
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/ORM/intfAlerts.h"
 
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+#include "Interfaces/ObjectStorage/Gateways/gtwNFS.h"
+#include "Interfaces/ObjectStorage/Gateways/gtwAWSS3.h"
+using namespace Targoman::API::ObjectStorage;
+
 #include "Interfaces/Helpers/PhoneHelper.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
@@ -137,12 +142,14 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
 /*****************************************************************/
 TARGOMAN_IMPL_API_MODULE(Account)
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
+TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Account, AAASchema)
 
 Account::Account() :
     intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
 {
     TARGOMAN_API_IMPLEMENT_MIGRATIONS(Account, AAASchema)
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
+    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());
@@ -1470,7 +1477,8 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     quint32 _amount,
 //    NULLABLE_TYPE(quint64) voucherID,
     quint64 _walID,
-    QString _note
+    QString _note,
+    TAPI::stuFileInfo _file
 )) {
     /*if (NULLABLE_HAS_VALUE(voucherID)) {
         QJsonObject VoucherInfo = QJsonObject::fromVariantMap(SelectQuery(Voucher::instance())
@@ -1495,21 +1503,39 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
     QVariantMap CreateParams = {
-        { "ofpcBank", _bank },
-        { "ofpcReceiptCode", _receiptCode },
-        { "ofpcReceiptDate", _receiptDate },
-        { "ofpcAmount", _amount },
+        { tblOfflinePaymentClaims::Fields::ofpcBank, _bank },
+        { tblOfflinePaymentClaims::Fields::ofpcReceiptCode, _receiptCode },
+        { tblOfflinePaymentClaims::Fields::ofpcReceiptDate, _receiptDate },
+        { tblOfflinePaymentClaims::Fields::ofpcAmount, _amount },
     };
 
     if ((_note.isNull() == false) && (_note.trimmed().length() > 0))
-        CreateParams.insert("ofpcNotes", _note.trimmed());
+        CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcNotes, _note.trimmed());
 
     /*if (NULLABLE_HAS_VALUE(voucherID))
-        CreateParams.insert("ofpc_vchID", NULLABLE_VALUE(voucherID));
+        CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpc_vchID, NULLABLE_VALUE(voucherID));
     */
 
     if (_walID > 0)
-        CreateParams.insert("ofpcTarget_walID", _walID);
+        CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcTarget_walID, _walID);
+
+    if (_file.Size > 0) {
+        try {
+            quint64 UploadedFileID = ObjectStorageManager::saveFile(
+                                         APICALLBOOM_PARAM,
+                                         UploadFiles::instance(),
+                                         UploadQueue::instance(),
+                                         UploadGateways::instance(),
+                                         _file,
+                                         "offlinePayment"
+                                         );
+            if (UploadedFileID > 0)
+                CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcReceiptImage_uflID, UploadedFileID);
+
+        } catch (std::exception &exp) {
+            TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
+        }
+    }
 
     return OfflinePaymentClaims::instance().Create(APICALLBOOM_PARAM,
                                                    TAPI::ORMFields_t(CreateParams));
@@ -1628,6 +1654,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
     if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID))
             CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID));
+
+    if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcReceiptImage_uflID))
+            CreateParams.insert(tblOfflinePayments::Fields::ofpReceiptImage_uflID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcReceiptImage_uflID));
 
     quint64 PaymentID = OfflinePayments::instance().Create(APICALLBOOM_PARAM,
                  TAPI::ORMFields_t(CreateParams));

@@ -342,8 +342,8 @@ class intfUploadFiles : public intfSQLBasedModule
 
 public:
     intfUploadFiles(
-        const QString &_schema,
-        const QString &_name
+        const QString& _module,
+        const QString& _schema
     );
 
     struct stuObjectStorageConfigs
@@ -371,8 +371,8 @@ class intfUploadGateways : public intfSQLBasedModule
 
 public:
     intfUploadGateways(
-        const QString &_schema,
-        const QString &_name
+        const QString& _module,
+        const QString& _schema
     );
 
 private slots:
@@ -388,8 +388,8 @@ class intfUploadQueue : public intfSQLBasedModule
 
 public:
     intfUploadQueue(
-        const QString &_schema,
-        const QString &_name
+        const QString& _module,
+        const QString& _schema
     );
 
 private slots:

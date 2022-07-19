@@ -1055,6 +1055,9 @@ private slots:
                     { "receiptDate",    "2022/03/04" },
                     { "amount",         14'000 },
                     { "note",           "this is note for offline payment 2" },
+                },
+                {
+                    { "file", "../../README.md" },
                 }
             );
 
@@ -1086,6 +1089,22 @@ private slots:
         }
     }
 
+    void listOfflinePayments() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Account/OfflinePayments",
+                {},
+                {}
+            );
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+private:
     void UserWallets_transfer() {
         QT_TRY {
             QVariant Result = callUserAPI(

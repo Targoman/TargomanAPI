@@ -79,8 +79,8 @@ class intfMigrations : public intfSQLBasedModule
 
 public:
     intfMigrations(
-        const QString &_schema,
-        const QString &_name
+        const QString& _module,
+        const QString& _schema
     );
 
 private slots:
@@ -115,7 +115,7 @@ protected: \
 
 //put this macro into module class constructor (.cpp)
 #define TARGOMAN_API_IMPLEMENT_MIGRATIONS(_module, _schema) \
-    this->_Migrations   .reset(&Migrations   ::instance()); \
+    this->_Migrations.reset(&Migrations::instance()); \
     this->addSubModule(this->_Migrations.data());
 
 /****************************************************/

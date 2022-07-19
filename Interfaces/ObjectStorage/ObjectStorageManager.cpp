@@ -461,8 +461,8 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     ORMSelectQuery &_query,
     Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
     Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+    Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
     const QString &_foreignTableName,
     const QString &_foreignTableUploadedFileIDFieldName
 ) {
@@ -510,12 +510,12 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
                 .else_("CONCAT(g.ugwEndpointUrl, '/', g.ugwBucket, '/', f.uflPath, '/', f.uflStoredFileName)"),
                 uflFullFileUrl)
 
-        .innerJoin(/*TBL_uploadFiles->name()*/ _uploadFiles, "f",
+        .leftJoin(/*TBL_uploadFiles->name()*/ _uploadFiles, "f",
                    { "f", tblUploadFiles::Fields::uflID,
                    enuConditionOperator::Equal,
                    _foreignTableName, _foreignTableUploadedFileIDFieldName })
 
-        .nestedInnerJoin(_uploadQueue.GetSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(_uploadQueue.GetSelectQuery(APICALLBOOM_PARAM)
                    .addCol(DBExpression::VALUE(R"(
                                                ROW_NUMBER()
                                                OVER (
@@ -535,7 +535,7 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
                    .andCond({ "q.row_num", enuConditionOperator::Equal, 1 })
                    )
 
-        .innerJoin(_uploadGateways, "g",
+        .leftJoin(_uploadGateways, "g",
                    { "g", tblUploadGateways::Fields::ugwID,
                    enuConditionOperator::Equal,
                    "q", tblUploadQueue::Fields::uqu_ugwID })

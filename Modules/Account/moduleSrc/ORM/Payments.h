@@ -28,6 +28,8 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/API/intfSQLBasedModule.h"
 #include "Voucher.h"
+#include "Interfaces/ObjectStorage/ObjectStorageManager.h"
+using namespace Targoman::API::ObjectStorage;
 
 namespace Targoman::API::AccountModule {
 
@@ -186,6 +188,7 @@ namespace tblOfflinePaymentClaims {
         TARGOMAN_CREATE_CONSTEXPR(ofpcAmount);
         TARGOMAN_CREATE_CONSTEXPR(ofpcTarget_walID);
         TARGOMAN_CREATE_CONSTEXPR(ofpcNotes);
+        TARGOMAN_CREATE_CONSTEXPR(ofpcReceiptImage_uflID);
         TARGOMAN_CREATE_CONSTEXPR(ofpcStatus);
         TARGOMAN_CREATE_CONSTEXPR(ofpcCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(ofpcCreatedBy_usrID);
@@ -198,26 +201,29 @@ namespace tblOfflinePaymentClaims {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::ofpcID,                  ORM_PRIMARYKEY_64},
-            { Fields::ofpc_vchID,              S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner},
-            { Fields::ofpcBank,                S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { Fields::ofpcReceiptCode,         S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-            { Fields::ofpcReceiptDate,         S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner},
-            { Fields::ofpcAmount,              S(quint32),                 QFV,                                QRequired,  UPOwner},
-            { Fields::ofpcTarget_walID,        S(quint64),                 QFV,                                QNull,      UPNone },
-            { Fields::ofpcNotes,               S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-            { Fields::ofpcStatus,              ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
-            { Fields::ofpcCreationDateTime,    ORM_CREATED_ON},
-            { Fields::ofpcCreatedBy_usrID,     ORM_CREATED_BY},
-            { Fields::ofpcUpdatedBy_usrID,     ORM_UPDATED_BY},
+            //ColName                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::ofpcID,                   ORM_PRIMARYKEY_64 },
+            { Fields::ofpc_vchID,               S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner },
+            { Fields::ofpcBank,                 S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
+            { Fields::ofpcReceiptCode,          S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
+            { Fields::ofpcReceiptDate,          S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner },
+            { Fields::ofpcAmount,               S(quint32),                 QFV,                                QRequired,  UPOwner },
+            { Fields::ofpcTarget_walID,         S(NULLABLE_TYPE(quint64)),  QFV,                                QNull,      UPNone  },
+            { Fields::ofpcNotes,                S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner },
+            { Fields::ofpcReceiptImage_uflID,   S(NULLABLE_TYPE(quint64)),  QFV,                                QNull,      UPOwner },
+            { Fields::ofpcStatus,               ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New) },
+            { Fields::ofpcCreationDateTime,     ORM_CREATED_ON },
+            { Fields::ofpcCreatedBy_usrID,      ORM_CREATED_BY },
+            { Fields::ofpcUpdatedBy_usrID,      ORM_UPDATED_BY },
         };
 
         const QList<stuRelation> Relations = {
-            ///Col                                               Reference Table                 ForeignCol          Rename     LeftJoin
-            { Fields::ofpc_vchID,              R(AAASchema, tblVoucher::Name), tblVoucher::Fields::vchID },
+            //Col                               Reference Table                 ForeignCol          Rename     LeftJoin
+            { Fields::ofpc_vchID,               R(AAASchema, tblVoucher::Name), tblVoucher::Fields::vchID },
             ORM_RELATION_OF_CREATOR(Fields::ofpcCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::ofpcUpdatedBy_usrID),
+            { Fields::ofpcReceiptImage_uflID,   R(AAASchema, tblUploadFiles::Name), tblUploadFiles::Fields::uflID },
+            { Fields::ofpcReceiptImage_uflID,   R(AAASchema, tblUploadQueue::Name), tblUploadQueue::Fields::uqu_uflID},
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -235,6 +241,7 @@ namespace tblOfflinePaymentClaims {
         SF_quint32                  (ofpcAmount),
         SF_NULLABLE_quint64         (ofpcTarget_walID),
         SF_QString                  (ofpcNotes),
+        SF_NULLABLE_quint64         (ofpcReceiptImage_uflID),
         SF_ORM_STATUS_FIELD         (ofpcStatus, Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::New),
 //        SF_QString                  (ofpcCreationDateTime),
         SF_DateTime_t               (ofpcCreationDateTime),
@@ -256,6 +263,85 @@ private slots:
 //    bool ORMDELETE("Delete an OfflinePaymentClaim")
 };
 
+/*
+CREATE TABLE `tblOfflinePaymentClaims_attachments` (
+    `ofpcatID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `ofpcat_ofpcID` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+    `ofpcat_uplID` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+    `ofpcatCreationDateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `ofpcatCreatedBy_usrID` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
+    PRIMARY KEY (`ofpcatID`) USING BTREE,
+    INDEX `FK_tblOfflinePaymentClaims_attachments_tblOfflinePaymentClaims` (`ofpcat_ofpcID`) USING BTREE,
+    INDEX `FK_tblOfflinePaymentClaims_attachments_tblUploads` (`ofpcat_uplID`) USING BTREE,
+    CONSTRAINT `FK_tblOfflinePaymentClaims_attachments_tblOfflinePaymentClaims` FOREIGN KEY (`ofpcat_ofpcID`) REFERENCES `tblOfflinePaymentClaims` (`ofpcID`) ON UPDATE NO ACTION ON DELETE CASCADE,
+    CONSTRAINT `FK_tblOfflinePaymentClaims_attachments_tblUploads` FOREIGN KEY (`ofpcat_uplID`) REFERENCES `tblUploadFiles` (`uflID`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='utf8mb4_general_ci'
+ENGINE=InnoDB
+;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace tblOfflinePaymentClaimsAttachments {
+    constexpr char Name[] = "tblOfflinePaymentClaims_attachments";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(ofpcatID);
+        TARGOMAN_CREATE_CONSTEXPR(ofpcat_ofpcID);
+        TARGOMAN_CREATE_CONSTEXPR(ofpcat_uplID);
+        TARGOMAN_CREATE_CONSTEXPR(ofpcatCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(ofpcatCreatedBy_usrID);
+    }
+
+    namespace Relation {
+        constexpr char OfflinePaymentClaims[] = "OfflinePaymentClaims";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                           Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::ofpcatID,                 ORM_PRIMARYKEY_64 },
+            { Fields::ofpcat_ofpcID,            S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::ofpcat_uplID,             S(quint64),             QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::ofpcatCreationDateTime,   ORM_CREATED_ON },
+            { Fields::ofpcatCreatedBy_usrID,    ORM_CREATED_BY },
+        };
+
+        const QList<stuRelation> Relations = {
+            //Alias        Col                               Reference Table                            ForeignCol          Rename     LeftJoin
+            { Relation::OfflinePaymentClaims,
+              { Fields::ofpcat_ofpcID,  R(AAASchema, tblOfflinePaymentClaims::Name), tblOfflinePaymentClaims::Fields::ofpcID } },
+            { Fields::ofpcat_uplID,  R(AAASchema, tblUploadFiles::Name),  tblUploadFiles::Fields::uflID },
+            //this index is preventing querybuilder invalid column for filter error:
+            { Fields::ofpcat_uplID,  R(AAASchema, tblUploadQueue::Name),  tblUploadQueue::Fields::uqu_uflID },
+            ORM_RELATION_OF_CREATOR(Fields::ofpcatCreatedBy_usrID),
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_64        (ofpcatID),
+        SF_quint64                  (ofpcat_ofpcID),
+        SF_quint64                  (ofpcat_uplID),
+        SF_ORM_CREATED_ON           (ofpcatCreationDateTime),
+        SF_ORM_CREATED_BY           (ofpcatCreatedBy_usrID)
+    );
+}
+#pragma GCC diagnostic pop
+
+class OfflinePaymentClaimsAttachments : public intfSQLBasedModule
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaimsAttachments)
+
+private slots:
+    QVariant ORMGET("Get OfflinePaymentClaims Attachments")
+};
+*/
+
 /*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
@@ -273,6 +359,7 @@ namespace tblOfflinePayments {
         TARGOMAN_CREATE_CONSTEXPR(ofpAmount);
         TARGOMAN_CREATE_CONSTEXPR(ofpTarget_walID);
         TARGOMAN_CREATE_CONSTEXPR(ofpNotes);
+        TARGOMAN_CREATE_CONSTEXPR(ofpReceiptImage_uflID);
         TARGOMAN_CREATE_CONSTEXPR(ofpStatus);
         TARGOMAN_CREATE_CONSTEXPR(ofpCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(ofpCreatedBy_usrID);
@@ -285,27 +372,30 @@ namespace tblOfflinePayments {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                                   Type                    Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
-                { Fields::ofpID,                ORM_PRIMARYKEY_64},
-                { Fields::ofp_vchID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPOwner},
-                { Fields::ofpBank,              S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-                { Fields::ofpReceiptCode,       S(QString),             QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner},
-                { Fields::ofpReceiptDate,       S(TAPI::DateTime_t),    QFV,                                QRequired,  UPOwner},
-                { Fields::ofpAmount,            S(quint32),             QFV,                                QRequired,  UPOwner},
-                { Fields::ofpTarget_walID,      S(quint64),             QFV,                                QNull,      UPNone },
-                { Fields::ofpNotes,             S(QString),             QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner},
-                { Fields::ofpStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
-                { Fields::ofpCreationDateTime,  ORM_CREATED_ON},
-                { Fields::ofpCreatedBy_usrID,   ORM_CREATED_BY},
-                { Fields::ofpUpdatedBy_usrID,   ORM_UPDATED_BY},
-            };
+            //ColName                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::ofpID,                    ORM_PRIMARYKEY_64 },
+            { Fields::ofp_vchID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPOwner },
+            { Fields::ofpBank,                  S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
+            { Fields::ofpReceiptCode,           S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
+            { Fields::ofpReceiptDate,           S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner },
+            { Fields::ofpAmount,                S(quint32),                 QFV,                                QRequired,  UPOwner },
+            { Fields::ofpTarget_walID,          S(NULLABLE_TYPE(quint64)),  QFV,                                QNull,      UPNone  },
+            { Fields::ofpNotes,                 S(QString),                 QFV.allwaysValid().maxLenght(500),  QNull,      UPOwner },
+            { Fields::ofpReceiptImage_uflID,    S(NULLABLE_TYPE(quint64)),  QFV,                                QNull,      UPOwner },
+            { Fields::ofpStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending) },
+            { Fields::ofpCreationDateTime,      ORM_CREATED_ON },
+            { Fields::ofpCreatedBy_usrID,       ORM_CREATED_BY },
+            { Fields::ofpUpdatedBy_usrID,       ORM_UPDATED_BY },
+        };
 
         const QList<stuRelation> Relations = {
-            ///Col                        Reference Table                  ForeignCol         Rename     LeftJoin
-                { Fields::ofp_vchID,         R(AAASchema,tblVoucher::Name),   tblVoucher::Fields::vchID},
-                ORM_RELATION_OF_CREATOR(Fields::ofpCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(Fields::ofpUpdatedBy_usrID),
-            };
+            //Col                               Reference Table                  ForeignCol         Rename     LeftJoin
+            { Fields::ofp_vchID,                R(AAASchema,tblVoucher::Name),   tblVoucher::Fields::vchID},
+            ORM_RELATION_OF_CREATOR(Fields::ofpCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(Fields::ofpUpdatedBy_usrID),
+            { Fields::ofpReceiptImage_uflID,    R(AAASchema, tblUploadFiles::Name), tblUploadFiles::Fields::uflID },
+            { Fields::ofpReceiptImage_uflID,    R(AAASchema, tblUploadQueue::Name), tblUploadQueue::Fields::uqu_uflID},
+        };
 
         const QList<stuDBIndex> Indexes = {
         };
@@ -322,6 +412,7 @@ namespace tblOfflinePayments {
         SF_quint32                  (ofpAmount),
         SF_NULLABLE_quint64         (ofpTarget_walID),
         SF_QString                  (ofpNotes),
+        SF_NULLABLE_quint64         (ofpReceiptImage_uflID),
         SF_ORM_STATUS_FIELD         (ofpStatus, Targoman::API::AccountModule::enuPaymentStatus, Targoman::API::AccountModule::enuPaymentStatus::Pending),
 //        SF_QString                  (ofpCreationDateTime),
         SF_DateTime_t               (ofpCreationDateTime),

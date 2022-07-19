@@ -30,12 +30,12 @@ using namespace Targoman::API::AAA;
 namespace Targoman::API::ORM {
 
 intfActionLogs::intfActionLogs(
-    const QString& _schema,
-    const QString& _name
+    const QString& _module,
+    const QString& _schema
 ) :
 intfSQLBasedModule(
+    _module,
     _schema,
-    _name,
     tblActionLogs::Name,
     tblActionLogs::Private::ORMFields,
     tblActionLogs::Private::Relations,

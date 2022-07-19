@@ -86,9 +86,9 @@ class intfActionLogs : public intfSQLBasedModule
 
 public:
     intfActionLogs(
-            const QString& _schema,
-            const QString& _name
-        );
+        const QString& _module,
+        const QString& _schema
+    );
 
 protected slots:
     QVariant ORMGET("Get Action Logs.")
