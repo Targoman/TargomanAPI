@@ -26,6 +26,7 @@
 
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
@@ -43,6 +44,7 @@ namespace Targoman::API::AccountModule {
 
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_OBJECTSTORAGE_PREPARENT;
 
 class Account : public intfSQLBasedWithActionLogsModule
 {
@@ -53,6 +55,7 @@ class Account : public intfSQLBasedWithActionLogsModule
     TARGOMAN_DEFINE_API_MODULE(Account);
     TARGOMAN_API_DEFINE_MIGRATIONS(Account, AAASchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
+    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Account, AAASchema);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
@@ -405,7 +408,8 @@ private slots:
             quint32 _amount,
 //            NULLABLE_TYPE(quint64) _voucherID = NULLABLE_NULL_VALUE,
             quint64 _walID = 0,
-            QString _note = {}
+            QString _note = {},
+            TAPI::stuFileInfo _file = {}
         ),
         "Claim offline payment by user."
         "Set vchID to null just for charging wallet, otherwise after increasing the wallet, the voucher will be paid"
@@ -521,6 +525,7 @@ private slots:
 
 TARGOMAN_MIGRATIONS_POSTPARENT(Account, AAASchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
+TARGOMAN_OBJECTSTORAGE_POSTPARENT(Account, AAASchema);
 
 } //namespace Targoman::API::AccountModule
 

@@ -87,8 +87,8 @@ public:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         ORMSelectQuery &_query,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
-        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
+        Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
         const QString &_foreignTableName,
         const QString &_foreignTableUploadedFileIDFieldName
         );

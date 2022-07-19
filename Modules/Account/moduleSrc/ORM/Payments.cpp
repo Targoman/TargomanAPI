@@ -252,11 +252,29 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
 ) { ; }
 
 QVariant IMPL_ORMGET(OfflinePaymentClaims) {
+//    UploadFiles::instance().prepareFiltersList();
+//    UploadGateways::instance().prepareFiltersList();
+    UploadQueue::instance().prepareFiltersList();
+
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
-    auto fnTouchQuery = [](ORMSelectQuery &_query) {
-        _query.innerJoin(tblVoucher::Name);
+    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+        _query
+                .addCols(this->SelectableColumnNames())
+                .leftJoin(tblVoucher::Name)
+                .addCols(Voucher::instance().SelectableColumnNames())
+                ;
+
+        ObjectStorageManager::applyGetFileUrlInQuery(
+                    APICALLBOOM_PARAM,
+                    _query,
+                    UploadFiles::instance(),
+                    UploadGateways::instance(),
+                    UploadQueue::instance(),
+                    tblOfflinePaymentClaims::Name,
+                    tblOfflinePaymentClaims::Fields::ofpcReceiptImage_uflID
+                    );
     };
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
@@ -279,6 +297,50 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
 //    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 //}
 
+/*****************************************************************/
+/*
+OfflinePaymentClaimsAttachments::OfflinePaymentClaimsAttachments() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblOfflinePaymentClaimsAttachments::Name,
+        tblOfflinePaymentClaimsAttachments::Private::ORMFields,
+        tblOfflinePaymentClaimsAttachments::Private::Relations,
+        tblOfflinePaymentClaimsAttachments::Private::Indexes
+) { ; }
+
+QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
+    UploadQueue::instance().prepareFiltersList();
+
+    clsCondition ExtraFilters = {};
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        ExtraFilters
+                .setCond({ tblOfflinePaymentClaims::Fields::ofpcCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+                .orCond({ tblOfflinePaymentClaimsAttachments::Fields::ofpcatCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+                ;
+
+    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+        _query
+            .addCols(this->SelectableColumnNames())
+            .innerJoinWith("OfflinePaymentClaims")
+            .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
+        ;
+
+        ObjectStorageManager::applyGetFileUrlInQuery(
+                    APICALLBOOM_PARAM,
+                    _query,
+                    UploadFiles::instance(),
+                    UploadGateways::instance(),
+                    UploadQueue::instance(),
+                    tblOfflinePaymentClaimsAttachments::Name,
+                    tblOfflinePaymentClaimsAttachments::Fields::ofpcat_uplID
+                    );
+
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, fnTouchQuery);
+}
+*/
+
 /*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
@@ -292,11 +354,27 @@ OfflinePayments::OfflinePayments() :
 ) { ; }
 
 QVariant IMPL_ORMGET(OfflinePayments) {
+    UploadQueue::instance().prepareFiltersList();
+
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
-    auto fnTouchQuery = [](ORMSelectQuery &_query) {
-        _query.innerJoin(tblVoucher::Name);
+    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+        _query
+                .addCols(this->SelectableColumnNames())
+                .innerJoin(tblVoucher::Name)
+                .addCols(Voucher::instance().SelectableColumnNames())
+                ;
+
+        ObjectStorageManager::applyGetFileUrlInQuery(
+                    APICALLBOOM_PARAM,
+                    _query,
+                    UploadFiles::instance(),
+                    UploadGateways::instance(),
+                    UploadQueue::instance(),
+                    tblOfflinePayments::Name,
+                    tblOfflinePayments::Fields::ofpReceiptImage_uflID
+                    );
     };
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);

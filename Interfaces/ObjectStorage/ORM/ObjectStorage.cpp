@@ -52,12 +52,12 @@ void stuProcessUploadQueueInfo::fromVariantMap(const QVariantMap& _info) {
 /******************************************************************/
 /******************************************************************/
 intfUploadFiles::intfUploadFiles(
-    const QString &_schema,
-    const QString &_name
+    const QString& _module,
+    const QString& _schema
 ) :
     intfSQLBasedModule(
+        _module,
         _schema,
-        _name,
         tblUploadFiles::Name,
         tblUploadFiles::Private::ORMFields,
         tblUploadFiles::Private::Relations,
@@ -73,12 +73,12 @@ QVariant IMPL_ORMGET(intfUploadFiles) {
 /******************************************************************/
 /******************************************************************/
 intfUploadGateways::intfUploadGateways(
-    const QString &_schema,
-    const QString &_name
+    const QString& _module,
+    const QString& _schema
 ) :
     intfSQLBasedModule(
+        _module,
         _schema,
-        _name,
         tblUploadGateways::Name,
         tblUploadGateways::Private::ORMFields,
         tblUploadGateways::Private::Relations,
@@ -113,12 +113,12 @@ bool IMPL_ORMDELETE(intfUploadGateways) {
 /******************************************************************/
 /******************************************************************/
 intfUploadQueue::intfUploadQueue(
-    const QString &_schema,
-    const QString &_name
+    const QString& _module,
+    const QString& _schema
 ) :
     intfSQLBasedModule(
+        _module,
         _schema,
-        _name,
         tblUploadQueue::Name,
         tblUploadQueue::Private::ORMFields,
         tblUploadQueue::Private::Relations(_schema),

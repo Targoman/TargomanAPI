@@ -31,12 +31,12 @@ using namespace Targoman::API::AAA;
 namespace Targoman::API::ORM {
 
 intfMigrations::intfMigrations(
-    const QString& _schema,
-    const QString& _name
+    const QString& _module,
+    const QString& _schema
 ) :
 intfSQLBasedModule(
+    _module,
     _schema,
-    _name,
     tblMigrations::Name,
     tblMigrations::Private::ORMFields,
     tblMigrations::Private::Relations,
