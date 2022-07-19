@@ -948,7 +948,7 @@ private slots:
     void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
         if (this->Voucher.PaymentKey.isEmpty() == false) {
             QT_TRY {
-                QVariant Result = callUserAPI(
+                QVariant Result = callAdminAPI(
                     RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
@@ -1067,7 +1067,7 @@ private slots:
     void claimOfflinePayment_NO_VOUCHER_2_approveOfflinePayment() {
         if (this->OfflinePaymentClaimID > 0) {
             QT_TRY {
-                QVariant Result = callUserAPI(
+                QVariant Result = callAdminAPI(
                     RESTClientHelper::POST,
                     "Account/approveOfflinePayment",
                     {},
