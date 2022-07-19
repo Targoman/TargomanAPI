@@ -86,4 +86,12 @@ QString URLHelper::normalize(const QString &_url) {
     return Result;
 }
 
+QString URLHelper::encode(const QString &_url) {
+    return QUrl::toPercentEncoding(_url);
+}
+
+QString URLHelper::decode(const QString &_url) {
+    return QUrl::fromPercentEncoding(_url.toLatin1());
+}
+
 } //namespace Targoman::API::Helpers

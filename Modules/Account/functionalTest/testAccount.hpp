@@ -274,6 +274,26 @@ private slots:
     /***************************************************************************************/
     /* tests *******************************************************************************/
     /***************************************************************************************/
+//    void checkUrl() {
+//        QString u = QUrl::toPercentEncoding("https://callback.com?a=1&b=2");
+//        qDebug() << 1 << u;
+
+//        u = QUrl::toPercentEncoding(u);
+//        qDebug() << 2 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 3 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 4 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 5 << u;
+
+//        u = QUrl::fromPercentEncoding(u.toLatin1());
+//        qDebug() << 6 << u;
+//    }
+//private:
     void NormalizePhoneNumber() {
         try {
             QVariant Result = callUserAPI(
@@ -889,7 +909,7 @@ private slots:
             {
                 { "amount", 10'000 },
                 { "gatewayType", "_DeveloperTest" },
-                { "domain", "dev.test" },
+//                { "domain", "dev.test" },
                 { "walID", 0 },
                 { "paymentVerifyCallback", "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" }
             }
@@ -928,7 +948,7 @@ private slots:
     void approveOnlinePayment_for_requestIncrease_DEVTEST_with_domain() {
         if (this->Voucher.PaymentKey.isEmpty() == false) {
             QT_TRY {
-                QVariant Result = callUserAPI(
+                QVariant Result = callAdminAPI(
                     RESTClientHelper::POST,
                     "Account/approveOnlinePayment",
                     {},
@@ -1047,7 +1067,7 @@ private slots:
     void claimOfflinePayment_NO_VOUCHER_2_approveOfflinePayment() {
         if (this->OfflinePaymentClaimID > 0) {
             QT_TRY {
-                QVariant Result = callUserAPI(
+                QVariant Result = callAdminAPI(
                     RESTClientHelper::POST,
                     "Account/approveOfflinePayment",
                     {},

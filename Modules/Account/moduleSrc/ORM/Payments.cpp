@@ -137,8 +137,10 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
                     .arg(ServerUrl) //ClientConfigs::RESTServerAddress.value())
                     .arg(_paymentKey)
                     ;
-    else
+    else {
+        _callback = URLHelper::decode(_callback);
         _callback = URLHelper::addParameter(_callback, "paymentKey", _paymentKey);
+    }
 
     QByteArray Content = R"(
 <html>

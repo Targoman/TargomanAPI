@@ -36,6 +36,8 @@ public:
     static QString addParameter(const QString& _url, const QString& _paramName, const QVariant& _value);
     static QString addParameters(const QString& _url, const QVariantMap& _params);
     static QString normalize(const QString &_url);
+    static QString encode(const QString &_url);
+    static QString decode(const QString &_url);
 };
 
 } //namespace Targoman::API::Helpers

@@ -145,6 +145,8 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.Info.ToPay = _amount;
     Voucher.Info.Sign = QString(sign(Voucher.Info));
 
+    Voucher.Remained = _amount;
+
     Voucher.ID = Voucher::instance().Create(
                      APICALLBOOM_PARAM,
                      TAPI::ORMFields_t({
