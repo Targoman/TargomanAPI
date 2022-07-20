@@ -41,21 +41,13 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
     const QString &_callback,
     const QString &_desc
 ) {
+    Q_UNUSED(_paymentGateway);
     Q_UNUSED(_paymentKey);
     Q_UNUSED(_amount);
     Q_UNUSED(_callback);
     Q_UNUSED(_desc);
 
-//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
-
 #ifdef QT_DEBUG
-//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
-
-//    raiseError = true;
-
-//    if (raiseError)
-//        throw exPayment("raiseError is TRUE");
-
     QString TrackID = "track_" + _paymentKey;
 
     QString HostPort = APICALLBOOM_PARAM.hostAndPort();
@@ -89,26 +81,25 @@ std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
     const TAPI::JSON_t &_pgResponse
 //    const QString &_domain
 ) {
+    Q_UNUSED(_paymentGateway);
+    Q_UNUSED(_onlinePayment);
     Q_UNUSED(_pgResponse);
-//    Q_UNUSED(_domain);
-
-//    TAPI::JSON_t MetaInfo = NULLABLE_GET_OR_DEFAULT(_paymentGateway.pgwMetaInfo, TAPI::JSON_t());
 
 #ifdef QT_DEBUG
-//    bool raiseError = _paymentGateway.pgwMetaInfo["raiseError"].toBool();
-
-//    raiseError = true;
-
-//    QString PaymentKey = _pgResponse.object().value("orderId").toString();
-//    QString TrackID = _pgResponse.object().value("trackId").toString();
-
     if (_pgResponse.isObject() == false)
         throw exPayment("Invalid response from gateway.");
     QJsonObject PGResponse = _pgResponse.object();
+
+    if (PGResponse.contains("result") == false)
+        throw exPayment("Payment failed due to empty result");
+
     QString Result = PGResponse.value("result").toString();
 
     if (Result == "error")
         throw exPayment("Payment failed");
+
+    if (Result != "ok")
+        throw exPayment("Payment failed due to unknown result: " + Result);
 
     return {
         "",
