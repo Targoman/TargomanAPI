@@ -15,4 +15,5 @@ OTHER_FILES += \
     migrations/db/* \
     migrations/db/.dbdiff.dev_.cfg \
     migrations/local/* \
+    migrations/local/*.sh \
     migrations/local/.migrations
