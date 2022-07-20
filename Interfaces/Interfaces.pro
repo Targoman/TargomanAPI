@@ -120,7 +120,15 @@ OTHER_FILES += \
     migrations/objectstorage/.gitkeep \
     migrations/objectstorage/db/*.sql \
     migrations/objectstorage/local/*.sh \
-    migrations/objectstorage/local/.migrations
+    migrations/objectstorage/local/.migrations \
+    migrations/actionlogs/.gitkeep \
+    migrations/actionlogs/db/*.sql \
+    migrations/actionlogs/local/*.sh \
+    migrations/actionlogs/local/.migrations \
+    migrations/faq/.gitkeep \
+    migrations/faq/db/*.sql \
+    migrations/faq/local/*.sh \
+    migrations/faq/local/.migrations
 
 INCLUDEPATH += \
     $$BASE_PROJECT_PATH/App/ \
