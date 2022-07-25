@@ -2064,22 +2064,26 @@ public:
             QStringList PkFilters;
 
             QStringList Pks = this->PksByPath.split(QRegularExpression("(;|,)"));
-            foreach (auto PkValue, Pks) {
-                foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols) {
-                    if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isPrimaryKey()) {
-                        if (PkValue.size()) {
-                            QString ColName = makeColName(
-                                                  this->Owner->Data->Table.Name,
-                                                  this->Owner->Data->Alias,
-                                                  baseCol.Col,
-                                                  false);
+            auto PkIt = Pks.constBegin();
+            bool Found = false;
+            foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols) {
+                if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isPrimaryKey()) {
+                    QString ColName = makeColName(
+                                          this->Owner->Data->Table.Name,
+                                          this->Owner->Data->Alias,
+                                          baseCol.Col,
+                                          false);
 
-                            PkFilters.append(ColName + " = \"" + PkValue + "\"");
-                        }
+                    PkFilters.append(ColName + " = \"" + *PkIt + "\"");
+                    Found = true;
+
+                    ++PkIt;
+                    if (PkIt == Pks.constEnd())
                         break;
-                    }
                 }
             }
+            if (Found == false)
+                throw exQueryBuilder("Could not assign pksByPath");
 
             if (PkFilters.isEmpty())
                 throw exQueryBuilder("pksByPath had no results");
@@ -2374,7 +2378,7 @@ itmplDerived& tmplQueryGroupAndHavingTrait<itmplDerived>::xorHaving(const clsCon
 }
 
 /***************************************************************************************/
-/* ORMSelectQuery *************************************************************************/
+/* ORMSelectQuery **********************************************************************/
 /***************************************************************************************/
 ORMSelectQuery::ORMSelectQuery() :
     tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(),
@@ -2948,7 +2952,7 @@ TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _ma
 }
 
 /***************************************************************************************/
-/* clsORMCreateQueryData ******************************************************************/
+/* clsORMCreateQueryData ***************************************************************/
 /***************************************************************************************/
 struct stuORMCreateQueryPreparedItems {
     QStringList         Cols;
@@ -3138,7 +3142,7 @@ public:
 };
 
 /***************************************************************************************/
-/* ORMCreateQuery *************************************************************************/
+/* ORMCreateQuery **********************************************************************/
 /***************************************************************************************/
 ORMCreateQuery::ORMCreateQuery(const ORMCreateQuery& _other) :
     tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(_other) { ; }
@@ -3475,7 +3479,7 @@ quint64 ORMCreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
 }
 
 /***************************************************************************************/
-/* clsORMUpdateQueryData ******************************************************************/
+/* clsORMUpdateQueryData ***************************************************************/
 /***************************************************************************************/
 struct stuORMUpdateQueryPreparedItems {
     QStringList     SetCols;
@@ -3602,7 +3606,7 @@ public:
 };
 
 /***************************************************************************************/
-/* ORMUpdateQuery *************************************************************************/
+/* ORMUpdateQuery **********************************************************************/
 /***************************************************************************************/
 ORMUpdateQuery::ORMUpdateQuery(const ORMUpdateQuery& _other) :
     tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>(_other),
@@ -3762,7 +3766,7 @@ quint64 ORMUpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
 }
 
 /***************************************************************************************/
-/* clsORMDeleteQueryData ******************************************************************/
+/* clsORMDeleteQueryData ***************************************************************/
 /***************************************************************************************/
 struct stuORMDeleteQueryPreparedItems {
     QStringList Targets;
@@ -3802,7 +3806,7 @@ public:
 };
 
 /***************************************************************************************/
-/* ORMDeleteQuery *************************************************************************/
+/* ORMDeleteQuery **********************************************************************/
 /***************************************************************************************/
 ORMDeleteQuery::ORMDeleteQuery(const ORMDeleteQuery& _other) :
     tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>(_other),

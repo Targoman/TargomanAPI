@@ -36,91 +36,65 @@ class intfSQLBasedModule : public intfPureModule, public clsTable
 {
 public:
     intfSQLBasedModule(
-            const QString& _module,
-            const QString& _schema,
-            const QString& _name,
-            const QList<clsORMField>& _cols = {},
-            const QList<stuRelation>& _relations = {},
-            const QList<stuDBIndex>& _indexes = {},
-            const QVariantMap& _dbProperties = {}
-        );
+        const QString& _module,
+        const QString& _schema,
+        const QString& _name,
+        const QList<clsORMField>& _cols = {},
+        const QList<stuRelation>& _relations = {},
+        const QList<stuDBIndex>& _indexes = {},
+        const QVariantMap& _dbProperties = {}
+    );
     intfSQLBasedModule(
-            const QString& _schema,
-            const QString& _name,
-            const QList<clsORMField>& _cols = {},
-            const QList<stuRelation>& _relations = {},
-            const QList<stuDBIndex>& _indexes = {},
-            const QVariantMap& _dbProperties = {}
-        );
+        const QString& _schema,
+        const QString& _name,
+        const QList<clsORMField>& _cols = {},
+        const QList<stuRelation>& _relations = {},
+        const QList<stuDBIndex>& _indexes = {},
+        const QVariantMap& _dbProperties = {}
+    );
 
 private:
     QVariantMap SelectOne(
-//            clsTable& _table,
-            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const clsCondition& _extraFilters = {},
-            quint16 _cacheTime = 0,
-            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
-        );
+        GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        const clsCondition& _extraFilters = {},
+        quint16 _cacheTime = 0,
+        std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
+    );
     QVariantList SelectAll(
-//            clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-            const clsCondition& _extraFilters = {},
-            quint16 _cacheTime = 0,
-            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
-        );
+        GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+        const clsCondition& _extraFilters = {},
+        quint16 _cacheTime = 0,
+        std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
+    );
     TAPI::stuTable SelectAllWithCount(
-//            clsTable& _table,
-            GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-            const clsCondition& _extraFilters = {},
-            quint16 _cacheTime = 0,
-            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
-        );
+        GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+        const clsCondition& _extraFilters = {},
+        quint16 _cacheTime = 0,
+        std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
+    );
 
 public:
-//    QVariant Select(
-//            clsTable& _table,
-//            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
-//            const clsCondition& _extraFilters = {},
-//            quint16 _cacheTime = 0,
-//            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
-//        );
     QVariant Select(
-            GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const clsCondition& _extraFilters = {},
-            quint16 _cacheTime = 0,
-            std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
-        );
+        GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        const clsCondition& _extraFilters = {},
+        quint16 _cacheTime = 0,
+        std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
+    );
 
-//    quint64 Create(
-//            clsTable& _table,
-//            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
-//        );
     quint64 Create(
-            CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
-        );
+        CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
+    );
 
-//    bool Update(
-//            clsTable& _table,
-//            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-//            const QVariantMap& _extraFilters = {}
-//        );
     bool Update(
-            UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const QVariantMap& _extraFilters = {}
-        );
+        UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        const QVariantMap& _extraFilters = {}
+    );
 
-//    bool DeleteByPks(
-//            clsTable& _table,
-//            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-//            const QVariantMap& _extraFilters = {},
-//            bool _realDelete = false
-//        );
     bool DeleteByPks(
-            DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
-            const QVariantMap& _extraFilters = {},
-            bool _realDelete = false
-        );
-
+        DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        const QVariantMap& _extraFilters = {},
+        bool _realDelete = false
+    );
 };
 
 } // namespace Targoman::API::API
