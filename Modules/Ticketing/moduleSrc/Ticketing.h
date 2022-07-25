@@ -30,6 +30,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "ORM/Defs.hpp"
+#include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule {
@@ -37,6 +38,7 @@ namespace Targoman::API::TicketingModule {
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
+TARGOMAN_FAQ_PREPARENT;
 
 class Ticketing : public intfSQLBasedWithActionLogsModule
 {
@@ -48,6 +50,7 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_DEFINE_MIGRATIONS(Ticketing, TicketingSchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
     TARGOMAN_API_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
+    TARGOMAN_API_DEFINE_FAQ(Ticketing, TicketingSchema);
 
 private:
     quint64 insertTicket(
@@ -118,6 +121,7 @@ protected slots:
 TARGOMAN_MIGRATIONS_POSTPARENT(Ticketing, TicketingSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Ticketing, TicketingSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Ticketing, TicketingSchema);
+TARGOMAN_FAQ_POSTPARENT(Ticketing, TicketingSchema);
 
 } //namespace Targoman::API::TicketingModule
 

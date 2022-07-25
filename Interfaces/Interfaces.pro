@@ -43,6 +43,7 @@ PRIVATE_HEADERS += \
 
 HEADERS += \
     Helpers/IteratorHelper.hpp \
+    ORM/intfFAQ.h \
     ORM/intfMigrations.h \
     Server/APICallBoom.h \
     Server/ServerCommon.h \
@@ -77,6 +78,7 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \
     Server/APICallBoom.cpp \
     Server/ServerCommon.cpp \

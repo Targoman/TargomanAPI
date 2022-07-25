@@ -34,6 +34,7 @@
 #include "ORM/Voucher.h"
 #include "Classes/Defs.hpp"
 #include "Payment/PaymentLogic.h"
+#include "Interfaces/ORM/intfFAQ.h"
 
 namespace Targoman::API::AccountModule {
 
@@ -45,6 +46,7 @@ namespace Targoman::API::AccountModule {
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
+TARGOMAN_FAQ_PREPARENT;
 
 class Account : public intfSQLBasedWithActionLogsModule
 {
@@ -56,6 +58,7 @@ class Account : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_DEFINE_MIGRATIONS(Account, AAASchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
     TARGOMAN_API_DEFINE_OBJECTSTORAGE(Account, AAASchema);
+    TARGOMAN_API_DEFINE_FAQ(Account, AAASchema);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
@@ -526,6 +529,7 @@ private slots:
 TARGOMAN_MIGRATIONS_POSTPARENT(Account, AAASchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Account, AAASchema);
+TARGOMAN_FAQ_POSTPARENT(Account, AAASchema);
 
 } //namespace Targoman::API::AccountModule
 

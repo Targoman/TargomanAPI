@@ -32,6 +32,7 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
+#include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 
@@ -53,6 +54,7 @@ struct stuAdvertBill {
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
+TARGOMAN_FAQ_PREPARENT;
 
 class Advert : public intfAccountingBasedModule
 {
@@ -64,6 +66,7 @@ class Advert : public intfAccountingBasedModule
     TARGOMAN_API_DEFINE_MIGRATIONS(Advert, AdvertSchema);
     TARGOMAN_API_DEFINE_ACTIONLOG(Advert, AdvertSchema);
     TARGOMAN_API_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
+    TARGOMAN_API_DEFINE_FAQ(Advert, AdvertSchema);
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
@@ -173,6 +176,7 @@ protected slots:
 TARGOMAN_MIGRATIONS_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Advert, AdvertSchema);
+TARGOMAN_FAQ_POSTPARENT(Advert, AdvertSchema);
 
 } //namespace Targoman::API::AdvertModule
 

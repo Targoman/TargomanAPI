@@ -88,6 +88,7 @@ Advert::Advert() :
     TARGOMAN_API_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
+    TARGOMAN_API_IMPLEMENT_FAQ(Advert, AdvertSchema)
 
     this->addSubModule(AccountUnits.data());
 //    this->addSubModule(AccountUnitsTranslate.data());
