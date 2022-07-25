@@ -91,31 +91,31 @@ namespace tblTickets {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-                { Fields::tktID,                ORM_PRIMARYKEY_64 },
-                { Fields::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
-                { Fields::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
-                { Fields::tkt_untID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
-                { Fields::tktBase_tktID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
-                { Fields::tktInReply_tktID,     S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
-                { Fields::tktType,              S(Targoman::API::TicketingModule::enuTicketType::Type), QFV, Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
-                { Fields::tktTitle,             S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone, false, false },
-                { Fields::tktBody,              S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone, false, false },
-                { Fields::tktStatus,            ORM_STATUS_FIELD(Targoman::API::TicketingModule::enuTicketStatus, Targoman::API::TicketingModule::enuTicketStatus::New) },
-                { Fields::tktCreationDateTime,  ORM_CREATED_ON },
-                { Fields::tktCreatedBy_usrID,   ORM_CREATED_BY },
-                { Fields::tktUpdatedBy_usrID,   ORM_UPDATED_BY },
-            };
+            //ColName                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::tktID,                ORM_PRIMARYKEY_64 },
+            { Fields::tktTarget_usrID,      S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { Fields::tkt_svcID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { Fields::tkt_untID,            S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { Fields::tktBase_tktID,        S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { Fields::tktInReply_tktID,     S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPNone },
+            { Fields::tktType,              S(Targoman::API::TicketingModule::enuTicketType::Type), QFV, Targoman::API::TicketingModule::enuTicketType::Message, UPNone },
+            { Fields::tktTitle,             S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone },
+            { Fields::tktBody,              S(QString),                 QFV.allwaysValid(),         QRequired,  UPNone },
+            { Fields::tktStatus,            ORM_STATUS_FIELD(Targoman::API::TicketingModule::enuTicketStatus, Targoman::API::TicketingModule::enuTicketStatus::New) },
+            { Fields::tktCreationDateTime,  ORM_CREATED_ON },
+            { Fields::tktCreatedBy_usrID,   ORM_CREATED_BY },
+            { Fields::tktUpdatedBy_usrID,   ORM_UPDATED_BY },
+        };
 
         const QList<stuRelation> Relations = {
-            ///Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
-                { Fields::tktInReply_tktID, R(TicketingSchema, tblTickets::Name),       Fields::tktID,          "InReply_" , true },
-                { Fields::tktTarget_usrID,  R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_"  , true },
-                { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_", true },
-                { Fields::tkt_untID,        R(TicketingSchema, tblUnits::Name),         tblUnits::Fields::untID },
-                ORM_RELATION_OF_CREATOR(Fields::tktCreatedBy_usrID),
-                ORM_RELATION_OF_UPDATER(Fields::tktUpdatedBy_usrID),
-            };
+            //Col                           Reference Table                          ForeignCol                 Rename     LeftJoin
+            { Fields::tktInReply_tktID, R(TicketingSchema, tblTickets::Name),       Fields::tktID,          "InReply_" , true },
+            { Fields::tktTarget_usrID,  R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_"  , true },
+            { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_", true },
+            { Fields::tkt_untID,        R(TicketingSchema, tblUnits::Name),         tblUnits::Fields::untID },
+            ORM_RELATION_OF_CREATOR(Fields::tktCreatedBy_usrID),
+            ORM_RELATION_OF_UPDATER(Fields::tktUpdatedBy_usrID),
+        };
 
         const QList<stuDBIndex> Indexes = {
         };
@@ -146,11 +146,11 @@ namespace tblTicketRead {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///<ColName                       Type                   Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                { Fields::tkr_tktID,      ORM_PRIMARYKEY_64},
-                { Fields::tkrBy_usrID,    S(quint64),            QFV.integer().minValue(1),       QInvalid, UPNone,false,false},
-                { Fields::tkrDateTime,    S(TAPI::DateTime_t),   QFV.allwaysInvalid(),            QInvalid, UPNone,false,false},
-            };
+            //<ColName              Type                    Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::tkr_tktID,    ORM_PRIMARYKEY_64 },
+            { Fields::tkrBy_usrID,  S(quint64),             QFV.integer().minValue(1),  QInvalid,   UPNone },
+            { Fields::tkrDateTime,  S(TAPI::DateTime_t),    QFV.allwaysInvalid(),       QInvalid,   UPNone },
+        };
 
         const QList<stuRelation> Relations = {
         };
