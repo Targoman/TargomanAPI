@@ -184,7 +184,7 @@ private slots:
             quint64 _pageIndex = 0,
             quint16 _pageSize = 20,
 //            TAPI::Cols_t _cols = {},
-//            TAPI::Filter_t _filters = {},
+            TAPI::Filter_t _filters = {},
             TAPI::OrderBy_t _orderBy = {},
 //            TAPI::GroupBy_t _groupBy = {},
             bool _reportCount = true,

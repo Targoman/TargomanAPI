@@ -53,7 +53,7 @@ QVariant Tickets::apiGET(
     quint64 _pageIndex,
     quint16 _pageSize,
 //        TAPI::Cols_t _cols,
-//        TAPI::Filter_t _filters,
+    TAPI::Filter_t _filters,
     TAPI::OrderBy_t _orderBy,
 //        TAPI::GroupBy_t _groupBy,
     bool _reportCount,
@@ -63,7 +63,6 @@ QVariant Tickets::apiGET(
     quint64 _inReplyTicketID
 ) {
     TAPI::Cols_t _cols;
-    TAPI::Filter_t _filters;
     TAPI::GroupBy_t _groupBy;
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
