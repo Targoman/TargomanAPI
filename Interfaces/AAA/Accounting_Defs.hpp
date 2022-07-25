@@ -113,6 +113,7 @@ namespace tblAccountUnitsBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(untID);
         TARGOMAN_CREATE_CONSTEXPR(untName);
+        TARGOMAN_CREATE_CONSTEXPR(untName_translate);
     } //namespace Fields
 }
 
@@ -177,7 +178,9 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
         TARGOMAN_CREATE_CONSTEXPR(slbCode);
         TARGOMAN_CREATE_CONSTEXPR(slbName);
+        TARGOMAN_CREATE_CONSTEXPR(slbName_translate);
         TARGOMAN_CREATE_CONSTEXPR(slbDesc);
+        TARGOMAN_CREATE_CONSTEXPR(slbDesc_translate);
         TARGOMAN_CREATE_CONSTEXPR(slbType);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
@@ -295,7 +298,7 @@ namespace tblAccountUnitsBase {
         const QList<clsORMField> ORMFields = {
             //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::untID,        ORM_PRIMARYKEY_16 },
-            { Fields::untName,      S(QString),         QFV,        QRequired,  UPOwner },
+            ORM_MULTILANGUAGE(Fields::untName, QRequired,  UPOwner),
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -478,27 +481,27 @@ namespace tblAccountSaleablesBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName                           Type                                Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
-            clsORMField(Fields::slbID,                    ORM_PRIMARYKEY_32),
-            clsORMField(Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),       QRequired,  UPOwner),
-            clsORMField(Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                             QRequired,  UPOwner),
-            clsORMField(Fields::slbName,                  S(QString),                         QFV,                             QRequired,  UPOwner).setMultiLanguage(),
-            clsORMField(Fields::slbDesc,                  S(QString),                         QFV,                             QNull,      UPOwner).setMultiLanguage(),
-            clsORMField(Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                             TAPI::enuSaleableType::Normal, UPOwner),
-            clsORMField(Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                             QNow,       UPOwner),
-            clsORMField(Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                             QNull,      UPOwner),
-            clsORMField(Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                             QNull,      UPOwner),
-            clsORMField(Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),          QRequired,  UPOwner),
-            clsORMField(Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                             QNull,      UPOwner),
-            clsORMField(Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                             QNull,      UPOwner),
-            clsORMField(Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),       QRequired,  UPAdmin),
-            clsORMField(Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin),
-            clsORMField(Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin),
-            clsORMField(Fields::slbVoucherTemplate,       S(QString),                         QFV,                             QNull,      UPOwner),
-            clsORMField(Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
-            clsORMField(ORM_INVALIDATED_AT_FIELD),
-            clsORMField(Fields::slbCreationDateTime,      ORM_CREATED_ON),
-            clsORMField(Fields::slbCreatedBy_usrID,       ORM_CREATED_BY),
-            clsORMField(Fields::slbUpdatedBy_usrID,       ORM_UPDATED_BY),
+            { Fields::slbID,                    ORM_PRIMARYKEY_32 },
+            { Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),       QRequired,  UPOwner },
+            { Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                             QRequired,  UPOwner },
+            ORM_MULTILANGUAGE(Fields::slbName, QRequired,  UPOwner),
+            ORM_MULTILANGUAGE(Fields::slbDesc, QNull,      UPOwner),
+            { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
+            { Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                             QNow,       UPOwner },
+            { Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                             QNull,      UPOwner },
+            { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                             QNull,      UPOwner },
+            { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),          QRequired,  UPOwner },
+            { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                             QNull,      UPOwner },
+            { Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                             QNull,      UPOwner },
+            { Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),       QRequired,  UPAdmin },
+            { Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
+            { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
+            { Fields::slbVoucherTemplate,       S(QString),                         QFV,                             QNull,      UPOwner },
+            { Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::slbCreationDateTime,      ORM_CREATED_ON },
+            { Fields::slbCreatedBy_usrID,       ORM_CREATED_BY },
+            { Fields::slbUpdatedBy_usrID,       ORM_UPDATED_BY },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
