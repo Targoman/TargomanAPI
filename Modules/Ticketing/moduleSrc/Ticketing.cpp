@@ -58,6 +58,7 @@ Ticketing::Ticketing() :
     TARGOMAN_API_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
+    TARGOMAN_API_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
 
     this->addSubModule(&Departments::instance());
     this->addSubModule(&Units::instance());

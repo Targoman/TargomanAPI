@@ -150,6 +150,7 @@ Account::Account() :
     TARGOMAN_API_IMPLEMENT_MIGRATIONS(Account, AAASchema)
     TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
     TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
+    TARGOMAN_API_IMPLEMENT_FAQ(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());

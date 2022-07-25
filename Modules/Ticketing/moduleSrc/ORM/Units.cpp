@@ -36,8 +36,8 @@ Units::Units() :
         tblUnits::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(Units) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant IMPL_ANONYMOUSE_ORMGET(Units) {
+//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
