@@ -141,8 +141,8 @@ using namespace Targoman::API::Server;
 |** UPDATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define UPDATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
 #define ORMUPDATE(_doc, ...)                        apiUPDATE(UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
     QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -155,8 +155,8 @@ using namespace Targoman::API::Server;
 //#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_USER       quint64 _userID, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
 //#define UPDATE_METHOD_ARGS_CALL_INTERNAL_USER       _userID, _pksByPath, _updateInfo
 
-#define UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, const TAPI::ORMFields_t& _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, const TAPI::ORMFields_t& _updateInfo
+#define UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM       INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM       INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 #define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM       APICALLBOOM_PARAM, _pksByPath, _updateInfo
 
 //#define UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM2USER  APICALLBOOM_PARAM.getUserID(), _pksByPath, _updateInfo

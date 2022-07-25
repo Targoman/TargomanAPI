@@ -306,16 +306,50 @@ private slots:
                 "Advert/AccountProducts",
                 {},
                 {
-                    { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
-                    { tblAccountProductsBase::Fields::prdName,          "test product 123" },
-                    { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-                    { tblAccountProductsBase::Fields::prd_untID,        1 },
-                    { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::ExtraFields::prdEx_locID,     this->LocationID },
+                    { tblAccountProductsBase::Fields::prdCode,              this->BannerProductCode },
+                    { tblAccountProductsBase::Fields::prdName,              "test product 123" },
+                    { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
+                    { tblAccountProductsBase::Fields::prd_untID,            1 },
+                    { tblAccountProducts::ExtraFields::prdExType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prdEx_locID,         this->LocationID },
+                    { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+                          { "fa", "عنوان فارسی ۱۲۳" },
+                          { "ar", "عنوان عربی ۱۲۳" },
+                          { "fr", "عنوان فرانسوی ۱۲۳" },
+                    }) },
+                    { tblAccountProductsBase::Fields::prdDesc_translate,    QVariantMap({
+                          { "fa", "شرح فارسی ۱۲۳" },
+                          { "ar", "شرح عربی ۱۲۳" },
+                    }) },
                 }
             );
 
             QVERIFY(this->BannerProductID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void updateProduct_banner() {
+        QT_TRY {
+            auto Result = callAdminAPI(
+                RESTClientHelper::PATCH,
+                QString("Advert/AccountProducts/") + this->BannerProductID.toString(),
+                {},
+                {
+                    { tblAccountProductsBase::Fields::prdName,              "test product 123456" },
+                    { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+                          { "fa", "عنوان فارسی 123456" },
+                    }) },
+                    { tblAccountProductsBase::Fields::prdDesc_translate,    QVariantMap({
+                          { "fa", "شرح فارسی 123456" },
+                          { "ar", "شرح عربی 123456" },
+                    }) },
+                }
+            );
+
+            QVERIFY(Result > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);

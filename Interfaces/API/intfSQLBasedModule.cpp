@@ -25,8 +25,10 @@
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/DBM/QueryBuilders.h"
+#include "Interfaces/Helpers/IteratorHelper.hpp"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::DBM;
+using namespace Targoman::API::Helpers;
 
 namespace Targoman::API::API {
 
@@ -76,7 +78,6 @@ intfSQLBasedModule::intfSQLBasedModule(
 { ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
-//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -119,7 +120,6 @@ QVariantMap intfSQLBasedModule::SelectOne(
 }
 
 QVariantList intfSQLBasedModule::SelectAll(
-//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -160,7 +160,6 @@ QVariantList intfSQLBasedModule::SelectAll(
 }
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
-//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -201,7 +200,6 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 }
 
 QVariant intfSQLBasedModule::Select(
-//    clsTable& _table,
     GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -212,7 +210,6 @@ QVariant intfSQLBasedModule::Select(
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
-//                        _table,
                         GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                         _extraFilters,
                         _cacheTime,
@@ -222,7 +219,6 @@ QVariant intfSQLBasedModule::Select(
                 ;
 
         return this->SelectAll(
-//                    _table,
                     GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                     _extraFilters,
                     _cacheTime,
@@ -231,7 +227,6 @@ QVariant intfSQLBasedModule::Select(
     }
 
     return this->SelectOne(
-//                _table,
                 GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
                 _extraFilters,
                 _cacheTime,
@@ -239,29 +234,41 @@ QVariant intfSQLBasedModule::Select(
                 );
 }
 
-//QVariant intfSQLBasedModule::Select(
-//    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-//    const clsCondition& _extraFilters,
-//    quint16 _cacheTime,
-//    std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
-//) {
-//    return this->Select(
-//                *this,
-//                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
-//                _extraFilters,
-//                _cacheTime,
-//                _fnTouchQuery
-//            );
-//}
-
 quint64 intfSQLBasedModule::Create(
-//    clsTable& _table,
     CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
 ) {
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "create");
 
     this->prepareFiltersList();
 
+    TAPI::ORMFields_t CreateInfo;
+    //key: language
+    QMap<QString, TAPI::ORMFields_t> TranslateCreateInfo;
+
+    //1: extract _translate fields
+    TAPI::ORMFields_t::iterator it = _createInfo.begin();
+    while (it != _createInfo.end()) {
+        if (it.key().endsWith("_translate")) {
+            QString ColName = it.key().chopped(QString("_translate").length());
+
+            QVariantMap ValuesByLanguage = it.value().toMap();
+            it = _createInfo.erase(it);
+
+            IteratorHelper::ConstIterator(ValuesByLanguage)
+                    .runAll([&ColName, &TranslateCreateInfo](QString _key, QVariant _value) -> bool {
+                        TranslateCreateInfo[_key].insert(ColName, _value);
+                        return true;
+                    });
+
+            continue;
+        } else
+            it++;
+    }
+
+    if ((TranslateCreateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "_translate") == false))
+        throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
+
+    //2: run wo/ _translate
     ORMCreateQuery query = this->GetCreateQuery(APICALLBOOM_PARAM);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
@@ -269,20 +276,39 @@ quint64 intfSQLBasedModule::Create(
 
     query.values(_createInfo);
 
-    return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID));
+    quint64 LastID = query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID));
+
+    //3: run _translate
+    if ((LastID > 0) && (TranslateCreateInfo.isEmpty() == false)) {
+        intfSQLBasedModule* TranslateModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "_translate"]);
+        if (TranslateModule) {
+            IteratorHelper::ConstIterator(TranslateCreateInfo)
+                    .runAll([&TranslateModule, &APICALLBOOM_PARAM, LastID](QString _key, QVariant _value) -> bool {
+                        TAPI::ORMFields_t TranslateInfo;
+                        TranslateInfo.insert("pid", LastID);
+                        TranslateInfo.insert("language", _key);
+
+                        IteratorHelper::ConstIterator(_value.toMap())
+                                .runAll([&TranslateInfo](QString _key, QVariant _value) -> bool {
+                                    TranslateInfo.insert(_key, _value);
+                                    return true;
+                                });
+
+                        /*quint64 TranslateLastID = */TranslateModule->Create(
+                                                      APICALLBOOM_PARAM,
+                                                      TranslateInfo
+                                                      );
+
+                        return true;
+                    });
+        }
+    }
+
+    //--
+    return LastID;
 }
 
-//quint64 intfSQLBasedModule::Create(
-//    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
-//) {
-//    return this->Create(
-//        *this,
-//        CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM
-//    );
-//}
-
 bool intfSQLBasedModule::Update(
-//    clsTable& _table,
     UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters
 ) {
@@ -296,6 +322,34 @@ bool intfSQLBasedModule::Update(
     if (_updateInfo.isEmpty())
         throw exHTTPBadRequest("No change provided to update");
 
+    TAPI::ORMFields_t UpdateInfo;
+    //key: language
+    QMap<QString, TAPI::ORMFields_t> TranslateUpdateInfo;
+
+    //1: extract _translate fields
+    TAPI::ORMFields_t::iterator it = _updateInfo.begin();
+    while (it != _updateInfo.end()) {
+        if (it.key().endsWith("_translate")) {
+            QString ColName = it.key().chopped(QString("_translate").length());
+
+            QVariantMap ValuesByLanguage = it.value().toMap();
+            it = _updateInfo.erase(it);
+
+            IteratorHelper::ConstIterator(ValuesByLanguage)
+                    .runAll([&ColName, &TranslateUpdateInfo](QString _key, QVariant _value) -> bool {
+                        TranslateUpdateInfo[_key].insert(ColName, _value);
+                        return true;
+                    });
+
+            continue;
+        } else
+            it++;
+    }
+
+    if ((TranslateUpdateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "_translate") == false))
+        throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
+
+    //2: run wo/ _translate
     ORMUpdateQuery query = this->GetUpdateQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
@@ -316,22 +370,43 @@ bool intfSQLBasedModule::Update(
         }
     }
 
-    return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID)) > 0;
+    quint64 NumRowsAffected = query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID)) > 0;
+
+    //3: run _translate
+    if ((NumRowsAffected > 0) && (TranslateUpdateInfo.isEmpty() == false)) {
+        intfSQLBasedModule* TranslateModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "_translate"]);
+        if (TranslateModule) {
+            IteratorHelper::ConstIterator(TranslateUpdateInfo)
+                    .runAll([&TranslateModule, &APICALLBOOM_PARAM, _pksByPath](QString _key, QVariant _value) -> bool {
+                        TAPI::ORMFields_t TranslateInfo;
+//                        TranslateInfo.insert("pid", _pksByPath);
+//                        TranslateInfo.insert("language", _key);
+
+                        IteratorHelper::ConstIterator(_value.toMap())
+                                .runAll([&TranslateInfo](QString _key, QVariant _value) -> bool {
+                                    TranslateInfo.insert(_key, _value);
+                                    return true;
+                                });
+
+                        //PK: id,language
+                        TAPI::PKsByPath_t TranslatePKs = QString("%1,%2").arg(_pksByPath).arg(_key);
+
+                        /*quint64 TranslateRowsCount = */TranslateModule->Update(
+                                                         APICALLBOOM_PARAM,
+                                                         TranslatePKs,
+                                                         TranslateInfo
+                                                         );
+
+                        return true;
+                    });
+        }
+    }
+
+    //--
+    return NumRowsAffected;
 }
 
-//bool intfSQLBasedModule::Update(
-//    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-//    const QVariantMap& _extraFilters
-//) {
-//    return this->Update(
-//        *this,
-//        UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM,
-//        _extraFilters
-//    );
-//}
-
 bool intfSQLBasedModule::DeleteByPks(
-//    clsTable& _table,
     DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
     const QVariantMap& _extraFilters,
     bool _realDelete
@@ -370,18 +445,5 @@ bool intfSQLBasedModule::DeleteByPks(
 
     return query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID), {}, _realDelete) > 0;
 }
-
-//bool intfSQLBasedModule::DeleteByPks(
-//    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
-//    const QVariantMap& _extraFilters,
-//    bool _realDelete
-//) {
-//    return this->DeleteByPks(
-//        *this,
-//        DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM,
-//        _extraFilters,
-//        _realDelete
-//        );
-//}
 
 } // namespace Targoman::API::API

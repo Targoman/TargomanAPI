@@ -120,7 +120,6 @@ namespace tblAccountUnitsTranslateBase {
     constexpr char Name[] = "tblAccountUnits_translate";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(id);
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
         TARGOMAN_CREATE_CONSTEXPR(untName);
@@ -134,7 +133,9 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdID);
         TARGOMAN_CREATE_CONSTEXPR(prdCode);
         TARGOMAN_CREATE_CONSTEXPR(prdName);
+        TARGOMAN_CREATE_CONSTEXPR(prdName_translate);
         TARGOMAN_CREATE_CONSTEXPR(prdDesc);
+        TARGOMAN_CREATE_CONSTEXPR(prdDesc_translate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
@@ -161,7 +162,6 @@ namespace tblAccountProductsTranslateBase {
     constexpr char Name[] = "tblAccountProducts_translate";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(id);
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
         TARGOMAN_CREATE_CONSTEXPR(prdName);
@@ -205,7 +205,6 @@ namespace tblAccountSaleablesTranslateBase {
     constexpr char Name[] = "tblAccountSaleables_translate";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(id);
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
         TARGOMAN_CREATE_CONSTEXPR(slbName);
@@ -325,10 +324,9 @@ namespace tblAccountUnitsTranslateBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::id,           ORM_PRIMARYKEY_32 },
-            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPOwner },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPOwner },
+            //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
+            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::untName,      S(QString),         QFV,        QRequired,  UPOwner },
         };
 
@@ -342,7 +340,6 @@ namespace tblAccountUnitsTranslateBase {
     } //namespace Private
 
 #define SF_tblAccountUnitsTranslateBase_DTO \
-    SF_ORM_PRIMARYKEY_32        (id), \
     SF_quint16                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (untName)
@@ -361,26 +358,26 @@ namespace tblAccountProductsBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //          ColName                     Type                            Validation                              Default     UpBy   Sort  Filter Self  Virt   PK
-            clsORMField(Fields::prdID,              ORM_PRIMARYKEY_32),
-            clsORMField(Fields::prdCode,            S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner),
-            clsORMField(Fields::prdName,            S(QString),                     QFV,                                    QRequired,  UPOwner).setMultiLanguage(),
-            clsORMField(Fields::prdDesc,            S(QString),                     QFV,                                    QNull,      UPOwner).setMultiLanguage(),
-            clsORMField(Fields::prdValidFromDate,   S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdValidToDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdValidFromHour,   S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
-            clsORMField(Fields::prdValidToHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner),
-            clsORMField(Fields::prdPrivs,           S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdVAT,             S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner),
-            clsORMField(Fields::prd_untID,          S(NULLABLE_TYPE(quint16)),      QFV,                                    QNull,      UPOwner),
-            clsORMField(Fields::prdQtyIsDecimal,    S(bool),                        QFV,                                    false,      UPAdmin),
-            clsORMField(Fields::prdInStockQty,      S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin),
-            clsORMField(Fields::prdOrderedQty,      S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
-            clsORMField(Fields::prdReturnedQty,     S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin),
-            clsORMField(Fields::prdStatus,          ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active)),
-            clsORMField(ORM_INVALIDATED_AT_FIELD),
-            clsORMField(Fields::prdCreationDateTime,ORM_CREATED_ON),
-            clsORMField(Fields::prdCreatedBy_usrID, ORM_CREATED_BY),
-            clsORMField(Fields::prdUpdatedBy_usrID, ORM_UPDATED_BY),
+            { Fields::prdID,              ORM_PRIMARYKEY_32 },
+            { Fields::prdCode,            S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner },
+            ORM_MULTILANGUAGE(Fields::prdName, QRequired,  UPOwner),
+            ORM_MULTILANGUAGE(Fields::prdDesc, QNull,      UPOwner),
+            { Fields::prdValidFromDate,   S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
+            { Fields::prdValidToDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
+            { Fields::prdValidFromHour,   S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+            { Fields::prdValidToHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+            { Fields::prdPrivs,           S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner },
+            { Fields::prdVAT,             S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
+            { Fields::prd_untID,          S(NULLABLE_TYPE(quint16)),      QFV,                                    QNull,      UPOwner },
+            { Fields::prdQtyIsDecimal,    S(bool),                        QFV,                                    false,      UPAdmin },
+            { Fields::prdInStockQty,      S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin },
+            { Fields::prdOrderedQty,      S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
+            { Fields::prdReturnedQty,     S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
+            { Fields::prdStatus,          ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::prdCreationDateTime,ORM_CREATED_ON },
+            { Fields::prdCreatedBy_usrID, ORM_CREATED_BY },
+            { Fields::prdUpdatedBy_usrID, ORM_UPDATED_BY },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -445,10 +442,9 @@ namespace tblAccountProductsTranslateBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::id,           ORM_PRIMARYKEY_64 },
-            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPOwner },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPOwner },
+            //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
+            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::prdName,      S(QString),         QFV,        QRequired,  UPOwner },
             { Fields::prdDesc,      S(QString),         QFV,        QNull,      UPOwner },
         };
@@ -463,7 +459,6 @@ namespace tblAccountProductsTranslateBase {
     } //namespace Private
 
 #define SF_tblAccountProductsTranslateBase_DTO \
-    SF_ORM_PRIMARYKEY_64        (id), \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (prdName), \
@@ -568,10 +563,9 @@ namespace tblAccountSaleablesTranslateBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::id,           ORM_PRIMARYKEY_64 },
-            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPOwner },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPOwner },
+            //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
+            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::slbName,      S(QString),         QFV,        QRequired,  UPOwner },
             { Fields::slbDesc,      S(QString),         QFV,        QNull,      UPOwner },
         };
@@ -586,7 +580,6 @@ namespace tblAccountSaleablesTranslateBase {
     } //namespace Private
 
 #define SF_tblAccountSaleablesTranslateBase_DTO \
-    SF_ORM_PRIMARYKEY_64        (id), \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (slbName), \
