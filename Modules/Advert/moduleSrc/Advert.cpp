@@ -81,7 +81,9 @@ Advert::Advert() :
 //        &AccountProductsTranslate::instance(),
         &AccountSaleables::instance(),
 //        &AccountSaleablesTranslate::instance(),
+        &AccountSaleablesFiles::instance(),
         &AccountUserAssets::instance(),
+        &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
 ) {
@@ -96,7 +98,9 @@ Advert::Advert() :
 //    this->addSubModule(AccountProductsTranslate.data());
     this->addSubModule(AccountSaleables.data());
 //    this->addSubModule(AccountSaleablesTranslate.data());
+    this->addSubModule(AccountSaleablesFiles.data());
     this->addSubModule(AccountUserAssets.data());
+    this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsages.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
@@ -213,7 +217,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     QVariantMap Result;
 
     if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        Result.insert(tblAccountUserAsset::ExtraFields::uasExDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+        Result.insert(tblAccountUserAssets::ExtraFields::uasExDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
 
     return Result;
 }
