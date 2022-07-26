@@ -38,20 +38,6 @@
 
 namespace Targoman::API::AAA {
 
-//TARGOMAN_DEFINE_ENUM(enuPreVoucherType,
-//                     Withdrawal,
-//                     Invoice,
-//                     Income,
-//                     IncreaseWallet,
-//                     CODCreadit,
-//                     CODDebit,
-//                     Prize,
-//                     TransferFrom,
-//                     TransferTo,
-//                     Freeze,
-//                     UnFreeze
-//                     )
-
 TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Withdrawal     = 'W',
                      Invoice        = 'E', //Expense -> Invoice
@@ -61,7 +47,6 @@ TARGOMAN_DEFINE_ENUM(enuVoucherType,
                      Prize          = 'Z',
                      TransferFrom   = 'F',
                      TransferTo     = 'T',
-
                      Freeze         = 'R', //freeze wallet
                      UnFreeze       = 'U', //unfreeze wallet
                      )
@@ -89,7 +74,6 @@ TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
 
 } //namespace Targoman::API::AAA
 
-//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuPreVoucherType);          // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
@@ -215,6 +199,23 @@ namespace tblAccountSaleablesTranslateBase {
     } //namespace Fields
 }
 
+namespace tblAccountSaleableFilesBase {
+    constexpr char Name[] = "tblAccountSaleableFiles";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(slfID);
+        TARGOMAN_CREATE_CONSTEXPR(slf_slbID);
+        TARGOMAN_CREATE_CONSTEXPR(slfName);
+        TARGOMAN_CREATE_CONSTEXPR(slfDesc);
+        TARGOMAN_CREATE_CONSTEXPR(slfMimeTypes);
+        TARGOMAN_CREATE_CONSTEXPR(slfExtensions);
+        TARGOMAN_CREATE_CONSTEXPR(slfMinSize);
+        TARGOMAN_CREATE_CONSTEXPR(slfMaxSize);
+        TARGOMAN_CREATE_CONSTEXPR(slfMinCount);
+        TARGOMAN_CREATE_CONSTEXPR(slfMaxCount);
+    } //namespace Fields
+}
+
 namespace tblAccountUserAssetsBase {
     constexpr char Name[] = "tblAccountUserAssets";
 
@@ -232,6 +233,19 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uasStatus);
         TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
+    }
+}
+
+namespace tblAccountUserAssetsFilesBase {
+    constexpr char Name[] = "tblAccountUserAssetsFiles";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(uasuflID);
+        TARGOMAN_CREATE_CONSTEXPR(uasufl_uasID);
+        TARGOMAN_CREATE_CONSTEXPR(uasufl_slfID);
+        TARGOMAN_CREATE_CONSTEXPR(uasufl_uflID);
+        TARGOMAN_CREATE_CONSTEXPR(uasuflCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(uasuflCreatedBy_usrID);
     }
 }
 
@@ -593,6 +607,51 @@ namespace tblAccountSaleablesTranslateBase {
     );
 }
 
+namespace tblAccountSaleableFilesBase {
+    namespace Relation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                   Type                    Validation  Default     UpBy    Sort  Filter Self   Virt   PK
+            { Fields::slfID,            ORM_PRIMARYKEY_64 },
+            { Fields::slf_slbID,        S(quint32),             QFV,        QRequired,  UPAdmin },
+            { Fields::slfName,          S(QString),             QFV,        QRequired,  UPAdmin },
+            { Fields::slfDesc,          S(QString),             QFV,        QNull,      UPAdmin },
+            { Fields::slfMimeTypes,     S(QString),             QFV,        QNull,      UPAdmin },
+            { Fields::slfExtensions,    S(QString),             QFV,        QNull,      UPAdmin },
+            { Fields::slfMinSize,       S(quint64),             QFV,        QNull,      UPAdmin },
+            { Fields::slfMaxSize,       S(quint64),             QFV,        QNull,      UPAdmin },
+            { Fields::slfMinCount,      S(quint16),             QFV,        QNull,      UPAdmin },
+            { Fields::slfMaxCount,      S(quint16),             QFV,        QNull,      UPAdmin },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {};
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountSaleableFilesBase_DTO \
+    SF_quint64                  (slfID), \
+    SF_quint32                  (slf_slbID), \
+    SF_QString                  (slfName), \
+    SF_QString                  (slfDesc), \
+    SF_QString                  (slfMimeTypes), \
+    SF_QString                  (slfExtensions), \
+    SF_quint64                  (slfMinSize), \
+    SF_quint64                  (slfMaxSize), \
+    SF_quint16                  (slfMinCount), \
+    SF_quint16                  (slfMaxCount)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountSaleableFilesBase_DTO
+    );
+}
+
 namespace tblAccountUserAssetsBase {
     namespace Relation {
         constexpr char Saleable[] = "Saleable";
@@ -666,6 +725,80 @@ namespace tblAccountUserAssetsBase {
         SF_tblAccountUserAssetsBase_DTO
     );
 }
+
+/*
+namespace tblAccountUserAssetsFilesBase {
+    namespace Relation {
+        constexpr char UserAssets[] = "UserAssets";
+        constexpr char Saleable[] = "Saleable";
+        constexpr char Saleable[] = "Saleable";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //Col                               Type                    Validation      Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::uasuflID,                 ORM_PRIMARYKEY_64 },
+            { Fields::uasufl_uasID,             S(quint64),             QFV,            QRequired,  UPNone },
+            { Fields::uasufl_slfID,             S(quint64),             QFV,            QRequired,  UPNone },
+            { Fields::uasufl_uflID,             S(quint64),             QFV,            QRequired,  UPNone },
+            { Fields::uasuflCreationDateTime,   S(TAPI::DateTime_t),    QFV,            QNow,       UPNone },
+            { Fields::uasuflCreatedBy_usrID,    ORM_CREATED_BY },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {
+                ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
+                { Relation::Saleable,
+                    { Fields::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slbID, "",       true } },
+            };
+        };
+
+        const QList<stuDBIndex> Indexes = {
+            { {
+                  Fields::uas_usrID,
+                  Fields::uasVoucherItemUUID,
+                  ORM_INVALIDATED_AT_FIELD_NAME,
+              }, enuDBIndex::Unique },
+            { Fields::uas_usrID },
+            { Fields::uas_slbID },
+            { Fields::uas_vchID },
+            { Fields::uasVoucherItemUUID },
+            { Fields::uas_cpnID },
+            { Fields::uasOrderDateTime },
+            { Fields::uasStatus },
+            { Fields::uasUpdatedBy_usrID },
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountUserAssetsBase_DTO \
+    SF_ORM_PRIMARYKEY_64        (uasID), \
+    SF_quint64                  (uas_usrID), \
+    SF_quint64                  (uas_slbID), \
+    SF_qreal                    (uasQty), \
+    SF_NULLABLE_quint64         (uas_vchID), \
+    SF_MD5_t                    (uasVoucherItemUUID), \
+    SF_JSON_t                   (uasVoucherItemInfo), \
+    SF_NULLABLE_quint32         (uas_cpnID), \
+    SF_NULLABLE_quint32         (uasDiscountAmount), \
+    SF_bool                     (uasPrefered), \
+    SF_DateTime_t               (uasOrderDateTime), \
+    SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
+    SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUserAssetsBase_DTO
+    );
+
+
+uasuflID
+uasufl_uasID
+uasufl_slfID
+uasufl_uflID
+uasuflCreationDateTime
+uasuflCreatedBy_usrID
+}
+*/
 
 namespace tblAccountAssetUsageBase {
     namespace Relation {
