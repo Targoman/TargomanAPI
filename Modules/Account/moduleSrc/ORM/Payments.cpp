@@ -86,7 +86,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 //            .addCols(OnlinePayments::instance().SelectableColumnNames())
 //            .addCols(PaymentGateways::instance().SelectableColumnNames())
 //            .innerJoinWith("paymentGateway")
-            .addCol(tblOnlinePayments::Fields::onpCallbackUrl)
+//            .addCol(tblOnlinePayments::Fields::onpCallbackUrl)
             .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
             .one<tblOnlinePayments::DTO>();
 
