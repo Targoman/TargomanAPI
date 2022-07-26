@@ -726,12 +726,11 @@ namespace tblAccountUserAssetsBase {
     );
 }
 
-/*
 namespace tblAccountUserAssetsFilesBase {
     namespace Relation {
-        constexpr char UserAssets[] = "UserAssets";
-        constexpr char Saleable[] = "Saleable";
-        constexpr char Saleable[] = "Saleable";
+        constexpr char UserAssets[]   = "UserAssets";
+        constexpr char SaleableFile[] = "SaleableFile";
+        constexpr char UploadedFile[] = "UploadedFile";
     }
 
     namespace Private {
@@ -747,58 +746,33 @@ namespace tblAccountUserAssetsFilesBase {
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
-                ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
-                { Relation::Saleable,
-                    { Fields::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slbID, "",       true } },
+                //Col                           Reference Table                                 ForeignCol                      Rename     LeftJoin
+                { Relation::UserAssets,
+                    { Fields::uasufl_uasID,     R(_schema, tblAccountUserAssetsBase::Name),     tblAccountUserAssetsBase::Fields::uasID } },
+                { Relation::SaleableFile,
+                    { Fields::uasufl_slfID,     R(_schema, tblAccountSaleableFilesBase::Name),  tblAccountSaleableFilesBase::Fields::slfID } },
+                { Relation::UploadedFile,
+                    { Fields::uasufl_uflID,     R(_schema, tblUploadFiles::Name),               tblUploadFiles::Fields::uflID } },
             };
         };
 
         const QList<stuDBIndex> Indexes = {
-            { {
-                  Fields::uas_usrID,
-                  Fields::uasVoucherItemUUID,
-                  ORM_INVALIDATED_AT_FIELD_NAME,
-              }, enuDBIndex::Unique },
-            { Fields::uas_usrID },
-            { Fields::uas_slbID },
-            { Fields::uas_vchID },
-            { Fields::uasVoucherItemUUID },
-            { Fields::uas_cpnID },
-            { Fields::uasOrderDateTime },
-            { Fields::uasStatus },
-            { Fields::uasUpdatedBy_usrID },
         };
 
     } //namespace Private
 
-#define SF_tblAccountUserAssetsBase_DTO \
-    SF_ORM_PRIMARYKEY_64        (uasID), \
-    SF_quint64                  (uas_usrID), \
-    SF_quint64                  (uas_slbID), \
-    SF_qreal                    (uasQty), \
-    SF_NULLABLE_quint64         (uas_vchID), \
-    SF_MD5_t                    (uasVoucherItemUUID), \
-    SF_JSON_t                   (uasVoucherItemInfo), \
-    SF_NULLABLE_quint32         (uas_cpnID), \
-    SF_NULLABLE_quint32         (uasDiscountAmount), \
-    SF_bool                     (uasPrefered), \
-    SF_DateTime_t               (uasOrderDateTime), \
-    SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
-    SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
+#define SF_tblAccountUserAssetsFilesBase_DTO \
+    SF_ORM_PRIMARYKEY_64        (uasuflID), \
+    SF_quint64                  (uasufl_uasID), \
+    SF_quint64                  (uasufl_slfID), \
+    SF_quint64                  (uasufl_uflID), \
+    SF_DateTime_t               (uasuflCreationDateTime), \
+    SF_ORM_UPDATED_BY           (uasuflCreatedBy_usrID)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountUserAssetsBase_DTO
+        SF_tblAccountUserAssetsFilesBase_DTO
     );
-
-
-uasuflID
-uasufl_uasID
-uasufl_slfID
-uasufl_uflID
-uasuflCreationDateTime
-uasuflCreatedBy_usrID
 }
-*/
 
 namespace tblAccountAssetUsageBase {
     namespace Relation {
