@@ -255,7 +255,33 @@ namespace tblAccountSaleablesTranslate {
     );
 }
 
-namespace tblAccountUserAsset {
+namespace tblAccountSaleablesFiles {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            ///ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountSaleablesFilesBase_DTO
+    );
+}
+
+namespace tblAccountUserAssets {
 
     namespace ExtraFields {
         TARGOMAN_CREATE_CONSTEXPR(uasExDays);
@@ -298,6 +324,32 @@ namespace tblAccountUserAsset {
         SF_quint32                  (uasExDayClicks),
         SF_quint32                  (uasExMonthClicks),
         SF_quint64                  (uasExTotalClicks)
+    );
+}
+
+namespace tblAccountUserAssetsFiles {
+
+    namespace ExtraFields {
+    }
+
+    namespace ExtraRelation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountUserAssetsFilesBase_DTO
     );
 }
 
@@ -378,6 +430,8 @@ namespace tblAccountCoupons {
 #pragma GCC diagnostic pop
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class AccountUnits : public intfAccountUnits
 {
     Q_OBJECT
@@ -387,6 +441,7 @@ protected:
     QScopedPointer<intfAccountUnitsTranslate> AccountUnitsTranslate;
 };
 
+/******************************************************/
 class AccountUnitsTranslate : public intfAccountUnitsTranslate
 {
     Q_OBJECT
@@ -395,6 +450,8 @@ class AccountUnitsTranslate : public intfAccountUnitsTranslate
 public:
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class AccountProducts : public intfAccountProducts
 {
@@ -405,6 +462,7 @@ protected:
     QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
 };
 
+/******************************************************/
 class AccountProductsTranslate : public intfAccountProductsTranslate
 {
     Q_OBJECT
@@ -413,6 +471,8 @@ class AccountProductsTranslate : public intfAccountProductsTranslate
 public:
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class AccountSaleables : public intfAccountSaleables
 {
@@ -423,23 +483,44 @@ protected:
     QScopedPointer<intfAccountSaleablesTranslate> AccountSaleablesTranslate;
 };
 
+/******************************************************/
 class AccountSaleablesTranslate : public intfAccountSaleablesTranslate
 {
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesTranslate)
 
-public:
+//public:
 };
 
+/******************************************************/
+class AccountSaleablesFiles : public intfAccountSaleablesFiles
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesFiles)
+};
+
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class AccountUserAssets : public intfAccountUserAssets
 {
     Q_OBJECT
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssets)
 
-public:
+//public:
 };
 
+/******************************************************/
+class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
+{
+    Q_OBJECT
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssetsFiles)
+
+//public:
+};
+
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class AccountAssetUsage : public intfAccountAssetUsage
 {
@@ -450,6 +531,8 @@ public:
 };
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class AccountCoupons : public intfAccountCoupons
 {
     Q_OBJECT
@@ -458,6 +541,8 @@ class AccountCoupons : public intfAccountCoupons
 public:
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 //There is no Prize in the advertisement module
 /*class clsAccountPrizes: public Accounting::intfAccountPrizes

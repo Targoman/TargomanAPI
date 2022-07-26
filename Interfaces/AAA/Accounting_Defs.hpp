@@ -35,6 +35,8 @@
 #include <QString>
 #include <QJsonArray>
 #include "Interfaces/Server/clsSimpleCrypt.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
+using namespace Targoman::API::ObjectStorage::ORM;
 
 namespace Targoman::API::AAA {
 
@@ -199,8 +201,8 @@ namespace tblAccountSaleablesTranslateBase {
     } //namespace Fields
 }
 
-namespace tblAccountSaleableFilesBase {
-    constexpr char Name[] = "tblAccountSaleableFiles";
+namespace tblAccountSaleablesFilesBase {
+    constexpr char Name[] = "tblAccountSaleablesFiles";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(slfID);
@@ -607,7 +609,7 @@ namespace tblAccountSaleablesTranslateBase {
     );
 }
 
-namespace tblAccountSaleableFilesBase {
+namespace tblAccountSaleablesFilesBase {
     namespace Relation {
     }
 
@@ -635,7 +637,7 @@ namespace tblAccountSaleableFilesBase {
 
     } //namespace Private
 
-#define SF_tblAccountSaleableFilesBase_DTO \
+#define SF_tblAccountSaleablesFilesBase_DTO \
     SF_quint64                  (slfID), \
     SF_quint32                  (slf_slbID), \
     SF_QString                  (slfName), \
@@ -648,7 +650,7 @@ namespace tblAccountSaleableFilesBase {
     SF_quint16                  (slfMaxCount)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountSaleableFilesBase_DTO
+        SF_tblAccountSaleablesFilesBase_DTO
     );
 }
 
@@ -750,7 +752,7 @@ namespace tblAccountUserAssetsFilesBase {
                 { Relation::UserAssets,
                     { Fields::uasufl_uasID,     R(_schema, tblAccountUserAssetsBase::Name),     tblAccountUserAssetsBase::Fields::uasID } },
                 { Relation::SaleableFile,
-                    { Fields::uasufl_slfID,     R(_schema, tblAccountSaleableFilesBase::Name),  tblAccountSaleableFilesBase::Fields::slfID } },
+                    { Fields::uasufl_slfID,     R(_schema, tblAccountSaleablesFilesBase::Name),  tblAccountSaleablesFilesBase::Fields::slfID } },
                 { Relation::UploadedFile,
                     { Fields::uasufl_uflID,     R(_schema, tblUploadFiles::Name),               tblUploadFiles::Fields::uflID } },
             };

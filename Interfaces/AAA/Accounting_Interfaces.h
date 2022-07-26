@@ -32,6 +32,8 @@ using namespace Targoman::API::API;
 namespace Targoman::API::AAA {
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class intfAccountUnitsTranslate : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -47,6 +49,7 @@ protected:
     friend class intfAccountUnits;
 };
 
+/******************************************************/
 class intfAccountUnits : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -68,6 +71,8 @@ private slots:
 };
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class intfAccountProductsTranslate : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -83,6 +88,7 @@ protected:
     friend class intfAccountProducts;
 };
 
+/******************************************************/
 class intfAccountProducts : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -97,17 +103,14 @@ public:
     virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
-#ifdef QT_DEBUG
     QVariant ANONYMOUSE_ORMGET("Get Available Products")
-#else
-    QVariant ORMGET("Get Available Products")
-#endif
-
     quint32 ORMCREATE("Create a new Product by priviledged user")
     bool ORMUPDATE("Update a Product info by priviledged user")
     bool ORMDELETE("Delete a Product")
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountSaleablesTranslate : public intfSQLBasedModule
 {
@@ -124,6 +127,7 @@ protected:
     friend class intfAccountSaleables;
 };
 
+/******************************************************/
 class intfAccountSaleables : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -138,17 +142,35 @@ public:
     virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
-#ifdef QT_DEBUG
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
-#else
-    QVariant ORMGET("Get Available Saleables")
-#endif
-
     quint32 ORMCREATE("Create a new Saleable by priviledged user")
     bool ORMUPDATE("Update a Saleable info by priviledged user")
     bool ORMDELETE("Delete a Saleable")
 };
 
+/******************************************************/
+class intfAccountSaleablesFiles : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountSaleablesFiles(const QString& _schema,
+                              const QList<DBM::clsORMField>& _exclusiveCols = {},
+                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+//public:
+//    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+
+private slots:
+    QVariant ANONYMOUSE_ORMGET("Get Available Saleables Files")
+    quint32 ORMCREATE("Create a new Saleables File by priviledged user")
+    bool ORMUPDATE("Update a Saleables File info by priviledged user")
+    bool ORMDELETE("Delete a Saleables File")
+};
+
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountUserAssets : public intfSQLBasedModule
 {
@@ -182,6 +204,25 @@ private slots:
 };
 
 /******************************************************/
+class intfAccountUserAssetsFiles : public intfSQLBasedModule
+{
+    Q_OBJECT
+
+public:
+    intfAccountUserAssetsFiles(const QString& _schema,
+                               const QList<DBM::clsORMField>& _exclusiveCols = {},
+                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+private slots:
+    QVariant ORMGET("Get User Assets Files")
+
+    ///@TODO: complete other orm actions
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
 class intfAccountAssetUsage : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -195,6 +236,8 @@ private slots:
     QVariant ORMGET("Get user Usage on each Asset")
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountCoupons : public intfSQLBasedModule
 {
@@ -213,6 +256,8 @@ private slots:
     bool ORMDELETE("Delete a Discount")
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountPrizes : public intfSQLBasedModule
 {

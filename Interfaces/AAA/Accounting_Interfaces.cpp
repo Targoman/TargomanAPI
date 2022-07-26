@@ -258,12 +258,8 @@ ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALL
     ;
 }
 
-#ifdef QT_DEBUG
 QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountProducts) {
-#else
-QVariant IMPL_ORMGET(intfAccountProducts) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-#endif
+//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
 
@@ -356,20 +352,15 @@ ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
     ;
 }
 
-#ifdef QT_DEBUG
 QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleables) {
     clsCondition ExtraFilters = {};
-#else
-QVariant IMPL_ORMGET(intfAccountSaleables) {
-    clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        ExtraFilters
-            .setCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
-                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
-                          DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-            );
-#endif
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//        ExtraFilters
+//            .setCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
+//            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+//                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+//                          DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+//            );
 
     constexpr quint16 CACHE_TIME = 15 * 60;
 
@@ -421,6 +412,46 @@ bool IMPL_ORMDELETE(intfAccountSaleables) {
 }
 
 /******************************************************************/
+intfAccountSaleablesFiles::intfAccountSaleablesFiles(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountSaleablesFilesBase::Name,
+        tblAccountSaleablesFilesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountSaleablesFilesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountSaleablesFilesBase::Private::Indexes + _exclusiveIndexes
+) { ; }
+
+QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleablesFiles) {
+    constexpr quint16 CACHE_TIME = 15 * 60;
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, CACHE_TIME);
+}
+
+quint32 IMPL_ORMCREATE(intfAccountSaleablesFiles) {
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMUPDATE(intfAccountSaleablesFiles) {
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+bool IMPL_ORMDELETE(intfAccountSaleablesFiles) {
+      Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+
+      return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountUserAssets::intfAccountUserAssets(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
@@ -436,48 +467,71 @@ intfAccountUserAssets::intfAccountUserAssets(
 ) { ; }
 
 QVariant IMPL_ORMGET(intfAccountUserAssets) {
-  if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-    this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getUserID() }}, _filters);
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getUserID() }}, _filters);
 
-  return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
-  bool Ok;
-  quint64 UserPackageID = _pksByPath.toUInt(&Ok);
-  if (!Ok || !UserPackageID )
-    throw exHTTPBadRequest("Invalid UserPackageID provided");
+    bool Ok;
+    quint64 UserPackageID = _pksByPath.toUInt(&Ok);
+    if (!Ok || !UserPackageID )
+        throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-  this->callSP(APICALLBOOM_PARAM,
-               "spUserAsset_SetAsPrefered", {
-                   { "iUserID", APICALLBOOM_PARAM.getUserID() },
-                   { "iUASID",  UserPackageID },
-               });
-  return false;
+    this->callSP(APICALLBOOM_PARAM,
+                 "spUserAsset_SetAsPrefered", {
+                     { "iUserID", APICALLBOOM_PARAM.getUserID() },
+                     { "iUASID",  UserPackageID },
+                 });
+    return false;
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
-  bool Ok;
-  quint64 UserPackageID = _pksByPath.toUInt(&Ok);
-  if (!Ok || !UserPackageID )
-    throw exHTTPBadRequest("Invalid UserPackageID provided");
+    bool Ok;
+    quint64 UserPackageID = _pksByPath.toUInt(&Ok);
+    if (!Ok || !UserPackageID )
+        throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-  /*return this->update(APICALLBOOM_PARAM.getUserID(), {
-                            {tblAccountUserAssets::Fields::uasID, UserPackageID}
-                        }, {
-                            {tblAccountUserAssets::Fields::uasStatus, TAPI::enuAuditableStatus::Banned},
-                        });*/
-  throw Targoman::Common::exTargomanMustBeImplemented(__FUNCTION__);
-  return Ok;
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    /*return this->update(APICALLBOOM_PARAM.getUserID(), {
+                              {tblAccountUserAssets::Fields::uasID, UserPackageID}
+                          }, {
+                              {tblAccountUserAssets::Fields::uasStatus, TAPI::enuAuditableStatus::Banned},
+                          });*/
+    throw Targoman::Common::exTargomanMustBeImplemented(__FUNCTION__);
+    return Ok;
 }
 
+/******************************************************************/
+intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountUserAssetsFilesBase::Name,
+        tblAccountUserAssetsFilesBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUserAssetsFilesBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUserAssetsFilesBase::Private::Indexes + _exclusiveIndexes
+) { ; }
+
+QVariant IMPL_ORMGET(intfAccountUserAssetsFiles) {
+    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
+}
+
+/******************************************************************/
+/******************************************************************/
 /******************************************************************/
 intfAccountAssetUsage::intfAccountAssetUsage(
     const QString& _schema,
@@ -500,6 +554,8 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
+/******************************************************************/
+/******************************************************************/
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
     const QString& _schema,
@@ -543,6 +599,8 @@ bool IMPL_ORMDELETE(intfAccountCoupons) {
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
 }
 
+/******************************************************************/
+/******************************************************************/
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
     const QString& _schema,

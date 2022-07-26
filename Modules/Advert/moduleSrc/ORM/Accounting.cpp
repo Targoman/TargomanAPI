@@ -30,6 +30,8 @@ using namespace Targoman::API::AAA;
 namespace Targoman::API::AdvertModule::ORM {
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 AccountUnits::AccountUnits() :
     intfAccountUnits(
         AdvertSchema,
@@ -40,6 +42,7 @@ AccountUnits::AccountUnits() :
     AccountUnitsTranslate::instance();
 }
 
+/******************************************************/
 AccountUnitsTranslate::AccountUnitsTranslate() :
     intfAccountUnitsTranslate(
         AdvertSchema,
@@ -48,6 +51,8 @@ AccountUnitsTranslate::AccountUnitsTranslate() :
         tblAccountUnitsTranslate::Private::ExtraIndexes
 ) { ; }
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 AccountProducts::AccountProducts() :
     intfAccountProducts(
@@ -59,6 +64,7 @@ AccountProducts::AccountProducts() :
     AccountProductsTranslate::instance();
 }
 
+/******************************************************/
 AccountProductsTranslate::AccountProductsTranslate() :
     intfAccountProductsTranslate(
         AdvertSchema,
@@ -67,6 +73,8 @@ AccountProductsTranslate::AccountProductsTranslate() :
         tblAccountProductsTranslate::Private::ExtraIndexes
 ) { ; }
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
@@ -78,6 +86,7 @@ AccountSaleables::AccountSaleables() :
     AccountSaleablesTranslate::instance();
 }
 
+/******************************************************/
 AccountSaleablesTranslate::AccountSaleablesTranslate() :
     intfAccountSaleablesTranslate(
         AdvertSchema,
@@ -87,14 +96,36 @@ AccountSaleablesTranslate::AccountSaleablesTranslate() :
 ) { ; }
 
 /******************************************************/
+AccountSaleablesFiles::AccountSaleablesFiles() :
+    intfAccountSaleablesFiles(
+        AdvertSchema,
+        tblAccountSaleablesFiles::Private::ExtraORMFields,
+        tblAccountSaleablesFiles::Private::ExtraRelations,
+        tblAccountSaleablesFiles::Private::ExtraIndexes
+) { ; }
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
         AdvertSchema,
-        tblAccountUserAsset::Private::ExtraORMFields,
-        tblAccountUserAsset::Private::ExtraRelations,
-        tblAccountUserAsset::Private::ExtraIndexes
+        tblAccountUserAssets::Private::ExtraORMFields,
+        tblAccountUserAssets::Private::ExtraRelations,
+        tblAccountUserAssets::Private::ExtraIndexes
 ) { ; }
 
+/******************************************************/
+AccountUserAssetsFiles::AccountUserAssetsFiles() :
+    intfAccountUserAssetsFiles(
+        AdvertSchema,
+        tblAccountUserAssetsFiles::Private::ExtraORMFields,
+        tblAccountUserAssetsFiles::Private::ExtraRelations,
+        tblAccountUserAssetsFiles::Private::ExtraIndexes
+) { ; }
+
+/******************************************************/
+/******************************************************/
 /******************************************************/
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
@@ -104,6 +135,8 @@ AccountAssetUsage::AccountAssetUsage() :
         tblAccountAssetUsage::Private::ExtraIndexes
 ) { ; }
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 AccountCoupons::AccountCoupons() :
     intfAccountCoupons(
