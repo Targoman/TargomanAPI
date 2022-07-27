@@ -162,6 +162,10 @@ public:
 //public:
 //    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
+protected:
+    static intfAccountSaleablesFiles* myInstance;
+    friend class intfAccountUserAssets;
+
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables Files")
     quint32 ORMCREATE("Create a new Saleables File by priviledged user")
@@ -182,8 +186,12 @@ public:
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
+public:
+    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+
 private slots:
     QVariant ORMGET("Get User Assets")
+
     bool REST_UPDATE(
         disablePackage,
         (
@@ -213,6 +221,10 @@ public:
                                const QList<DBM::clsORMField>& _exclusiveCols = {},
                                const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+protected:
+    static intfAccountUserAssetsFiles* myInstance;
+    friend class intfAccountUserAssets;
 
 private slots:
     QVariant ORMGET("Get User Assets Files")

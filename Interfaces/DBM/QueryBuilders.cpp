@@ -1149,12 +1149,25 @@ class clsBaseQueryData : public QSharedData
 public:
     clsBaseQueryData(INTFAPICALLBOOM_IMPL &_APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
         APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
-        Table(_table),
+        _FromTable(_table),
+        Alias(_alias)
+    { ; }
+
+    clsBaseQueryData(INTFAPICALLBOOM_IMPL &_APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {}) :
+        APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
+        FromQuery(_fromQuery),
         Alias(_alias)
     { ; }
 
     virtual ~clsBaseQueryData()
     { ; }
+
+    virtual clsTable &table() {
+        if (this->_FromTable.isValid())
+            return this->_FromTable;
+
+        return this->FromQuery.Data->table();
+    }
 
     virtual void prepare(quint64 _currentUserID, bool _useBinding) {
         Q_UNUSED(_currentUserID)
@@ -1166,9 +1179,28 @@ public:
         this->BaseQueryPreparedItems.IsPrepared = true;
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->table().Name;
 
-        this->BaseQueryPreparedItems.From = PrependSchema(this->Table.Schema) + "." + this->Table.Name;
+        if (this->_FromTable.isValid())
+            this->BaseQueryPreparedItems.From = PrependSchema(this->table().Schema) + "." + this->table().Name;
+        else {
+            //for preventing to adding limit in nested queries
+            this->FromQuery.pageSize(0);
+
+            QString selectBody = this->FromQuery.buildQueryString({}, false, false, true);
+
+            if (SQLPrettyLen)
+                selectBody = "(\n"
+                           + selectBody
+                           + "\n"
+                           + QString(SQLPrettyLen, ' ')
+                           + " )";
+            else
+                selectBody = "(" + selectBody + ")";
+
+            this->BaseQueryPreparedItems.From = selectBody;
+        }
+
         if (this->Alias.length())
             this->BaseQueryPreparedItems.From += " " + this->Alias;
     }
@@ -1178,10 +1210,11 @@ public:
     friend clsQueryGroupAndHavingTraitData<itmplDerived>;
 
 public:
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM;
-    clsTable&   Table;
-    QString     Alias;
-    stuBaseQueryPreparedItems BaseQueryPreparedItems;
+    INTFAPICALLBOOM_IMPL        &APICALLBOOM_PARAM;
+    clsTable                    _FromTable;
+    ORMSelectQuery              FromQuery;
+    QString                     Alias;
+    stuBaseQueryPreparedItems   BaseQueryPreparedItems;
 };
 
 /***************************************************************************************/
@@ -1204,6 +1237,14 @@ tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLBOOM_IMPL &APIC
 }
 
 template <class itmplDerived, class itmplData>
+tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias) :
+    Data(new itmplData(APICALLBOOM_PARAM, _fromQuery, _alias))
+{
+//    if (_table.AllCols.isEmpty())
+//        throw exQueryBuilder(QString("Call prepareFiltersList on table (%1) before creating a QueryBuilder").arg(_table.Name));
+}
+
+template <class itmplDerived, class itmplData>
 tmplBaseQuery<itmplDerived, itmplData>::~tmplBaseQuery() {
 //    if (this->dac != nullptr)
 //        delete this->dac;
@@ -1216,8 +1257,13 @@ bool tmplBaseQuery<itmplDerived, itmplData>::isValid() {
 }
 
 //template <class itmplDerived, class itmplData>
+//itmplDerived& tmplBaseQuery<itmplDerived, itmplData>::from(const ORMSelectQuery& _nestedQuery, const QString _alias) {
+
+//}
+
+//template <class itmplDerived, class itmplData>
 //clsDAC tmplBaseQuery<itmplDerived, itmplData>::DAC() {
-//    return clsDAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+//    return clsDAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 //}
 
 template <class itmplDerived, class itmplData>
@@ -1261,7 +1307,7 @@ public:
         this->IsPrepared = true;
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->Table.Name;
+        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->table().Name;
 
         /****************************************************************************/
 //        foreach (auto Join, UsedJoins) {
@@ -1306,7 +1352,7 @@ public:
             } else {
                 //2: find relation definition
 //                stuRelation* Relation = nullptr;
-//                foreach (stuRelation Rel, this->Owner->Data->Table.Relations)
+//                foreach (stuRelation Rel, this->Owner->Data->table().Relations)
 //                {
 //                    if (Rel.ReferenceTable == Join.ForeignTable) {
 //                        Relation = &Rel;
@@ -1347,10 +1393,10 @@ public:
                     j += " ON ";
 
                 j += Join.On.buildConditionString(
-                    this->Owner->Data->Table.Name,
+                    this->Owner->Data->table().Name,
                     this->Owner->Data->Alias,
-                    this->Owner->Data->Table.SelectableColsMap,
-                    this->Owner->Data->Table.FilterableColsMap,
+                    this->Owner->Data->table().SelectableColsMap,
+                    this->Owner->Data->table().FilterableColsMap,
                     true, //false,
                     this->Owner->Data->BaseQueryPreparedItems.RenamedCols
                 );
@@ -1359,14 +1405,14 @@ public:
 
             //4: append columns
 //                QSet<stuRelation> UsedJoins;
-//                foreach (stuRelation Relation, this->Table.Relations) {
+//                foreach (stuRelation Relation, this->table().Relations) {
 //                    clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
 //                    if (ForeignTable == nullptr)
 //                        throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 
 //                    bool Joined = false;
 //                    if (this->RequiredCols.isEmpty())
-//                        foreach (auto Col, ForeignTable->BaseCols)
+//                        foreach (auto Col, ForeignTable.BaseCols)
 //                            this->ORMSelectQueryPreparedItems.Cols.append(makeColName(MainTableNameOrAlias, Col, true, Relation));
 //                    else
 //                        foreach (auto RequiredCol, this->RequiredCols)
@@ -1401,6 +1447,10 @@ class clsORMSelectQueryData : public clsBaseQueryData<ORMSelectQuery>
 public:
     clsORMSelectQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
         clsBaseQueryData<ORMSelectQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
+
+    clsORMSelectQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {}) :
+        clsBaseQueryData<ORMSelectQuery>(APICALLBOOM_PARAM, _fromQuery, _alias) { ; }
+
 //    clsORMSelectQueryData(const clsORMSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMSelectQueryData() { ; }
 
@@ -1412,17 +1462,17 @@ public:
         clsBaseQueryData<ORMSelectQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->table().Name;
 
         /****************************************************************************/
         auto addCol = [this](clsColSpecs& _col, const stuRelation& _relation = InvalidRelation) {
             this->ORMSelectQueryPreparedItems.Cols.append(
                 _col.buildColNameString(
-                    this->Table.Name,
+                    this->table().Name,
                     this->Alias,
                     "",
-                    this->Table.SelectableColsMap,
-                    this->Table.FilterableColsMap,
+                    this->table().SelectableColsMap,
+                    this->table().FilterableColsMap,
                     true,
                     this->BaseQueryPreparedItems.RenamedCols,
                     true,
@@ -1437,9 +1487,9 @@ public:
         }; //addCol
 
         if (this->RequiredCols.isEmpty()) {
-            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
+            foreach (stuRelatedORMField baseCol, this->table().AllCols) {
                 if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isSelectable())
-                    this->ORMSelectQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, true));
+                    this->ORMSelectQueryPreparedItems.Cols.append(makeColName(this->table().Name, this->Alias, baseCol.Col, true));
             }
         } else {
 //            qDebug() << MainTableNameOrAlias << "has RequiredCols";
@@ -1451,14 +1501,14 @@ public:
         }
 
 //        QSet<stuRelation> UsedJoins;
-//        foreach (stuRelation Relation, this->Table.Relations) {
+//        foreach (stuRelation Relation, this->table().Relations) {
 //            clsTable* ForeignTable = clsTable::Registry[Relation.ReferenceTable];
 //            if (ForeignTable == nullptr)
 //                throw exHTTPInternalServerError("Reference table has not been registered: " + Relation.ReferenceTable);
 
 //            bool Joined = false;
 //            if (this->RequiredCols.isEmpty())
-//                foreach (auto Col, ForeignTable->BaseCols)
+//                foreach (auto Col, ForeignTable.BaseCols)
 //                    this->ORMSelectQueryPreparedItems.Cols.append(makeColName(MainTableName, Col, true, Relation));
 //            else
 //                foreach (auto RequiredCol, this->RequiredCols)
@@ -1623,7 +1673,7 @@ public:
     }
 
 //    clsORMField colByName(const QString& _col) {
-//        return this->Table.SelectableColsMap[_col];
+//        return this->table().SelectableColsMap[_col];
 //    }
 
 public:
@@ -1670,7 +1720,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
         throw exHTTPInternalServerError("Foreign Table is empty.");
 
     if (_foreignTable.indexOf('.') < 0)
-        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->Table.Schema).arg(_foreignTable);
+        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->table().Schema).arg(_foreignTable);
 
     if ((_joinType == enuJoinType::CROSS) || (_on.isEmpty() == false)) {
         //prefix table name with schema
@@ -1698,7 +1748,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
     //find relation definition
     bool RelationFound = false;
     stuRelation Relation("", "", "");
-    foreach (stuRelation Rel, this->JoinTraitData->Owner->Data->Table.Relations) {
+    foreach (stuRelation Rel, this->JoinTraitData->Owner->Data->table().Relations) {
 //        parts = Rel.ReferenceTable.split('.', QString::SkipEmptyParts);
 //        if (parts[parts.length() - 1] == ForeignTable_Name)
 //        qDebug() << "&&&&&&& search relation" << Rel.ReferenceTable << _foreignTable;
@@ -1728,7 +1778,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::join(enuJoinType::Type _joinType
         _alias.length() ? _alias : ForeignTable->Name,
         Relation.ForeignColumn,
         enuConditionOperator::Equal,
-        this->JoinTraitData->Owner->Data->Alias.length() ? this->JoinTraitData->Owner->Data->Alias : this->JoinTraitData->Owner->Data->Table.Name,
+        this->JoinTraitData->Owner->Data->Alias.length() ? this->JoinTraitData->Owner->Data->Alias : this->JoinTraitData->Owner->Data->table().Name,
         Relation.Column
     );
 
@@ -1769,7 +1819,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _jo
         throw exHTTPInternalServerError("Foreign Table is empty.");
 
     if (_foreignTable.indexOf('.') < 0)
-        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->Table.Schema).arg(_foreignTable);
+        _foreignTable = QString("%1.%2").arg(this->JoinTraitData->Owner->Data->table().Schema).arg(_foreignTable);
 
     if (clsTable::Registry.contains(_foreignTable) == false)
         throw exHTTPInternalServerError("Reference table has not been registered: " + _foreignTable);
@@ -1802,20 +1852,22 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _jo
 }
 
 //-- nested -------------------------
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedCrossJoin(ORMSelectQuery& _nestedQuery, const QString _alias)                          { return this->nestedJoin(enuJoinType::CROSS, _nestedQuery, _alias); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedInnerJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::INNER, _nestedQuery, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedLeftJoin (ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::LEFT,  _nestedQuery, _alias, _on); }
-template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedRightJoin(ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::RIGHT, _nestedQuery, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedCrossJoin(const ORMSelectQuery& _nestedQuery, const QString _alias)                          { return this->nestedJoin(enuJoinType::CROSS, _nestedQuery, _alias); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedInnerJoin(const ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::INNER, _nestedQuery, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedLeftJoin (const ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::LEFT,  _nestedQuery, _alias, _on); }
+template <class itmplDerived> itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedRightJoin(const ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) { return this->nestedJoin(enuJoinType::RIGHT, _nestedQuery, _alias, _on); }
 
 template <class itmplDerived>
-itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedJoin(enuJoinType::Type _joinType, ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
+itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedJoin(enuJoinType::Type _joinType, const ORMSelectQuery& _nestedQuery, const QString _alias, const clsCondition& _on) {
     if (_alias.length())
         this->JoinTraitData->Owner->Data->BaseQueryPreparedItems.RenamedCols.append(_alias);
 
-    //for preventing to adding limit in nested queries
-    _nestedQuery.pageSize(0);
+    auto NestedQuery = _nestedQuery;
 
-    QString joinBody = _nestedQuery.buildQueryString({}, false, false, true);
+    //for preventing to adding limit in nested queries
+    NestedQuery.pageSize(0);
+
+    QString joinBody = NestedQuery.buildQueryString({}, false, false, true);
 
     if (SQLPrettyLen)
         joinBody = "(\n"
@@ -1828,7 +1880,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedJoin(enuJoinType::Type _jo
 
     this->JoinTraitData->Joins.append({ _joinType, joinBody, _alias, _on });
 
-    QStringList renCols = _nestedQuery.getRenamedCols();
+    QStringList renCols = NestedQuery.getRenamedCols();
 //    qDebug() << "renCols" << renCols;
     this->JoinTraitData->Owner->addRenamedCols(renCols, _alias);
 
@@ -1850,8 +1902,8 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::joinWith(enuJoinType::Type _join
     //find relation definition
     stuRelation* Relation = nullptr;
 
-    for (QList<stuRelation>::iterator iter = this->JoinTraitData->Owner->Data->Table.Relations.begin();
-         iter != this->JoinTraitData->Owner->Data->Table.Relations.end();
+    for (QList<stuRelation>::iterator iter = this->JoinTraitData->Owner->Data->table().Relations.begin();
+         iter != this->JoinTraitData->Owner->Data->table().Relations.end();
          iter++
     ) {
         stuRelation Rel = *iter;
@@ -1876,13 +1928,13 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::joinWith(enuJoinType::Type _join
     if (ForeignTable == nullptr)
         throw exHTTPInternalServerError(QString("Reference table (%1) has not been registered.").arg(Relation->ReferenceTable));
 
-//    qDebug() << "foreign table found: " << ForeignTable->Name;
+//    qDebug() << "foreign table found: " << ForeignTable.Name;
 
     clsCondition On(
         _alias.length() ? _alias : ForeignTable->Name,
         Relation->ForeignColumn,
         enuConditionOperator::Equal,
-        this->JoinTraitData->Owner->Data->Alias.length() ? this->JoinTraitData->Owner->Data->Alias : this->JoinTraitData->Owner->Data->Table.Name,
+        this->JoinTraitData->Owner->Data->Alias.length() ? this->JoinTraitData->Owner->Data->Alias : this->JoinTraitData->Owner->Data->table().Name,
         Relation->Column
     );
 
@@ -1916,16 +1968,16 @@ public:
         this->IsPrepared = true;
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->Table.Name;
+        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->table().Name;
 
         /****************************************************************************/
         bool StatusColHasCriteria = false;
 
         this->PreparedItems.Where = this->WhereClauses.buildConditionString(
-            this->Owner->Data->Table.Name,
+            this->Owner->Data->table().Name,
             this->Owner->Data->Alias,
-            this->Owner->Data->Table.SelectableColsMap,
-            this->Owner->Data->Table.FilterableColsMap,
+            this->Owner->Data->table().SelectableColsMap,
+            this->Owner->Data->table().FilterableColsMap,
             false,
             this->Owner->Data->BaseQueryPreparedItems.RenamedCols,
             &StatusColHasCriteria);
@@ -1990,10 +2042,10 @@ public:
 //                        Rule += "\n";
                     Rule += LastLogical;
 
-                    stuRelatedORMField relatedORMField = this->Owner->Data->Table.FilterableColsMap.value(PatternMatches.captured(1).trimmed());
+                    stuRelatedORMField relatedORMField = this->Owner->Data->table().FilterableColsMap.value(PatternMatches.captured(1).trimmed());
                     if (relatedORMField.isValid())
                         Rule += makeColName(
-                                    this->Owner->Data->Table.Name,
+                                    this->Owner->Data->table().Name,
                                     this->Owner->Data->Alias,
                                     relatedORMField.Col,
                                     false,
@@ -2066,10 +2118,10 @@ public:
             QStringList Pks = this->PksByPath.split(QRegularExpression("(;|,)"));
             auto PkIt = Pks.constBegin();
             bool Found = false;
-            foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols) {
+            foreach (stuRelatedORMField baseCol, this->Owner->Data->table().AllCols) {
                 if ((baseCol.Relation == InvalidRelation) && baseCol.Col.isPrimaryKey()) {
                     QString ColName = makeColName(
-                                          this->Owner->Data->Table.Name,
+                                          this->Owner->Data->table().Name,
                                           this->Owner->Data->Alias,
                                           baseCol.Col,
                                           false);
@@ -2099,13 +2151,13 @@ public:
         /****************************************************************************/
         //only check for stand alone select query
         QStringList w;
-        foreach (stuRelatedORMField baseCol, this->Owner->Data->Table.AllCols) {
+        foreach (stuRelatedORMField baseCol, this->Owner->Data->table().AllCols) {
             if (baseCol.Relation == InvalidRelation) {
                 if (_checkStatusCol && (StatusColHasCriteria == false) && baseCol.Col.updatableBy() == enuUpdatableBy::__STATUS__)
-                    w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
+                    w.append(QString("%1 != 'R'").arg(makeColName(this->Owner->Data->table().Name, this->Owner->Data->Alias, baseCol.Col, false)));
 
                 if (baseCol.Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
-                    w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->Table.Name, this->Owner->Data->Alias, baseCol.Col, false)));
+                    w.append(QString("%1 = 0").arg(makeColName(this->Owner->Data->table().Name, this->Owner->Data->Alias, baseCol.Col, false)));
             }
         }
 
@@ -2236,9 +2288,9 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::addFilters(const QString& _filt
 
 //        QString MainTableNameOrAlias = this->WhereTraitData->Owner->Data->Alias.length()
 //                                       ? this->WhereTraitData->Owner->Data->Alias
-//                                       : this->WhereTraitData->Owner->Data->Table.Name;
+//                                       : this->WhereTraitData->Owner->Data->table().Name;
 
-//        this->andWhere(clsCondition::parse(Filters, MainTableNameOrAlias, this->WhereTraitData->Owner->Data->Table.FilterableColsMap));
+//        this->andWhere(clsCondition::parse(Filters, MainTableNameOrAlias, this->WhereTraitData->Owner->Data->table().FilterableColsMap));
     }
 
     return (itmplDerived&)*this;
@@ -2275,7 +2327,7 @@ public:
         this->IsPrepared = true;
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->Table.Name;
+        QString MainTableNameOrAlias = this->Owner->Data->Alias.length() ? this->Owner->Data->Alias : this->Owner->Data->table().Name;
 
         /****************************************************************************/
         if (this->GroupByCols.length()) {
@@ -2286,10 +2338,10 @@ public:
 
         /****************************************************************************/
         this->PreparedItems.Having = this->HavingClauses.buildConditionString(
-            this->Owner->Data->Table.Name,
+            this->Owner->Data->table().Name,
             this->Owner->Data->Alias,
-            this->Owner->Data->Table.SelectableColsMap,
-            this->Owner->Data->Table.FilterableColsMap,
+            this->Owner->Data->table().SelectableColsMap,
+            this->Owner->Data->table().FilterableColsMap,
             true,
             this->Owner->Data->BaseQueryPreparedItems.RenamedCols);
     }
@@ -2389,6 +2441,7 @@ ORMSelectQuery::ORMSelectQuery() :
     tmplQueryWhereTrait<ORMSelectQuery>::WhereTraitData->Owner = this;
     tmplQueryGroupAndHavingTrait<ORMSelectQuery>::GroupAndHavingTraitData->Owner = this;
 }
+
 ORMSelectQuery::ORMSelectQuery(const ORMSelectQuery& _other) :
     tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(_other),
     tmplQueryJoinTrait<ORMSelectQuery>(_other),
@@ -2398,11 +2451,21 @@ ORMSelectQuery::ORMSelectQuery(const ORMSelectQuery& _other) :
     tmplQueryWhereTrait<ORMSelectQuery>::WhereTraitData->Owner = this;
     tmplQueryGroupAndHavingTrait<ORMSelectQuery>::GroupAndHavingTraitData->Owner = this;
 }
+
 ORMSelectQuery::ORMSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
     tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(APICALLBOOM_PARAM, _table, _alias),
     tmplQueryJoinTrait<ORMSelectQuery>(this),
     tmplQueryWhereTrait<ORMSelectQuery>(this),
-    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this) { ; }
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this)
+{ ; }
+
+ORMSelectQuery::ORMSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias) :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(APICALLBOOM_PARAM, _fromQuery, _alias),
+    tmplQueryJoinTrait<ORMSelectQuery>(this),
+    tmplQueryWhereTrait<ORMSelectQuery>(this),
+    tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this)
+{ ; }
+
 ORMSelectQuery::~ORMSelectQuery() { ; }
 
 /***********************\
@@ -2628,7 +2691,7 @@ into_option: {
 */
 
 void ORMSelectQuery::prepare(Q_DECL_UNUSED QVariantMap _args, Q_DECL_UNUSED bool _selectOne, Q_DECL_UNUSED bool _reportCount, Q_DECL_UNUSED bool _checkStatusCol) {
-    //this->Data->Table.prepareFiltersList();
+    //this->Data->table().prepareFiltersList();
     this->Data->prepare(0, false);
     this->WhereTraitData->prepare(_checkStatusCol);
     this->GroupAndHavingTraitData->prepare();
@@ -2830,18 +2893,18 @@ QVariantMap ORMSelectQuery::one(QVariantMap _args) {
 
     QJsonDocument Result;
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     if (this->Data->CahceTime > 0)
         Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                            .toJson(true, this->Data->Table.Converters);
+                 .toJson(true, this->Data->table().Converters);
     else
         Result = DAC.execQuery("", QueryString)
-                            .toJson(true, this->Data->Table.Converters);
+                 .toJson(true, this->Data->table().Converters);
 
     if (Result.object().isEmpty())
 #ifdef QT_DEBUG
-        throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(PrependSchema(this->Data->Table.Schema)).arg(this->Data->Table.Name));
+        throw exHTTPNotFound(QString("No item could be found in table (%1.%2)").arg(PrependSchema(this->Data->table().Schema)).arg(this->Data->table().Name));
 #else
         throw exHTTPNotFound("No item could be found");
 #endif
@@ -2892,16 +2955,16 @@ QVariantList ORMSelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, qui
                                  << endl << "-- Query:" << endl << QueryString << endl;
 #endif
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     QJsonDocument Result;
 
     if (this->Data->CahceTime > 0)
         Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                            .toJson(false, this->Data->Table.Converters);
+                 .toJson(false, this->Data->table().Converters);
     else
         Result = DAC.execQuery("", QueryString)
-                            .toJson(false, this->Data->Table.Converters);
+                 .toJson(false, this->Data->table().Converters);
 
     return Result.toVariant().toList();
 }
@@ -2919,20 +2982,20 @@ TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _ma
     QJsonDocument ResultRows;
     QJsonDocument ResultTotalRows;
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     if (this->Data->CahceTime > 0) {
         ResultTotalRows = DAC.execQueryCacheable(this->Data->CahceTime, "", CountingQueryString)
                                      .toJson(true);
 
         ResultRows = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
-                                .toJson(false, this->Data->Table.Converters);
+                                .toJson(false, this->Data->table().Converters);
     } else {
         ResultTotalRows = DAC.execQuery("", CountingQueryString)
                                      .toJson(true);
 
         ResultRows = DAC.execQuery("", QueryString)
-                                .toJson(false, this->Data->Table.Converters);
+                                .toJson(false, this->Data->table().Converters);
     }
 
     TAPI::stuTable Result;
@@ -2969,6 +3032,9 @@ public:
     clsORMCreateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
         clsBaseQueryData<ORMCreateQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
 
+    clsORMCreateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {}) :
+        clsBaseQueryData<ORMCreateQuery>(APICALLBOOM_PARAM, _fromQuery, _alias) { ; }
+
 //    clsORMCreateQueryData(const clsORMCreateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMCreateQueryData() { ; }
 
@@ -2982,7 +3048,7 @@ public:
         clsBaseQueryData<ORMCreateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->table().Name;
 
         /****************************************************************************/
         if (this->Cols.isEmpty())
@@ -2995,7 +3061,7 @@ public:
         //1- check Cols by BaseCols
         foreach (auto col, this->Cols) {
             bool found = false;
-            foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
+            foreach (stuRelatedORMField baseCol, this->table().AllCols) {
 //                qDebug() << "compare" << col << baseCol.name();
                 if (col == baseCol.Col.name()) {
                     if ((baseCol.Col.defaultValue() == QInvalid)
@@ -3006,7 +3072,7 @@ public:
 
                     providedBaseCols.append(baseCol.Col);
 
-                    this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                    this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->table().Name, this->Alias, baseCol.Col, false));
 
                     found = true;
 
@@ -3014,11 +3080,11 @@ public:
                 }
             }
             if (found == false)
-                throw exQueryBuilderColumnNotFound("Column <" + col + "> not found in table <" + this->Table.Name + "> base columns");
+                throw exQueryBuilderColumnNotFound("Column <" + col + "> not found in table <" + this->table().Name + "> base columns");
         }
 
         //2- check BaseCols (required, ...)
-        foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
+        foreach (stuRelatedORMField baseCol, this->table().AllCols) {
             if (baseCol.Relation == InvalidRelation) {
                 if (this->Cols.contains(baseCol.Col.name()) == false) {
                     if (baseCol.Col.defaultValue() == QRequired)
@@ -3026,7 +3092,7 @@ public:
 
                     if (baseCol.Col.updatableBy() == enuUpdatableBy::__CREATOR__) {
     //                    extraBaseCols.append(baseCol);
-                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->table().Name, this->Alias, baseCol.Col, false));
                         extraBaseColsValues.append(baseCol.Col.toDB(_currentUserID));
                     } else if (baseCol.Col.defaultValue() == QNow) {
                         //NOW() is defined as default value in db schema
@@ -3039,7 +3105,7 @@ public:
                              && (baseCol.Col.defaultValue() != QDBInternal)
                         ) {
     //                    qDebug() << "********************" << makeColName(MainTableNameOrAlias, baseCol, false) << baseCol.defaultValue() << baseCol.toDB(baseCol.defaultValue());
-                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->Table.Name, this->Alias, baseCol.Col, false));
+                        this->ORMCreateQueryPreparedItems.Cols.append(makeColName(this->table().Name, this->Alias, baseCol.Col, false));
                         extraBaseColsValues.append(baseCol.Col.toDB(baseCol.Col.defaultValue()));
                     }
                 }
@@ -3398,13 +3464,13 @@ QString getInvalidatedAtQueryString(clsTable& _table, bool _makeWithUniqeIndex, 
 quint64 ORMCreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _useBinding) {
     stuBoundQueryString BoundQueryString = this->buildQueryString(_currentUserID, _args, _useBinding);
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     ///@TODO: start transaction
 
     QT_TRY {
         //1: invalidate OLD removed row(s)
-        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, true, true);
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->table(), true, true);
         if (invalidateQueryString.length()) {
             if (this->Data->Select.isValid())
                 throw exQueryBuilder("multi values for insert query with select clause can not be used in tables with `invalidated at` field");
@@ -3412,7 +3478,7 @@ quint64 ORMCreateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
             else {
                 foreach (QVariantMap oneRecord, this->Data->Values) {
                     QString query = invalidateQueryString;
-                    foreach (stuRelatedORMField baseCol, this->Data->Table.AllCols) {
+                    foreach (stuRelatedORMField baseCol, this->Data->table().AllCols) {
                         if (baseCol.Relation == InvalidRelation) {
                         //ignore statusFieldName in update conditions
 //                        if (statusFieldName.length() && (Col.name() == statusFieldName))
@@ -3494,6 +3560,9 @@ public:
     clsORMUpdateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
         clsBaseQueryData<ORMUpdateQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
 
+    clsORMUpdateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {}) :
+        clsBaseQueryData<ORMUpdateQuery>(APICALLBOOM_PARAM, _fromQuery, _alias) { ; }
+
 //    clsORMUpdateQueryData(const clsORMUpdateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMUpdateQueryData() { ; }
 
@@ -3506,7 +3575,7 @@ public:
         clsBaseQueryData<ORMUpdateQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->table().Name;
 
         /****************************************************************************/
         if (this->SetMaps.isEmpty())
@@ -3539,16 +3608,16 @@ public:
             QString key = Col.first;
             QVariant val = Col.second;
 
-            stuRelatedORMField& relatedORMField = this->Table.SelectableColsMap[key];
+            stuRelatedORMField& relatedORMField = this->table().SelectableColsMap[key];
             if (relatedORMField.isValid() == false) {
-                qDebug() << "valid columns: " << this->Table.SelectableColsMap.keys().join(", ");
+                qDebug() << "valid columns: " << this->table().SelectableColsMap.keys().join(", ");
                 throw exQueryBuilderColumnNotFound("Column <" + key + "> not found");
             }
 
             if (relatedORMField.Col.isReadOnly())
                 throw exHTTPInternalServerError("Invalid change to read-only column <" + key + ">");
 
-            QString colName = makeColName(this->Table.Name, this->Alias, relatedORMField.Col, false);
+            QString colName = makeColName(this->table().Name, this->Alias, relatedORMField.Col, false);
 
             if (val.userType() == QMetaType::QStringList) {
                 QStringList l = val.value<QStringList>();
@@ -3579,12 +3648,12 @@ public:
             }
         }
 
-        foreach (stuRelatedORMField baseCol, this->Table.AllCols) {
+        foreach (stuRelatedORMField baseCol, this->table().AllCols) {
             if ((baseCol.Relation == InvalidRelation)
                 && (providedCols.contains(baseCol.Col.name()) == false)
                 && (baseCol.Col.updatableBy() == enuUpdatableBy::__UPDATER__ )
             ) {
-                auto colName = makeColName(this->Table.Name, this->Alias, baseCol.Col, false);
+                auto colName = makeColName(this->table().Name, this->Alias, baseCol.Col, false);
 
                 if (_useBinding == false)
                     this->ORMUpdateQueryPreparedItems.SetCols.append(QString("%1%2%3").arg(colName).arg(equalSign).arg(baseCol.Col.toDB(_currentUserID).toString()));
@@ -3754,7 +3823,7 @@ quint64 ORMUpdateQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
     }
 #endif
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     clsDACResult Result = DAC.execQuery(
                               "",
@@ -3779,6 +3848,9 @@ public:
     clsORMDeleteQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {}) :
         clsBaseQueryData<ORMDeleteQuery>(APICALLBOOM_PARAM, _table, _alias) { ; }
 
+    clsORMDeleteQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {}) :
+        clsBaseQueryData<ORMDeleteQuery>(APICALLBOOM_PARAM, _fromQuery, _alias) { ; }
+
 //    clsORMDeleteQueryData(const clsORMDeleteQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMDeleteQueryData() { ; }
 
@@ -3792,7 +3864,7 @@ public:
         clsBaseQueryData<ORMDeleteQuery>::prepare(_currentUserID, _useBinding );
 
         /****************************************************************************/
-        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->Table.Name;
+        QString MainTableNameOrAlias = this->Alias.length() ? this->Alias : this->table().Name;
 
         /****************************************************************************/
         this->ORMDeleteQueryPreparedItems.Targets = this->Targets;
@@ -3915,15 +3987,15 @@ QString ORMDeleteQuery::buildQueryString(quint64 _currentUserID, QVariantMap _ar
 quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool _realDelete) {
     QString QueryString = this->buildQueryString(_currentUserID, _args);
 
-    clsDAC DAC(this->Data->Table.domain(), PrependSchema(this->Data->Table.Schema));
+    clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
     ///@TODO: start transaction
 
     QT_TRY {
-        QString statusFieldName = this->Data->Table.getStatusColumnName();
+        QString statusFieldName = this->Data->table().getStatusColumnName();
 
         //1: invalidate OLD removed row
-        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->Table, false, false);
+        QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->table(), false, false);
 
 //        qDebug() << "-------------" << invalidateQueryString;
 
@@ -3934,7 +4006,7 @@ quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
 
         //2: soft delete this
         QT_TRY {
-            quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->Table)
+            quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->table())
                     .set(statusFieldName, "Removed")
                     .where(this->WhereTraitData->WhereClauses)
                     .setPksByPath(this->WhereTraitData->PksByPath)

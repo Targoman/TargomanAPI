@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     try {
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
     } catch (exTargomanBase &e) {
         ++FailedTests;
         qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());

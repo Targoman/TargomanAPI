@@ -58,6 +58,7 @@ clsTable::clsTable(const QString& _domain,
                    const QList<stuDBIndex>& _indexes,
                    const QVariantMap& _dbProperties) :
     BaseCols(_cols),
+    IsValid(true),
     Schema(_schema),
     Name(_name),
     Domain(_domain),
