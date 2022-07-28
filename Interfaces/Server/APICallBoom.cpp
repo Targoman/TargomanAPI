@@ -73,8 +73,12 @@ public:
     QString AcceptLanguage;
 };
 
-intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) : Data(new APICallBoomData(_fnTiming)) { ; }
-intfAPICallBoom::intfAPICallBoom(const intfAPICallBoom& _other) : Data(_other.Data) { ; }
+intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
+    Data(new APICallBoomData(_fnTiming)) { ; }
+
+intfAPICallBoom::intfAPICallBoom(const intfAPICallBoom& _other) :
+    Data(_other.Data) { ; }
+
 intfAPICallBoom::~intfAPICallBoom() { ; }
 
 void intfAPICallBoom::initialize(

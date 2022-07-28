@@ -133,11 +133,14 @@ void test_overloaded_function() {
 }
 */
 
+auto fnTiming = [](Q_DECL_UNUSED const QString &_name, Q_DECL_UNUSED const QString &_desc, Q_DECL_UNUSED quint64 _nanoSecs) {
+};
+
 class testQueryBuilders: public QObject
 {
     Q_OBJECT
 
-    APICALLBOOM_TYPE_NO_JWT_DECL APICALLBOOM_PARAM;
+    APICALLBOOM_TYPE_NO_JWT_DECL APICALLBOOM_PARAM = APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming);
     TestTable1 t1;
     TestTable2 t2;
 //    TAPI::JWT_t JWT;
