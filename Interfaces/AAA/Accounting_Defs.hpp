@@ -239,7 +239,7 @@ namespace tblAccountUserAssetsBase {
 }
 
 namespace tblAccountUserAssetsFilesBase {
-    constexpr char Name[] = "tblAccountUserAssetsFiles";
+    constexpr char Name[] = "tblAccountUserAssets_files";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(uasuflID);
@@ -590,7 +590,9 @@ namespace tblAccountSaleablesTranslateBase {
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
-            return {};
+            return {
+                //<Col                      Reference Table                             ForeignCol                              Rename     LeftJoin
+            };
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -629,7 +631,10 @@ namespace tblAccountSaleablesFilesBase {
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
-            return {};
+            return {
+                //<Col                      Reference Table                             ForeignCol                              Rename      LeftJoin
+                { Fields::slf_slbID,        R(_schema, tblAccountSaleablesBase::Name),  tblAccountSaleablesBase::Fields::slbID, "",         true },
+            };
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -680,13 +685,12 @@ namespace tblAccountUserAssetsBase {
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
-                ///<  Col                                  Reference Table                            ForeignCol                      Rename     LeftJoin
-                { Fields::uas_usrID, R(AAASchema, tblUser::Name),               tblUser::Fields::usrID,                 "Owner_" },
+                //<Col                      Reference Table                             ForeignCol                              Rename     LeftJoin
+                { Fields::uas_usrID,        R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,                 "Owner_" },
                 { Relation::Saleable,
-                    { Fields::uas_slbID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slbID, "",       true } },
-                { Fields::uas_cpnID, R(_schema, tblAccountCouponsBase::Name),   tblAccountCouponsBase::Fields::cpnID,   "",       true },
-                //Voucher is not accessible as it is in another schema
-                //{tblAccountUserAssets::Fields::uas_vchID,    R(AAASchema,tblVoucher::Name),  tblVoucher::Fields::vchID,    "", true},
+                    { Fields::uas_slbID,    R(_schema, tblAccountSaleablesBase::Name),  tblAccountSaleablesBase::Fields::slbID, "",         true } },
+                { Fields::uas_cpnID,        R(_schema, tblAccountCouponsBase::Name),    tblAccountCouponsBase::Fields::cpnID,   "",         true },
+//                { Fields::uas_vchID,        R(AAASchema, tblVoucher::Name),             tblVoucher::Fields::vchID,              "",         true},
             };
         };
 

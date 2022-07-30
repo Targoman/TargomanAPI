@@ -516,16 +516,16 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
     if (_isRoot) {
         Query.addCols(this->SelectableColumnNames())
 //            LEFT JOIN (
-//            SELECT slf_slbID
-//            , SUM(slfMinCount) AS MandatoryFilesCount
-//            FROM tblAccountSaleablesFiles slf
-//            WHERE slfMinCount > 0
-//            GROUP BY slf_slbID
-//            ) tmpNeededFiles
-//            ON tmpNeededFiles.slf_slbID = uas.uas_slbID
+//               SELECT slf_slbID
+//                    , SUM(slfMinCount) AS MandatoryFilesCount
+//                 FROM tblAccountSaleablesFiles
+//                WHERE slfMinCount > 0
+//             GROUP BY slf_slbID
+//                      ) tmpNeededFiles
+//                   ON tmpNeededFiles.slf_slbID = tblAccountUserAssets.uas_slbID
 
              .nestedLeftJoin(intfAccountSaleablesFiles::myInstance->GetSelectQuery(APICALLBOOM_PARAM, "", false)
-                             .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID)
+                             .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID, tblAccountSaleablesFilesBase::Fields::slf_slbID)
                              .addCol(enuAggregation::SUM, tblAccountSaleablesFilesBase::Fields::slfMinCount, "MandatoryFilesCount")
                              .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount, enuConditionOperator::Greater, 0 })
                              .groupBy(tblAccountSaleablesFilesBase::Fields::slf_slbID)
@@ -534,37 +534,36 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                                  enuConditionOperator::Equal,
                                  tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uas_slbID }
                              )
-             .addCol(DBExpression::VALUE("IFNULL(SUM(tmpNeededFiles.MandatoryFilesCount), 0)"), "MandatoryFilesCount")
+            .addCol(QString("tmpNeededFiles.") + tblAccountSaleablesFilesBase::Fields::slf_slbID)
+            .addCol(DBExpression::VALUE("IFNULL(tmpNeededFiles.MandatoryFilesCount, 0)"), "MandatoryFilesCount")
 
 //            LEFT JOIN (
-//            SELECT
-//            uasufl_uasID
-//            , SUM(LEAST(slfMinCount, ProvidedFilesCount)) AS ProvidedMandatoryFilesCount
+//               SELECT uasufl_uasID
+//                    , SUM(LEAST(slfMinCount, ProvidedFilesCount)) AS ProvidedMandatoryFilesCount
 
-//            FROM (
-//            SELECT
-//            uasufl_uasID
-//            , uasufl_slfID
-//            , slfMinCount
-//            , COUNT(*) AS ProvidedFilesCount
-//            FROM tblAccountUserAssets_files uasufl
-//            INNER JOIN tblAccountSaleablesFiles slf
-//            ON slf.slfID = uasufl.uasufl_slfID
-//            WHERE slfMinCount > 0
-//            GROUP BY uasufl_uasID
-//            , uasufl_slfID
-//            ) t1
+//                 FROM (
+//               SELECT uasufl_uasID
+//                    , uasufl_slfID
+//                    , slfMinCount
+//                    , COUNT(*) AS ProvidedFilesCount
+//                 FROM tblAccountUserAssets_files
+//           INNER JOIN tblAccountSaleablesFiles
+//                   ON tblAccountSaleablesFiles.slfID = tblAccountUserAssets_files.uasufl_slfID
+//                WHERE slfMinCount > 0
+//             GROUP BY uasufl_uasID
+//                    , uasufl_slfID
+//                      ) t1
 
-//            GROUP BY uasufl_uasID
-//            ) tmpProvidedFiles
-//            ON tmpProvidedFiles.uasufl_uasID = uas.uasID
+//             GROUP BY uasufl_uasID
+//                      ) tmpProvidedFiles
+//                   ON tmpProvidedFiles.uasufl_uasID = tblAccountUserAssets.uasID
 
             .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
                                            intfAccountUserAssetsFiles::myInstance->GetSelectQuery(APICALLBOOM_PARAM, "", false)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_slfID)
                                            .addCol(tblAccountSaleablesFilesBase::Fields::slfMinCount)
-                                           .addCol(enuAggregation::COUNT, "*", "ProvidedFilesCount")
+                                           .addCol(enuAggregation::COUNT, tblAccountUserAssetsFilesBase::Fields::uasuflID, "ProvidedFilesCount")
                                            .innerJoin(tblAccountSaleablesFilesBase::Name)
                                            .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount,
                                                     enuConditionOperator::Greater,
@@ -573,10 +572,9 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                                                         tblAccountUserAssetsFilesBase::Fields::uasufl_uasID,
                                                         tblAccountUserAssetsFilesBase::Fields::uasufl_slfID
                                                     })
-
                                            ,
                                            "t1")
-                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
+                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID, tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                             .addCol(DBExpression::VALUE("SUM(LEAST(slfMinCount, ProvidedFilesCount))"), "ProvidedMandatoryFilesCount")
                             .groupBy(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                             , "tmpProvidedFiles"
@@ -584,6 +582,7 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                                 enuConditionOperator::Equal,
                                 tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uasID }
                             )
+            .addCol(DBExpression::VALUE("IFNULL(tmpProvidedFiles.ProvidedMandatoryFilesCount, 0)"), "ProvidedMandatoryFilesCount")
         ;
     }
 

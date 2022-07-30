@@ -350,9 +350,16 @@ class tmplBaseQuery
 {
 public:
     tmplBaseQuery();
-    tmplBaseQuery(const tmplBaseQuery<itmplDerived, itmplData>& _other);
-    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
-    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {});
+    tmplBaseQuery(itmplDerived* _derived,
+                  const tmplBaseQuery<itmplDerived, itmplData>& _other);
+    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+                  itmplDerived* _derived,
+                  clsTable& _table,
+                  const QString& _alias = {});
+    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+                  itmplDerived* _derived,
+                  const ORMSelectQuery& _fromQuery,
+                  const QString& _alias = {});
     virtual ~tmplBaseQuery();
     bool isValid();
 
@@ -505,7 +512,8 @@ public:
     ORMSelectQuery();
     ORMSelectQuery(const ORMSelectQuery& _other);
     ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
-    ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias = {});
+    //alias is mandatory for nested from query
+    ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias /*= {}*/);
     virtual ~ORMSelectQuery();
 
     virtual ORMSelectQuery& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs) {

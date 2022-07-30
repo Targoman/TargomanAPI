@@ -1080,6 +1080,54 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
         }
     }
 
+    void select_nested_select() {
+        QT_TRY {
+            ORMSelectQuery query = t1.GetSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+                .addCols(QStringList({
+                    "colA1",
+                }))
+                .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
+                                               t2.GetSelectQuery(APICALLBOOM_PARAM, "alias_t2")
+                                               , "tmp_t2"
+                                               )
+                                , "nested_t2"
+                                , { "nested_t2", "colB2", enuConditionOperator::Equal, "alias_t1", "colB1" }
+                                )
+            ;
+
+            QString qry = query.buildQueryString({}, true, false, false);
+
+            if (SQLPrettyLen)
+                qDebug().nospace().noquote() << endl << endl << qry << endl;
+
+//            QCOMPARE("\n" + qry + "\n", R"(
+//            SELECT alias_t1.colA1
+//                 , alias_t1.colB1 AS `alias_colB1`
+//                 , COUNT(IF (alias_t1.colB1 = 123,1,NULL)) AS `countif_colB`
+//              FROM test.t1 alias_t1
+//             WHERE alias_t1.status1 != 'R'
+//               AND alias_t1._InvalidatedAt = 0
+//          GROUP BY colA1
+//                 , slbStatus
+//            HAVING alias_t1.colB1 = 123
+//               AND alias_t1.colC1 LIKE 'test it'
+//               XOR (
+//                   alias_t1.colF1 = ''
+//                OR alias_colB1 = 106
+//                   )
+//          ORDER BY colA1
+//                 , colB1 DESC
+//             LIMIT 2000,100
+//         UNION ALL
+//            SELECT t2.colA2
+//              FROM test.t2
+//             WHERE t2._InvalidatedAt = 0
+//)");
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     /***************************************************************************************/
     /* CreateQuery *************************************************************************/
     /***************************************************************************************/

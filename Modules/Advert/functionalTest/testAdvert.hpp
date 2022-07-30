@@ -55,7 +55,7 @@ class testAdvert : public clsBaseTest
 public:
     testAdvert(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
-    QString LastRandomNumber = "998877998877";
+    QString LastRandomNumber; // = "998877998877";
     QString CreatedUserEmail;
     QString CreatedAdminEmail;
 
@@ -182,17 +182,19 @@ private:
             }
         }
 
-        try {
-            QVariant Result = callAdminAPI(
-                RESTClientHelper::POST,
-                "Account/fixtureCleanup",
-                {},
-                {
-                    { "random", this->LastRandomNumber },
-                });
+        if (this->LastRandomNumber.isEmpty() == false) {
+            try {
+                QVariant Result = callAdminAPI(
+                    RESTClientHelper::POST,
+                    "Account/fixtureCleanup",
+                    {},
+                    {
+                        { "random", this->LastRandomNumber },
+                    });
 
-        } catch (std::exception &_exp) {
-            TargomanDebug(5) << _exp.what();
+            } catch (std::exception &_exp) {
+                TargomanDebug(5) << _exp.what();
+            }
         }
 
     }
@@ -201,21 +203,6 @@ private slots:
     /***************************************************************************************/
     /* tests *******************************************************************************/
     /***************************************************************************************/
-    void getAccountProducts_with_translate() {
-        QVariant Result = callGuestAPI(
-            RESTClientHelper::GET,
-            "Advert/AccountProducts"
-        );
-    }
-
-    void getAccountSaleable_join_product_with_translate() {
-        QVariant Result = callGuestAPI(
-            RESTClientHelper::GET,
-            "Advert/AccountSaleables"
-        );
-    }
-
-//private:
     void setupAccountFixture() {
         QT_TRY {
             QVariant Result = callAdminAPI(
@@ -223,12 +210,12 @@ private slots:
                 "Account/fixtureSetup",
                 {},
                 {
-                    { "random", this->LastRandomNumber },
+                    { "random", 1 },
                 });
 
             QVERIFY(Result.isValid());
 
-//            this->LastRandomNumber = Result.toMap().value("Random").toString();
+            this->LastRandomNumber = Result.toMap().value("Random").toString();
 
             this->CreatedUserEmail = Result.toMap().value("User").toMap().value("email").toString();
             gUserID = Result.toMap().value("User").toMap().value("usrID").toULongLong();
@@ -276,6 +263,20 @@ private slots:
     }
 
     /***************************************************/
+    void getAccountProducts_with_translate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountProducts"
+        );
+    }
+
+    void getAccountSaleable_join_product_with_translate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountSaleables"
+        );
+    }
+
     void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
@@ -1304,6 +1305,23 @@ private slots:
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
             }
+        }
+    }
+
+    void get_userassets() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::GET,
+                "Advert/AccountUserAssets",
+                {},
+                {
+                }
+            );
+
+//            QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
 
