@@ -149,8 +149,8 @@ void clsRequestHandler::process(const QString& _api) {
                         static auto decodePercentEncoding = [](QByteArray& _value) {
                             _value = _value.replace("+"," ");
                             QUrl URL = QUrl::fromPercentEncoding("http://127.0.0.1/?key=" + _value);
-                            _value=URL.query(QUrl::FullyDecoded).toUtf8();
-                            _value=_value.mid(_value.indexOf('=') + 1);
+                            _value = URL.query(QUrl::FullyDecoded).toUtf8();
+                            _value = _value.mid(_value.indexOf('=') + 1);
                             return _value;
                         };
 

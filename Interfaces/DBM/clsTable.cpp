@@ -58,13 +58,15 @@ clsTable::clsTable(const QString& _domain,
                    const QList<stuDBIndex>& _indexes,
                    const QVariantMap& _dbProperties) :
     BaseCols(_cols),
+    IsValid(true),
     Schema(_schema),
     Name(_name),
     Domain(_domain),
     Relations(_relations),
     Indexes(_indexes),
     DBProperties(_dbProperties),
-    CountOfPKs(0) {
+    CountOfPKs(0)
+{
     foreach (auto Col, this->BaseCols) {
         if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
             this->addDBProperty(

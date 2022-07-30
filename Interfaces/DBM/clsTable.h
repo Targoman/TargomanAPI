@@ -86,6 +86,10 @@ protected:
     };
 
 public:
+    clsTable() {
+        this->IsValid = false;
+    }
+
     clsTable(const QString& _domain,
              const QString& _schema,
              const QString& _name,
@@ -199,6 +203,7 @@ public:
     const QVariant getDBProperty(const QString& _key);
     const QString getStatusColumnName();
 
+    bool isValid() const { return this->IsValid; }
     const QString schema() const;
     const QString name() const;
     const QString nameWithSchema() const;
@@ -224,6 +229,7 @@ private:
     QList<clsORMField> BaseCols;
 
 protected:
+    bool IsValid;
     QString Schema;
     QString Name;
     QString Domain;

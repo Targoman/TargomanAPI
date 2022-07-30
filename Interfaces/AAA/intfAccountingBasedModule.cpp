@@ -1171,7 +1171,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     QVariantMap DiscountInfo = this->AccountCoupons->GetSelectQuery(APICALLBOOM_PARAM)
         .addCols(this->AccountCoupons->SelectableColumnNames())
 
-        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM, "", false)
                   .addCols({
                                tblAccountUserAssetsBase::Fields::uas_cpnID,
                                tblAccountUserAssetsBase::Fields::uas_vchID,
@@ -1190,7 +1190,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
         )
         .addCol("tmp_cpn_count._discountUsedCount")
 
-        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM, "", false)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
                   .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
