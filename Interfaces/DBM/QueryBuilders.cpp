@@ -1932,7 +1932,6 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::nestedJoin(enuJoinType::Type _jo
     this->JoinTraitData->Joins.append({ _joinType, joinBody, _alias, _on });
 
     QStringList renCols = NestedQuery.getRenamedCols();
-//    qDebug() << "renCols" << renCols;
     this->JoinTraitData->Owner->addRenamedCols(renCols, _alias);
 
     return (itmplDerived&)*this;

@@ -65,7 +65,8 @@ clsTable::clsTable(const QString& _domain,
     Relations(_relations),
     Indexes(_indexes),
     DBProperties(_dbProperties),
-    CountOfPKs(0) {
+    CountOfPKs(0)
+{
     foreach (auto Col, this->BaseCols) {
         if (Col.name() == ORM_INVALIDATED_AT_FIELD_NAME)
             this->addDBProperty(
