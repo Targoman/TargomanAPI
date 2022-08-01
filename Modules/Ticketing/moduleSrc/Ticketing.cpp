@@ -300,7 +300,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
            { "body", FixtureHelper::MakeRandomizeName(_random, " ", "ticket", "body") },
        },
        {
-//           { "file", "../../README.md" },
+//           { "file_1", "../../README.md" },
        }
     );
     quint32 TicketID = res.toMap().value("id").toUInt();
@@ -320,7 +320,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
             { "inReplyTicketID", TicketID },
         },
         {
-//            { "file", "../../README.md" },
+//            { "file_1", "../../README.md" },
         }
     );
     quint32 Reply1TicketID = res.toMap().value("id").toUInt();
@@ -340,7 +340,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
             { "inReplyTicketID", Reply1TicketID },
         },
         {
-//            { "file", "../../README.md" },
+//            { "file_1", "../../README.md" },
         }
     );
 //    quint32 Reply2TicketID = res.toMap().value("id").toUInt();

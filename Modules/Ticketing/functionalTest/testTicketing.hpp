@@ -169,7 +169,7 @@ private slots:
                     { "body", "this is ticket body" },
                 },
                 {
-                    { "file", "../../README.md" },
+                    { "file_1", "../../README.md" },
                 }
             );
 
@@ -198,7 +198,7 @@ private slots:
                     { "inReplyTicketID", this->MainTicketID },
                 },
                 {
-                    { "file", "../../README.md" },
+                    { "file_1", "../../README.md" },
                 }
             );
 
@@ -227,7 +227,7 @@ private slots:
                     { "inReplyTicketID", this->Reply1TicketID },
                 },
                 {
-                    { "file", "../../README.md" },
+                    { "file_1", "../../README.md" },
                 }
             );
 
