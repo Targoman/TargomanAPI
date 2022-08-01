@@ -28,6 +28,19 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuWalletTransactionSt
 
 namespace Targoman::API::AccountModule::ORM {
 
+/*
+SELECT *
+FROM tblWalletsTransactions
+LEFT JOIN tblWalletsBalanceHistory
+ON tblWalletsBalanceHistory.wbl_wltID = tblWalletsTransactions.wltID
+LEFT JOIN tblVoucher
+ON tblVoucher.vchID = tblWalletsTransactions.wlt_vchID
+LEFT JOIN tblUserWallets
+ON tblUserWallets.walID = tblWalletsTransactions.wlt_walID
+ORDER BY wlt_walID, wltID -- , wltDateTime
+-- wlt_walID, wltID
+*/
+
 /*****************************************************************\
 |* WalletTransactions ********************************************|
 \*****************************************************************/

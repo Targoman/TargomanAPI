@@ -142,13 +142,18 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     quint32 _serviceID,
     quint64 _targetUserID,
     quint32 _unitID,
-    const TAPI::stuFileInfo &_file
+    const TAPI::stuFileInfo &_file_1,
+    const TAPI::stuFileInfo &_file_2,
+    const TAPI::stuFileInfo &_file_3,
+    const TAPI::stuFileInfo &_file_4
 )) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
-    if (_file.Size > 0)
-        Files.append(_file);
+    if (_file_1.Size > 0) Files.append(_file_1);
+    if (_file_2.Size > 0) Files.append(_file_2);
+    if (_file_3.Size > 0) Files.append(_file_3);
+    if (_file_4.Size > 0) Files.append(_file_4);
 
     quint64 ID = this->insertTicket(
                      APICALLBOOM_PARAM,
@@ -174,7 +179,10 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
     quint32 _serviceID,
     quint64 _inReplyTicketID,
-    const TAPI::stuFileInfo &_file
+    const TAPI::stuFileInfo &_file_1,
+    const TAPI::stuFileInfo &_file_2,
+    const TAPI::stuFileInfo &_file_3,
+    const TAPI::stuFileInfo &_file_4
 )) {
     Authorization::checkPriv(APICALLBOOM_PARAM, {});
 
@@ -186,8 +194,10 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
         throw exHTTPBadRequest("Message and Broadcast tickets must be sent via newMessage method");
 
     TAPI::Files_t Files;
-    if (_file.Size > 0)
-        Files.append(_file);
+    if (_file_1.Size > 0) Files.append(_file_1);
+    if (_file_2.Size > 0) Files.append(_file_2);
+    if (_file_3.Size > 0) Files.append(_file_3);
+    if (_file_4.Size > 0) Files.append(_file_4);
 
     quint64 ID = this->insertTicket(
                      APICALLBOOM_PARAM,

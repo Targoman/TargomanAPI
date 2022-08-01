@@ -132,13 +132,15 @@ struct stuFileInfo {
   static stuFileInfo fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
 };
 
-class Files_t : public QList<stuFileInfo>{
+class Files_t : public QList<stuFileInfo>
+{
 public:
     QVariant toVariant() const;
     Files_t& fromVariant(const QVariant& _value, const QByteArray& _paramName = {});
 };
 
-class RawData_t {
+class RawData_t
+{
 public:
     RawData_t() = default;
     ~RawData_t() = default;
@@ -154,7 +156,8 @@ private:
     QByteArray Data;
 };
 
-class FileData_t {
+class FileData_t
+{
 public:
     FileData_t() = default;
     ~FileData_t() = default;
@@ -170,7 +173,8 @@ private:
 //    QString Mime;
 };
 
-class ResponseRedirect_t {
+class ResponseRedirect_t
+{
 public:
     ResponseRedirect_t() = default;
     ~ResponseRedirect_t() = default;
