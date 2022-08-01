@@ -76,7 +76,10 @@ private slots:
             quint32 _serviceID,
             quint64 _targetUserID = 0,
             quint32 _unitID = 0,
-            const TAPI::stuFileInfo &_file = {}
+            const TAPI::stuFileInfo &_file_1 = {},
+            const TAPI::stuFileInfo &_file_2 = {},
+            const TAPI::stuFileInfo &_file_3 = {},
+            const TAPI::stuFileInfo &_file_4 = {}
         ),
         "create new message targeting a user or all users (if target user is 0)"
     )
@@ -90,7 +93,10 @@ private slots:
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
             quint32 _serviceID,
             quint64 _inReplyTicketID = 0,
-            const TAPI::stuFileInfo &_file = {}
+            const TAPI::stuFileInfo &_file_1 = {},
+            const TAPI::stuFileInfo &_file_2 = {},
+            const TAPI::stuFileInfo &_file_3 = {},
+            const TAPI::stuFileInfo &_file_4 = {}
         ),
         "create a new/reply feedback with"
     )
