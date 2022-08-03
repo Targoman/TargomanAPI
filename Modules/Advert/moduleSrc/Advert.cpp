@@ -313,42 +313,19 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- product --------------------------------------
     QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
 
-    QVariantMap ProductValues = {
-        { tblAccountProductsBase::Fields::prdCode,          ProductCode },
-        { tblAccountProductsBase::Fields::prdName,          FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
-        { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
-        { tblAccountProductsBase::Fields::prd_untID,        1 },
-        { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-        { tblAccountProducts::ExtraFields::prdEx_locID,     LocationID },
-    };
+    TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
+        { tblAccountProductsBase::Fields::prdCode,              ProductCode },
+        { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
+        { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+        }) },
+        { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
+        { tblAccountProductsBase::Fields::prd_untID,            1 },
+        { tblAccountProducts::ExtraFields::prdExType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prdEx_locID,         LocationID },
+    });
 
-    quint32 ProductID = this->AccountProducts->GetCreateQuery(APICALLBOOM_PARAM)
-                        .addCols({
-//                                     tblAccountProductsBase::Fields::prdID,
-                                     tblAccountProductsBase::Fields::prdCode,
-                                     tblAccountProductsBase::Fields::prdName,
-//                                     tblAccountProductsBase::Fields::prdDesc,
-//                                     tblAccountProductsBase::Fields::prdValidFromDate,
-//                                     tblAccountProductsBase::Fields::prdValidToDate,
-//                                     tblAccountProductsBase::Fields::prdValidFromHour,
-//                                     tblAccountProductsBase::Fields::prdValidToHour,
-//                                     tblAccountProductsBase::Fields::prdPrivs,
-//                                     tblAccountProductsBase::Fields::prdVAT,
-                                     tblAccountProductsBase::Fields::prdInStockQty,
-                                     tblAccountProductsBase::Fields::prd_untID,
-//                                     tblAccountProductsBase::Fields::prdOrderedQty,
-//                                     tblAccountProductsBase::Fields::prdReturnedQty,
-//                                     tblAccountProductsBase::Fields::prdStatus,
-                                     tblAccountProducts::ExtraFields::prdExType,
-                                     tblAccountProducts::ExtraFields::prdEx_locID,
-//                                     tblAccountProducts::ExtraFields::prdExShowPerDay,
-//                                     tblAccountProducts::ExtraFields::prdExShowTotal,
-//                                     tblAccountProducts::ExtraFields::prdExClicksPerDay,
-//                                     tblAccountProducts::ExtraFields::prdExClicksPerMonth,
-//                                     tblAccountProducts::ExtraFields::prdExClicksTotal,
-                                 })
-                        .values(ProductValues)
-                        .execute(1);
+    quint32 ProductID = this->AccountProducts->Create(APICALLBOOM_PARAM, ProductValues);
 
     ProductValues.insert(tblAccountProductsBase::Fields::prdID, ProductID);
     Result.insert("Product", ProductValues);
@@ -356,10 +333,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- saleable --------------------------------------
     QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
 
-    QVariantMap SaleableValues = {
+    TAPI::ORMFields_t SaleableValues = TAPI::ORMFields_t({
         { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
         { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
+        { tblAccountSaleablesBase::Fields::slbName_translate,   QVariantMap({
+              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+        }) },
         { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
         { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
         { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
@@ -367,42 +347,12 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //        { tblAccountSaleablesBase::Fields::slbMaxSaleCountPerUser,  },
         { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
         { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
-    };
+    });
 
-    quint32 SaleableID = this->AccountSaleables->GetCreateQuery(APICALLBOOM_PARAM)
-                         .addCols({
-//                                      tblAccountSaleablesBase::Fields::slbID,
-                                      tblAccountSaleablesBase::Fields::slb_prdID,
-                                      tblAccountSaleablesBase::Fields::slbCode,
-                                      tblAccountSaleablesBase::Fields::slbName,
-                                      tblAccountSaleablesBase::Fields::slbDesc,
-                                      tblAccountSaleablesBase::Fields::slbType,
-//                                      tblAccountSaleablesBase::Fields::slbAvailableFromDate,
-//                                      tblAccountSaleablesBase::Fields::slbAvailableToDate,
-//                                      tblAccountSaleablesBase::Fields::slbPrivs,
-                                      tblAccountSaleablesBase::Fields::slbBasePrice,
-//                                      tblAccountSaleablesBase::Fields::slbAdditives,
-//                                      tblAccountSaleablesBase::Fields::slbProductCount,
-//                                      tblAccountSaleablesBase::Fields::slbMaxSaleCountPerUser,
-                                      tblAccountSaleablesBase::Fields::slbInStockQty,
-//                                      tblAccountSaleablesBase::Fields::slbOrderedQty,
-//                                      tblAccountSaleablesBase::Fields::slbReturnedQty,
-                                      tblAccountSaleablesBase::Fields::slbVoucherTemplate,
-//                                      tblAccountSaleablesBase::Fields::slbStatus,
-//                                      tblAccountSaleablesBase::Fields::slbCreatedBy_usrID,
-//                                      tblAccountSaleablesBase::Fields::slbCreationDateTime,
-//                                      tblAccountSaleablesBase::Fields::slbUpdatedBy_usrID,
-//                                      tblAccountSaleables::Fields::slbExShowPerDay,
-//                                      tblAccountSaleables::Fields::slbExShowTotal,
-//                                      tblAccountSaleables::Fields::slbExClicksPerDay,
-//                                      tblAccountSaleables::Fields::slbExClicksPerMonth,
-//                                      tblAccountSaleables::Fields::slbExClicksTotal,
-                                  })
-                         .values(SaleableValues)
-                         .execute(1);
+    quint32 SaleableID = this->AccountSaleables->Create(APICALLBOOM_PARAM, SaleableValues);
 
-     SaleableValues.insert(tblAccountSaleablesBase::Fields::slbID, SaleableID);
-     Result.insert("Saleable", SaleableValues);
+    SaleableValues.insert(tblAccountSaleablesBase::Fields::slbID, SaleableID);
+    Result.insert("Saleable", SaleableValues);
 
     //-- coupon --------------------------------------
     QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
@@ -462,13 +412,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- add to basket --------------------------------------
     stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
         APICALLBOOM_PARAM,
-        /* saleableCode        */ SaleableCode,
-        /* orderAdditives      */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
-        /* qty                 */ 1,
-        /* discountCode        */ CouponCode,
-        /* referrer            */ "",
-        /* referrerParams */ {},
-        /* lastPreVoucher      */ LastPreVoucher
+        /* saleableCode     */ SaleableCode,
+        /* orderAdditives   */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
+        /* qty              */ 1,
+        /* discountCode     */ CouponCode,
+        /* referrer         */ "",
+        /* referrerParams   */ {},
+        /* lastPreVoucher   */ LastPreVoucher
     );
     LastPreVoucher = BasketActionResult.PreVoucher;
     Result.insert("LastPreVoucher", LastPreVoucher.toJson());
