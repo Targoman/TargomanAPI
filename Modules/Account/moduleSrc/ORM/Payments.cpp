@@ -66,7 +66,7 @@ QVariant IMPL_ORMGET(OnlinePayments) {
         _query.innerJoin(tblVoucher::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
 /**
@@ -279,24 +279,24 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
                     );
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-//    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+//    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 //}
 
 //bool IMPL_ORMUPDATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-//    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+//    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 //}
 
 //bool IMPL_ORMDELETE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 //}
 
 /*****************************************************************/
@@ -339,7 +339,7 @@ QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
 
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, ExtraFilters, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, ExtraFilters, 0, fnTouchQuery);
 }
 */
 
@@ -379,12 +379,12 @@ QVariant IMPL_ORMGET(OfflinePayments) {
                     );
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 /*****************************************************************/

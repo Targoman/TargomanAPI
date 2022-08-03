@@ -219,7 +219,7 @@ QVariant intfSQLBasedModule::Select(
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
-                        GET_METHOD_ARGS_CALL_INTERNAL,
+                        GET_METHOD_ARGS_CALL_VALUES,
                         _extraFilters,
                         _cacheTime,
                         _fnTouchQuery
@@ -228,7 +228,7 @@ QVariant intfSQLBasedModule::Select(
                 ;
 
         return this->SelectAll(
-                    GET_METHOD_ARGS_CALL_INTERNAL,
+                    GET_METHOD_ARGS_CALL_VALUES,
                     _extraFilters,
                     _cacheTime,
                     _fnTouchQuery
@@ -236,7 +236,7 @@ QVariant intfSQLBasedModule::Select(
     }
 
     return this->SelectOne(
-                GET_METHOD_ARGS_CALL_INTERNAL,
+                GET_METHOD_ARGS_CALL_VALUES,
                 _extraFilters,
                 _cacheTime,
                 _fnTouchQuery

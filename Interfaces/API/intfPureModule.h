@@ -102,7 +102,7 @@ using namespace Targoman::API::Server;
 #define GET_METHOD_ARGS_DECL_INTERNAL               INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLBOOM_DECL)
 #define GET_METHOD_ARGS_IMPL_INTERNAL               INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLBOOM_IMPL)
 
-#define GET_METHOD_ARGS_CALL_INTERNAL \
+#define GET_METHOD_ARGS_CALL_VALUES \
     APICALLBOOM_PARAM, \
     _pksByPath, \
     _pageIndex, \
@@ -126,9 +126,11 @@ using namespace Targoman::API::Server;
 
 #define IMPL_ORMCREATE(_module)                     _module::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
 
+//used by internal methods
 #define CREATE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
 #define CREATE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
-#define CREATE_METHOD_ARGS_CALL_INTERNAL            APICALLBOOM_PARAM, _createInfo
+
+#define CREATE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
@@ -143,9 +145,11 @@ using namespace Targoman::API::Server;
 
 #define IMPL_ORMUPDATE(_module)                     _module::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
 
+//used by internal methods
 #define UPDATE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
 #define UPDATE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
-#define UPDATE_METHOD_ARGS_CALL_INTERNAL            APICALLBOOM_PARAM, _pksByPath, _updateInfo
+
+#define UPDATE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _pksByPath, _updateInfo
 
 /**********************************************************************\
 |** DELETE ************************************************************|
@@ -160,9 +164,11 @@ using namespace Targoman::API::Server;
 
 #define IMPL_ORMDELETE(_module)                     _module::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
 
+//used by internal methods
 #define DELETE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
 #define DELETE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
-#define DELETE_METHOD_ARGS_CALL_INTERNAL            APICALLBOOM_PARAM, _pksByPath
+
+#define DELETE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _pksByPath
 
 /**********************************************************************/
 namespace TAPI {
@@ -241,23 +247,29 @@ namespace Targoman::API::API {
 #define EXRESTCONFIGKEY_ALIAS "alias"
 #define EXRESTCONFIG_ALIAS(_alias) { EXRESTCONFIGKEY_ALIAS, _alias }
 
+//-- sync --
 #define EXREST(_method, _name, _sig, _doc, ...) \
     api##_method##_name _sig; \
     QString signOf##_method##_name() { return #_sig; } \
     QString docOf##_method##_name() { return #_doc; } \
     QVariantMap confOf##_method##_name() { return __VA_ARGS__; }
+
 #define REST(_method, _name, _sig, _doc) \
     EXREST(_method, _name, _sig, _doc, {})
+
 #define IMPL_REST(_method, _module, _name, _params) \
     _module::api##_method##_name _params
 
+//-- async --
 #define ASYNC_EXREST(_method, _name, _sig, _doc, ...) \
     asyncApi##_method##_name _sig; \
     QString signOf##_method##_name() { return #_sig; } \
     QString docOf##_method##_name() { return #_doc; } \
     QVariantMap confOf##_method##_name() { return __VA_ARGS__; }
+
 #define ASYNC_REST(_method, _name, _sig, _doc) \
     ASYNC_EXREST(_method, _name, _sig, _doc, {})
+
 #define IMPL_ASYNC_REST(_method, _module, _name, _params) \
     _module::asyncApi##_method##_name _params
 

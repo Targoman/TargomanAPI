@@ -46,7 +46,7 @@ QVariant IMPL_ORMGET(intfActionLogs) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":ActionLogs:CRUD~0100" });
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 } //namespace Targoman::API::ORM
