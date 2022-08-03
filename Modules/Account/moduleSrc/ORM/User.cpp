@@ -97,7 +97,7 @@ QVariant IMPL_ORMGET(User) {
 //            tblUserExtraInfo::Fields::ueiUpdatedBy_usrID,
         }).join(",");
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL,
                         {},
                         0,
                         [](ORMSelectQuery &_query) {
@@ -114,7 +114,7 @@ quint64 IMPL_ORMCREATE(User) {
     if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
 }
 
 /*
@@ -123,13 +123,13 @@ quint64 IMPL_ORMCREATE(User) {
 bool IMPL_ORMUPDATE(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
 }
 
 bool IMPL_ORMDELETE(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
 }
 
 ORMSelectQuery User::getPhotoQuery(

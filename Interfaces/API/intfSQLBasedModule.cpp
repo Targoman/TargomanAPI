@@ -78,7 +78,7 @@ intfSQLBasedModule::intfSQLBasedModule(
 { ; }
 
 QVariantMap intfSQLBasedModule::SelectOne(
-    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
@@ -95,7 +95,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .andWhere(_extraFilters)
+//        .andWhere(_extraFilters)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
         .setCacheTime(_cacheTime)
@@ -103,6 +103,9 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     if (_fnTouchQuery != nullptr)
         _fnTouchQuery(Query);
+
+    if (_extraFilters.isEmpty() == false)
+        Query.andWhere(_extraFilters);
 
     QVariantMap Result = Query.one();
 
@@ -120,7 +123,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 }
 
 QVariantList intfSQLBasedModule::SelectAll(
-    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
@@ -137,12 +140,15 @@ QVariantList intfSQLBasedModule::SelectAll(
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .andWhere(_extraFilters)
+//        .andWhere(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     if (_fnTouchQuery != nullptr)
         _fnTouchQuery(Query);
+
+    if (_extraFilters.isEmpty() == false)
+        Query.andWhere(_extraFilters);
 
     QVariantList Result = Query.all();
 
@@ -160,7 +166,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 }
 
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
-    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
@@ -177,12 +183,15 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
-        .andWhere(_extraFilters)
+//        .andWhere(_extraFilters)
         .setCacheTime(_cacheTime)
     ;
 
     if (_fnTouchQuery != nullptr)
         _fnTouchQuery(Query);
+
+    if (_extraFilters.isEmpty() == false)
+        Query.andWhere(_extraFilters);
 
     TAPI::stuTable Result = Query.allWithCount();
 
@@ -200,7 +209,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 }
 
 QVariant intfSQLBasedModule::Select(
-    GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
     std::function<void(ORMSelectQuery &_query)> _fnTouchQuery
@@ -210,7 +219,7 @@ QVariant intfSQLBasedModule::Select(
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
-                        GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+                        GET_METHOD_ARGS_CALL_INTERNAL,
                         _extraFilters,
                         _cacheTime,
                         _fnTouchQuery
@@ -219,7 +228,7 @@ QVariant intfSQLBasedModule::Select(
                 ;
 
         return this->SelectAll(
-                    GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+                    GET_METHOD_ARGS_CALL_INTERNAL,
                     _extraFilters,
                     _cacheTime,
                     _fnTouchQuery
@@ -227,7 +236,7 @@ QVariant intfSQLBasedModule::Select(
     }
 
     return this->SelectOne(
-                GET_METHOD_ARGS_CALL_INTERNAL_BOOM,
+                GET_METHOD_ARGS_CALL_INTERNAL,
                 _extraFilters,
                 _cacheTime,
                 _fnTouchQuery
@@ -235,7 +244,7 @@ QVariant intfSQLBasedModule::Select(
 }
 
 quint64 intfSQLBasedModule::Create(
-    CREATE_METHOD_ARGS_IMPL_INTERNAL_BOOM
+    CREATE_METHOD_ARGS_IMPL_INTERNAL
 ) {
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "create");
 
@@ -309,7 +318,7 @@ quint64 intfSQLBasedModule::Create(
 }
 
 bool intfSQLBasedModule::Update(
-    UPDATE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    UPDATE_METHOD_ARGS_IMPL_INTERNAL,
     const QVariantMap& _extraFilters
 ) {
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "update");
@@ -407,7 +416,7 @@ bool intfSQLBasedModule::Update(
 }
 
 bool intfSQLBasedModule::DeleteByPks(
-    DELETE_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+    DELETE_METHOD_ARGS_IMPL_INTERNAL,
     const QVariantMap& _extraFilters,
     bool _realDelete
 ) {
