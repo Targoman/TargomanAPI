@@ -40,7 +40,7 @@ IPBin::IPBin() :
 QVariant IMPL_ORMGET(IPBin) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 
 //    return query.one();
 

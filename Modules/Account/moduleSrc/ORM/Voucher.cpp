@@ -63,7 +63,7 @@ QVariant IMPL_ORMGET(Voucher) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(Voucher) {
@@ -76,7 +76,7 @@ bool IMPL_ORMDELETE(Voucher) {
 //        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
     }
 
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL, ExtraFilters);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

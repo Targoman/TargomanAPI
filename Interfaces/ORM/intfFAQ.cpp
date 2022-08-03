@@ -47,21 +47,21 @@ intfSQLBasedModule(
 ) { ; }
 
 QVariant IMPL_ANONYMOUSE_ORMGET(intfFaqQuestions) {
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 quint32 IMPL_ORMCREATE(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 /*********************************************************\
@@ -81,21 +81,21 @@ intfSQLBasedModule(
 ) { ; }
 
 QVariant IMPL_ANONYMOUSE_ORMGET(intfFaqAnswers) {
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 quint32 IMPL_ORMCREATE(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 } //namespace Targoman::API::ORM

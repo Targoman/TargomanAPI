@@ -40,7 +40,7 @@ BlockingRules::BlockingRules() :
 QVariant IMPL_ORMGET(BlockingRules) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 
 //    return query.one();
 
@@ -50,19 +50,19 @@ QVariant IMPL_ORMGET(BlockingRules) {
 quint64 IMPL_ORMCREATE(BlockingRules) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(BlockingRules) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(BlockingRules) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 } //namespace Targoman::API::AccountModule::ORM

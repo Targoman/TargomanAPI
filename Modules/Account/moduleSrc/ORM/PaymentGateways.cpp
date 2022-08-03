@@ -53,22 +53,22 @@ PaymentGatewayTypes::PaymentGatewayTypes() :
 
 QVariant IMPL_ORMGET(PaymentGatewayTypes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE(PaymentGatewayTypes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(PaymentGatewayTypes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(PaymentGatewayTypes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 /*****************************************************************\
@@ -85,7 +85,7 @@ PaymentGateways::PaymentGateways() :
 
 QVariant IMPL_ORMGET(PaymentGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE(PaymentGateways) {
@@ -94,17 +94,17 @@ quint32 IMPL_ORMCREATE(PaymentGateways) {
     if (_createInfo.contains(tblPaymentGateways::Fields::pgwAllowedDomainName))
         _createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName].toString());
 
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(PaymentGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(PaymentGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (

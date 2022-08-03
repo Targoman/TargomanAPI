@@ -66,7 +66,7 @@ intfUploadFiles::intfUploadFiles(
 
 QVariant IMPL_ORMGET(intfUploadFiles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 /******************************************************************/
@@ -87,7 +87,7 @@ intfUploadGateways::intfUploadGateways(
 
 QVariant IMPL_ORMGET(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE(intfUploadGateways) {
@@ -96,17 +96,17 @@ quint32 IMPL_ORMCREATE(intfUploadGateways) {
 //    if (_createInfo.contains(tblintfUploadGateways::Fields::ugwAllowedDomainName))
 //        _createInfo[tblintfUploadGateways::Fields::ugwAllowedDomainName] = URLHelper::domain(_createInfo[tblUploadGateways::Fields::ugwAllowedDomainName].toString());
 
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 /******************************************************************/
@@ -127,7 +127,7 @@ intfUploadQueue::intfUploadQueue(
 
 QVariant IMPL_ORMGET(intfUploadQueue) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 } //namespace Targoman::API::ObjectStorage::ORM

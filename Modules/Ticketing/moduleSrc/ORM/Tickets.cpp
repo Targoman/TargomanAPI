@@ -122,7 +122,7 @@ QVariant Tickets::apiGET(
 
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, ExtraFilters, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, ExtraFilters, 0, fnTouchQuery);
 }
 
 QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
