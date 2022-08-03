@@ -159,7 +159,7 @@ private slots:
 
     void Ticket_newMessage() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
                 "Ticketing/newMessage",
                 {},
@@ -186,7 +186,7 @@ private slots:
 
     void Ticket_newFeedback_1() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
                 "Ticketing/newFeedback",
                 {},
@@ -215,7 +215,7 @@ private slots:
 
     void Ticket_newFeedback_2() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::PUT,
                 "Ticketing/newFeedback",
                 {},
@@ -244,7 +244,7 @@ private slots:
 
     void Tickets_Get() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 QString("Ticketing/Tickets/%1").arg(this->MainTicketID),
                 {},
@@ -261,7 +261,7 @@ private slots:
     }
     void Tickets_List() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Ticketing/Tickets",
                 {},
@@ -279,7 +279,7 @@ private slots:
 
     void Tickets_setAsRead_1() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::PATCH,
                 "Ticketing/Tickets/setAsRead/" + QString::number(this->MainTicketID),
                 {},
@@ -297,7 +297,7 @@ private slots:
 
     void Tickets_setAsRead_2() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::PATCH,
                 "Ticketing/Tickets/setAsRead/" + QString::number(this->MainTicketID),
                 {},
@@ -315,7 +315,7 @@ private slots:
 
     void Tickets_List_by_baseTicketID() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Ticketing/Tickets",
                 {
@@ -335,7 +335,7 @@ private slots:
 
     void Tickets_List_by_inReplyTicketID() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Ticketing/Tickets",
                 {
@@ -355,7 +355,7 @@ private slots:
 
     void TicketAttachments_List() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Ticketing/TicketAttachments",
                 {},

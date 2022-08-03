@@ -55,19 +55,19 @@ public:
 
 private:
     QVariantMap SelectOne(
-        GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        GET_METHOD_ARGS_DECL_INTERNAL,
         const clsCondition& _extraFilters = {},
         quint16 _cacheTime = 0,
         std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
     );
     QVariantList SelectAll(
-        GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+        GET_METHOD_ARGS_IMPL_INTERNAL,
         const clsCondition& _extraFilters = {},
         quint16 _cacheTime = 0,
         std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
     );
     TAPI::stuTable SelectAllWithCount(
-        GET_METHOD_ARGS_IMPL_INTERNAL_BOOM,
+        GET_METHOD_ARGS_IMPL_INTERNAL,
         const clsCondition& _extraFilters = {},
         quint16 _cacheTime = 0,
         std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
@@ -75,23 +75,23 @@ private:
 
 public:
     QVariant Select(
-        GET_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        GET_METHOD_ARGS_DECL_INTERNAL,
         const clsCondition& _extraFilters = {},
         quint16 _cacheTime = 0,
         std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
     );
 
     quint64 Create(
-        CREATE_METHOD_ARGS_DECL_INTERNAL_BOOM
+        CREATE_METHOD_ARGS_DECL_INTERNAL
     );
 
     bool Update(
-        UPDATE_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        UPDATE_METHOD_ARGS_DECL_INTERNAL,
         const QVariantMap& _extraFilters = {}
     );
 
     bool DeleteByPks(
-        DELETE_METHOD_ARGS_DECL_INTERNAL_BOOM,
+        DELETE_METHOD_ARGS_DECL_INTERNAL,
         const QVariantMap& _extraFilters = {},
         bool _realDelete = false
     );

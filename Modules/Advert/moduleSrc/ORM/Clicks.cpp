@@ -42,7 +42,7 @@ QVariant IMPL_ORMGET(Clicks) {
         _query.innerJoin(tblBin::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, {}, 0, fnTouchQuery);
 }
 
 } //namespace Targoman::API::AdvertModule::ORM

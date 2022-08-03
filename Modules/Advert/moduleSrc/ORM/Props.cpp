@@ -42,7 +42,7 @@ QVariant IMPL_ORMGET(Props) {
         _query.innerJoin(tblBin::Name);
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_INTERNAL, {}, 0, fnTouchQuery);
 }
 
 quint64 IMPL_ORMCREATE(Props) {
@@ -50,7 +50,7 @@ quint64 IMPL_ORMCREATE(Props) {
         _createInfo.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
 //    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, _createInfo);
 
-    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL_BOOM);
+    return this->Create(CREATE_METHOD_ARGS_CALL_INTERNAL);
 }
 
 bool IMPL_ORMUPDATE(Props) {
@@ -60,7 +60,7 @@ bool IMPL_ORMUPDATE(Props) {
         ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
 //    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
 
-    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
+    return this->Update(UPDATE_METHOD_ARGS_CALL_INTERNAL, ExtraFilters);
 }
 
 bool IMPL_ORMDELETE(Props) {
@@ -69,7 +69,7 @@ bool IMPL_ORMDELETE(Props) {
         ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
 //    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
 
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters);
+    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_INTERNAL, ExtraFilters);
 }
 
 } //namespace Targoman::API::AdvertModule::ORM
