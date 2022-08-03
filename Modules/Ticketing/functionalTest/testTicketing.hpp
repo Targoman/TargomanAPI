@@ -277,6 +277,42 @@ private slots:
         }
     }
 
+    void Tickets_setAsRead_1() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PATCH,
+                "Ticketing/Tickets/setAsRead/" + QString::number(this->MainTicketID),
+                {},
+                {}
+            );
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void Tickets_setAsRead_2() {
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PATCH,
+                "Ticketing/Tickets/setAsRead/" + QString::number(this->MainTicketID),
+                {},
+                {}
+            );
+
+            qDebug() << Result;
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void Tickets_List_by_baseTicketID() {
         QT_TRY {
             QVariant Result = callAdminAPI(

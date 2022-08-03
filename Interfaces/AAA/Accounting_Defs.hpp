@@ -1044,7 +1044,6 @@ TAPI_DEFINE_STRUCT(stuPendingVoucher,
     SF_quint64          (Amount),
     SF_QJsonObject      (Info)
 );
-//typedef QList<stuPendingVoucher> PendingVouchers_t;
 
 TAPI_DEFINE_STRUCT(stuVoucherItemPrivate,
     SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
@@ -1080,7 +1079,6 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_QJsonObject      (AdditionalInfo), //per service
 
     SF_Struct           (Private, stuVoucherItemPrivate, [](Q_DECL_UNUSED auto v) { return true; } (v))
-//    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
 );
 
 typedef QMap<QString, stuAssetItem> ActiveCredits_t;
@@ -1153,9 +1151,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_QString          (Referrer),
     SF_JSON_t           (ReferrerParams),
 
-//    SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher),
     SF_QString          (Private), //encrypted + base64
-//    SF_Struct           (Private, stuVoucherItemPrivate, [](Q_DECL_UNUSED auto v) { return true; } (v)),
     SF_QListOfVarStruct (SubItems, stuVoucherItem),
 
     SF_QString          (Sign)
