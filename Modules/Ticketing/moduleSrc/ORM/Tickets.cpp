@@ -59,8 +59,8 @@ QVariant Tickets::apiGET(
     bool _reportCount,
     //-------------------------------------
 //    const stuTicketScope &_ticketScope
-    quint64 _baseTicketID,
-    quint64 _inReplyTicketID
+    NULLABLE_TYPE(quint64) _baseTicketID,
+    NULLABLE_TYPE(quint64) _inReplyTicketID
 ) {
     TAPI::Cols_t _cols;
     TAPI::GroupBy_t _groupBy;
@@ -77,24 +77,9 @@ QVariant Tickets::apiGET(
                 .andCond({ tblTickets::Fields::tktType, enuConditionOperator::Equal, enuTicketType::Broadcast })
             );
 
-    auto fnTouchQuery = [&APICALLBOOM_PARAM, &_baseTicketID, _inReplyTicketID](ORMSelectQuery &_query) {
+    auto fnTouchQuery = [this, &APICALLBOOM_PARAM, &_baseTicketID, &_inReplyTicketID, &CurrentUserID](ORMSelectQuery &_query) {
         _query
-            .addCols({
-                         tblTickets::Fields::tktID,
-                         tblTickets::Fields::tktTarget_usrID,
-                         tblTickets::Fields::tkt_svcID,
-                         tblTickets::Fields::tkt_untID,
-                         tblTickets::Fields::tktBase_tktID,
-                         tblTickets::Fields::tktInReply_tktID,
-                         tblTickets::Fields::tktType,
-                         tblTickets::Fields::tktTitle,
-                         tblTickets::Fields::tktBody,
-                         tblTickets::Fields::tktStatus,
-                         tblTickets::Fields::tktCreationDateTime,
-                         tblTickets::Fields::tktCreatedBy_usrID,
-                         tblTickets::Fields::tktUpdatedBy_usrID,
-                         CURRENT_TIMESTAMP,
-                     })
+            .addCols(this->SelectableColumnNames())
             .leftJoin(tblUnits::Name)
             .leftJoin(tblDepartments::Name, clsCondition(tblDepartments::Name, tblDepartments::Fields::depID, enuConditionOperator::Equal, tblUnits::Name, tblUnits::Fields::unt_depID))
             .addCols({
@@ -104,13 +89,13 @@ QVariant Tickets::apiGET(
                      })
         ;
 
-        if (_inReplyTicketID > 0)
-            _query.andWhere({ tblTickets::Fields::tktInReply_tktID, enuConditionOperator::Equal, _inReplyTicketID });
-        else {
-            if (_baseTicketID == 0)
+        if (NULLABLE_HAS_VALUE(_inReplyTicketID))
+            _query.andWhere({ tblTickets::Fields::tktInReply_tktID, enuConditionOperator::Equal, NULLABLE_VALUE(_inReplyTicketID) });
+        else if (NULLABLE_HAS_VALUE(_baseTicketID)) {
+            if (NULLABLE_VALUE(_baseTicketID) == 0)
                 _query.andWhere({ tblTickets::Fields::tktBase_tktID, enuConditionOperator::Null });
             else
-                _query.andWhere({ tblTickets::Fields::tktBase_tktID, enuConditionOperator::Equal, _baseTicketID });
+                _query.andWhere({ tblTickets::Fields::tktBase_tktID, enuConditionOperator::Equal, NULLABLE_VALUE(_baseTicketID) });
         }
 
         _query
@@ -126,9 +111,39 @@ QVariant Tickets::apiGET(
             .addCol("tmpReply._cnt", "TotalReplyCount")
             .addCol("tmpReply._maxdate", "LastReplyDateTime")
         ;
+
+        _query
+            .leftJoin(tblTicketRead::Name,
+                      clsCondition(tblTicketRead::Name, tblTicketRead::Fields::tkr_tktID, enuConditionOperator::Equal, tblTickets::Name, tblTickets::Fields::tktID)
+                      .andCond({ tblTicketRead::Fields::tkrBy_usrID, enuConditionOperator::Equal, CurrentUserID })
+                      )
+            .addCols(TicketRead::instance().SelectableColumnNames())
+        ;
+
     };
 
     return this->Select(GET_METHOD_ARGS_CALL_INTERNAL_BOOM, ExtraFilters, 0, fnTouchQuery);
+}
+
+QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    TAPI::PKsByPath_t _pksByPath
+)) {
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+
+    TicketRead::instance().prepareFiltersList();
+
+    return TicketRead::instance().GetCreateQuery(APICALLBOOM_PARAM)
+            .options_ignore()
+            .addCols({
+                        tblTicketRead::Fields::tkr_tktID,
+                        tblTicketRead::Fields::tkrBy_usrID,
+                    })
+            .values({
+                        { tblTicketRead::Fields::tkr_tktID, _pksByPath },
+                        { tblTicketRead::Fields::tkrBy_usrID, CurrentUserID },
+                    })
+            .execute(CurrentUserID);
 }
 
 /******************************************************************************\
