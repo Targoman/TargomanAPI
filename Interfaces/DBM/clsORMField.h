@@ -153,11 +153,7 @@ public:
 
     const intfAPIArgManipulator& argSpecs();
 
-    inline clsORMField& setMultiLanguage() {
-        this->Data->setMultiLanguage(true);
-        this->Data->setSelectable(false);
-        return *this;
-    }
+    clsORMField& setMultiLanguage();
     inline bool isMultiLanguage() { return this->Data->isMultiLanguage(); }
 
 private:

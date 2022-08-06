@@ -61,7 +61,8 @@ using namespace Targoman::API::Server;
     TAPI::Filter_t      _filters = {}, \
     TAPI::OrderBy_t     _orderBy = {}, \
     TAPI::GroupBy_t     _groupBy = {}, \
-    bool                _reportCount = true
+    bool                _reportCount = true, \
+    bool                _translate = true
 
 #define INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(_apiCallBoomType) \
     _apiCallBoomType    &APICALLBOOM_PARAM, \
@@ -72,7 +73,8 @@ using namespace Targoman::API::Server;
     TAPI::Filter_t      _filters, \
     TAPI::OrderBy_t     _orderBy, \
     TAPI::GroupBy_t     _groupBy, \
-    bool                _reportCount
+    bool                _reportCount, \
+    bool                _translate
 
 #define            GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_DECL)
 #define ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
@@ -111,7 +113,8 @@ using namespace Targoman::API::Server;
     _filters, \
     _orderBy, \
     _groupBy, \
-    _reportCount
+    _reportCount, \
+    _translate
 
 /**********************************************************************\
 |** CREATE ************************************************************|

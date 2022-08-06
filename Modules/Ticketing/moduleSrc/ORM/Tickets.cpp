@@ -64,6 +64,7 @@ QVariant Tickets::apiGET(
 ) {
     TAPI::Cols_t _cols;
     TAPI::GroupBy_t _groupBy;
+    bool _translate = true;
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
     clsCondition ExtraFilters = {};

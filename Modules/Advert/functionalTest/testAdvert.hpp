@@ -263,10 +263,37 @@ private slots:
     }
 
     /***************************************************/
+    void getAccountUnits_with_I18N() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountUnits"
+        );
+    }
+
+    void getAccountUnits_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountUnits",
+            {
+                { "translate", false },
+            }
+        );
+    }
+
     void getAccountProducts_with_I18N() {
         QVariant Result = callGuestAPI(
             RESTClientHelper::GET,
             "Advert/AccountProducts"
+        );
+    }
+
+    void getAccountProducts_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountProducts",
+            {
+                { "translate", false },
+            }
         );
     }
 
@@ -277,6 +304,17 @@ private slots:
         );
     }
 
+    void getAccountSaleable_join_product_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountSaleables",
+            {
+                { "translate", false },
+            }
+        );
+    }
+
+private:
     void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 

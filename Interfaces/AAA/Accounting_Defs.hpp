@@ -109,7 +109,7 @@ namespace tblAccountUnitsI18NBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(untName);
+        TARGOMAN_CREATE_CONSTEXPR(untNameI18N);
     } //namespace Fields
 }
 
@@ -151,8 +151,8 @@ namespace tblAccountProductsI18NBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(prdName);
-        TARGOMAN_CREATE_CONSTEXPR(prdDesc);
+        TARGOMAN_CREATE_CONSTEXPR(prdNameI18N);
+        TARGOMAN_CREATE_CONSTEXPR(prdDescI18N);
     } //namespace Fields
 }
 
@@ -196,8 +196,8 @@ namespace tblAccountSaleablesI18NBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
         TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(slbName);
-        TARGOMAN_CREATE_CONSTEXPR(slbDesc);
+        TARGOMAN_CREATE_CONSTEXPR(slbNameI18N);
+        TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
     } //namespace Fields
 }
 
@@ -346,7 +346,7 @@ namespace tblAccountUnitsI18NBase {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
             { Fields::pid,          S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::untName,      S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::untNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -361,7 +361,7 @@ namespace tblAccountUnitsI18NBase {
 #define SF_tblAccountUnitsI18NBase_DTO \
     SF_quint16                  (pid), \
     SF_QString                  (language), \
-    SF_QString                  (untName)
+    SF_QString                  (untNameI18N)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUnitsI18NBase_DTO
@@ -464,8 +464,8 @@ namespace tblAccountProductsI18NBase {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
             { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::prdName,      S(QString),         QFV,        QRequired,  UPOwner },
-            { Fields::prdDesc,      S(QString),         QFV,        QNull,      UPOwner },
+            { Fields::prdNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::prdDescI18N,  S(QString),         QFV,        QNull,      UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -480,8 +480,8 @@ namespace tblAccountProductsI18NBase {
 #define SF_tblAccountProductsI18NBase_DTO \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
-    SF_QString                  (prdName), \
-    SF_QString                  (prdDesc)
+    SF_QString                  (prdNameI18N), \
+    SF_QString                  (prdDescI18N)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsI18NBase_DTO
@@ -585,8 +585,8 @@ namespace tblAccountSaleablesI18NBase {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
             { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
             { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::slbName,      S(QString),         QFV,        QRequired,  UPOwner },
-            { Fields::slbDesc,      S(QString),         QFV,        QNull,      UPOwner },
+            { Fields::slbNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::slbDescI18N,  S(QString),         QFV,        QNull,      UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -603,8 +603,8 @@ namespace tblAccountSaleablesI18NBase {
 #define SF_tblAccountSaleablesI18NBase_DTO \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
-    SF_QString                  (slbName), \
-    SF_QString                  (slbDesc)
+    SF_QString                  (slbNameI18N), \
+    SF_QString                  (slbDescI18N)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesI18NBase_DTO
