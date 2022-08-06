@@ -23,6 +23,8 @@ SOURCES += \
 
 OTHER_FILES += \
 
+LIBS += -lNLPHelper \
+
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
 

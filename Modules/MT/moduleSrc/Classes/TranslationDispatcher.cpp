@@ -29,7 +29,10 @@
 #include "libTargomanTextProcessor/TextProcessor.h"
 #include "Engines/clsNMT.h"
 #include "Interfaces/AAA/AAA.hpp"
-#include "Interfaces/NLP/FormalityChecker.h"
+#include "ModuleHelpers/NLP/FormalityChecker.h"
+#include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
+
+using namespace Targoman::API::ModuleHelpers::NLP;
 
 namespace Targoman::API::MTModule::Classes {
 
@@ -37,23 +40,29 @@ using namespace Apps;
 using namespace NLPLibs;
 using namespace DBManager;
 using namespace Common;
-using namespace Common::Configuration;
+//using namespace Common::Configuration;
 using namespace AAA;
-using namespace NLP;
+//using namespace NLP;
 
 TranslationDispatcher::~TranslationDispatcher() { ; }
 
-QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
-                                                 QString _text,
-                                                 const TranslationDir_t& _dir,
-                                                 const QString& _engine,
-                                                 bool _useSpecialClass,
-                                                 bool _detailed,
-                                                 bool _detokenize,
-                                                 int& _preprocessTime,
-                                                 int& _translationTime) {
-    if (_detailed && Authorization::hasPriv(_privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
+QVariantMap TranslationDispatcher::doTranslation(
+    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    const QJsonObject& _privInfo,
+    QString _text,
+    const TranslationDir_t& _dir,
+    const QString& _engine,
+    bool _useSpecialClass,
+    bool _detailed,
+    bool _detokenize,
+    int& _preprocessTime,
+    int& _translationTime
+) {
+    //@TODO: ujncomment and fix source of privInfo
+    /*
+    if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM, _privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought priviledges to get detailed translation response.");
+
     QTime CacheLookupTime; CacheLookupTime.start();
     QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();
     QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
@@ -105,6 +114,7 @@ QVariantMap TranslationDispatcher::doTranslation(const QJsonObject& _privInfo,
         CachedTranslation[RESULTItems::CACHE] = CacheLookupTime.elapsed();
     }
     return CachedTranslation;
+    */
 }
 
 QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
@@ -183,8 +193,9 @@ void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _en
 
 void TranslationDispatcher::registerEngines() {
     foreach (const QString& Key, this->TranslationServers.keys()) {
-        const tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
-                this->TranslationServers.values(Key);
+        const Targoman::Common::Configuration::tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
+            this->TranslationServers.values(Key);
+
         for (size_t i=0; i<ServersConfig.size(); ++i) {
             stuTrServerConfig Server = ServersConfig.at(i);
             if (Server.Active.value() == false)
@@ -222,8 +233,4 @@ TranslationDispatcher::TranslationDispatcher() {
 /********************************************/
 intfTranslatorEngine::~intfTranslatorEngine() { ; }
 
-}
-}
-}
-}
-}
+} // namespace Targoman::API::MTModule::Classes

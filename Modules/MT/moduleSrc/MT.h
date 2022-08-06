@@ -44,8 +44,8 @@ TARGOMAN_FAQ_PREPARENT;
 class MT : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
-    Q_INTERFACES(Targoman::API::intfAPIModule)
+    Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
+    Q_INTERFACES(Targoman::API::API::intfPureModule)
     TARGOMAN_API_MODULE_DB_CONFIGS(MT);
     TARGOMAN_DEFINE_API_MODULE(MT);
     TARGOMAN_API_DEFINE_MIGRATIONS(MT, MTSchema);
@@ -53,31 +53,31 @@ class MT : public intfSQLBasedWithActionLogsModule
     TARGOMAN_API_DEFINE_FAQ(MT, MTSchema);
 
 private slots:
-    QVariantMap REST_GET_OR_POST(
-        Translate,
-        (
-            const TAPI::RemoteIP_t& _REMOTE_IP,
-            const QString& _token,
-            QString _text,
-            QString _dir,
-            const QString& _engine = "NMT",
-            bool _detailed = false,
-            bool _detok = true,
-            bool _dic = false,
-            bool _dicFull = false
-        ),
-        "Translates input text if specified engine and language are found."
-    )
+//    QVariantMap REST_GET_OR_POST(
+//        Translate,
+//        (
+//            const TAPI::RemoteIP_t& _REMOTE_IP,
+//            const QString& _token,
+//            QString _text,
+//            QString _dir,
+//            const QString& _engine = "NMT",
+//            bool _detailed = false,
+//            bool _detok = true,
+//            bool _dic = false,
+//            bool _dicFull = false
+//        ),
+//        "Translates input text if specified engine and language are found."
+//    )
 
-    QVariantMap REST_GET_OR_POST(
-        Test,
-        (
-            const TAPI::RemoteIP_t& _REMOTE_IP,
-            const QString& _token,
-            const QString& _arg
-        ),
-        "Test"
-    )
+//    QVariantMap REST_GET_OR_POST(
+//        Test,
+//        (
+//            const TAPI::RemoteIP_t& _REMOTE_IP,
+//            const QString& _token,
+//            const QString& _arg
+//        ),
+//        "Test"
+//    )
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);

@@ -30,6 +30,7 @@
 
 namespace Targoman {
 namespace Apps {
+
 struct gConfigs{
     struct Classifier{
         static inline QString makeConfig(const QString& _name);
@@ -39,7 +40,8 @@ struct gConfigs{
         static Targoman::Common::Configuration::tmplConfigurable<bool>         SupportsIXML;
     };
 };
-}
+
+} // namespace Apps
 
 namespace API {
 namespace ModuleHelpers {

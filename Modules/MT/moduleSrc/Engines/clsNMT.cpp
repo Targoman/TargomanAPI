@@ -206,8 +206,4 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
     return Result;
 }
 
-}
-}
-}
-}
-}
+} // namespace Targoman::API::MTModule::Engines
