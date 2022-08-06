@@ -17,21 +17,21 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
-#define TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
+
+#ifndef TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#define TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "intfTranslatorEngine.hpp"
+#include "Interfaces/Server/APICallBoom.h"
+using namespace Targoman::API::Server;
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Classes {
+namespace Targoman::API::MTModule::Classes {
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
@@ -53,33 +53,36 @@ class TranslationDispatcher
 private:
     struct stuTrServerConfig{
         stuTrServerConfig(const QString& _basePath);
-        Common::Configuration::tmplConfigurable<QUrl> URL;
-        Common::Configuration::tmplConfigurable<QString>  Class;
-        Common::Configuration::tmplConfigurable<QString>  SourceLang;
-        Common::Configuration::tmplConfigurable<QString>  DestLang;
-        Common::Configuration::tmplConfigurable<bool>     SupportsIXML;
-        Common::Configuration::tmplConfigurable<bool>     Active;
-        struct stuStatistics{
+        Targoman::Common::Configuration::tmplConfigurable<QUrl> URL;
+        Targoman::Common::Configuration::tmplConfigurable<QString>  Class;
+        Targoman::Common::Configuration::tmplConfigurable<QString>  SourceLang;
+        Targoman::Common::Configuration::tmplConfigurable<QString>  DestLang;
+        Targoman::Common::Configuration::tmplConfigurable<bool>     SupportsIXML;
+        Targoman::Common::Configuration::tmplConfigurable<bool>     Active;
+
+        struct stuStatistics {
             stuStatistics(const QString& _basePath);
-            Common::Configuration::tmplConfigurable<quint64> OkResponses;
-            Common::Configuration::tmplConfigurable<quint64> FailedResponses;
-        }Statistics;
+            Targoman::Common::Configuration::tmplConfigurable<quint64> OkResponses;
+            Targoman::Common::Configuration::tmplConfigurable<quint64> FailedResponses;
+        } Statistics;
     };
-    static Common::Configuration::tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
+    static Targoman::Common::Configuration::tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
 
 public:
     static TranslationDispatcher& instance() {static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
     ~TranslationDispatcher();
 
-    QVariantMap doTranslation(const QJsonObject& _privInfo,
-                              QString _text,
-                              const TranslationDir_t& _dir,
-                              const QString& _engine,
-                              bool _useSpecialClass,
-                              bool _detailed, bool _detokenize,
-                              int& _preprocessTime,
-                              int& _translationTime
-                              );
+    QVariantMap doTranslation(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const QJsonObject& _privInfo,
+        QString _text,
+        const TranslationDir_t& _dir,
+        const QString& _engine,
+        bool _useSpecialClass,
+        bool _detailed, bool _detokenize,
+        int& _preprocessTime,
+        int& _translationTime
+    );
 
     QString tokenize(const QString& _text, const QString& _lang);
     QString detokenize(const QString& _text, const QString& _lang);
@@ -116,10 +119,6 @@ private:
     QTime LastCorrectionRuleUpdateTime;
 };
 
+} //namespace Targoman::API::MTModule::Classes
 
-}
-}
-}
-}
-}
-#endif // TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
+#endif // TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H

@@ -6,23 +6,15 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=MT
+include($$QBUILD_PATH/templates/projectConfigs.pri)
 
-HEADERS += \
-    Classes/intfTranslatorBridge.hpp \
-    Classes/intfTranslatorEngine.hpp \
-    Classes/TranslationDispatcher.h \
-    Engines/clsNMT.h \
-    TranslationDefs.hpp \
-    MT.h
-
-SOURCES += \
-    Classes/TranslationDispatcher.cpp \
-    Engines/clsNMT.cpp \
-    MT.cpp
+addSubdirs(moduleSrc, Dependencies)
+#addSubdirs(functionalTest, Dependencies)
 
 OTHER_FILES += \
-
-################################################################################
-include($$QBUILD_PATH/templates/moduleConfigs.pri)
+    migrations/db/* \
+    migrations/db/.dbdiff.dev_.cfg \
+    migrations/local/* \
+    migrations/local/*.sh \
+    migrations/local/.migrations
 

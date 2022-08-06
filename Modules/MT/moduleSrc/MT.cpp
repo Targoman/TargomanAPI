@@ -17,20 +17,31 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "MT.h"
 #include "Classes/TranslationDispatcher.h"
-#include "TranslationDefs.hpp"
+#include "MTDefs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
+namespace Targoman::API::MTModule {
 
-using namespace  Translation::Classes;
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT);
+using namespace Classes;
 
+TARGOMAN_IMPL_API_MODULE(MT)
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)
+
+MT::MT() :
+    intfSQLBasedWithActionLogsModule(
+        MTDomain,
+        MTSchema
+) {
+    // Register translation engines
+    TranslationDispatcher::instance().registerEngines();
+}
+
+/*
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     const TAPI::RemoteIP_t& _REMOTE_IP,
     const QString& _token,
@@ -91,17 +102,18 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
     QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
-/*    //TODO fix
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
-    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
-*/
+
+    //@TODO: fix
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_dir+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxPerMonth", Stats["tksThisMonthWords"].toDouble()+ SourceWordCount);
+//    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
+
     if (_dic) {
         if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})) {
             if (_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
@@ -172,14 +184,6 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
         {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
     };
 }
+*/
 
-MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {
-    // Register translation engines
-    TranslationDispatcher::instance().registerEngines();
-}
-
-
-
-}
-}
-}
+} //namespace Targoman::API::MTModule
