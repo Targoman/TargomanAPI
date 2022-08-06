@@ -17,21 +17,19 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
-#define TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
+
+#ifndef TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#define TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "intfTranslatorEngine.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Classes {
+namespace Targoman::API::MTModule::Classes {
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
@@ -116,10 +114,6 @@ private:
     QTime LastCorrectionRuleUpdateTime;
 };
 
+} //namespace Targoman::API::MTModule::Classes
 
-}
-}
-}
-}
-}
-#endif // TARGOMAN_API_CLASSES_TRANSLATIONDISPATCHER_H
+#endif // TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H

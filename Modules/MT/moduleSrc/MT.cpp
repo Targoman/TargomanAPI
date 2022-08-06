@@ -17,19 +17,22 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "MT.h"
 #include "Classes/TranslationDispatcher.h"
 #include "TranslationDefs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
+#include "ORM/Defs.hpp"
 
-using namespace  Translation::Classes;
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT);
+namespace Targoman::API::MTModule {
+
+using namespace Classes;
+
+TARGOMAN_IMPL_API_MODULE(MT)
+TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)
 
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     const TAPI::RemoteIP_t& _REMOTE_IP,
@@ -178,8 +181,4 @@ MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {
     TranslationDispatcher::instance().registerEngines();
 }
 
-
-
-}
-}
-}
+} //namespace Targoman::API::MTModule

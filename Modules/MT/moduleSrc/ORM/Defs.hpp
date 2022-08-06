@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -17,27 +17,26 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP
-#define TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP
 
-#include "intfTranslatorEngine.hpp"
+#ifndef TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP
+#define TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Classes {
+#include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
-class intfTranslatorBridge : public intfTranslatorEngine{
-public:
+constexpr char MTDomain[] = "MT";
+constexpr char MTSchema[] = "MT";
 
-};
+namespace Targoman::API::MTModule {
 
-}
-}
-}
-}
-}
-#endif // TARGOMAN_API_CLASSES_INTFTRANSLATORBRIDGE_HPP
+//TARGOMAN_DEFINE_ENUM(enuAdvertOrder,
+//                    );
+
+} //namespace Targoman::API::MTModule
+
+//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::MTModule, enu...);
+
+#endif // TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP

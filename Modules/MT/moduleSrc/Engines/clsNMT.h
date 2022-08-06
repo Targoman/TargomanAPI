@@ -17,19 +17,17 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_ENGINES_CLSBASENMT_H
-#define TARGOMAN_API_ENGINES_CLSBASENMT_H
+
+#ifndef TARGOMAN_API_MODULES_MT_ENGINES_CLSBASENMT_H
+#define TARGOMAN_API_MODULES_MT_ENGINES_CLSBASENMT_H
 
 #include <QUrl>
 #include "../Classes/intfTranslatorEngine.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Engines {
+namespace Targoman::API::MTModule::Engines {
 
 class clsBaseNMT : public Classes::intfTranslatorEngine
 {
@@ -42,9 +40,6 @@ private:
     QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
 };
 
-}
-}
-}
-}
-}
+} //namespace Targoman::API::MTModule::Engines
+
 #endif // TARGOMAN_API_ENGINES_CLSBASENMT_H

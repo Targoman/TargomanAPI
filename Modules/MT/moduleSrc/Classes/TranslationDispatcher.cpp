@@ -17,8 +17,10 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #include <QVariantMap>
 #include <QTime>
 #include <QUrl>
@@ -29,11 +31,7 @@
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/NLP/FormalityChecker.h"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Classes {
+namespace Targoman::API::MTModule::Classes {
 
 using namespace Apps;
 using namespace NLPLibs;

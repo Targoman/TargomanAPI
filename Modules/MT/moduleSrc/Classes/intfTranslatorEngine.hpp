@@ -17,10 +17,12 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP
-#define TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP
+
+#ifndef TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#define TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP
 
 #include <QString>
 #include <QVariantMap>
@@ -28,12 +30,7 @@
 #include "libTargomanCommon/Macros.h"
 #include "TranslationDefs.hpp"
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Classes {
-
+namespace Targoman::API::MTModule::Classes {
 
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuEngine,
                                NMT,
@@ -92,9 +89,6 @@ protected:
     stuEngineSpecs EngineSpecs;
 };
 
-}
-}
-}
-}
-}
-#endif // TARGOMAN_API_CLASSES_INTFTRANSLATORENGINE_HPP
+} //namespace Targoman::API::MTModule::Classes
+
+#endif // TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP

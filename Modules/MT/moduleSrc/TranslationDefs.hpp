@@ -17,13 +17,14 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
-#ifndef TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
-#define TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
 
-namespace Targoman {
-namespace API {
+#ifndef TARGOMAN_API_MODULES_MT_TRANSLATIONDEFS_HPP
+#define TARGOMAN_API_MODULES_MT_TRANSLATIONDEFS_HPP
+
+namespace Targoman::API::MTModule {
 
 namespace RESULTItems {
     constexpr char ERRNO[]= "errno";
@@ -52,6 +53,6 @@ namespace RESULTItems {
     }
 }
 
-}
-}
-#endif // TARGOMAN_API_MODULES_TRANSLATIONDEFS_HPP
+} //namespace Targoman::API::MTModule
+
+#endif // TARGOMAN_API_MODULES_MT_TRANSLATIONDEFS_HPP

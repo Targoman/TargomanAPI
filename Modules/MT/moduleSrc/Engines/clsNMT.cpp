@@ -17,8 +17,10 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
+
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -28,11 +30,7 @@
 
 #include <QtDebug>
 
-namespace Targoman {
-namespace API {
-namespace Modules {
-namespace Translation {
-namespace Engines {
+namespace Targoman::API::MTModule::Engines {
 
 using namespace Classes;
 
