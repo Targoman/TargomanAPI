@@ -208,12 +208,12 @@ public:
     const QString name() const;
     const QString nameWithSchema() const;
 
-    const QStringList SelectableColumnNames(QString _tableAlias = "") const;
+    const QStringList selectableColumnNames(QString _tableAlias = "") const;
 
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
-    virtual ORMCreateQuery GetCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
-    virtual ORMUpdateQuery GetUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
-    virtual ORMDeleteQuery GetDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMCreateQuery makeCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
+    virtual ORMUpdateQuery makeUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMDeleteQuery makeDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
 
 protected:
     /*inline */const QString domain();

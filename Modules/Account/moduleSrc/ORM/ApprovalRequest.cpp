@@ -100,8 +100,8 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
     } else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
-    QVariantMap Info = this->GetSelectQuery(APICALLBOOM_PARAM)
-//                            .addCols(ApprovalRequest::instance().SelectableColumnNames())
+    QVariantMap Info = this->makeSelectQuery(APICALLBOOM_PARAM)
+//                            .addCols(ApprovalRequest::instance().selectableColumnNames())
 //                            .addCol(Targoman::API::CURRENT_TIMESTAMP)
                             .where({ tblApprovalRequest::Fields::aprApprovalKey, enuConditionOperator::Equal, _emailOrMobile })
                             .andWhere({ tblApprovalRequest::Fields::aprRequestedFor, enuConditionOperator::Equal, Type })

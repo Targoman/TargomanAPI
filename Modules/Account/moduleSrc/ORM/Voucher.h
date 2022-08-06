@@ -112,7 +112,7 @@ class Voucher : public intfSQLBasedModule
     TARGOMAN_DEFINE_API_SUBMODULE(Account, Voucher)
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET("Get Voucher information")

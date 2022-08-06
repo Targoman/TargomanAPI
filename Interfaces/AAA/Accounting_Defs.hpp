@@ -99,12 +99,12 @@ namespace tblAccountUnitsBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(untID);
         TARGOMAN_CREATE_CONSTEXPR(untName);
-        TARGOMAN_CREATE_CONSTEXPR(untName_translate);
+        TARGOMAN_CREATE_CONSTEXPR(untNameI18N);
     } //namespace Fields
 }
 
-namespace tblAccountUnitsTranslateBase {
-    constexpr char Name[] = "tblAccountUnits_translate";
+namespace tblAccountUnitsI18NBase {
+    constexpr char Name[] = "tblAccountUnitsI18N";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
@@ -120,9 +120,9 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdID);
         TARGOMAN_CREATE_CONSTEXPR(prdCode);
         TARGOMAN_CREATE_CONSTEXPR(prdName);
-        TARGOMAN_CREATE_CONSTEXPR(prdName_translate);
+        TARGOMAN_CREATE_CONSTEXPR(prdNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(prdDesc);
-        TARGOMAN_CREATE_CONSTEXPR(prdDesc_translate);
+        TARGOMAN_CREATE_CONSTEXPR(prdDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
@@ -145,8 +145,8 @@ namespace tblAccountProductsBase {
     } //namespace Fields
 }
 
-namespace tblAccountProductsTranslateBase {
-    constexpr char Name[] = "tblAccountProducts_translate";
+namespace tblAccountProductsI18NBase {
+    constexpr char Name[] = "tblAccountProductsI18N";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
@@ -164,9 +164,9 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
         TARGOMAN_CREATE_CONSTEXPR(slbCode);
         TARGOMAN_CREATE_CONSTEXPR(slbName);
-        TARGOMAN_CREATE_CONSTEXPR(slbName_translate);
+        TARGOMAN_CREATE_CONSTEXPR(slbNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbDesc);
-        TARGOMAN_CREATE_CONSTEXPR(slbDesc_translate);
+        TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbType);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
@@ -190,8 +190,8 @@ namespace tblAccountSaleablesBase {
     }
 }
 
-namespace tblAccountSaleablesTranslateBase {
-    constexpr char Name[] = "tblAccountSaleables_translate";
+namespace tblAccountSaleablesI18NBase {
+    constexpr char Name[] = "tblAccountSaleablesI18N";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(pid);
@@ -319,7 +319,7 @@ namespace tblAccountUnitsBase {
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
-                { Fields::untID, R(_schema, tblAccountUnitsTranslateBase::Name), tblAccountUnitsTranslateBase::Fields::pid },
+                { Fields::untID, R(_schema, tblAccountUnitsI18NBase::Name), tblAccountUnitsI18NBase::Fields::pid },
             };
         };
 
@@ -337,7 +337,7 @@ namespace tblAccountUnitsBase {
     );
 }
 
-namespace tblAccountUnitsTranslateBase {
+namespace tblAccountUnitsI18NBase {
     namespace Relation {
     }
 
@@ -358,13 +358,13 @@ namespace tblAccountUnitsTranslateBase {
 
     } //namespace Private
 
-#define SF_tblAccountUnitsTranslateBase_DTO \
+#define SF_tblAccountUnitsI18NBase_DTO \
     SF_quint16                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (untName)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountUnitsTranslateBase_DTO
+        SF_tblAccountUnitsI18NBase_DTO
     );
 }
 
@@ -406,7 +406,7 @@ namespace tblAccountProductsBase {
                     { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
-                { Fields::prdID, R(_schema, tblAccountProductsTranslateBase::Name), tblAccountProductsTranslateBase::Fields::pid },
+                { Fields::prdID, R(_schema, tblAccountProductsI18NBase::Name), tblAccountProductsI18NBase::Fields::pid },
                 { Relation::Unit,
                     { Fields::prd_untID, R(_schema, tblAccountUnitsBase::Name), tblAccountUnitsBase::Fields::untID } },
             };
@@ -455,7 +455,7 @@ namespace tblAccountProductsBase {
     );
 }
 
-namespace tblAccountProductsTranslateBase {
+namespace tblAccountProductsI18NBase {
     namespace Relation {
     }
 
@@ -477,14 +477,14 @@ namespace tblAccountProductsTranslateBase {
 
     } //namespace Private
 
-#define SF_tblAccountProductsTranslateBase_DTO \
+#define SF_tblAccountProductsI18NBase_DTO \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (prdName), \
     SF_QString                  (prdDesc)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountProductsTranslateBase_DTO
+        SF_tblAccountProductsI18NBase_DTO
     );
 }
 
@@ -529,7 +529,7 @@ namespace tblAccountSaleablesBase {
                     { Fields::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_slbID } },
                 ORM_RELATION_OF_CREATOR(Fields::slbCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::slbUpdatedBy_usrID),
-                { Fields::slbID, R(_schema, tblAccountSaleablesTranslateBase::Name), tblAccountSaleablesTranslateBase::Fields::pid },
+                { Fields::slbID, R(_schema, tblAccountSaleablesI18NBase::Name), tblAccountSaleablesI18NBase::Fields::pid },
             };
         };
 
@@ -576,7 +576,7 @@ namespace tblAccountSaleablesBase {
     );
 }
 
-namespace tblAccountSaleablesTranslateBase {
+namespace tblAccountSaleablesI18NBase {
     namespace Relation {
     }
 
@@ -600,14 +600,14 @@ namespace tblAccountSaleablesTranslateBase {
 
     } //namespace Private
 
-#define SF_tblAccountSaleablesTranslateBase_DTO \
+#define SF_tblAccountSaleablesI18NBase_DTO \
     SF_quint32                  (pid), \
     SF_QString                  (language), \
     SF_QString                  (slbName), \
     SF_QString                  (slbDesc)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountSaleablesTranslateBase_DTO
+        SF_tblAccountSaleablesI18NBase_DTO
     );
 }
 

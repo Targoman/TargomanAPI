@@ -104,17 +104,17 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 ) {
     QString Domain = URLHelper::domain(_domain, true);
 
-    ORMSelectQuery qry = PaymentGatewayTypes::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery qry = PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
                       .addCol(tblPaymentGatewayTypes::Fields::pgtType)
                       .addCol(tblPaymentGatewayTypes::Fields::pgtName)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMinRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMinRequestAmount)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMaxRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount)
-                      .nestedInnerJoin(PaymentGatewayTypes::instance().GetSelectQuery(APICALLBOOM_PARAM)
+                      .nestedInnerJoin(PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                  .addCol(tblPaymentGatewayTypes::Fields::pgtType)
                                  .addCol(enuAggregation::COUNT, tblPaymentGatewayTypes::Fields::pgtType, "_cnt")
 
-                                 .nestedInnerJoin(PaymentGateways::instance().GetSelectQuery(APICALLBOOM_PARAM)
-                                            .addCols(PaymentGateways::instance().SelectableColumnNames())
+                                 .nestedInnerJoin(PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                                            .addCols(PaymentGateways::instance().selectableColumnNames())
                                             .addCol(enuConditionalAggregation::IF,
                                                 { tblPaymentGateways::Fields::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
                                                 , DBExpression::VALUE(QString("%1 * %2 / 100").arg(tblPaymentGateways::Fields::pgwTransactionFeeValue).arg(_amount))
@@ -171,7 +171,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 
 //    QList<ORM::tblPaymentGateways::DTO> Rows = qry.all<ORM::tblPaymentGateways::DTO>();
 
-    QVariantList Rows = qry.all();
+    QVariantList Rows = qry.all().Rows;
 
     QVariantList Result;
 
@@ -204,13 +204,13 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
 
     QString Domain = URLHelper::domain(_domain, true);
 
-    ORMSelectQuery qry = PaymentGateways::instance().GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(PaymentGateways::instance().SelectableColumnNames())
+    ORMSelectQuery qry = PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(PaymentGateways::instance().selectableColumnNames())
         .addCols({
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
                  })
-        .nestedLeftJoin(PaymentGateways::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
             .addCol(tblPaymentGateways::Fields::pgwID)
             .addCol(enuConditionalAggregation::IF,
                     { tblPaymentGateways::Fields::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
@@ -381,9 +381,9 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
     if (_paymentKey.isEmpty())
         throw exPayment("paymentKey is empty");
 
-    QVariantMap OnlinePaymentInfo = OnlinePayments::instance().GetSelectQuery(APICALLBOOM_PARAM)
-            .addCols(OnlinePayments::instance().SelectableColumnNames())
-            .addCols(PaymentGateways::instance().SelectableColumnNames())
+    QVariantMap OnlinePaymentInfo = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+            .addCols(OnlinePayments::instance().selectableColumnNames())
+            .addCols(PaymentGateways::instance().selectableColumnNames())
             .innerJoinWith("paymentGateway")
             .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
             .one();

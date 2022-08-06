@@ -76,11 +76,11 @@ Advert::Advert() :
             { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
         },
         &AccountUnits::instance(),
-//        &AccountUnitsTranslate::instance(),
+//        &AccountUnitsI18N::instance(),
         &AccountProducts::instance(),
-//        &AccountProductsTranslate::instance(),
+//        &AccountProductsI18N::instance(),
         &AccountSaleables::instance(),
-//        &AccountSaleablesTranslate::instance(),
+//        &AccountSaleablesI18N::instance(),
         &AccountSaleablesFiles::instance(),
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
@@ -93,11 +93,11 @@ Advert::Advert() :
     TARGOMAN_API_IMPLEMENT_FAQ(Advert, AdvertSchema)
 
     this->addSubModule(AccountUnits.data());
-//    this->addSubModule(AccountUnitsTranslate.data());
+//    this->addSubModule(AccountUnitsI18N.data());
     this->addSubModule(AccountProducts.data());
-//    this->addSubModule(AccountProductsTranslate.data());
+//    this->addSubModule(AccountProductsI18N.data());
     this->addSubModule(AccountSaleables.data());
-//    this->addSubModule(AccountSaleablesTranslate.data());
+//    this->addSubModule(AccountSaleablesI18N.data());
     this->addSubModule(AccountSaleablesFiles.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
@@ -298,7 +298,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblLocations::Fields::locPlaceCode,  "FIX" },
     };
 
-    quint32 LocationID = Locations::instance().GetCreateQuery(APICALLBOOM_PARAM)
+    quint32 LocationID = Locations::instance().makeCreateQuery(APICALLBOOM_PARAM)
                          .addCols({
                                       tblLocations::Fields::locURL,
                                       tblLocations::Fields::locPlaceCode,
@@ -316,7 +316,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
         { tblAccountProductsBase::Fields::prdCode,              ProductCode },
         { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
-        { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+        { tblAccountProductsBase::Fields::prdNameI18N,          QVariantMap({
               { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
         }) },
         { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
@@ -337,7 +337,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
         { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
-        { tblAccountSaleablesBase::Fields::slbName_translate,   QVariantMap({
+        { tblAccountSaleablesBase::Fields::slbNameI18N,         QVariantMap({
               { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
         }) },
         { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
@@ -380,7 +380,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //        { tblAccountCouponsBase::Fields::cpnStatus,  },
     };
 
-    quint32 CouponID = this->AccountCoupons->GetCreateQuery(APICALLBOOM_PARAM)
+    quint32 CouponID = this->AccountCoupons->makeCreateQuery(APICALLBOOM_PARAM)
                        .addCols({
 //                                    tblAccountCouponsBase::Fields::cpnID,
                                     tblAccountCouponsBase::Fields::cpnCode,

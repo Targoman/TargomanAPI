@@ -34,18 +34,18 @@ namespace Targoman::API::AAA {
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUnitsTranslate : public intfSQLBasedModule
+class intfAccountUnitsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUnitsTranslate(const QString& _schema,
+    intfAccountUnitsI18N(const QString& _schema,
                               const QList<DBM::clsORMField>& _exclusiveCols = {},
                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountUnitsTranslate* myInstance;
+    static intfAccountUnitsI18N* myInstance;
     friend class intfAccountUnits;
 };
 
@@ -61,7 +61,7 @@ public:
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Units")
@@ -73,18 +73,18 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountProductsTranslate : public intfSQLBasedModule
+class intfAccountProductsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsTranslate(const QString& _schema,
+    intfAccountProductsI18N(const QString& _schema,
                                  const QList<DBM::clsORMField>& _exclusiveCols = {},
                                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountProductsTranslate* myInstance;
+    static intfAccountProductsI18N* myInstance;
     friend class intfAccountProducts;
 };
 
@@ -100,7 +100,7 @@ public:
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Products")
@@ -112,18 +112,18 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountSaleablesTranslate : public intfSQLBasedModule
+class intfAccountSaleablesI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesTranslate(const QString& _schema,
+    intfAccountSaleablesI18N(const QString& _schema,
                                   const QList<DBM::clsORMField>& _exclusiveCols = {},
                                   const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                   const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountSaleablesTranslate* myInstance;
+    static intfAccountSaleablesI18N* myInstance;
     friend class intfAccountSaleables;
 };
 
@@ -139,7 +139,7 @@ public:
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
@@ -160,7 +160,7 @@ public:
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 //public:
-//    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 protected:
     static intfAccountSaleablesFiles* myInstance;
@@ -187,7 +187,7 @@ public:
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery GetSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET("Get User Assets")

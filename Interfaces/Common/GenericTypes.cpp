@@ -387,6 +387,51 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,           
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 
+/**********************************************************************************/
+QVariant stuTable::toVariant() const {
+    QVariantMap Result;
+
+    QStringList Headers;
+    QVariantList RowsArray;
+
+    int RowIndex = 0;
+    foreach (QVariant Row, this->Rows) {
+
+        QVariantMap RowMap = Row.toMap();
+
+        QVariantList OneRowsAsArray;
+
+        for (auto It = RowMap.constBegin(); It != RowMap.constEnd(); It++) {
+            QString ColName = It.key();
+            QVariant ColValue = It.value();
+
+            if (RowIndex == 0) {
+                Headers.append(ColName);
+            }
+
+            OneRowsAsArray.append(ColValue);
+        }
+
+        RowsArray.append(QVariant(OneRowsAsArray));
+
+        ++RowIndex;
+    }
+
+    if (Headers.isEmpty() == false)
+        Result.insert("cols", Headers);
+
+    Result.insert("rows", RowsArray);
+
+    if (this->HasCount) {
+        Result.insert("totalRows", this->TotalRows);
+        Result.insert("pageCount", this->PageCount);
+        Result.insert("hasMore", this->HasMore);
+    }
+
+    return Result;
+}
+
+/**********************************************************************************/
 stuFileInfo stuFileInfo::fromVariant(const QVariant& _value, const QByteArray& _paramName) {
      QVariantMap Value = _value.toMap();
      if (Value.isEmpty() || !Value.contains("name") || !Value.contains("tmpname") || !Value.contains("size") || !Value.contains("mime"))
@@ -409,6 +454,7 @@ QVariant stuFileInfo::toVariant() const{
                        });
 }
 
+/**********************************************************************************/
 QVariant Files_t::toVariant() const
 {
     QVariantList Files;

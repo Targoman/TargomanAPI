@@ -598,7 +598,7 @@ QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
 )) {
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-    QVariantMap Data = ForgotPassRequest::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap Data = ForgotPassRequest::instance().makeSelectQuery(APICALLBOOM_PARAM)
                        .addCols({
                                     tblForgotPassRequest::Fields::fprCode,
                                     tblForgotPassRequest::Fields::fprStatus,
@@ -617,7 +617,7 @@ QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
 
     QString fprStatus = Data.value(tblForgotPassRequest::Fields::fprStatus).toString();
     if (fprStatus != "Sent") {
-        quint64 RowsCount = ForgotPassRequest::instance().GetUpdateQuery(APICALLBOOM_PARAM)
+        quint64 RowsCount = ForgotPassRequest::instance().makeUpdateQuery(APICALLBOOM_PARAM)
                             .set(tblForgotPassRequest::Fields::fprStatus, enuFPRStatus::Sent)
                             .where({ tblForgotPassRequest::Fields::fprCode, enuConditionOperator::Equal, Code })
                             .execute(1)
@@ -837,9 +837,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
     //check prevoucher changes
     if (_preVoucher.VoucherID > 0) {
-        QVariantMap VoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-//                                     .addCols(Voucher::instance().SelectableColumnNames())
-//                                     .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        QVariantMap VoucherInfo = Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
+//                                     .addCols(Voucher::instance().selectableColumnNames())
+//                                     .nestedLeftJoin(Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
 //                                               .addCol(tblVoucher::Fields::vch_rootVchID)
 //                                               .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
 //                                               .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
@@ -942,7 +942,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     quint64 MustFreeze = 0;
 
     if ((RemainingAfterWallet > 0) && (_walID >= 0)) {
-        auto Query = UserWallets::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        auto Query = UserWallets::instance().makeSelectQuery(APICALLBOOM_PARAM)
                      .andWhere({ tblUserWallets::Fields::wal_usrID, enuConditionOperator::Equal, CurrentUserID });
                      ;
 
@@ -1071,7 +1071,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
     //rem > 0 and non cod:
 
     //check max gateway amount per pay
-    tblPaymentGatewayTypes::DTO PaymentGatewayTypesDTO = PaymentGatewayTypes::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    tblPaymentGatewayTypes::DTO PaymentGatewayTypesDTO = PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                                          .where({ tblPaymentGatewayTypes::Fields::pgtType, enuConditionOperator::Equal, _gatewayType })
                                                          .one<tblPaymentGatewayTypes::DTO>();
     stuVoucher Voucher;
@@ -1189,7 +1189,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
 //    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
 
     tblVoucher::DTO VoucherDTO = SelectQuery(Voucher::instance())
-                                 .addCols(Voucher::instance().SelectableColumnNames())
+                                 .addCols(Voucher::instance().selectableColumnNames())
                                  .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                  .one<tblVoucher::DTO>();
 
@@ -1283,9 +1283,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
             );
 
     //----------------------------------
-    QVariantMap VoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-//                                 .addCols(Voucher::instance().SelectableColumnNames())
-//                                 .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap VoucherInfo = Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
+//                                 .addCols(Voucher::instance().selectableColumnNames())
+//                                 .nestedLeftJoin(Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
 //                                           .addCol(tblVoucher::Fields::vch_rootVchID)
 //                                           .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
 //                                           .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
@@ -1310,9 +1310,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
     QVariantMap RootVoucherInfo;
     tblVoucher::DTO RootVoucherDTO;
     if (NULLABLE_HAS_VALUE(VoucherDTO.vch_rootVchID)) {
-        RootVoucherInfo = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-//                          .addCols(Voucher::instance().SelectableColumnNames())
-//                          .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        RootVoucherInfo = Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
+//                          .addCols(Voucher::instance().selectableColumnNames())
+//                          .nestedLeftJoin(Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
 //                                    .addCol(tblVoucher::Fields::vch_rootVchID)
 //                                    .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "TotalFreezed")
 //                                    .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
@@ -1551,9 +1551,9 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
 )) {
-    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePaymentClaims::instance().GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
-//        .addCols(Voucher::instance().SelectableColumnNames())
+    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePaymentClaims::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(OfflinePaymentClaims::instance().selectableColumnNames())
+//        .addCols(Voucher::instance().selectableColumnNames())
 //        .leftJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one()
@@ -1594,9 +1594,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentClaimID
 )) {
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO = OfflinePaymentClaims::instance().GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
-//        .addCols(Voucher::instance().SelectableColumnNames())
+    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO = OfflinePaymentClaims::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(OfflinePaymentClaims::instance().selectableColumnNames())
+//        .addCols(Voucher::instance().selectableColumnNames())
 //        .innerJoin(tblVoucher::Name)
         .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
         .one<tblOfflinePaymentClaims::DTO>();
@@ -1821,8 +1821,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         if (RemainingAmount != 0)
             throw exHTTPInternalServerError("This voucher has not been paid in full");
 
-        tblVoucher::DTO VoucherDTO = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
-//                                     .addCols(Voucher::instance().SelectableColumnNames())
+        tblVoucher::DTO VoucherDTO = Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
+//                                     .addCols(Voucher::instance().selectableColumnNames())
                                      .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                      .one<tblVoucher::DTO>();
 
@@ -1851,13 +1851,13 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         if (PreVoucher.Items.isEmpty())
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
 
-        QVariantList Services = Service::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        QVariantList Services = Service::instance().makeSelectQuery(APICALLBOOM_PARAM)
                 .addCols({
                              tblService::Fields::svcID,
                              tblService::Fields::svcName,
                              tblService::Fields::svcProcessVoucherItemEndPoint,
                          })
-                .all();
+                .all().Rows;
 
         if (Services.isEmpty())
             throw exHTTPInternalServerError("There is no services registered.");
@@ -2042,7 +2042,7 @@ void Account::tryCancelVoucher(
 ) {
     //1: cancel voucher items
     try {
-        QVariant VoucherDesc = Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM)
+        QVariant VoucherDesc = Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                .addCol(tblVoucher::Fields::vchDesc)
                                .where({ tblVoucher::Fields::vchID, enuConditionOperator::Equal, _voucherID })
                                .tryOne()
@@ -2056,13 +2056,13 @@ void Account::tryCancelVoucher(
             PreVoucher.fromJson(QJsonObject::fromVariantMap(VoucherDesc.toMap()));
 
         if (PreVoucher.Items.length()) {
-            QVariantList Services = Service::instance().GetSelectQuery(APICALLBOOM_PARAM)
+            QVariantList Services = Service::instance().makeSelectQuery(APICALLBOOM_PARAM)
                     .addCols({
                                  tblService::Fields::svcID,
                                  tblService::Fields::svcName,
                                  tblService::Fields::svcCancelVoucherItemEndPoint,
                              })
-                    .all();
+                    .all().Rows;
 
             if (Services.isEmpty() == false) {
                 foreach (Targoman::API::AAA::stuVoucherItem VoucherItem, PreVoucher.Items) {
@@ -2391,7 +2391,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                     { tblPaymentGateways::Fields::pgw_curID,   1 },
                     { tblPaymentGateways::Fields::pgwAllowedDomainName, "dev.test" },
                 };
-                quint32 PaymentGatewayID = PaymentGateways::instance().GetCreateQuery(APICALLBOOM_PARAM)
+                quint32 PaymentGatewayID = PaymentGateways::instance().makeCreateQuery(APICALLBOOM_PARAM)
                                            .addCols({
 //                                                        tblPaymentGateways::Fields::pgwID,
                                                         tblPaymentGateways::Fields::pgwName,

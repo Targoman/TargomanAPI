@@ -260,7 +260,7 @@ const QString clsTable::nameWithSchema() const {
     return QString("%1.%2").arg(this->Schema).arg(this->Name);
 }
 
-const QStringList clsTable::SelectableColumnNames(QString _tableAlias) const {
+const QStringList clsTable::selectableColumnNames(QString _tableAlias) const {
     if (_tableAlias.isEmpty() == false)
         _tableAlias += ".";
 
@@ -277,19 +277,19 @@ const QStringList clsTable::SelectableColumnNames(QString _tableAlias) const {
     return ColNames;
 }
 
-ORMSelectQuery clsTable::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery clsTable::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     return ORMSelectQuery(APICALLBOOM_PARAM, *this, _alias);
 }
 
-ORMCreateQuery clsTable::GetCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
+ORMCreateQuery clsTable::makeCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
     return ORMCreateQuery(APICALLBOOM_PARAM, *this);
 }
 
-ORMUpdateQuery clsTable::GetUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+ORMUpdateQuery clsTable::makeUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
     return ORMUpdateQuery(APICALLBOOM_PARAM, *this, _alias);
 }
 
-ORMDeleteQuery clsTable::GetDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
+ORMDeleteQuery clsTable::makeDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
     return ORMDeleteQuery(APICALLBOOM_PARAM, *this, _alias);
 }
 

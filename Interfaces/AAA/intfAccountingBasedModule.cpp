@@ -111,11 +111,11 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     const QString               &_schema,
     AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
     intfAccountUnits            *_units,
-//    intfAccountUnitsTranslate* _unitsTranslate,
+//    intfAccountUnitsI18N        *_unitsI18N,
     intfAccountProducts         *_products,
-//    intfAccountProductsTranslate* _productsTranslate,
+//    intfAccountProductsI18N     *_productsI18N,
     intfAccountSaleables        *_saleables,
-//    intfAccountSaleablesTranslate* _saleablesTranslate,
+//    intfAccountSaleablesI18N    *_saleablesI18N,
     intfAccountSaleablesFiles   *_saleablesFiles,
     intfAccountUserAssets       *_userAssets,
     intfAccountUserAssetsFiles  *_userAssetsFiles,
@@ -126,11 +126,11 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     API::intfSQLBasedWithActionLogsModule(_module, _schema),
     ServiceName(_schema),
     AccountUnits(_units),
-//    AccountUnitsTranslate(_unitsTranslate),
+//    AccountUnitsI18N(_unitsI18N),
     AccountProducts(_products),
-//    AccountProductsTranslate(_productsTranslate),
+//    AccountProductsI18N(_productsI18N),
     AccountSaleables(_saleables),
-//    AccountSaleablesTranslate(_saleablesTranslate),
+//    AccountSaleablesI18N(_saleablesI18N),
     AccountSaleablesFiles(_saleablesFiles),
     AccountUserAssets(_userAssets),
     AccountUserAssetsFiles(_userAssetsFiles),
@@ -424,9 +424,9 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
                 continue;
         }
 
-        QVariantMap UserAssetInfo = this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
-            .addCols(this->AccountUserAssets->SelectableColumnNames())
-            .addCols(this->AccountSaleables->SelectableColumnNames())
+        QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM)
+            .addCols(this->AccountUserAssets->selectableColumnNames())
+            .addCols(this->AccountSaleables->selectableColumnNames())
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
             .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->OrderID })
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, AssetItem.Saleable.slbID })
@@ -455,9 +455,9 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     } //find duplicates
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap SaleableInfo = this->AccountSaleables->GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(this->AccountSaleables->SelectableColumnNames())
-        .addCols(this->AccountProducts->SelectableColumnNames())
+    QVariantMap SaleableInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(this->AccountSaleables->selectableColumnNames())
+        .addCols(this->AccountProducts->selectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
         .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
@@ -538,7 +538,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     PreVoucherItem.Referrer = AssetItem.Referrer;
     PreVoucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
-    ORMCreateQuery qry = this->AccountUserAssets->GetCreateQuery(APICALLBOOM_PARAM)
+    ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(APICALLBOOM_PARAM)
         .addCols({
                      tblAccountUserAssetsBase::Fields::uas_usrID,
                      tblAccountUserAssetsBase::Fields::uas_slbID,
@@ -742,16 +742,16 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
         throw exHTTPBadRequest("Item not found in pre-Voucher");
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap UserAssetInfo = this->AccountSaleables->GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(this->AccountSaleables->SelectableColumnNames())
-        .addCols(this->AccountProducts->SelectableColumnNames())
+    QVariantMap UserAssetInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(this->AccountSaleables->selectableColumnNames())
+        .addCols(this->AccountProducts->selectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
         .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
         .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
 
         .innerJoinWith(tblAccountSaleablesBase::Relation::UserAsset)
-        .addCols(this->AccountUserAssets->SelectableColumnNames())
+        .addCols(this->AccountUserAssets->selectableColumnNames())
         .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 
         .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
@@ -856,7 +856,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
         _voucherItem.Referrer = AssetItem.Referrer;
         _voucherItem.ReferrerParams = AssetItem.ReferrerParams;
 
-        ORMUpdateQuery qry = this->AccountUserAssets->GetUpdateQuery(APICALLBOOM_PARAM)
+        ORMUpdateQuery qry = this->AccountUserAssets->makeUpdateQuery(APICALLBOOM_PARAM)
                           .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                           .set(tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, _voucherItem.toJson().toVariantMap())
                           .set(tblAccountUserAssetsBase::Fields::uasQty, _newQty)
@@ -1168,10 +1168,10 @@ void intfAccountingBasedModule::computeCouponDiscount(
                                     _oldVoucherItem->OrderID });
     }
 
-    QVariantMap DiscountInfo = this->AccountCoupons->GetSelectQuery(APICALLBOOM_PARAM)
-        .addCols(this->AccountCoupons->SelectableColumnNames())
+    QVariantMap DiscountInfo = this->AccountCoupons->makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(this->AccountCoupons->selectableColumnNames())
 
-        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM, "", false)
+        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", false)
                   .addCols({
                                tblAccountUserAssetsBase::Fields::uas_cpnID,
                                tblAccountUserAssetsBase::Fields::uas_vchID,
@@ -1190,7 +1190,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
         )
         .addCol("tmp_cpn_count._discountUsedCount")
 
-        .nestedLeftJoin(this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM, "", false)
+        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", false)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
                   .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
@@ -1447,7 +1447,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem))
         return false;
 
-    QVariantMap UserAssetInfo = this->AccountUserAssets->GetSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM)
                                 .addCols({
                                              tblAccountUserAssetsBase::Fields::uasID,
                                              tblAccountUserAssetsBase::Fields::uas_slbID,

@@ -89,7 +89,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
@@ -122,7 +122,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
     return Result;
 }
 
-QVariantList intfSQLBasedModule::SelectAll(
+/*QVariantList*/ TAPI::stuTable intfSQLBasedModule::SelectAll(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -132,7 +132,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -150,7 +150,7 @@ QVariantList intfSQLBasedModule::SelectAll(
     if (_extraFilters.isEmpty() == false)
         Query.andWhere(_extraFilters);
 
-    QVariantList Result = Query.all();
+    /*QVariantList*/ TAPI::stuTable Result = Query.all();
 
 //    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
 //    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
@@ -175,7 +175,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -224,15 +224,15 @@ QVariant intfSQLBasedModule::Select(
                         _cacheTime,
                         _fnTouchQuery
                         )
-                    .toVariant()
-                ;
+                    .toVariant();
 
         return this->SelectAll(
                     GET_METHOD_ARGS_CALL_VALUES,
                     _extraFilters,
                     _cacheTime,
                     _fnTouchQuery
-                    );
+                    )
+                .toVariant();
     }
 
     return this->SelectOne(
@@ -252,20 +252,20 @@ quint64 intfSQLBasedModule::Create(
 
     TAPI::ORMFields_t CreateInfo;
     //key: language
-    QMap<QString, TAPI::ORMFields_t> TranslateCreateInfo;
+    QMap<QString, TAPI::ORMFields_t> I18NCreateInfo;
 
-    //1: extract _translate fields
+    //1: extract I18N fields
     TAPI::ORMFields_t::iterator it = _createInfo.begin();
     while (it != _createInfo.end()) {
-        if (it.key().endsWith("_translate")) {
-            QString ColName = it.key().chopped(QString("_translate").length());
+        if (it.key().endsWith("I18N")) {
+            QString ColName = it.key().chopped(QString("I18N").length());
 
             QVariantMap ValuesByLanguage = it.value().toMap();
             it = _createInfo.erase(it);
 
             IteratorHelper::ConstIterator(ValuesByLanguage)
-                    .runAll([&ColName, &TranslateCreateInfo](QString _key, QVariant _value) -> bool {
-                        TranslateCreateInfo[_key].insert(ColName, _value);
+                    .runAll([&ColName, &I18NCreateInfo](QString _key, QVariant _value) -> bool {
+                        I18NCreateInfo[_key].insert(ColName, _value);
                         return true;
                     });
 
@@ -274,11 +274,11 @@ quint64 intfSQLBasedModule::Create(
             it++;
     }
 
-    if ((TranslateCreateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "_translate") == false))
+    if ((I18NCreateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "I18N") == false))
         throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
 
-    //2: run wo/ _translate
-    ORMCreateQuery query = this->GetCreateQuery(APICALLBOOM_PARAM);
+    //2: run wo/ I18N
+    ORMCreateQuery query = this->makeCreateQuery(APICALLBOOM_PARAM);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
         query.addCol(arg.key());
@@ -287,25 +287,25 @@ quint64 intfSQLBasedModule::Create(
 
     quint64 LastID = query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID));
 
-    //3: run _translate
-    if ((LastID > 0) && (TranslateCreateInfo.isEmpty() == false)) {
-        intfSQLBasedModule* TranslateModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "_translate"]);
-        if (TranslateModule) {
-            IteratorHelper::ConstIterator(TranslateCreateInfo)
-                    .runAll([&TranslateModule, &APICALLBOOM_PARAM, LastID](QString _key, QVariant _value) -> bool {
-                        TAPI::ORMFields_t TranslateInfo;
-                        TranslateInfo.insert("pid", LastID);
-                        TranslateInfo.insert("language", _key);
+    //3: run I18N
+    if ((LastID > 0) && (I18NCreateInfo.isEmpty() == false)) {
+        intfSQLBasedModule* I18NModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "I18N"]);
+        if (I18NModule) {
+            IteratorHelper::ConstIterator(I18NCreateInfo)
+                    .runAll([&I18NModule, &APICALLBOOM_PARAM, LastID](QString _key, QVariant _value) -> bool {
+                        TAPI::ORMFields_t I18NInfo;
+                        I18NInfo.insert("pid", LastID);
+                        I18NInfo.insert("language", _key);
 
                         IteratorHelper::ConstIterator(_value.toMap())
-                                .runAll([&TranslateInfo](QString _key, QVariant _value) -> bool {
-                                    TranslateInfo.insert(_key, _value);
+                                .runAll([&I18NInfo](QString _key, QVariant _value) -> bool {
+                                    I18NInfo.insert(_key, _value);
                                     return true;
                                 });
 
-                        /*quint64 TranslateLastID = */TranslateModule->Create(
+                        /*quint64 I18NLastID = */I18NModule->Create(
                                                       APICALLBOOM_PARAM,
-                                                      TranslateInfo
+                                                      I18NInfo
                                                       );
 
                         return true;
@@ -333,20 +333,20 @@ bool intfSQLBasedModule::Update(
 
     TAPI::ORMFields_t UpdateInfo;
     //key: language
-    QMap<QString, TAPI::ORMFields_t> TranslateUpdateInfo;
+    QMap<QString, TAPI::ORMFields_t> I18NUpdateInfo;
 
-    //1: extract _translate fields
+    //1: extract I18N fields
     TAPI::ORMFields_t::iterator it = _updateInfo.begin();
     while (it != _updateInfo.end()) {
-        if (it.key().endsWith("_translate")) {
-            QString ColName = it.key().chopped(QString("_translate").length());
+        if (it.key().endsWith("I18N")) {
+            QString ColName = it.key().chopped(QString("I18N").length());
 
             QVariantMap ValuesByLanguage = it.value().toMap();
             it = _updateInfo.erase(it);
 
             IteratorHelper::ConstIterator(ValuesByLanguage)
-                    .runAll([&ColName, &TranslateUpdateInfo](QString _key, QVariant _value) -> bool {
-                        TranslateUpdateInfo[_key].insert(ColName, _value);
+                    .runAll([&ColName, &I18NUpdateInfo](QString _key, QVariant _value) -> bool {
+                        I18NUpdateInfo[_key].insert(ColName, _value);
                         return true;
                     });
 
@@ -355,11 +355,11 @@ bool intfSQLBasedModule::Update(
             it++;
     }
 
-    if ((TranslateUpdateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "_translate") == false))
+    if ((I18NUpdateInfo.isEmpty() == false) && (clsTable::Registry.contains(this->nameWithSchema() + "I18N") == false))
         throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
 
-    //2: run wo/ _translate
-    ORMUpdateQuery query = this->GetUpdateQuery(APICALLBOOM_PARAM)
+    //2: run wo/ I18N
+    ORMUpdateQuery query = this->makeUpdateQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -381,29 +381,29 @@ bool intfSQLBasedModule::Update(
 
     quint64 NumRowsAffected = query.execute(APICALLBOOM_PARAM.getUserID(SYSTEM_USER_ID)) > 0;
 
-    //3: run _translate
-    if ((NumRowsAffected > 0) && (TranslateUpdateInfo.isEmpty() == false)) {
-        intfSQLBasedModule* TranslateModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "_translate"]);
-        if (TranslateModule) {
-            IteratorHelper::ConstIterator(TranslateUpdateInfo)
-                    .runAll([&TranslateModule, &APICALLBOOM_PARAM, _pksByPath](QString _key, QVariant _value) -> bool {
-                        TAPI::ORMFields_t TranslateInfo;
-//                        TranslateInfo.insert("pid", _pksByPath);
-//                        TranslateInfo.insert("language", _key);
+    //3: run I18N
+    if ((NumRowsAffected > 0) && (I18NUpdateInfo.isEmpty() == false)) {
+        intfSQLBasedModule* I18NModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "I18N"]);
+        if (I18NModule) {
+            IteratorHelper::ConstIterator(I18NUpdateInfo)
+                    .runAll([&I18NModule, &APICALLBOOM_PARAM, _pksByPath](QString _key, QVariant _value) -> bool {
+                        TAPI::ORMFields_t I18NInfo;
+//                        I18NInfo.insert("pid", _pksByPath);
+//                        I18NInfo.insert("language", _key);
 
                         IteratorHelper::ConstIterator(_value.toMap())
-                                .runAll([&TranslateInfo](QString _key, QVariant _value) -> bool {
-                                    TranslateInfo.insert(_key, _value);
+                                .runAll([&I18NInfo](QString _key, QVariant _value) -> bool {
+                                    I18NInfo.insert(_key, _value);
                                     return true;
                                 });
 
                         //PK: id,language
-                        TAPI::PKsByPath_t TranslatePKs = QString("%1,%2").arg(_pksByPath).arg(_key);
+                        TAPI::PKsByPath_t I18NPKs = QString("%1,%2").arg(_pksByPath).arg(_key);
 
-                        /*quint64 TranslateRowsCount = */TranslateModule->Update(
+                        /*quint64 I18NRowsCount = */I18NModule->Update(
                                                          APICALLBOOM_PARAM,
-                                                         TranslatePKs,
-                                                         TranslateInfo
+                                                         I18NPKs,
+                                                         I18NInfo
                                                          );
 
                         return true;
@@ -438,7 +438,7 @@ bool intfSQLBasedModule::DeleteByPks(
 //    if (_realDelete == false)
 //        return true;
 
-    ORMDeleteQuery query = this->GetDeleteQuery(APICALLBOOM_PARAM)
+    ORMDeleteQuery query = this->makeDeleteQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;

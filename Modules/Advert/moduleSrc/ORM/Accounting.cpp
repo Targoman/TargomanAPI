@@ -39,16 +39,16 @@ AccountUnits::AccountUnits() :
         tblAccountUnits::Private::ExtraRelations,
         tblAccountUnits::Private::ExtraIndexes
 ) {
-    AccountUnitsTranslate::instance();
+    AccountUnitsI18N::instance();
 }
 
 /******************************************************/
-AccountUnitsTranslate::AccountUnitsTranslate() :
-    intfAccountUnitsTranslate(
+AccountUnitsI18N::AccountUnitsI18N() :
+    intfAccountUnitsI18N(
         AdvertSchema,
-        tblAccountUnitsTranslate::Private::ExtraORMFields,
-        tblAccountUnitsTranslate::Private::ExtraRelations,
-        tblAccountUnitsTranslate::Private::ExtraIndexes
+        tblAccountUnitsI18N::Private::ExtraORMFields,
+        tblAccountUnitsI18N::Private::ExtraRelations,
+        tblAccountUnitsI18N::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
@@ -61,16 +61,16 @@ AccountProducts::AccountProducts() :
         tblAccountProducts::Private::ExtraRelations,
         tblAccountProducts::Private::ExtraIndexes
 ) {
-    AccountProductsTranslate::instance();
+    AccountProductsI18N::instance();
 }
 
 /******************************************************/
-AccountProductsTranslate::AccountProductsTranslate() :
-    intfAccountProductsTranslate(
+AccountProductsI18N::AccountProductsI18N() :
+    intfAccountProductsI18N(
         AdvertSchema,
-        tblAccountProductsTranslate::Private::ExtraORMFields,
-        tblAccountProductsTranslate::Private::ExtraRelations,
-        tblAccountProductsTranslate::Private::ExtraIndexes
+        tblAccountProductsI18N::Private::ExtraORMFields,
+        tblAccountProductsI18N::Private::ExtraRelations,
+        tblAccountProductsI18N::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
@@ -83,16 +83,16 @@ AccountSaleables::AccountSaleables() :
         tblAccountSaleables::Private::ExtraRelations,
         tblAccountSaleables::Private::ExtraIndexes
 ) {
-    AccountSaleablesTranslate::instance();
+    AccountSaleablesI18N::instance();
 }
 
 /******************************************************/
-AccountSaleablesTranslate::AccountSaleablesTranslate() :
-    intfAccountSaleablesTranslate(
+AccountSaleablesI18N::AccountSaleablesI18N() :
+    intfAccountSaleablesI18N(
         AdvertSchema,
-        tblAccountSaleablesTranslate::Private::ExtraORMFields,
-        tblAccountSaleablesTranslate::Private::ExtraRelations,
-        tblAccountSaleablesTranslate::Private::ExtraIndexes
+        tblAccountSaleablesI18N::Private::ExtraORMFields,
+        tblAccountSaleablesI18N::Private::ExtraRelations,
+        tblAccountSaleablesI18N::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/

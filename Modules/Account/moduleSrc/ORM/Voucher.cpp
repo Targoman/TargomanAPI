@@ -34,13 +34,13 @@ Voucher::Voucher() :
         tblVoucher::Private::Indexes
 ) { ; }
 
-ORMSelectQuery Voucher::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery Voucher::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
 
-    ORMSelectQuery Query = intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias);
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias);
 
     if (_isRoot) {
-        Query.addCols(this->SelectableColumnNames())
-             .nestedLeftJoin(Voucher::instance().GetSelectQuery(APICALLBOOM_PARAM, "", false)
+        Query.addCols(this->selectableColumnNames())
+             .nestedLeftJoin(Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM, "", false)
                              .addCol(tblVoucher::Fields::vch_rootVchID)
                              .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "vchTotalFreezed")
                              .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")

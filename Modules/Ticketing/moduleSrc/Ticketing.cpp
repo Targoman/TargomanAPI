@@ -102,7 +102,7 @@ quint64 Ticketing::insertTicket(
                                     );
 
     if (_files.isEmpty() == false) {
-        ORMCreateQuery QueryCreateAttachments = TicketAttachments::instance().GetCreateQuery(APICALLBOOM_PARAM)
+        ORMCreateQuery QueryCreateAttachments = TicketAttachments::instance().makeCreateQuery(APICALLBOOM_PARAM)
                                              .addCol(tblTicketAttachments::Fields::tat_tktID)
                                              .addCol(tblTicketAttachments::Fields::tat_uplID)
                                              ;
