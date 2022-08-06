@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,22 +21,41 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP
-#define TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP
-
-#include "libTargomanCommon/Macros.h"
-#include "Interfaces/Common/intfAPIArgManipulator.h"
+#ifndef TARGOMAN_API_MODULES_MT_MTDEFS_HPP
+#define TARGOMAN_API_MODULES_MT_MTDEFS_HPP
 
 constexpr char MTDomain[] = "MT";
 constexpr char MTSchema[] = "MT";
 
 namespace Targoman::API::MTModule {
 
-//TARGOMAN_DEFINE_ENUM(enuAdvertOrder,
-//                    );
+namespace RESULTItems {
+    constexpr char ERRNO[]= "errno";
+    constexpr char MESSAGE[]= "message";
+    constexpr char CLASS[]= "class";
+    constexpr char CACHE[]= "byCache";
+
+    constexpr char SIMPLE[]= "simple";
+    constexpr char SERVERID[]= "serverID";
+    constexpr char TRANSLATION[]= "tr";
+    constexpr char TIMES[]= "times";
+    constexpr char TIME[]= "time";
+
+    namespace TRANSLATIONItems {
+        constexpr char PHRASES[]= "phrases";
+        constexpr char ALIGNMENTS[]= "alignments";
+        constexpr char BASE[]= "base";
+
+    }
+
+    namespace TIMESItems {
+        constexpr char PRE[]= "pre";
+        constexpr char TR[]= "tr";
+        constexpr char POST[]= "post";
+        constexpr char ALL[]= "all";
+    }
+}
 
 } //namespace Targoman::API::MTModule
 
-//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::MTModule, enu...);
-
-#endif // TARGOMAN_API_MODULES_MT_ORM_DEFS_HPP
+#endif // TARGOMAN_API_MODULES_MT_MTDEFS_HPP

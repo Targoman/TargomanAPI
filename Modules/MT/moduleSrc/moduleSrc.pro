@@ -13,9 +13,8 @@ HEADERS += \
     Classes/intfTranslatorEngine.hpp \
     Classes/TranslationDispatcher.h \
     Engines/clsNMT.h \
-    TranslationDefs.hpp \
-    ORM/Defs.hpp \
-    MT.h
+    MT.h \
+    MTDefs.hpp
 
 SOURCES += \
     Classes/TranslationDispatcher.cpp \

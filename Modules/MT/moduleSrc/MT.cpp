@@ -23,9 +23,7 @@
 
 #include "MT.h"
 #include "Classes/TranslationDispatcher.h"
-#include "TranslationDefs.hpp"
-
-#include "ORM/Defs.hpp"
+#include "MTDefs.hpp"
 
 namespace Targoman::API::MTModule {
 
@@ -33,6 +31,15 @@ using namespace Classes;
 
 TARGOMAN_IMPL_API_MODULE(MT)
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)
+
+MT::MT() :
+    intfSQLBasedWithActionLogsModule(
+        MTDomain,
+        MTSchema
+) {
+    // Register translation engines
+    TranslationDispatcher::instance().registerEngines();
+}
 
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     const TAPI::RemoteIP_t& _REMOTE_IP,
@@ -174,11 +181,6 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
         {"inputArg", _arg},
         {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
     };
-}
-
-MT::MT() : ORM::clsRESTAPIWithActionLogs("MT", "MT") {
-    // Register translation engines
-    TranslationDispatcher::instance().registerEngines();
 }
 
 } //namespace Targoman::API::MTModule

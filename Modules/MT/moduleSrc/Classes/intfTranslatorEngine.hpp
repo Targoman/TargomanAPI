@@ -28,7 +28,7 @@
 #include <QVariantMap>
 #include <QUrl>
 #include "libTargomanCommon/Macros.h"
-#include "TranslationDefs.hpp"
+#include "MTDefs.hpp"
 
 namespace Targoman::API::MTModule::Classes {
 

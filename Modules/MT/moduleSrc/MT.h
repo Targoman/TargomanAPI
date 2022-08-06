@@ -24,20 +24,24 @@
 #ifndef TARGOMAN_API_MODULES_MT_MT_H
 #define TARGOMAN_API_MODULES_MT_MT_H
 
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
-#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
 #include "Interfaces/AAA/AAA.hpp"
-#include "ORM/Defs.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
+#include "MTDefs.hpp"
 
 namespace Targoman::API::MTModule {
 
-class MT  : public intfAccountingBasedModule
+TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_FAQ_PREPARENT;
+
+class MT : public intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFAPIMODULE_IID)
@@ -59,7 +63,7 @@ private slots:
             const QString& _engine = "NMT",
             bool _detailed = false,
             bool _detok = true,
-            bool _dic=false,
+            bool _dic = false,
             bool _dicFull = false
         ),
         "Translates input text if specified engine and language are found."
