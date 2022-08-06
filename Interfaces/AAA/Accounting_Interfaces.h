@@ -34,18 +34,18 @@ namespace Targoman::API::AAA {
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUnitsTranslate : public intfSQLBasedModule
+class intfAccountUnitsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUnitsTranslate(const QString& _schema,
+    intfAccountUnitsI18N(const QString& _schema,
                               const QList<DBM::clsORMField>& _exclusiveCols = {},
                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountUnitsTranslate* myInstance;
+    static intfAccountUnitsI18N* myInstance;
     friend class intfAccountUnits;
 };
 
@@ -73,18 +73,18 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountProductsTranslate : public intfSQLBasedModule
+class intfAccountProductsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsTranslate(const QString& _schema,
+    intfAccountProductsI18N(const QString& _schema,
                                  const QList<DBM::clsORMField>& _exclusiveCols = {},
                                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountProductsTranslate* myInstance;
+    static intfAccountProductsI18N* myInstance;
     friend class intfAccountProducts;
 };
 
@@ -112,18 +112,18 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountSaleablesTranslate : public intfSQLBasedModule
+class intfAccountSaleablesI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesTranslate(const QString& _schema,
+    intfAccountSaleablesI18N(const QString& _schema,
                                   const QList<DBM::clsORMField>& _exclusiveCols = {},
                                   const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                   const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountSaleablesTranslate* myInstance;
+    static intfAccountSaleablesI18N* myInstance;
     friend class intfAccountSaleables;
 };
 

@@ -202,7 +202,7 @@ constexpr enuUpdatableBy::Type UPStatus = enuUpdatableBy::__STATUS__;
 //              ColName             type                validator   Default     UPBy    Sort    Filter  Self    Virt    PK      Sel
 #define ORM_MULTILANGUAGE(_name, _def, _upby) \
     clsORMField(_name,              S(QString),         QFV,        _def,       _upby).setMultiLanguage(), \
-    {           _name##_translate,  S(TAPI::JSON_t),    QFV,        QNull,      _upby,  false,  false,  false,  true,   false,  false }
+    {           _name##I18N,        S(TAPI::JSON_t),    QFV,        QNull,      _upby,  false,  false,  false,  true,   false,  false }
 
 ///                                  Relation Name                   Col Reference Table              ForeignCol      Rename      IsLeftJoin
 #define ORM_RELATION_OF_CREATOR(F) { ORM_RELATION_OF_CREATOR_NAME, { F,  R(AAASchema, tblUser::Name), tblUser::Fields::usrID, "Creator_", true } }

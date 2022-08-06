@@ -76,7 +76,7 @@ namespace tblAccountUnits {
     );
 }
 
-namespace tblAccountUnitsTranslate {
+namespace tblAccountUnitsI18N {
 
     namespace ExtraFields {
     }
@@ -100,7 +100,7 @@ namespace tblAccountUnitsTranslate {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountUnitsTranslateBase_DTO
+        SF_tblAccountUnitsI18NBase_DTO
     );
 }
 
@@ -156,7 +156,7 @@ namespace tblAccountProducts {
     );
 }
 
-namespace tblAccountProductsTranslate {
+namespace tblAccountProductsI18N {
 
     namespace ExtraFields {
     }
@@ -180,7 +180,7 @@ namespace tblAccountProductsTranslate {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountProductsTranslateBase_DTO
+        SF_tblAccountProductsI18NBase_DTO
     );
 }
 
@@ -227,7 +227,7 @@ namespace tblAccountSaleables {
     );
 }
 
-namespace tblAccountSaleablesTranslate {
+namespace tblAccountSaleablesI18N {
 
     namespace ExtraFields {
     }
@@ -251,7 +251,7 @@ namespace tblAccountSaleablesTranslate {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountSaleablesTranslateBase_DTO
+        SF_tblAccountSaleablesI18NBase_DTO
     );
 }
 
@@ -438,14 +438,14 @@ class AccountUnits : public intfAccountUnits
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnits)
 
 protected:
-    QScopedPointer<intfAccountUnitsTranslate> AccountUnitsTranslate;
+    QScopedPointer<intfAccountUnitsI18N> AccountUnitsI18N;
 };
 
 /******************************************************/
-class AccountUnitsTranslate : public intfAccountUnitsTranslate
+class AccountUnitsI18N : public intfAccountUnitsI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnitsTranslate)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnitsI18N)
 
 public:
 };
@@ -459,14 +459,14 @@ class AccountProducts : public intfAccountProducts
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
 
 protected:
-    QScopedPointer<intfAccountProductsTranslate> AccountProductsTranslate;
+    QScopedPointer<intfAccountProductsI18N> AccountProductsI18N;
 };
 
 /******************************************************/
-class AccountProductsTranslate : public intfAccountProductsTranslate
+class AccountProductsI18N : public intfAccountProductsI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProductsTranslate)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProductsI18N)
 
 public:
 };
@@ -480,14 +480,14 @@ class AccountSaleables : public intfAccountSaleables
     TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
 
 protected:
-    QScopedPointer<intfAccountSaleablesTranslate> AccountSaleablesTranslate;
+    QScopedPointer<intfAccountSaleablesI18N> AccountSaleablesI18N;
 };
 
 /******************************************************/
-class AccountSaleablesTranslate : public intfAccountSaleablesTranslate
+class AccountSaleablesI18N : public intfAccountSaleablesI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesTranslate)
+    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesI18N)
 
 //public:
 };

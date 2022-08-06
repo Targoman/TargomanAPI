@@ -263,14 +263,14 @@ private slots:
     }
 
     /***************************************************/
-    void getAccountProducts_with_translate() {
+    void getAccountProducts_with_I18N() {
         QVariant Result = callGuestAPI(
             RESTClientHelper::GET,
             "Advert/AccountProducts"
         );
     }
 
-    void getAccountSaleable_join_product_with_translate() {
+    void getAccountSaleable_join_product_with_I18N() {
         QVariant Result = callGuestAPI(
             RESTClientHelper::GET,
             "Advert/AccountSaleables"
@@ -307,18 +307,18 @@ private slots:
                 "Advert/AccountProducts",
                 {},
                 {
-                    { tblAccountProductsBase::Fields::prdCode,              this->BannerProductCode },
-                    { tblAccountProductsBase::Fields::prdName,              "test product 123" },
-                    { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
-                    { tblAccountProductsBase::Fields::prd_untID,            1 },
-                    { tblAccountProducts::ExtraFields::prdExType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::ExtraFields::prdEx_locID,         this->LocationID },
-                    { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+                    { tblAccountProductsBase::Fields::prdCode,          this->BannerProductCode },
+                    { tblAccountProductsBase::Fields::prdName,          "test product 123" },
+                    { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
+                    { tblAccountProductsBase::Fields::prd_untID,        1 },
+                    { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prdEx_locID,     this->LocationID },
+                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
                           { "fa", "عنوان فارسی ۱۲۳" },
                           { "ar", "عنوان عربی ۱۲۳" },
                           { "fr", "عنوان فرانسوی ۱۲۳" },
                     }) },
-                    { tblAccountProductsBase::Fields::prdDesc_translate,    QVariantMap({
+                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
                           { "fa", "شرح فارسی ۱۲۳" },
                           { "ar", "شرح عربی ۱۲۳" },
                     }) },
@@ -339,11 +339,11 @@ private slots:
                 QString("Advert/AccountProducts/") + this->BannerProductID.toString(),
                 {},
                 {
-                    { tblAccountProductsBase::Fields::prdName,              "test product 123456" },
-                    { tblAccountProductsBase::Fields::prdName_translate,    QVariantMap({
+                    { tblAccountProductsBase::Fields::prdName,          "test product 123456" },
+                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
                           { "fa", "عنوان فارسی 123456" },
                     }) },
-                    { tblAccountProductsBase::Fields::prdDesc_translate,    QVariantMap({
+                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
                           { "fa", "شرح فارسی 123456" },
                           { "ar", "شرح عربی 123456" },
                     }) },

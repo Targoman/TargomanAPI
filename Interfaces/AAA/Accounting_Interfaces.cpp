@@ -100,9 +100,9 @@ namespace Targoman::API::AAA {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountUnitsTranslate* intfAccountUnitsTranslate::myInstance;
+intfAccountUnitsI18N* intfAccountUnitsI18N::myInstance;
 
-intfAccountUnitsTranslate::intfAccountUnitsTranslate(
+intfAccountUnitsI18N::intfAccountUnitsI18N(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -110,12 +110,12 @@ intfAccountUnitsTranslate::intfAccountUnitsTranslate(
 ) :
     intfSQLBasedModule(
         _schema,
-        tblAccountUnitsTranslateBase::Name,
-        tblAccountUnitsTranslateBase::Private::ORMFields + _exclusiveCols,
-        tblAccountUnitsTranslateBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblAccountUnitsTranslateBase::Private::Indexes + _exclusiveIndexes
+        tblAccountUnitsI18NBase::Name,
+        tblAccountUnitsI18NBase::Private::ORMFields + _exclusiveCols,
+        tblAccountUnitsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountUnitsI18NBase::Private::Indexes + _exclusiveIndexes
 ) {
-    intfAccountUnitsTranslate::myInstance = this;
+    intfAccountUnitsI18N::myInstance = this;
 }
 
 /******************************************************************/
@@ -134,25 +134,25 @@ intfAccountUnits::intfAccountUnits(
 ) { ; }
 
 ORMSelectQuery intfAccountUnits::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountUnitsTranslate::myInstance->prepareFiltersList();
+    intfAccountUnitsI18N::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
             .addCols(this->SelectableColumnNames())
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsTranslate::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountUnitsTranslateBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
+            .nestedLeftJoin(intfAccountUnitsI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+                      .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountUnits"
-                      , { "lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::pid,
+                      , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
                           enuConditionOperator::Equal,
                           tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
                       }
                      )
             .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::untName, enuConditionOperator::Null },
+                    { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untName, enuConditionOperator::Null },
                     DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias, tblAccountUnitsBase::Fields::untName)),
-                    DBExpression::VALUE(R("lng_tblAccountUnits", tblAccountUnitsTranslateBase::Fields::untName)),
+                    DBExpression::VALUE(R("lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untName)),
                     tblAccountUnitsBase::Fields::untName
                    )
     ;
@@ -184,9 +184,9 @@ bool IMPL_ORMDELETE(intfAccountUnits) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountProductsTranslate* intfAccountProductsTranslate::myInstance;
+intfAccountProductsI18N* intfAccountProductsI18N::myInstance;
 
-intfAccountProductsTranslate::intfAccountProductsTranslate(
+intfAccountProductsI18N::intfAccountProductsI18N(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -194,12 +194,12 @@ intfAccountProductsTranslate::intfAccountProductsTranslate(
 ) :
     intfSQLBasedModule(
         _schema,
-        tblAccountProductsTranslateBase::Name,
-        tblAccountProductsTranslateBase::Private::ORMFields + _exclusiveCols,
-        tblAccountProductsTranslateBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblAccountProductsTranslateBase::Private::Indexes + _exclusiveIndexes
+        tblAccountProductsI18NBase::Name,
+        tblAccountProductsI18NBase::Private::ORMFields + _exclusiveCols,
+        tblAccountProductsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountProductsI18NBase::Private::Indexes + _exclusiveIndexes
 ) {
-    intfAccountProductsTranslate::myInstance = this;
+    intfAccountProductsI18N::myInstance = this;
 }
 
 /******************************************************************/
@@ -218,7 +218,7 @@ intfAccountProducts::intfAccountProducts(
 ) { ; }
 
 ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountProductsTranslate::myInstance->prepareFiltersList();
+    intfAccountProductsI18N::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
             .addCols(this->SelectableColumnNames())
@@ -226,24 +226,24 @@ ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALL
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsTranslate::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountProductsTranslateBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
+            .nestedLeftJoin(intfAccountProductsI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+                      .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountProducts"
-                      , { "lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::pid,
+                      , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
                           enuConditionOperator::Equal,
                           tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
                       }
                      )
             .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdName, enuConditionOperator::Null },
+                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdName, enuConditionOperator::Null },
                     DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdName)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdName)),
+                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdName)),
                     tblAccountProductsBase::Fields::prdName
                    )
             .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdDesc, enuConditionOperator::Null },
+                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDesc, enuConditionOperator::Null },
                     DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsTranslateBase::Fields::prdDesc)),
+                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDesc)),
                     tblAccountProductsBase::Fields::prdDesc
                    )
             .inlineInnerJoin(tblAccountUnitsBase::Name/*, tblAccountUnitsBase::Name*/, clsCondition(
@@ -287,9 +287,9 @@ bool IMPL_ORMDELETE(intfAccountProducts) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountSaleablesTranslate* intfAccountSaleablesTranslate::myInstance;
+intfAccountSaleablesI18N* intfAccountSaleablesI18N::myInstance;
 
-intfAccountSaleablesTranslate::intfAccountSaleablesTranslate(
+intfAccountSaleablesI18N::intfAccountSaleablesI18N(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -297,12 +297,12 @@ intfAccountSaleablesTranslate::intfAccountSaleablesTranslate(
 ) :
     intfSQLBasedModule(
         _schema,
-        tblAccountSaleablesTranslateBase::Name,
-        tblAccountSaleablesTranslateBase::Private::ORMFields + _exclusiveCols,
-        tblAccountSaleablesTranslateBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblAccountSaleablesTranslateBase::Private::Indexes + _exclusiveIndexes
+        tblAccountSaleablesI18NBase::Name,
+        tblAccountSaleablesI18NBase::Private::ORMFields + _exclusiveCols,
+        tblAccountSaleablesI18NBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountSaleablesI18NBase::Private::Indexes + _exclusiveIndexes
 ) {
-    intfAccountSaleablesTranslate::myInstance = this;
+    intfAccountSaleablesI18N::myInstance = this;
 }
 
 /******************************************************************/
@@ -321,7 +321,7 @@ intfAccountSaleables::intfAccountSaleables(
 ) { ; }
 
 ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountSaleablesTranslate::myInstance->prepareFiltersList();
+    intfAccountSaleablesI18N::myInstance->prepareFiltersList();
 
     return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
             .addCols(this->SelectableColumnNames())
@@ -329,24 +329,24 @@ ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesTranslate::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountSaleablesTranslateBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
+            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+                      .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountSaleables"
-                      , { "lng_tblAccountSaleables", tblAccountSaleablesTranslateBase::Fields::pid,
+                      , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
                           enuConditionOperator::Equal,
                           tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID
                       }
                      )
             .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesTranslateBase::Fields::slbName, enuConditionOperator::Null },
+                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbName, enuConditionOperator::Null },
                     DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbName)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesTranslateBase::Fields::slbName)),
+                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbName)),
                     tblAccountSaleablesBase::Fields::slbName
                    )
             .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesTranslateBase::Fields::slbDesc, enuConditionOperator::Null },
+                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDesc, enuConditionOperator::Null },
                     DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesTranslateBase::Fields::slbDesc)),
+                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDesc)),
                     tblAccountSaleablesBase::Fields::slbDesc
                    )
     ;
