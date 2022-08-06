@@ -89,7 +89,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
@@ -122,7 +122,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
     return Result;
 }
 
-QVariantList intfSQLBasedModule::SelectAll(
+/*QVariantList*/ TAPI::stuTable intfSQLBasedModule::SelectAll(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
     quint16 _cacheTime,
@@ -132,7 +132,7 @@ QVariantList intfSQLBasedModule::SelectAll(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -150,7 +150,7 @@ QVariantList intfSQLBasedModule::SelectAll(
     if (_extraFilters.isEmpty() == false)
         Query.andWhere(_extraFilters);
 
-    QVariantList Result = Query.all();
+    /*QVariantList*/ TAPI::stuTable Result = Query.all();
 
 //    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT);
 //    APICALLBOOM_PARAM.addResponseHeaderNameToExpose(RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT);
@@ -175,7 +175,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->GetSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -224,15 +224,15 @@ QVariant intfSQLBasedModule::Select(
                         _cacheTime,
                         _fnTouchQuery
                         )
-                    .toVariant()
-                ;
+                    .toVariant();
 
         return this->SelectAll(
                     GET_METHOD_ARGS_CALL_VALUES,
                     _extraFilters,
                     _cacheTime,
                     _fnTouchQuery
-                    );
+                    )
+                .toVariant();
     }
 
     return this->SelectOne(
@@ -278,7 +278,7 @@ quint64 intfSQLBasedModule::Create(
         throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
 
     //2: run wo/ I18N
-    ORMCreateQuery query = this->GetCreateQuery(APICALLBOOM_PARAM);
+    ORMCreateQuery query = this->makeCreateQuery(APICALLBOOM_PARAM);
 
     for (QVariantMap::const_iterator arg = _createInfo.constBegin(); arg != _createInfo.constEnd(); ++arg)
         query.addCol(arg.key());
@@ -359,7 +359,7 @@ bool intfSQLBasedModule::Update(
         throw exHTTPBadRequest(QString("Table %1 cannot be translated").arg(this->nameWithSchema()));
 
     //2: run wo/ I18N
-    ORMUpdateQuery query = this->GetUpdateQuery(APICALLBOOM_PARAM)
+    ORMUpdateQuery query = this->makeUpdateQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;
@@ -438,7 +438,7 @@ bool intfSQLBasedModule::DeleteByPks(
 //    if (_realDelete == false)
 //        return true;
 
-    ORMDeleteQuery query = this->GetDeleteQuery(APICALLBOOM_PARAM)
+    ORMDeleteQuery query = this->makeDeleteQuery(APICALLBOOM_PARAM)
         .setPksByPath(_pksByPath)
 //        .addFilters(_extraFilters)
     ;

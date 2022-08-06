@@ -1874,7 +1874,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _jo
 
     clsTable* ForeignTable = clsTable::Registry[_foreignTable];
 
-    ORMSelectQuery Query = ForeignTable->GetSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM, _alias);
+    ORMSelectQuery Query = ForeignTable->makeSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM, _alias);
 
     //no union, no where, no group by, no having
     if (Query.isPure()) {
@@ -2997,7 +2997,7 @@ QVariantMap ORMSelectQuery::tryOne(QVariantMap _args) {
 //    }
 //}
 
-QVariantList ORMSelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
+/*QVariantList*/ TAPI::stuTable ORMSelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
     QString QueryString = this->buildQueryString(_args, false, false, true);
 
 #ifdef QT_DEBUG
@@ -3007,16 +3007,21 @@ QVariantList ORMSelectQuery::all(QVariantMap _args) { //, quint16 _maxCount, qui
 
     clsDAC DAC(this->Data->table().domain(), PrependSchema(this->Data->table().Schema));
 
-    QJsonDocument Result;
+    QJsonDocument ResultRows;
 
     if (this->Data->CahceTime > 0)
-        Result = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
+        ResultRows = DAC.execQueryCacheable(this->Data->CahceTime, "", QueryString)
                  .toJson(false, this->Data->table().Converters);
     else
-        Result = DAC.execQuery("", QueryString)
+        ResultRows = DAC.execQuery("", QueryString)
                  .toJson(false, this->Data->table().Converters);
 
-    return Result.toVariant().toList();
+    TAPI::stuTable Result;
+
+    Result.HasCount = false;
+    Result.Rows = ResultRows.toVariant().toList();
+
+    return Result;
 }
 
 TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _maxCount, quint64 _from) {
@@ -3049,6 +3054,8 @@ TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _ma
     }
 
     TAPI::stuTable Result;
+
+    Result.HasCount = true;
 
     Result.TotalRows = ResultTotalRows
                        .toVariant()

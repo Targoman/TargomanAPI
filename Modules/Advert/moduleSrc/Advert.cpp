@@ -298,7 +298,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblLocations::Fields::locPlaceCode,  "FIX" },
     };
 
-    quint32 LocationID = Locations::instance().GetCreateQuery(APICALLBOOM_PARAM)
+    quint32 LocationID = Locations::instance().makeCreateQuery(APICALLBOOM_PARAM)
                          .addCols({
                                       tblLocations::Fields::locURL,
                                       tblLocations::Fields::locPlaceCode,
@@ -380,7 +380,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //        { tblAccountCouponsBase::Fields::cpnStatus,  },
     };
 
-    quint32 CouponID = this->AccountCoupons->GetCreateQuery(APICALLBOOM_PARAM)
+    quint32 CouponID = this->AccountCoupons->makeCreateQuery(APICALLBOOM_PARAM)
                        .addCols({
 //                                    tblAccountCouponsBase::Fields::cpnID,
                                     tblAccountCouponsBase::Fields::cpnCode,

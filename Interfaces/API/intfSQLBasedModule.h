@@ -60,7 +60,7 @@ private:
         quint16 _cacheTime = 0,
         std::function<void(ORMSelectQuery &_query)> _fnTouchQuery = nullptr
     );
-    QVariantList SelectAll(
+    /*QVariantList*/ TAPI::stuTable SelectAll(
         GET_METHOD_ARGS_IMPL_INTERNAL,
         const clsCondition& _extraFilters = {},
         quint16 _cacheTime = 0,

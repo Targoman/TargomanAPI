@@ -133,15 +133,15 @@ intfAccountUnits::intfAccountUnits(
         tblAccountUnitsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountUnits::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountUnitsI18N::myInstance->prepareFiltersList();
 
-    return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
-            .addCols(this->SelectableColumnNames())
+    return intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias)
+            .addCols(this->selectableColumnNames())
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountUnitsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountUnits"
                       , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
@@ -217,16 +217,16 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountProducts::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountProductsI18N::myInstance->prepareFiltersList();
 
-    return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
-            .addCols(this->SelectableColumnNames())
+    return intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias)
+            .addCols(this->selectableColumnNames())
             .removeCols({
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountProductsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountProducts"
                       , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
@@ -320,16 +320,16 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
 ) { ; }
 
-ORMSelectQuery intfAccountSaleables::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
     intfAccountSaleablesI18N::myInstance->prepareFiltersList();
 
-    return intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias)
-            .addCols(this->SelectableColumnNames())
+    return intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias)
+            .addCols(this->selectableColumnNames())
             .removeCols({
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance->GetSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountSaleables"
                       , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
@@ -367,8 +367,8 @@ QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleables) {
     auto fnTouchQuery = [/*this, */&_cols](ORMSelectQuery &_query) {
         if (_cols.isEmpty()) {
 //            _query
-                //will be adding in GetSelectQuery
-//                .addCols(this->SelectableColumnNames())
+                //will be adding in makeSelectQuery
+//                .addCols(this->selectableColumnNames())
 //            ;
         } else {
             _query.addCSVCols(_cols);
@@ -510,11 +510,11 @@ GROUP BY uasufl_uasID
 ) tmpProvidedFiles
 ON tmpProvidedFiles.uasufl_uasID = uas.uasID
 */
-ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
-    ORMSelectQuery Query = intfSQLBasedModule::GetSelectQuery(APICALLBOOM_PARAM, _alias);
+ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias);
 
     if (_isRoot) {
-        Query.addCols(this->SelectableColumnNames())
+        Query.addCols(this->selectableColumnNames())
 //            LEFT JOIN (
 //               SELECT slf_slbID
 //                    , SUM(slfMinCount) AS MandatoryFilesCount
@@ -524,7 +524,7 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
 //                      ) tmpNeededFiles
 //                   ON tmpNeededFiles.slf_slbID = tblAccountUserAssets.uas_slbID
 
-             .nestedLeftJoin(intfAccountSaleablesFiles::myInstance->GetSelectQuery(APICALLBOOM_PARAM, "", false)
+             .nestedLeftJoin(intfAccountSaleablesFiles::myInstance->makeSelectQuery(APICALLBOOM_PARAM, "", false)
                              .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID, tblAccountSaleablesFilesBase::Fields::slf_slbID)
                              .addCol(enuAggregation::SUM, tblAccountSaleablesFilesBase::Fields::slfMinCount, "MandatoryFilesCount")
                              .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount, enuConditionOperator::Greater, 0 })
@@ -559,7 +559,7 @@ ORMSelectQuery intfAccountUserAssets::GetSelectQuery(INTFAPICALLBOOM_IMPL &APICA
 //                   ON tmpProvidedFiles.uasufl_uasID = tblAccountUserAssets.uasID
 
             .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
-                                           intfAccountUserAssetsFiles::myInstance->GetSelectQuery(APICALLBOOM_PARAM, "", false)
+                                           intfAccountUserAssetsFiles::myInstance->makeSelectQuery(APICALLBOOM_PARAM, "", false)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_slfID)
                                            .addCol(tblAccountSaleablesFilesBase::Fields::slfMinCount)

@@ -139,7 +139,7 @@ ORMSelectQuery User::getPhotoQuery(
 
     UserExtraInfo::instance().prepareFiltersList();
 
-    return UserExtraInfo::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    return UserExtraInfo::instance().makeSelectQuery(APICALLBOOM_PARAM)
         .addCol(tblUserExtraInfo::Fields::ueiPhoto)
         .where({ tblUserExtraInfo::Fields::uei_usrID, enuConditionOperator::Equal, _usrID })
     ;

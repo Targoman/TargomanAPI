@@ -576,7 +576,7 @@ public:
             return {};
         }
     }
-    QVariantList all(QVariantMap _args = {}); //, quint16 _maxCount = 20, quint64 _from = 0);
+    /*QVariantList*/ TAPI::stuTable all(QVariantMap _args = {}); //, quint16 _maxCount = 20, quint64 _from = 0);
     TAPI::stuTable allWithCount(QVariantMap _args = {}); //, quint16 _maxCount = 20, quint64 _from = 0);
 //    quint64 count(QVariantMap _args = {});
 

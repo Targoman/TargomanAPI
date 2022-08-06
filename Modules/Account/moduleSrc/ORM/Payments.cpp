@@ -82,9 +82,9 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     if (_paymentKey.isEmpty())
         throw exTargomanBase("paymentKey is empty", ESTATUS_INTERNAL_SERVER_ERROR);
 
-    tblOnlinePayments::DTO OnlinePaymentDTO = OnlinePayments::instance().GetSelectQuery(APICALLBOOM_PARAM)
-//            .addCols(OnlinePayments::instance().SelectableColumnNames())
-//            .addCols(PaymentGateways::instance().SelectableColumnNames())
+    tblOnlinePayments::DTO OnlinePaymentDTO = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+//            .addCols(OnlinePayments::instance().selectableColumnNames())
+//            .addCols(PaymentGateways::instance().selectableColumnNames())
 //            .innerJoinWith("paymentGateway")
 //            .addCol(tblOnlinePayments::Fields::onpCallbackUrl)
             .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
@@ -193,7 +193,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 </html>
 )";
 
-    tblOnlinePayments::DTO OnlinePaymentsDTO = OnlinePayments::instance().GetSelectQuery(APICALLBOOM_PARAM)
+    tblOnlinePayments::DTO OnlinePaymentsDTO = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                                .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
                                                .one<tblOnlinePayments::DTO>();
 
@@ -263,9 +263,9 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query
-                .addCols(this->SelectableColumnNames())
+                .addCols(this->selectableColumnNames())
                 .leftJoin(tblVoucher::Name)
-                .addCols(Voucher::instance().SelectableColumnNames())
+                .addCols(Voucher::instance().selectableColumnNames())
                 ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
@@ -322,9 +322,9 @@ QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query
-            .addCols(this->SelectableColumnNames())
+            .addCols(this->selectableColumnNames())
             .innerJoinWith("OfflinePaymentClaims")
-            .addCols(OfflinePaymentClaims::instance().SelectableColumnNames())
+            .addCols(OfflinePaymentClaims::instance().selectableColumnNames())
         ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
@@ -363,9 +363,9 @@ QVariant IMPL_ORMGET(OfflinePayments) {
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query
-                .addCols(this->SelectableColumnNames())
+                .addCols(this->selectableColumnNames())
                 .innerJoin(tblVoucher::Name)
-                .addCols(Voucher::instance().SelectableColumnNames())
+                .addCols(Voucher::instance().selectableColumnNames())
                 ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(

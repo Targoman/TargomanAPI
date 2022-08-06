@@ -79,7 +79,7 @@ QVariant Tickets::apiGET(
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM, &_baseTicketID, &_inReplyTicketID, &CurrentUserID](ORMSelectQuery &_query) {
         _query
-            .addCols(this->SelectableColumnNames())
+            .addCols(this->selectableColumnNames())
             .leftJoin(tblUnits::Name)
             .leftJoin(tblDepartments::Name, clsCondition(tblDepartments::Name, tblDepartments::Fields::depID, enuConditionOperator::Equal, tblUnits::Name, tblUnits::Fields::unt_depID))
             .addCols({
@@ -99,7 +99,7 @@ QVariant Tickets::apiGET(
         }
 
         _query
-            .nestedLeftJoin(Tickets::instance().GetSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(Tickets::instance().makeSelectQuery(APICALLBOOM_PARAM)
                       .addCol(tblTickets::Fields::tktBase_tktID)
                       .addCol(enuAggregation::COUNT, tblTickets::Fields::tktID, "_cnt")
                       .addCol(enuAggregation::MAX, tblTickets::Fields::tktCreationDateTime, "_maxdate")
@@ -117,7 +117,7 @@ QVariant Tickets::apiGET(
                       clsCondition(tblTicketRead::Name, tblTicketRead::Fields::tkr_tktID, enuConditionOperator::Equal, tblTickets::Name, tblTickets::Fields::tktID)
                       .andCond({ tblTicketRead::Fields::tkrBy_usrID, enuConditionOperator::Equal, CurrentUserID })
                       )
-            .addCols(TicketRead::instance().SelectableColumnNames())
+            .addCols(TicketRead::instance().selectableColumnNames())
         ;
 
     };
@@ -133,7 +133,7 @@ QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
 
     TicketRead::instance().prepareFiltersList();
 
-    return TicketRead::instance().GetCreateQuery(APICALLBOOM_PARAM)
+    return TicketRead::instance().makeCreateQuery(APICALLBOOM_PARAM)
             .options_ignore()
             .addCols({
                         tblTicketRead::Fields::tkr_tktID,
