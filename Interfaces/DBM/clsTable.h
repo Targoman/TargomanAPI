@@ -210,7 +210,7 @@ public:
 
     const QStringList selectableColumnNames(QString _tableAlias = "") const;
 
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
     virtual ORMCreateQuery makeCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
     virtual ORMUpdateQuery makeUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
     virtual ORMDeleteQuery makeDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});

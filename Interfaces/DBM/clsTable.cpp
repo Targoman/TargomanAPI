@@ -277,7 +277,7 @@ const QStringList clsTable::selectableColumnNames(QString _tableAlias) const {
     return ColNames;
 }
 
-ORMSelectQuery clsTable::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery clsTable::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
     return ORMSelectQuery(APICALLBOOM_PARAM, *this, _alias);
 }
 

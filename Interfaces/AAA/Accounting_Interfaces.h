@@ -61,7 +61,7 @@ public:
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Units")
@@ -100,7 +100,7 @@ public:
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Products")
@@ -139,7 +139,7 @@ public:
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
@@ -160,7 +160,7 @@ public:
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 //public:
-//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 protected:
     static intfAccountSaleablesFiles* myInstance;
@@ -187,7 +187,7 @@ public:
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET("Get User Assets")

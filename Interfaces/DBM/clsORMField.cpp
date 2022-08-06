@@ -200,4 +200,11 @@ QVariant clsORMField::fromDB(const QString& _value) {
     return this->argSpecs().toORMValue(_value);
 }
 
+clsORMField& clsORMField::setMultiLanguage() {
+    this->Data->setMultiLanguage(true);
+//    this->Data->setSelectable(false);
+
+    return *this;
+}
+
 } //namespace Targoman::API::DBM

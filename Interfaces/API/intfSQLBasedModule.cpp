@@ -89,7 +89,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
 //    qDebug() << __FILE__ << ":" << __FUNCTION__ << "() :" << "filters:" << _filters;
 
-    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM, "", _translate)
         .setPksByPath(_pksByPath)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
@@ -132,7 +132,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM, "", _translate)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)
@@ -175,7 +175,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     this->prepareFiltersList();
 
-    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM, "", _translate)
         .setPksByPath(_pksByPath)
         .pageIndex(_pageIndex)
         .pageSize(_pageSize)

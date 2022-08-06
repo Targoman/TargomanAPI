@@ -263,6 +263,23 @@ private slots:
     }
 
     /***************************************************/
+    void getAccountUnits_with_I18N() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountUnits"
+        );
+    }
+
+    void getAccountUnits_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountUnits",
+            {
+                { "translate", false },
+            }
+        );
+    }
+
     void getAccountProducts_with_I18N() {
         QVariant Result = callGuestAPI(
             RESTClientHelper::GET,
@@ -270,10 +287,30 @@ private slots:
         );
     }
 
+    void getAccountProducts_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountProducts",
+            {
+                { "translate", false },
+            }
+        );
+    }
+
     void getAccountSaleable_join_product_with_I18N() {
         QVariant Result = callGuestAPI(
             RESTClientHelper::GET,
             "Advert/AccountSaleables"
+        );
+    }
+
+    void getAccountSaleable_join_product_with_I18N_notranslate() {
+        QVariant Result = callGuestAPI(
+            RESTClientHelper::GET,
+            "Advert/AccountSaleables",
+            {
+                { "translate", false },
+            }
         );
     }
 
