@@ -58,7 +58,7 @@ int main(int _argc, char *_argv[]) {
     try {
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
         if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvert(DBPrefix), progArgsCount, progArgs);
-//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAdvertFixture(DBPrefix), progArgsCount, progArgs);
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testActionLogs(DBPrefix), progArgsCount, progArgs);
     } catch (exTargomanBase &e) {
         ++FailedTests;

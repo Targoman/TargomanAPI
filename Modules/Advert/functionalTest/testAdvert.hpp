@@ -314,7 +314,6 @@ private slots:
         );
     }
 
-private:
     void createLocation() {
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
