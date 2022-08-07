@@ -153,6 +153,22 @@ QString intfAPICallBoom::requestAPIPath() const {
     return this->Data->RequestAPIPath;
 }
 
+const QVariantMap intfAPICallBoom::requestHeaders() const {
+    return this->Data->RequestHeaders;
+}
+
+QVariant intfAPICallBoom::requestHeader(const QString &_name, const QVariant &_default) const {
+    for (auto It = this->Data->RequestHeaders.constBegin();
+         It != this->Data->RequestHeaders.constEnd();
+         It++
+    ) {
+        if (It.key().compare(_name, Qt::CaseInsensitive) == 0)
+            return It.value();
+    }
+
+    return _default;
+}
+
 QString intfAPICallBoom::host(const QString &_default) const {
     if (this->Data->RequestHeaders.contains("host") == false)
         return _default;
