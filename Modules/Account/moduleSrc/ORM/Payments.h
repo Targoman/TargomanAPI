@@ -37,7 +37,7 @@ namespace Targoman::API::AccountModule {
 
 TARGOMAN_DEFINE_ENUM(enuPaymentStatus,
                      New      = 'N',
-                     Pending  = 'P',
+                     Pending  = 'P', //used for Claimed for offline payments
                      Payed    = 'Y',
                      Succeded = 'A',
                      Error    = 'E',
@@ -174,6 +174,8 @@ private slots:
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|
 \*****************************************************************/
+/*
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 namespace tblOfflinePaymentClaims {
@@ -262,6 +264,8 @@ private slots:
 //    bool ORMUPDATE("Update OfflinePaymentClaim info")
 //    bool ORMDELETE("Delete an OfflinePaymentClaim")
 };
+
+*/
 
 /*
 CREATE TABLE `tblOfflinePaymentClaims_attachments` (
@@ -374,7 +378,7 @@ namespace tblOfflinePayments {
         const QList<clsORMField> ORMFields = {
             //ColName                           Type                        Validation                          Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::ofpID,                    ORM_PRIMARYKEY_64 },
-            { Fields::ofp_vchID,                S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPOwner },
+            { Fields::ofp_vchID,                S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),          QNull,      UPOwner },
             { Fields::ofpBank,                  S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
             { Fields::ofpReceiptCode,           S(QString),                 QFV.allwaysValid().maxLenght(50),   QRequired,  UPOwner },
             { Fields::ofpReceiptDate,           S(TAPI::DateTime_t),        QFV,                                QRequired,  UPOwner },
@@ -404,7 +408,7 @@ namespace tblOfflinePayments {
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (ofpID),
-        SF_quint64                  (ofp_vchID),
+        SF_NULLABLE_quint64         (ofp_vchID),
         SF_QString                  (ofpBank),
         SF_QString                  (ofpReceiptCode),
 //        SF_QString                  (ofpReceiptDate),

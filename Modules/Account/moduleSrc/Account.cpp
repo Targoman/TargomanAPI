@@ -163,9 +163,9 @@ Account::Account() :
     this->addSubModule(&IPStats::instance());
     this->addSubModule(&PaymentGatewayTypes::instance());
     this->addSubModule(&PaymentGateways::instance());
-    this->addSubModule(&OnlinePayments::instance());
+//    this->addSubModule(&OfflinePaymentClaims::instance());
     this->addSubModule(&OfflinePayments::instance());
-    this->addSubModule(&OfflinePaymentClaims::instance());
+    this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&Roles::instance());
     this->addSubModule(&Service::instance());
     this->addSubModule(&User::instance());
@@ -1504,21 +1504,22 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
     QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
     QVariantMap CreateParams = {
-        { tblOfflinePaymentClaims::Fields::ofpcBank, _bank },
-        { tblOfflinePaymentClaims::Fields::ofpcReceiptCode, _receiptCode },
-        { tblOfflinePaymentClaims::Fields::ofpcReceiptDate, _receiptDate },
-        { tblOfflinePaymentClaims::Fields::ofpcAmount, _amount },
+        { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Pending },
+        { tblOfflinePayments::Fields::ofpBank, _bank },
+        { tblOfflinePayments::Fields::ofpReceiptCode, _receiptCode },
+        { tblOfflinePayments::Fields::ofpReceiptDate, _receiptDate },
+        { tblOfflinePayments::Fields::ofpAmount, _amount },
     };
 
     if ((_note.isNull() == false) && (_note.trimmed().length() > 0))
-        CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcNotes, _note.trimmed());
+        CreateParams.insert(tblOfflinePayments::Fields::ofpNotes, _note.trimmed());
 
     /*if (NULLABLE_HAS_VALUE(voucherID))
         CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpc_vchID, NULLABLE_VALUE(voucherID));
     */
 
     if (_walID > 0)
-        CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcTarget_walID, _walID);
+        CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, _walID);
 
     if (_file.Size > 0) {
         try {
@@ -1531,15 +1532,15 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
                                          "offlinePayment"
                                          );
             if (UploadedFileID > 0)
-                CreateParams.insert(tblOfflinePaymentClaims::Fields::ofpcReceiptImage_uflID, UploadedFileID);
+                CreateParams.insert(tblOfflinePayments::Fields::ofpReceiptImage_uflID, UploadedFileID);
 
         } catch (std::exception &exp) {
             TargomanDebug(5, "ObjectStorageManager::saveFile(" << _file.Name << "):" << exp.what());
         }
     }
 
-    return OfflinePaymentClaims::instance().Create(APICALLBOOM_PARAM,
-                                                   TAPI::ORMFields_t(CreateParams));
+    return OfflinePayments::instance().Create(APICALLBOOM_PARAM,
+                                              TAPI::ORMFields_t(CreateParams));
 }
 
 /**
@@ -1549,38 +1550,38 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
  */
 bool IMPL_REST_POST(Account, rejectOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _offlinePaymentClaimID
+    quint64 _offlinePaymentID
 )) {
-    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePaymentClaims::instance().makeSelectQuery(APICALLBOOM_PARAM)
-        .addCols(OfflinePaymentClaims::instance().selectableColumnNames())
+    QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(OfflinePayments::instance().selectableColumnNames())
 //        .addCols(Voucher::instance().selectableColumnNames())
 //        .leftJoin(tblVoucher::Name)
-        .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
+        .where({ tblOfflinePayments::Fields::ofpID, enuConditionOperator::Equal, _offlinePaymentID })
         .one()
     );
 
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO;
-    OfflinePaymentClaimDTO.fromJson(PaymentInfo);
+    tblOfflinePayments::DTO OfflinePaymentDTO;
+    OfflinePaymentDTO.fromJson(PaymentInfo);
 
 //    tblVoucher::DTO VoucherDTO;
 //    VoucherDTO.fromJson(PaymentInfo);
 
     //check operator or owner
     if (Authorization::hasPriv(APICALLBOOM_PARAM, { "AAA:rejectOfflinePayment" }) == false) {
-        if (OfflinePaymentClaimDTO.ofpcCreatedBy_usrID != APICALLBOOM_PARAM.getUserID())
-            throw exAuthorization("This voucher is not yours");
+        if (OfflinePaymentDTO.ofpCreatedBy_usrID != APICALLBOOM_PARAM.getUserID())
+            throw exAuthorization("This offline payment claim is not yours");
     }
 
-    if (OfflinePaymentClaimDTO.ofpcStatus != enuPaymentStatus::New)
-        throw exAuthorization("Only new offline payments are allowed.");
+    if (OfflinePaymentDTO.ofpStatus != enuPaymentStatus::Pending)
+        throw exAuthorization("Only Pending offline payments are allowed.");
 
-    OfflinePaymentClaims::instance().Update(APICALLBOOM_PARAM,
+    OfflinePayments::instance().Update(APICALLBOOM_PARAM,
                 {},
                 TAPI::ORMFields_t({
-                    { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Rejected }
+                    { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Rejected }
                 }),
                 {
-                    { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
+                    { tblOfflinePayments::Fields::ofpID, _offlinePaymentID }
                 });
 
     return true;
@@ -1592,21 +1593,21 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _offlinePaymentClaimID
+    quint64 _offlinePaymentID
 )) {
-    tblOfflinePaymentClaims::DTO OfflinePaymentClaimDTO = OfflinePaymentClaims::instance().makeSelectQuery(APICALLBOOM_PARAM)
-        .addCols(OfflinePaymentClaims::instance().selectableColumnNames())
+    tblOfflinePayments::DTO OfflinePaymentDTO = OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .addCols(OfflinePayments::instance().selectableColumnNames())
 //        .addCols(Voucher::instance().selectableColumnNames())
 //        .innerJoin(tblVoucher::Name)
-        .where({ tblOfflinePaymentClaims::Fields::ofpcID, enuConditionOperator::Equal, _offlinePaymentClaimID })
-        .one<tblOfflinePaymentClaims::DTO>();
+        .where({ tblOfflinePayments::Fields::ofpID, enuConditionOperator::Equal, _offlinePaymentID })
+        .one<tblOfflinePayments::DTO>();
 
     //check operator
     if (Authorization::hasPriv(APICALLBOOM_PARAM, { "AAA:approveOfflinePayment" }) == false)
         throw exAuthorization("Access denied");
 
-    if (OfflinePaymentClaimDTO.ofpcStatus != enuPaymentStatus::New)
-        throw exAuthorization("Only new offline payments are allowed.");
+    if (OfflinePaymentDTO.ofpStatus != enuPaymentStatus::Pending)
+        throw exAuthorization("Only Pending offline payments are allowed.");
 
 //    if (ApprovalLimit > 0) {
 //        if (Voucher.value(tblVoucher::Fields::vchTotalAmount).toLongLong() > ApprovalLimit)
@@ -1616,17 +1617,19 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_bank, "bank");
 //    QFV.unicodeAlNum(true).maxLenght(50).validate(_receiptCode, "receiptCode");
 
-    quint64 _walID = NULLABLE_GET_OR_DEFAULT(OfflinePaymentClaimDTO.ofpcTarget_walID, 0);
+    quint64 _walID = NULLABLE_GET_OR_DEFAULT(OfflinePaymentDTO.ofpTarget_walID, 0);
     quint64 VoucherID;
 
-    if (NULLABLE_IS_NULL(OfflinePaymentClaimDTO.ofpc_vchID)) {
+    QVariantMap UpdateParams;
+
+    if (NULLABLE_IS_NULL(OfflinePaymentDTO.ofp_vchID)) {
         Targoman::API::AAA::stuVoucher Voucher;
 
         Voucher.Info.UserID = APICALLBOOM_PARAM.getUserID();
 //        Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
-        Voucher.Info.ToPay = OfflinePaymentClaimDTO.ofpcAmount;
+        Voucher.Info.ToPay = OfflinePaymentDTO.ofpAmount;
         Voucher.Info.Sign = QString(sign(Voucher.Info));
 
         Voucher.ID = Voucher::instance().Create(APICALLBOOM_PARAM,
@@ -1638,43 +1641,24 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
                                                { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
                                                { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::New },
                                            }));
-
         VoucherID = Voucher.ID;
+        UpdateParams.insert(tblOfflinePayments::Fields::ofp_vchID, VoucherID);
     } else
-        VoucherID = NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpc_vchID);
+        VoucherID = NULLABLE_VALUE(OfflinePaymentDTO.ofp_vchID);
 
-    QVariantMap CreateParams = {
-        { tblOfflinePayments::Fields::ofp_vchID, VoucherID },
-        { tblOfflinePayments::Fields::ofpBank, OfflinePaymentClaimDTO.ofpcBank },
-        { tblOfflinePayments::Fields::ofpReceiptCode, OfflinePaymentClaimDTO.ofpcReceiptCode },
-        { tblOfflinePayments::Fields::ofpReceiptDate, OfflinePaymentClaimDTO.ofpcReceiptDate },
-        { tblOfflinePayments::Fields::ofpAmount, OfflinePaymentClaimDTO.ofpcAmount },
-        { tblOfflinePayments::Fields::ofpNotes, OfflinePaymentClaimDTO.ofpcNotes.trimmed().size() ? OfflinePaymentClaimDTO.ofpcNotes.trimmed() : QVariant() },
-        { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Payed },
-    };
+    UpdateParams.insert(tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Payed);
 
-    if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID))
-            CreateParams.insert(tblOfflinePayments::Fields::ofpTarget_walID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcTarget_walID));
-
-    if (NULLABLE_HAS_VALUE(OfflinePaymentClaimDTO.ofpcReceiptImage_uflID))
-            CreateParams.insert(tblOfflinePayments::Fields::ofpReceiptImage_uflID, NULLABLE_VALUE(OfflinePaymentClaimDTO.ofpcReceiptImage_uflID));
-
-    quint64 PaymentID = OfflinePayments::instance().Create(APICALLBOOM_PARAM,
-                 TAPI::ORMFields_t(CreateParams));
-
-    OfflinePaymentClaims::instance().Update(APICALLBOOM_PARAM,
-                 {},
-                 TAPI::ORMFields_t({
-                     { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Succeded }
-                 }),
-                 {
-                     { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
-                 });
+    OfflinePayments::instance().Update(APICALLBOOM_PARAM,
+                {},
+                TAPI::ORMFields_t(UpdateParams),
+                {
+                    { tblOfflinePayments::Fields::ofpID, _offlinePaymentID }
+                });
 
     try {
         clsDACResult Result = this->callSP(APICALLBOOM_PARAM,
                                            "spWalletTransactionOnPayment_Create", {
-                                               { "iPaymentID", PaymentID },
+                                               { "iPaymentID", _offlinePaymentID },
                                                { "iPaymentType", QChar(enuPaymentType::Offline) },
                                                { "iVoucherID", VoucherID },
                                                { "ioTargetWalletID", _walID },
@@ -1689,34 +1673,14 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         return Account::processVoucher(APICALLBOOM_PARAM, VoucherID);
 
     }  catch (...) {
-        OfflinePaymentClaims::instance().Update(APICALLBOOM_PARAM,
-                     {},
-                     TAPI::ORMFields_t({
-                         { tblOfflinePaymentClaims::Fields::ofpcStatus, enuPaymentStatus::Error }
-                     }),
-                     {
-                         { tblOfflinePaymentClaims::Fields::ofpcID, _offlinePaymentClaimID }
-                     });
-
         OfflinePayments::instance().Update(APICALLBOOM_PARAM,
                      {},
                      TAPI::ORMFields_t({
                          { tblOfflinePayments::Fields::ofpStatus, enuPaymentStatus::Error }
                      }),
                      {
-                         { tblOfflinePayments::Fields::ofpID, PaymentID }
+                         { tblOfflinePayments::Fields::ofpID, _offlinePaymentID }
                      });
-
-
-        //        this->Update(Voucher::instance(),
-//                    SYSTEM_USER_ID,
-//                    {},
-//                    TAPI::ORMFields_t({
-//                        { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
-//                    }),
-//                    {
-//                        { tblVoucher::Fields::vchID, OfflinePaymentClaim.ofpc_vchID }
-//                    });
         throw;
     }
 }
