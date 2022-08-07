@@ -388,39 +388,46 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,           
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 
 /**********************************************************************************/
-QVariant stuTable::toVariant() const {
+QVariant stuTable::toVariant(bool _compactList) const {
+
+    if ((_compactList == false) && (this->HasCount == false))
+        return this->Rows;
+
     QVariantMap Result;
 
-    QStringList Headers;
-    QVariantList RowsArray;
+    if (_compactList) {
+        QStringList Headers;
+        QVariantList RowsArray;
 
-    int RowIndex = 0;
-    foreach (QVariant Row, this->Rows) {
+        int RowIndex = 0;
+        foreach (QVariant Row, this->Rows) {
 
-        QVariantMap RowMap = Row.toMap();
+            QVariantMap RowMap = Row.toMap();
 
-        QVariantList OneRowsAsArray;
+            QVariantList OneRowsAsArray;
 
-        for (auto It = RowMap.constBegin(); It != RowMap.constEnd(); It++) {
-            QString ColName = It.key();
-            QVariant ColValue = It.value();
+            for (auto It = RowMap.constBegin(); It != RowMap.constEnd(); It++) {
+                QString ColName = It.key();
+                QVariant ColValue = It.value();
 
-            if (RowIndex == 0) {
-                Headers.append(ColName);
+                if (RowIndex == 0) {
+                    Headers.append(ColName);
+                }
+
+                OneRowsAsArray.append(ColValue);
             }
 
-            OneRowsAsArray.append(ColValue);
+            RowsArray.append(QVariant(OneRowsAsArray));
+
+            ++RowIndex;
         }
 
-        RowsArray.append(QVariant(OneRowsAsArray));
+        if (Headers.isEmpty() == false)
+            Result.insert("cols", Headers);
 
-        ++RowIndex;
-    }
-
-    if (Headers.isEmpty() == false)
-        Result.insert("cols", Headers);
-
-    Result.insert("rows", RowsArray);
+        Result.insert("rows", RowsArray);
+    } else
+        Result.insert("rows", this->Rows);
 
     if (this->HasCount) {
         Result.insert("totalRows", this->TotalRows);

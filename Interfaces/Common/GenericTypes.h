@@ -97,7 +97,7 @@ struct stuTable {
 //        Rows(_rows)
 //    { ; }
 
-    QVariant toVariant() const;
+    QVariant toVariant(bool _compactList = false) const;
 };
 
 struct stuFileInfo {
