@@ -216,6 +216,8 @@ QVariant intfSQLBasedModule::Select(
 ) {
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "read");
 
+    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
     if (_pksByPath.isEmpty()) {
         if (_reportCount)
             return this->SelectAllWithCount(
@@ -224,7 +226,7 @@ QVariant intfSQLBasedModule::Select(
                         _cacheTime,
                         _fnTouchQuery
                         )
-                    .toVariant();
+                    .toVariant(CompactList);
 
         return this->SelectAll(
                     GET_METHOD_ARGS_CALL_VALUES,
@@ -232,7 +234,7 @@ QVariant intfSQLBasedModule::Select(
                     _cacheTime,
                     _fnTouchQuery
                     )
-                .toVariant();
+                .toVariant(CompactList);
     }
 
     return this->SelectOne(

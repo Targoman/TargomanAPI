@@ -454,10 +454,10 @@ stuFileInfo stuFileInfo::fromVariant(const QVariant& _value, const QByteArray& _
 
 QVariant stuFileInfo::toVariant() const{
     return QVariantMap({
-                      {"name", this->Name},
-                      {"tmpname", this->TempName},
-                      {"size", this->Size},
-                      {"mime", this->Mime},
+                           { "name", this->Name },
+                           { "tmpname", this->TempName },
+                           { "size", this->Size },
+                           { "mime", this->Mime },
                        });
 }
 

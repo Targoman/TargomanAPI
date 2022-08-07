@@ -91,6 +91,9 @@ public:
 
 //    void setRequestAPIPath(const QString &_path);
     QString requestAPIPath() const;
+    const QVariantMap requestHeaders() const;
+    QVariant requestHeader(const QString &_name, const QVariant &_default = {}) const;
+
     QString host(const QString &_default = "127.0.0.1") const;
     quint16 port() const;
     QString hostAndPort(const QString &_defaultHost = "127.0.0.1") const;
