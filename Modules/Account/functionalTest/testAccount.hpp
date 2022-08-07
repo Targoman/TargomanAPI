@@ -74,7 +74,7 @@ DELETE FROM dev_AAA.tblWalletsTransactions;
 DELETE FROM dev_AAA.tblUserWallets;
 DELETE FROM dev_AAA.tblOnlinePayments;
 DELETE FROM dev_AAA.tblOfflinePayments;
-DELETE FROM dev_AAA.tblOfflinePaymentClaims;
+-- DELETE FROM dev_AAA.tblOfflinePaymentClaims;
 DELETE FROM dev_AAA.tblVoucher;
 DELETE FROM dev_AAA.tblApprovalRequest;
 DELETE FROM dev_AAA.tblActiveSessions;
@@ -181,20 +181,20 @@ DELETE FROM dev_Advert.tblLocations;
             qDebug() << "*** tblOfflinePayments CLEANUP EXCEPTION ***" << _exp.what();
         }
 
-        try {
-            QString QueryString = R"(
-                DELETE ofpc
-                  FROM tblOfflinePaymentClaims ofpc
-            INNER JOIN tblUser u
-                    ON u.usrID = ofpc.ofpcCreatedBy_usrID
-                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
-                    OR u.usrMobile LIKE '+98999888%'
-            ;)";
-            clsDACResult DACResult = DAC.execQuery("", QueryString);
-            Result.insert("tblOfflinePaymentClaims", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
-        } catch (std::exception &_exp) {
-            qDebug() << "*** tblOfflinePaymentClaims CLEANUP EXCEPTION ***" << _exp.what();
-        }
+//        try {
+//            QString QueryString = R"(
+//                DELETE ofpc
+//                  FROM tblOfflinePaymentClaims ofpc
+//            INNER JOIN tblUser u
+//                    ON u.usrID = ofpc.ofpcCreatedBy_usrID
+//                 WHERE LOWER(u.usrEmail) LIKE 'unit_test%'
+//                    OR u.usrMobile LIKE '+98999888%'
+//            ;)";
+//            clsDACResult DACResult = DAC.execQuery("", QueryString);
+//            Result.insert("tblOfflinePaymentClaims", QVariantMap({{ "numRowsAffected", DACResult.numRowsAffected() }}));
+//        } catch (std::exception &_exp) {
+//            qDebug() << "*** tblOfflinePaymentClaims CLEANUP EXCEPTION ***" << _exp.what();
+//        }
 
         try {
             QString QueryString = R"(
@@ -1029,7 +1029,7 @@ private slots:
                     "Account/rejectOfflinePayment",
                     {},
                     {
-                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                        { "offlinePaymentID", this->OfflinePaymentClaimID },
                     }
                 );
 
@@ -1075,7 +1075,7 @@ private slots:
                     "Account/approveOfflinePayment",
                     {},
                     {
-                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                        { "offlinePaymentID", this->OfflinePaymentClaimID },
                     }
                 );
 

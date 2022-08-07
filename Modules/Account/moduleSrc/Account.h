@@ -422,7 +422,7 @@ private slots:
         rejectOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _offlinePaymentClaimID
+            quint64 _offlinePaymentID
         ),
         "reject offline payment claim"
     )
@@ -431,7 +431,7 @@ private slots:
         approveOfflinePayment,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _offlinePaymentClaimID
+            quint64 _offlinePaymentID
         ),
         "approve Voucher by offline payment"
     )

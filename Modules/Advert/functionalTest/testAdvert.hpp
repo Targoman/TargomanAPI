@@ -1331,7 +1331,7 @@ private slots:
                     "Account/approveOfflinePayment",
                     {},
                     {
-                        { "offlinePaymentClaimID", this->OfflinePaymentClaimID },
+                        { "offlinePaymentID", this->OfflinePaymentClaimID },
                     }
                 );
 

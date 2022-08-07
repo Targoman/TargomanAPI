@@ -244,6 +244,9 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
 /*****************************************************************\
 |* OfflinePaymentClaims ******************************************|
 \*****************************************************************/
+
+/*
+
 OfflinePaymentClaims::OfflinePaymentClaims() :
     intfSQLBasedModule(
         AAASchema,
@@ -281,6 +284,8 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
+
+*/
 
 //quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
