@@ -1467,7 +1467,6 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
 
 /**
  * @callby:
- *     operator
  *     owner
  */
 quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
@@ -1625,7 +1624,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     if (NULLABLE_IS_NULL(OfflinePaymentDTO.ofp_vchID)) {
         Targoman::API::AAA::stuVoucher Voucher;
 
-        Voucher.Info.UserID = APICALLBOOM_PARAM.getUserID();
+        Voucher.Info.UserID = OfflinePaymentDTO.ofpCreatedBy_usrID; //APICALLBOOM_PARAM.getUserID();
 //        Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
@@ -1634,7 +1633,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
         Voucher.ID = Voucher::instance().Create(APICALLBOOM_PARAM,
                          TAPI::ORMFields_t({
-                                               { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID() },
+                                               { tblVoucher::Fields::vch_usrID, OfflinePaymentDTO.ofpCreatedBy_usrID }, //APICALLBOOM_PARAM.getUserID() },
 //                                                   { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact).constData() },
                                                { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                                { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },

@@ -1091,7 +1091,7 @@ private slots:
 
     void listOfflinePayments() {
         QT_TRY {
-            QVariant Result = callAdminAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Account/OfflinePayments",
                 {},
@@ -1104,7 +1104,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     void UserWallets_transfer() {
         QT_TRY {
             QVariant Result = callUserAPI(
