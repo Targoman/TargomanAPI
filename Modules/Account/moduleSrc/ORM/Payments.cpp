@@ -60,7 +60,9 @@ OnlinePayments::OnlinePayments() :
 
 QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        this->setSelfFilters({
+                                 { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID() }
+                             }, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblVoucher::Name);
@@ -363,13 +365,20 @@ OfflinePayments::OfflinePayments() :
 QVariant IMPL_ORMGET(OfflinePayments) {
     UploadQueue::instance().prepareFiltersList();
 
+    clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        ExtraFilters
+                .setCond({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+                .orCond(clsCondition({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Null })
+                        .andCond({ tblOfflinePayments::Fields::ofpCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() }))
+                ;
+
+//    this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query
                 .addCols(this->selectableColumnNames())
-                .innerJoin(tblVoucher::Name)
+                .leftJoin(tblVoucher::Name)
                 .addCols(Voucher::instance().selectableColumnNames())
                 ;
 
@@ -384,7 +393,7 @@ QVariant IMPL_ORMGET(OfflinePayments) {
                     );
     };
 
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, ExtraFilters, 0, fnTouchQuery);
 }
 
 bool IMPL_ORMUPDATE(OfflinePayments) {
@@ -393,5 +402,6 @@ bool IMPL_ORMUPDATE(OfflinePayments) {
 }
 
 /*****************************************************************/
+
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
