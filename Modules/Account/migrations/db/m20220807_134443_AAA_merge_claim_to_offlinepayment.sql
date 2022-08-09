@@ -8,7 +8,6 @@ ALTER TABLE `tblOfflinePayments`
 
 INSERT
   INTO tblOfflinePayments(
-       ofpID,
        ofp_vchID,
        ofpBank,
        ofpReceiptCode,
@@ -22,8 +21,7 @@ INSERT
        ofpCreatedBy_usrID,
        ofpUpdatedBy_usrID
        )
-SELECT ofpcID,
-       ofpc_vchID,
+SELECT ofpc_vchID,
        ofpcBank,
        ofpcReceiptCode,
        ofpcReceiptDate,
