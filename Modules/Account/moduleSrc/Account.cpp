@@ -1634,7 +1634,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
         Voucher.ID = Voucher::instance().Create(APICALLBOOM_PARAM,
                          TAPI::ORMFields_t({
                                                { tblVoucher::Fields::vch_usrID, OfflinePaymentDTO.ofpCreatedBy_usrID }, //APICALLBOOM_PARAM.getUserID() },
-//                                                   { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact).constData() },
+//                                               { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact).constData() },
                                                { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                                { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
                                                { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },

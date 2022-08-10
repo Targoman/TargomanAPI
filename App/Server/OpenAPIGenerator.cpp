@@ -428,11 +428,14 @@ QJsonObject OpenAPIGenerator::retrieveJson(
 
                 QJsonArray Parameters;
                 for (quint8 i=0; i< /*APIObject->BaseMethod.parameterCount()*/APIObject->ParamNames.count(); ++i)
-                    addParamSpecs( Parameters, i, _pksByPathsStorage);
+                    addParamSpecs(Parameters, i, _pksByPathsStorage);
 
                 if (RequiredFiles > 0) {
                     PathInfo["consumes"] = QJsonArray({"multipart/form-data"});
-                    for (auto Prop = Properties.begin(); Prop != Properties.end(); ++Prop) {
+                    for (auto Prop = Properties.begin();
+                         Prop != Properties.end();
+                         ++Prop
+                    ) {
                         QJsonObject PropVal = Prop.value().toObject();
                         PropVal.insert("name", Prop.key());
                         PropVal.insert("in", "formData");
@@ -443,15 +446,16 @@ QJsonObject OpenAPIGenerator::retrieveJson(
                     for (auto PropertyIter = Properties.begin();
                         PropertyIter != Properties.end();
                         PropertyIter++
-                        )
+                    )
                         if (PropertyIter->toObject().value("required").toBool())
                             RequiredFields.append(PropertyIter.key());
+
                     PathInfo["consumes"] = QJsonArray({"application/json"});
                     Parameters.append(QJsonObject({
                                                       { "in", "body" },
                                                       { "name", "body" },
                                                       { "description", "Parameter Object" },
-                                                      { "required", true },
+                                                      { "required", /*true*/ RequiredFields.isEmpty() == false },
                                                       { "schema", QJsonObject({
                                                             { "required", RequiredFields },
                                                             { "type", "object" },
