@@ -105,7 +105,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
         _fnTouchQuery(Query);
 
     if (_extraFilters.isEmpty() == false)
-        Query.andWhere(_extraFilters);
+        Query.andWhere(clsCondition().andCond(_extraFilters));
 
     QVariantMap Result = Query.one();
 
@@ -134,13 +134,13 @@ QVariantMap intfSQLBasedModule::SelectOne(
 
     ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM, "", _translate)
         .setPksByPath(_pksByPath)
-        .pageIndex(_pageIndex)
-        .pageSize(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
 //        .andWhere(_extraFilters)
+        .pageIndex(_pageIndex)
+        .pageSize(_pageSize)
         .setCacheTime(_cacheTime)
     ;
 
@@ -148,7 +148,7 @@ QVariantMap intfSQLBasedModule::SelectOne(
         _fnTouchQuery(Query);
 
     if (_extraFilters.isEmpty() == false)
-        Query.andWhere(_extraFilters);
+        Query.andWhere(clsCondition().andCond(_extraFilters));
 
     /*QVariantList*/ TAPI::stuTable Result = Query.all();
 
@@ -177,13 +177,13 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
 
     ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM, "", _translate)
         .setPksByPath(_pksByPath)
-        .pageIndex(_pageIndex)
-        .pageSize(_pageSize)
         .addCSVCols(_cols)
         .orderBy(_orderBy)
         .groupBy(_groupBy)
         .addFilters(_filters)
 //        .andWhere(_extraFilters)
+        .pageIndex(_pageIndex)
+        .pageSize(_pageSize)
         .setCacheTime(_cacheTime)
     ;
 
@@ -191,7 +191,7 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
         _fnTouchQuery(Query);
 
     if (_extraFilters.isEmpty() == false)
-        Query.andWhere(_extraFilters);
+        Query.andWhere(clsCondition().andCond(_extraFilters));
 
     TAPI::stuTable Result = Query.allWithCount();
 
