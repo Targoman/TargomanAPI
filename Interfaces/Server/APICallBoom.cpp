@@ -124,11 +124,11 @@ void intfAPICallBoom::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
 /*TAPI::JWT_t*/QJsonObject &intfAPICallBoom::getJWT() {
     return this->Data->JWT;
 }
-quint64 intfAPICallBoom::getUserID(quint64 _default) {
-    quint64 UserID = Targoman::API::AAA::clsJWT(this->Data->JWT).usrID();
-    if (UserID == 0)
-        UserID = _default;
-    return UserID;
+quint64 intfAPICallBoom::getActorID(quint64 _default) {
+    quint64 ActorID = Targoman::API::AAA::clsJWT(this->Data->JWT).actorID();
+    if (ActorID == 0)
+        ActorID = _default;
+    return ActorID;
 }
 QJsonObject intfAPICallBoom::getJWTPrivsObject() {
     return Targoman::API::AAA::clsJWT(this->Data->JWT).privsObject();

@@ -72,8 +72,8 @@ Advert::Advert() :
         AdvertSchema,
         {
             //           day                week   month                total
-            { "show",  { "slbExShowPerDay",   {},    {},                  "slbExShowTotal" } },
-            { "click", { "slbExClicksPerDay", {},    "slbExClicksPerMonth", "slbExClicksTotal" } },
+            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
+            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
         },
         &AccountUnits::instance(),
 //        &AccountUnitsI18N::instance(),
@@ -217,7 +217,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     QVariantMap Result;
 
     if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        Result.insert(tblAccountUserAssets::ExtraFields::uasExDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
 
     return Result;
 }
@@ -321,8 +321,8 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         }) },
         { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
         { tblAccountProductsBase::Fields::prd_untID,            1 },
-        { tblAccountProducts::ExtraFields::prdExType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-        { tblAccountProducts::ExtraFields::prdEx_locID,         LocationID },
+        { tblAccountProducts::ExtraFields::prdType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prd_locID,         LocationID },
     });
 
     quint32 ProductID = this->AccountProducts->Create(APICALLBOOM_PARAM, ProductValues);

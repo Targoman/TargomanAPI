@@ -43,8 +43,8 @@ QVariant IMPL_ORMGET(TicketAttachments) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID).arg(APICALLBOOM_PARAM.getUserID())
-//                       .arg(tblTicketAttachments::Fields::tktCreatedBy_usrID).arg(APICALLBOOM_PARAM.getUserID())
+//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID).arg(APICALLBOOM_PARAM.getActorID())
+//                       .arg(tblTicketAttachments::Fields::tktCreatedBy_usrID).arg(APICALLBOOM_PARAM.getActorID())
 //                       .arg(tblTicketAttachments::Fields::tktTarget_usrID)
 //                       .arg(tblTicketAttachments::Fields::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
@@ -53,8 +53,8 @@ QVariant IMPL_ORMGET(TicketAttachments) {
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
-            .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+            .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
+            .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
             .orCond(
                 clsCondition({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Null })
                 .andCond({ tblTickets::Fields::tktType,

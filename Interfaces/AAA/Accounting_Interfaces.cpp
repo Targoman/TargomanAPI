@@ -670,7 +670,7 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
 
 QVariant IMPL_ORMGET(intfAccountUserAssets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getUserID() }}, _filters);
+        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -686,7 +686,7 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
 
     this->callSP(APICALLBOOM_PARAM,
                  "spUserAsset_SetAsPrefered", {
-                     { "iUserID", APICALLBOOM_PARAM.getUserID() },
+                     { "iUserID", APICALLBOOM_PARAM.getActorID() },
                      { "iUASID",  UserPackageID },
                  });
     return false;
@@ -702,7 +702,7 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
         throw exHTTPBadRequest("Invalid UserPackageID provided");
 
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    /*return this->update(APICALLBOOM_PARAM.getUserID(), {
+    /*return this->update(APICALLBOOM_PARAM.getActorID(), {
                               {tblAccountUserAssets::Fields::uasID, UserPackageID}
                           }, {
                               {tblAccountUserAssets::Fields::uasStatus, TAPI::enuAuditableStatus::Banned},
@@ -755,7 +755,7 @@ intfAccountAssetUsage::intfAccountAssetUsage(
 
 QVariant IMPL_ORMGET(intfAccountAssetUsage) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }

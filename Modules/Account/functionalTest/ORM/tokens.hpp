@@ -48,7 +48,7 @@ private slots:
 
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                  {"aptToken", UT_NormalToken},
-                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                 {"apt_usrID", clsJWT(gJWT).actorID()},
                              }) == gInvalid);
 
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
@@ -60,19 +60,19 @@ private slots:
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                  {"aptToken", UT_NormalToken},
                                  {"apt_svcID", 0},
-                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                 {"apt_usrID", clsJWT(gJWT).actorID()},
                              }) == gInvalid);
 
 
         QVERIFY((gAPITokenID =  callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                                  {"aptToken", UT_NormalToken},
                                                  {"apt_svcID", gServiceID},
-                                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                                 {"apt_usrID", clsJWT(gJWT).actorID()},
                                              }).toUInt()) > 0);
         QVERIFY((gAPIAdminTokenID =  callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                                  {"aptToken", UT_AdminToken},
                                                  {"apt_svcID", gServiceID},
-                                                 {"apt_usrID", clsJWT(gAdminJWT).usrID()},
+                                                 {"apt_usrID", clsJWT(gAdminJWT).actorID()},
                                              }).toUInt()) > 0);
     }
 
@@ -112,7 +112,7 @@ private slots:
         QVERIFY(callAdminAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                                  {"aptToken", UT_NormalToken},
                                                  {"apt_svcID", gServiceID},
-                                                 {"apt_usrID", clsJWT(gJWT).usrID()},
+                                                 {"apt_usrID", clsJWT(gJWT).actorID()},
                                              }) == gInvalid);
     }
 

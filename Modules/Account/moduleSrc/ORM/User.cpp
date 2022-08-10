@@ -61,7 +61,7 @@ User::User() :
 }
 
 QVariant IMPL_ORMGET(User) {
-    if (APICALLBOOM_PARAM.getUserID() != _pksByPath.toULongLong())
+    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
         Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
@@ -149,7 +149,7 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     if (CurrentUserID != _usrID)
         Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:photo:CRUD~0100" });
@@ -167,7 +167,7 @@ bool IMPL_REST_UPDATE(User, photo, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     QString qry = QString()
           + "INSERT INTO"
@@ -198,7 +198,7 @@ bool IMPL_REST_UPDATE(User, photo, (
 bool IMPL_REST_POST(User, deletePhoto, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     QString qry = QString()
           + "UPDATE"
@@ -228,7 +228,7 @@ bool IMPL_REST_UPDATE(User, email, (
     TAPI::MD5_t     _psw,
     QString         _salt
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     _email = _email.toLower().trimmed();
 
@@ -261,7 +261,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
     TAPI::MD5_t     _psw,
     QString         _salt
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -297,7 +297,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     NULLABLE_TYPE(bool) _enableEmailAlerts,
     NULLABLE_TYPE(bool) _enableSMSAlerts
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     QVariantMap ToUpdate;
 
@@ -322,7 +322,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     QStringList ToUpdate;
     QVariantList Params;
@@ -369,7 +369,7 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 //        QString         _language,
     QString         _theme
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     QVariantMap ToUpdateJson;
     QStringList ToRemoveJson;
@@ -505,7 +505,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _sheba, APICALLBOOM_PARAM.getUserID(), APICALLBOOM_PARAM.getUserID() }
+//                              { _sheba, APICALLBOOM_PARAM.getActorID(), APICALLBOOM_PARAM.getActorID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
@@ -519,7 +519,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _etherAddress, APICALLBOOM_PARAM.getUserID(), APICALLBOOM_PARAM.getUserID() }
+//                              { _etherAddress, APICALLBOOM_PARAM.getActorID(), APICALLBOOM_PARAM.getActorID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;

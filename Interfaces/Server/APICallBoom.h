@@ -81,7 +81,7 @@ public:
     virtual bool needJWT() = 0;
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
-    quint64 getUserID(quint64 _default=0);
+    quint64 getActorID(quint64 _default=0);
     QJsonObject getJWTPrivsObject();
 
     QString getIP();

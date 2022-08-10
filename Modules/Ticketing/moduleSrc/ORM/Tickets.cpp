@@ -66,7 +66,7 @@ QVariant Tickets::apiGET(
     TAPI::GroupBy_t _groupBy;
     bool _translate = true;
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
     clsCondition ExtraFilters = {};
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -130,7 +130,7 @@ QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     TicketRead::instance().prepareFiltersList();
 

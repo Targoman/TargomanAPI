@@ -128,7 +128,7 @@ private slots:
         gEncodedJWT = Result.toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
+        QVERIFY(clsJWT(gJWT).actorID() == gUserID);
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
@@ -145,7 +145,7 @@ private slots:
         gEncodedAdminJWT = Result.toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
+        QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
