@@ -36,7 +36,7 @@ Props::Props() :
 
 QVariant IMPL_ORMGET(Props) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -47,8 +47,8 @@ QVariant IMPL_ORMGET(Props) {
 
 quint64 IMPL_ORMCREATE(Props) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        _createInfo.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, _createInfo);
+        _createInfo.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _createInfo);
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
@@ -57,8 +57,8 @@ bool IMPL_ORMUPDATE(Props) {
     QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
-        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
@@ -66,8 +66,8 @@ bool IMPL_ORMUPDATE(Props) {
 bool IMPL_ORMDELETE(Props) {
     QVariantMap ExtraFilters;
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }

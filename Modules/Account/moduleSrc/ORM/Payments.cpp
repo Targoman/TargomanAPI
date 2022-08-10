@@ -61,7 +61,7 @@ OnlinePayments::OnlinePayments() :
 QVariant IMPL_ORMGET(OnlinePayments) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({
-                                 { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID() }
+                                 { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID() }
                              }, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
@@ -264,7 +264,7 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
     UploadQueue::instance().prepareFiltersList();
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query
@@ -323,8 +323,8 @@ QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-                .setCond({ tblOfflinePaymentClaims::Fields::ofpcCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
-                .orCond({ tblOfflinePaymentClaimsAttachments::Fields::ofpcatCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+                .setCond({ tblOfflinePaymentClaims::Fields::ofpcCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
+                .orCond({ tblOfflinePaymentClaimsAttachments::Fields::ofpcatCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
                 ;
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
@@ -368,12 +368,12 @@ QVariant IMPL_ORMGET(OfflinePayments) {
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-                .setCond({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() })
+                .setCond({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
                 .orCond(clsCondition({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Null })
-                        .andCond({ tblOfflinePayments::Fields::ofpCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getUserID() }))
+                        .andCond({ tblOfflinePayments::Fields::ofpCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() }))
                 ;
 
-//    this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+//    this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
         _query

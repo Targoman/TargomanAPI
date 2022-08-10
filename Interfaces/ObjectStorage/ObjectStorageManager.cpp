@@ -101,7 +101,7 @@ quint64 ObjectStorageManager::saveFile(
             throw exTargomanBase("Could not create storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
     }
     //--
-    QString StrOwnerID = QString("user_%1").arg(APICALLBOOM_PARAM.getUserID());
+    QString StrOwnerID = QString("user_%1").arg(APICALLBOOM_PARAM.getActorID());
     if (FullPathDir.exists(StrOwnerID) == false) {
         if (FullPathDir.mkpath(StrOwnerID) == false)
             throw exTargomanBase("Could not create path under storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
@@ -149,7 +149,7 @@ quint64 ObjectStorageManager::saveFile(
                                                         { "iFileSize",          _file.Size },
                                                         { "iFileType",          FileType },
                                                         { "iMimeType",          MimeType },
-                                                        { "iCreatorUserID",     APICALLBOOM_PARAM.getUserID() },
+                                                        { "iCreatorUserID",     APICALLBOOM_PARAM.getActorID() },
                                                         { "iLockedBy",          ServerCommonConfigs::InstanceID.value() },
                                                     })
                                                     .spDirectOutputs();
@@ -185,7 +185,7 @@ quint64 ObjectStorageManager::saveFile(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
                                         APICALLBOOM_PARAM,
-                                        APICALLBOOM_PARAM.getUserID(),
+                                        APICALLBOOM_PARAM.getActorID(),
                                         _uploadFiles,
                                         _uploadQueue,
                                         _uploadGateways,
@@ -206,7 +206,7 @@ quint64 ObjectStorageManager::saveFile(
             .set(tblUploadQueue::Fields::uquLockedBy, DBExpression::NIL())
             .where({ tblUploadQueue::Fields::uqu_uflID, enuConditionOperator::Equal, UploadedFileID })
             .andWhere({ tblUploadQueue::Fields::uquLockedAt, enuConditionOperator::NotNull })
-            .execute(APICALLBOOM_PARAM.getUserID())
+            .execute(APICALLBOOM_PARAM.getActorID())
         ;
     }
 

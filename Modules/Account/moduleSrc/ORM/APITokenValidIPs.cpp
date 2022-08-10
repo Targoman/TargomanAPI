@@ -37,7 +37,7 @@ APITokenValidIPs::APITokenValidIPs() :
 
 QVariant IMPL_ORMGET(APITokenValidIPs) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblAPITokens::Name);
@@ -55,9 +55,9 @@ quint64 IMPL_ORMCREATE(APITokenValidIPs) {
 bool IMPL_ORMUPDATE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID());
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
 
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
@@ -66,8 +66,8 @@ bool IMPL_ORMDELETE(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID());
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

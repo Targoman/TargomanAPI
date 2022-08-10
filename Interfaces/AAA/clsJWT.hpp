@@ -31,16 +31,18 @@
 
 namespace Targoman::API::AAA {
 
-namespace JWTItems{
+namespace JWTItems {
+TARGOMAN_CREATE_CONSTEXPR(jti);
 TARGOMAN_CREATE_CONSTEXPR(iat);
 TARGOMAN_CREATE_CONSTEXPR(exp);
-TARGOMAN_CREATE_CONSTEXPR(jti);
+//
+TARGOMAN_CREATE_CONSTEXPR(uid); //usrID -> actor id
+//
 TARGOMAN_CREATE_CONSTEXPR(priv);
 TARGOMAN_CREATE_CONSTEXPR(privs);
 TARGOMAN_CREATE_CONSTEXPR(usrLogin);
 TARGOMAN_CREATE_CONSTEXPR(usrName);
 TARGOMAN_CREATE_CONSTEXPR(usrFamily);
-TARGOMAN_CREATE_CONSTEXPR(usrID);
 TARGOMAN_CREATE_CONSTEXPR(usrApproval);
 TARGOMAN_CREATE_CONSTEXPR(usrStatus);
 TARGOMAN_CREATE_CONSTEXPR(canChangePass);
@@ -48,25 +50,28 @@ TARGOMAN_CREATE_CONSTEXPR(rolID);
 TARGOMAN_CREATE_CONSTEXPR(rolName);
 }
 
-class clsJWT{
+class clsJWT {
 public:
     clsJWT(const QJsonObject& _token) : Token(_token) { ; }
-    inline QString login() const {return this->Token.value(JWTItems::usrLogin).toString();}
-    inline QString name() const {return this->Token.value(JWTItems::usrName).toString();}
-    inline QString family() const {return this->Token.value(JWTItems::usrFamily).toString();}
-    inline QString rolName() const {return this->Token.value(JWTItems::rolName).toString();}
-    inline quint64 rolID() const {return static_cast<quint64>(this->Token.value(JWTItems::rolID).toDouble());}
-    inline QVariantMap privs() const {return this->Token.value(JWTItems::privs).toObject().toVariantMap();}
-    inline QJsonObject privsObject() const {return this->Token.value(JWTItems::privs).toObject();}
-    inline quint64 usrID() const {return static_cast<quint64>(this->Token.value(JWTItems::usrID).toDouble());}
-    inline TAPI::enuUserApproval::Type usrApproval() const {return TAPI::enuUserApproval::toEnum(this->Token.value(JWTItems::usrApproval).toString().toLatin1().constData());}
-    inline TAPI::enuUserStatus::Type usrStatus() const {return TAPI::enuUserStatus::toEnum(this->Token.value(JWTItems::usrStatus).toString().toLatin1().constData());}
-    inline QString session() const {return this->Token.value(JWTItems::jti).toString();}
-    inline QVariantMap privatePart() const {return this->Token.value(JWTItems::priv).toObject().toVariantMap();}
-    inline QJsonValue value(const QLatin1String& _key) const {return this->Token.value(_key);}
-    inline bool canChangePass() const {return this->Token.value(JWTItems::canChangePass).toBool();}
-    inline quint64 issuedAt() const { return static_cast<quint64>(this->Token.value(JWTItems::iat).toDouble()); }
-    inline quint64 expireAt() const { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
+    inline QString session() const                              { return this->Token.value(JWTItems::jti).toString(); }
+    inline quint64 issuedAt() const                             { return static_cast<quint64>(this->Token.value(JWTItems::iat).toDouble()); }
+    inline quint64 expireAt() const                             { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
+    //
+    inline quint64 actorID() const                              { return static_cast<quint64>(this->Token.value(JWTItems::uid).toDouble()); }
+    //
+    inline QVariantMap privatePart() const                      { return this->Token.value(JWTItems::priv).toObject().toVariantMap(); }
+    inline QVariantMap privs() const                            { return this->Token.value(JWTItems::privs).toObject().toVariantMap(); }
+    inline QJsonObject privsObject() const                      { return this->Token.value(JWTItems::privs).toObject(); }
+    inline QString login() const                                { return this->Token.value(JWTItems::usrLogin).toString(); }
+    inline QString name() const                                 { return this->Token.value(JWTItems::usrName).toString(); }
+    inline QString family() const                               { return this->Token.value(JWTItems::usrFamily).toString(); }
+    inline TAPI::enuUserApproval::Type usrApproval() const      { return TAPI::enuUserApproval::toEnum(this->Token.value(JWTItems::usrApproval).toString().toLatin1().constData()); }
+    inline TAPI::enuUserStatus::Type usrStatus() const          { return TAPI::enuUserStatus::toEnum(this->Token.value(JWTItems::usrStatus).toString().toLatin1().constData()); }
+    inline bool canChangePass() const                           { return this->Token.value(JWTItems::canChangePass).toBool(); }
+    inline QString rolName() const                              { return this->Token.value(JWTItems::rolName).toString(); }
+    inline quint64 rolID() const                                { return static_cast<quint64>(this->Token.value(JWTItems::rolID).toDouble()); }
+
+    inline QJsonValue value(const QLatin1String& _key) const    { return this->Token.value(_key); }
 
     /**
      * @brief createSignedJWT creates an string containing HEADER.PAYLOAD.SIGNATURE as described by JWT standard.

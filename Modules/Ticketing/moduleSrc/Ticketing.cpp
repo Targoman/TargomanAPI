@@ -129,7 +129,7 @@ quint64 Ticketing::insertTicket(
             }
         }
 
-        QueryCreateAttachments.execute(APICALLBOOM_PARAM.getUserID());
+        QueryCreateAttachments.execute(APICALLBOOM_PARAM.getActorID());
     }
 
     return TicketID;
@@ -261,7 +261,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                 { Gateways::NFSMetaInfoJsonKey::Path, ".../ticketing" },
                             })},
                         })
-                .execute(APICALLBOOM_PARAM.getUserID())
+                .execute(APICALLBOOM_PARAM.getActorID())
                 ;
         Result.insert("NFS", res);
     }
@@ -283,7 +283,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                   { Gateways::AWSS3MetaInfoJsonKey::AccessKey, "1" },
                             })},
                         })
-                .execute(APICALLBOOM_PARAM.getUserID())
+                .execute(APICALLBOOM_PARAM.getActorID())
                 ;
         Result.insert("S3", res);
     }

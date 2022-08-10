@@ -201,17 +201,17 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("jwt", "create");
 
     QJsonObject Payload = {
+        { JWTItems::iat,            _activeAccount.Privs["Issuance"] },
+        { JWTItems::uid,            _activeAccount.Privs["usrID"] },
+        { JWTItems::privs,          _activeAccount.Privs["privs"] },
         { JWTItems::usrLogin,       _login },
-        { JWTItems::usrID,          _activeAccount.Privs["usrID"] },
         { JWTItems::usrName,        _activeAccount.Privs["usrName"] },
         { JWTItems::usrFamily,      _activeAccount.Privs["usrFamily"] },
-        { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
-        { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
-        { JWTItems::privs,          _activeAccount.Privs["privs"] },
         { JWTItems::usrApproval,    TAPI::enuUserApproval::toStr(_activeAccount.Privs["usrApprovalState"].toString()) },
         { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
         { JWTItems::canChangePass,  _activeAccount.Privs["hasPass"] },
-        { JWTItems::iat,            _activeAccount.Privs["Issuance"] },
+        { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
+        { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
     };
 
     TAPI::EncodedJWT_t JWT = QJWT::createSigned(
@@ -567,7 +567,7 @@ bool IMPL_REST_GET_OR_POST(Account, logout, (
 
     this->callSP(APICALLBOOM_PARAM,
                  "spLogout", {
-                     { "iByUserID", JWT.usrID() },
+                     { "iByUserID", JWT.actorID() },
                      { "iSessionGUID", JWT.session() },
                  });
 
@@ -663,7 +663,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 
     this->callSP(APICALLBOOM_PARAM,
                  "spPassword_Change", {
-                     { "iUserID", JWT.usrID() },
+                     { "iUserID", JWT.actorID() },
                      { "iSessionGUID", JWT.session() },
                      { "iOldPass", _oldPass },
                      { "iOldPassSalt", _oldPassSalt },
@@ -737,7 +737,7 @@ bool IMPL_REST_POST(Account, cancelVoucher, (
     quint64 CurrentUserID = 0;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, { "AAA:cancelVoucher" }) == false)
-        CurrentUserID = APICALLBOOM_PARAM.getUserID();
+        CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     ///@TODO: implement this sp
 
@@ -817,7 +817,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
     checkPreVoucherSanity(_preVoucher);
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     if (_preVoucher.UserID != CurrentUserID)
         throw exHTTPBadRequest("invalid pre-Voucher owner" /*, stuVoucher(_preVoucher).toJson() */);
@@ -1186,7 +1186,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
 
-//    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+//    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     tblVoucher::DTO VoucherDTO = SelectQuery(Voucher::instance())
                                  .addCols(Voucher::instance().selectableColumnNames())
@@ -1491,7 +1491,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
 
         //check operator or owner
         if (Authorization::hasPriv(APICALLBOOM_PARAM, { "AAA:claimOfflinePayment" }) == false) {
-            if (VoucherDTO.vch_usrID != APICALLBOOM_PARAM.getUserID())
+            if (VoucherDTO.vch_usrID != APICALLBOOM_PARAM.getActorID())
                 throw exAuthorization("Voucher is not yours");
         }
 
@@ -1567,7 +1567,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
 
     //check operator or owner
     if (Authorization::hasPriv(APICALLBOOM_PARAM, { "AAA:rejectOfflinePayment" }) == false) {
-        if (OfflinePaymentDTO.ofpCreatedBy_usrID != APICALLBOOM_PARAM.getUserID())
+        if (OfflinePaymentDTO.ofpCreatedBy_usrID != APICALLBOOM_PARAM.getActorID())
             throw exAuthorization("This offline payment claim is not yours");
     }
 
@@ -1624,7 +1624,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
     if (NULLABLE_IS_NULL(OfflinePaymentDTO.ofp_vchID)) {
         Targoman::API::AAA::stuVoucher Voucher;
 
-        Voucher.Info.UserID = OfflinePaymentDTO.ofpCreatedBy_usrID; //APICALLBOOM_PARAM.getUserID();
+        Voucher.Info.UserID = OfflinePaymentDTO.ofpCreatedBy_usrID; //APICALLBOOM_PARAM.getActorID();
 //        Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
         Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
         Voucher.Info.Summary = "Increase wallet";
@@ -1633,7 +1633,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
         Voucher.ID = Voucher::instance().Create(APICALLBOOM_PARAM,
                          TAPI::ORMFields_t({
-                                               { tblVoucher::Fields::vch_usrID, OfflinePaymentDTO.ofpCreatedBy_usrID }, //APICALLBOOM_PARAM.getUserID() },
+                                               { tblVoucher::Fields::vch_usrID, OfflinePaymentDTO.ofpCreatedBy_usrID }, //APICALLBOOM_PARAM.getActorID() },
 //                                               { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson(QJsonDocument::Compact).constData() },
                                                { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
                                                { tblVoucher::Fields::vchTotalAmount, Voucher.Info.ToPay },
@@ -1743,7 +1743,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_wit
         if (RemainingAfterWallet > 0)
             return Targoman::API::AAA::stuVoucher();
 
-        return Account::processVoucher(APICALLBOOM_PARAM.getUserID(), _vchID);
+        return Account::processVoucher(APICALLBOOM_PARAM.getActorID(), _vchID);
 
     }  catch (...) {
         this->Update(OfflinePayments::instance(),
@@ -1859,7 +1859,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             //bypass process by end point?
                             if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
                                 stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                                VoucherItemForTrustedAction.UserID = VoucherDTO.vch_usrID; //APICALLBOOM_PARAM.getUserID();
+                                VoucherItemForTrustedAction.UserID = VoucherDTO.vch_usrID; //APICALLBOOM_PARAM.getActorID();
                                 VoucherItemForTrustedAction.VoucherID = _voucherID;
                                 VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                                 VoucherItemForTrustedAction.Sign.clear();
@@ -2041,7 +2041,7 @@ void Account::tryCancelVoucher(
                             if (NULLABLE_HAS_VALUE(CancelVoucherItemEndPoint)) {
                                 try {
                                     stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
-                                    VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getUserID();
+                                    VoucherItemForTrustedAction.UserID = APICALLBOOM_PARAM.getActorID();
                                     VoucherItemForTrustedAction.VoucherID = _voucherID;
                                     VoucherItemForTrustedAction.VoucherItem = VoucherItem;
                                     VoucherItemForTrustedAction.Sign.clear();
@@ -2109,7 +2109,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
                         "spWallet_Increase", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
-                            { "iByUserID", APICALLBOOM_PARAM.getUserID() },
+                            { "iByUserID", APICALLBOOM_PARAM.getActorID() },
                             { "iType", QString(static_cast<char>(enuVoucherType::Prize)) },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
@@ -2140,7 +2140,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
                         "spWallet_Increase", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
-                            { "iByUserID", APICALLBOOM_PARAM.getUserID() },
+                            { "iByUserID", APICALLBOOM_PARAM.getActorID() },
                             { "iType", QString(static_cast<char>(enuVoucherType::Income)) },
                             { "iAmount", _amount },
                             { "iDesc", _desc },

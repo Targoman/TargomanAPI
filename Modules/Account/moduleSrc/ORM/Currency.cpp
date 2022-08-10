@@ -72,7 +72,7 @@ bool IMPL_REST_UPDATE(Currency, setAsDefault, (
 
     this->callSP(APICALLBOOM_PARAM,
                  "spCurrency_SetAsDefault", {
-                     { "iUserID", APICALLBOOM_PARAM.getUserID() },
+                     { "iUserID", APICALLBOOM_PARAM.getActorID() },
                      { "iCurID", _pksByPath },
                  });
 

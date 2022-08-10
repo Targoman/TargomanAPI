@@ -241,7 +241,7 @@ private slots:
         gEncodedJWT = Result.toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).usrID() == gUserID);
+        QVERIFY(clsJWT(gJWT).actorID() == gUserID);
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
@@ -258,7 +258,7 @@ private slots:
         gEncodedAdminJWT = Result.toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gAdminJWT).usrID() == gAdminUserID);
+        QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
         QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
@@ -348,8 +348,8 @@ private slots:
                     { tblAccountProductsBase::Fields::prdName,          "test product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
                     { tblAccountProductsBase::Fields::prd_untID,        1 },
-                    { tblAccountProducts::ExtraFields::prdExType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::ExtraFields::prdEx_locID,     this->LocationID },
+                    { tblAccountProducts::ExtraFields::prdType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prd_locID,     this->LocationID },
                     { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
                           { "fa", "عنوان فارسی ۱۲۳" },
                           { "ar", "عنوان عربی ۱۲۳" },

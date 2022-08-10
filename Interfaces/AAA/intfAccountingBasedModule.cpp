@@ -171,7 +171,7 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getUserID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getActorID(), _requestedUsage);
 
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -377,7 +377,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     if (_lastPreVoucher.Items.isEmpty())
         _lastPreVoucher.UserID = CurrentUserID;
@@ -721,7 +721,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPBadRequest("Pre-Voucher is empty");
@@ -934,7 +934,7 @@ void intfAccountingBasedModule::processItemForBasket(
     **/
 
     //-- --------------------------------
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     //-- --------------------------------
     if ((_oldVoucherItem == nullptr) && (_assetItem.Qty == 0))
@@ -1112,7 +1112,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getUserID();
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     /**
       * discount code:
@@ -1474,7 +1474,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
     this->AccountSaleables->callSP(APICALLBOOM_PARAM,
                                    "spSaleable_unReserve", {
                                        { "iSaleableID", SaleableID },
-                                       { "iUserID", APICALLBOOM_PARAM.getUserID() },
+                                       { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                        { "iQty", _voucherItem.Qty },
                                    });
 

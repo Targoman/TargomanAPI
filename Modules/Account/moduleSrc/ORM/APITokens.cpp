@@ -35,11 +35,11 @@ APITokens::APITokens() :
         tblAPITokens::Private::ORMFields,
         tblAPITokens::Private::Relations,
         tblAPITokens::Private::Indexes
-    ) { ; }
+) { ; }
 
 QVariant IMPL_ORMGET(APITokens) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, _filters);
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -59,8 +59,8 @@ bool IMPL_ORMUPDATE(APITokens) {
 bool IMPL_ORMDELETE(APITokens) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID());
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getUserID()}}, ExtraFilters);
+        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
+//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
