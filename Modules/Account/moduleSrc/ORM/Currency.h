@@ -120,7 +120,7 @@ private slots:
         setAsDefault,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint32 _curID
+            TAPI::PKsByPath_t _pksByPath
         ),
         "change default Currency"
     )

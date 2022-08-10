@@ -371,24 +371,34 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 JWT
                                 );
                 } catch (exJWTExpired &exp) {
-                    auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
+                    QString TokenType = "user";
 
-                    bool IsRenewed = false;
-                    QString NewToken = Authentication::renewExpiredJWT(
-                                JWT,
-                                RemoteIP,
-                                IsRenewed
-                                );
+                    if (JWT.contains("typ"))
+                        TokenType = JWT["typ"].toString();
 
-                    BearerToken = NewToken;
+                    if (TokenType == "user") {
+                        auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
 
-                    APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
-                    APICALLBOOM->addResponseHeaderNameToExpose("x-auth-new-token");
+                        bool IsRenewed = false;
+                        QString NewToken = Authentication::renewExpiredJWT(
+                                    JWT,
+                                    RemoteIP,
+                                    IsRenewed
+                                    );
 
-                    if (IsRenewed == false) {
-                        APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
-                        APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
-                    }
+                        BearerToken = NewToken;
+
+                        APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
+                        APICALLBOOM->addResponseHeaderNameToExpose("x-auth-new-token");
+
+                        if (IsRenewed == false) {
+                            APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
+                            APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
+                        }
+                    } else if (TokenType == "api")
+                        throw exHTTPForbidden("API token is expired");
+                    else
+                        throw exHTTPForbidden("Unknown token type");
                 }
                 JWT["encodedJWT"] = BearerToken;
             } else

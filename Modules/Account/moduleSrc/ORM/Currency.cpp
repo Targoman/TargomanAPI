@@ -66,14 +66,14 @@ bool IMPL_ORMDELETE(Currency) {
  */
 bool IMPL_REST_UPDATE(Currency, setAsDefault, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    quint32 _curID
+    TAPI::PKsByPath_t _pksByPath
 )) {
     Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canChangeDefault" });
 
     this->callSP(APICALLBOOM_PARAM,
                  "spCurrency_SetAsDefault", {
                      { "iUserID", APICALLBOOM_PARAM.getUserID() },
-                     { "iCurID", _curID },
+                     { "iCurID", _pksByPath },
                  });
 
     return true;

@@ -74,28 +74,28 @@ namespace tblAPITokens {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                            Type                   Validation                      Default    UpBy   Sort  Filter Self  Virt   PK
-            { Fields::aptID,               ORM_PRIMARYKEY_64 },
-            { Fields::aptToken,            S(QString),            QFV.asciiAlNum().maxLenght(50), QRequired, UPNone, true, false },
-            { Fields::apt_usrID,           S(quint64),            QFV.integer().minValue(1),      QRequired, UPNone },
-            { Fields::apt_svcID,           S(quint32),            QFV.integer().minValue(1),      QRequired, UPAdmin },
-            { Fields::aptLang,             S(TAPI::ISO639_2_t),   QFV,                            "en",      UPAdmin },
-            { Fields::aptValidateIP,       S(bool),               QFV,                            false,     UPAdmin },
-            { Fields::aptExtraPriviledges, S(TAPI::PrivObject_t), QFV,                            QNull,     UPAdmin, false, false },
-            { Fields::aptExpiryDate,       S(TAPI::DateTime_t),   QFV,                            QNull,     UPAdmin },
-            { Fields::aptLastActivity,     S(TAPI::DateTime_t),   QFV,                            QInvalid,  UPNone },
-            { Fields::aptAccessCount,      S(quint32),            QFV.integer().minValue(1),      QInvalid,  UPNone },
-            { Fields::aptStatus,           ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active) },
+            //ColName                       Type                    alidation                       Default     UpBy        Sort  Filter Self  Virt   PK
+            { Fields::aptID,                ORM_PRIMARYKEY_64 },
+            { Fields::aptToken,             S(QString),             QFV.asciiAlNum().maxLenght(50), QRequired,  UPNone,     true, false },
+            { Fields::apt_usrID,            S(quint64),             QFV.integer().minValue(1),      QRequired,  UPNone },
+            { Fields::apt_svcID,            S(quint32),             QFV.integer().minValue(1),      QRequired,  UPAdmin },
+            { Fields::aptLang,              S(TAPI::ISO639_2_t),    QFV,                            "en",       UPAdmin },
+            { Fields::aptValidateIP,        S(bool),                QFV,                            false,      UPAdmin },
+            { Fields::aptExtraPriviledges,  S(TAPI::PrivObject_t),  QFV,                            QNull,      UPAdmin,    false, false },
+            { Fields::aptExpiryDate,        S(TAPI::DateTime_t),    QFV,                            QNull,      UPAdmin },
+            { Fields::aptLastActivity,      S(TAPI::DateTime_t),    QFV,                            QInvalid,   UPNone },
+            { Fields::aptAccessCount,       S(quint32),             QFV.integer().minValue(1),      QInvalid,   UPNone },
+            { Fields::aptStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
-            { Fields::aptCreatedBy_usrID,  ORM_CREATED_BY },
-            { Fields::aptCreationDateTime, ORM_CREATED_ON },
-            { Fields::aptUpdatedBy_usrID,  ORM_UPDATED_BY },
+            { Fields::aptCreatedBy_usrID,   ORM_CREATED_BY },
+            { Fields::aptCreationDateTime,  ORM_CREATED_ON },
+            { Fields::aptUpdatedBy_usrID,   ORM_UPDATED_BY },
         };
 
         const QList<stuRelation> Relations = {
-            ///Col                                Reference Table                 ForeignCol         Rename    LeftJoin
-            { Fields::apt_svcID,           R(AAASchema, tblService::Name), tblService::Fields::svcID, {},       true},
-            { Fields::apt_usrID,           R(AAASchema, tblUser::Name),    tblUser::Fields::usrID,    "Owner_", true},
+            //Col                           Reference Table                 ForeignCol                  Rename      LeftJoin
+            { Fields::apt_svcID,            R(AAASchema, tblService::Name), tblService::Fields::svcID,  {},         true },
+            { Fields::apt_usrID,            R(AAASchema, tblUser::Name),    tblUser::Fields::usrID,     "Owner_",   true },
             ORM_RELATION_OF_CREATOR(Fields::aptCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::aptUpdatedBy_usrID),
         };

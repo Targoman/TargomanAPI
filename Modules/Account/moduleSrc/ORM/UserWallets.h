@@ -150,7 +150,7 @@ private slots:
         setAsDefault, //defaultWallet,
         (
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-            quint64 _walID
+            TAPI::PKsByPath_t _pksByPath
         ),
         "change default wallet"
     )
