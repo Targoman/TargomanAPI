@@ -543,7 +543,7 @@ public:
 //    ORMSelectQuery& from(const QString _table, const QString& _renameAs = {});
 //    ORMSelectQuery& from(const ORMSelectQuery& _nestedQuery, const QString _alias);
 
-    ORMSelectQuery& orderBy(const QString& _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
+    ORMSelectQuery& orderBy(QString _col, enuOrderDir::Type _dir = enuOrderDir::Ascending);
 
     ORMSelectQuery& addUnion(ORMSelectQuery& _query);
     ORMSelectQuery& addUnionAll(ORMSelectQuery& _query);
