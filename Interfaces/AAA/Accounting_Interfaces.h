@@ -65,8 +65,8 @@ public:
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Units")
-    quint32 ORMCREATE("Create a new Unit by priviledged user")
-    bool ORMUPDATE("Update a Unit info by priviledged user")
+    quint32 ORMCREATE("Create a new Unit by an authorized user")
+    bool ORMUPDATE("Update a Unit info by an authorized user")
     bool ORMDELETE("Delete a Unit")
 };
 
@@ -104,8 +104,8 @@ public:
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Products")
-    quint32 ORMCREATE("Create a new Product by priviledged user")
-    bool ORMUPDATE("Update a Product info by priviledged user")
+    quint32 ORMCREATE("Create a new Product by an authorized user")
+    bool ORMUPDATE("Update a Product info by an authorized user")
     bool ORMDELETE("Delete a Product")
 };
 
@@ -143,8 +143,8 @@ public:
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
-    quint32 ORMCREATE("Create a new Saleable by priviledged user")
-    bool ORMUPDATE("Update a Saleable info by priviledged user")
+    quint32 ORMCREATE("Create a new Saleable by an authorized user")
+    bool ORMUPDATE("Update a Saleable info by an authorized user")
     bool ORMDELETE("Delete a Saleable")
 };
 
@@ -168,8 +168,8 @@ protected:
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Available Saleables Files")
-    quint32 ORMCREATE("Create a new Saleables File by priviledged user")
-    bool ORMUPDATE("Update a Saleables File info by priviledged user")
+    quint32 ORMCREATE("Create a new Saleables File by an authorized user")
+    bool ORMUPDATE("Update a Saleables File info by an authorized user")
     bool ORMDELETE("Delete a Saleables File")
 };
 
@@ -198,7 +198,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
-        "Mark a user Asset banned by priviledged user"
+        "Mark a user Asset banned by an authorized user"
     )
 
     bool REST_UPDATE(
@@ -263,8 +263,8 @@ public:
 
 private slots:
     QVariant ORMGET("Get Active Discounts")
-    quint32 ORMCREATE("Create a new Discount by priviledged user")
-    bool ORMUPDATE("Update a Discount info by priviledged user")
+    quint32 ORMCREATE("Create a new Discount by an authorized user")
+    bool ORMUPDATE("Update a Discount info by an authorized user")
     bool ORMDELETE("Delete a Discount")
 };
 
@@ -282,8 +282,8 @@ public:
                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
     QVariant ORMGET("Get Active Prizes")
-    quint32 ORMCREATE("Create a new Prizes by priviledged user")
-    bool ORMUPDATE("Update a Prizes info by priviledged user")
+    quint32 ORMCREATE("Create a new Prizes by an authorized user")
+    bool ORMUPDATE("Update a Prizes info by an authorized user")
     bool ORMDELETE("Delete a Prizes")
 };
 

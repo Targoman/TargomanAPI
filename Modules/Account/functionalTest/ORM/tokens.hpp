@@ -31,7 +31,7 @@ class testAPITokens: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void APITokens_CREATE_Unpriviledged() {
+    void APITokens_CREATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/APITokens/"),{},{
                                 {"aptToken", UT_NormalToken},
                              }) == gInvalid);
@@ -116,7 +116,7 @@ private slots:
                                              }) == gInvalid);
     }
 
-    void APITokens_GET_Unpriviledged() {
+    void APITokens_GET_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/")).toMap().size() == 1);
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPITokenID), {{"cols", "aptToken"}}).toMap().value("aptToken") == UT_NormalToken);
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/APITokens/%1").arg(gAPIAdminTokenID), {{"cols", "aptToken"}}).toMap().isEmpty());

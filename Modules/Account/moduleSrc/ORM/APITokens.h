@@ -58,7 +58,7 @@ namespace tblAPITokens {
         TARGOMAN_CREATE_CONSTEXPR(apt_svcID);
         TARGOMAN_CREATE_CONSTEXPR(aptLang);
         TARGOMAN_CREATE_CONSTEXPR(aptValidateIP);
-        TARGOMAN_CREATE_CONSTEXPR(aptExtraPriviledges);
+        TARGOMAN_CREATE_CONSTEXPR(aptExtraPrivileges);
         TARGOMAN_CREATE_CONSTEXPR(aptExpiryDate);
         TARGOMAN_CREATE_CONSTEXPR(aptLastActivity);
         TARGOMAN_CREATE_CONSTEXPR(aptAccessCount);
@@ -81,7 +81,7 @@ namespace tblAPITokens {
             { Fields::apt_svcID,            S(quint32),             QFV.integer().minValue(1),      QRequired,  UPAdmin },
             { Fields::aptLang,              S(TAPI::ISO639_2_t),    QFV,                            "en",       UPAdmin },
             { Fields::aptValidateIP,        S(bool),                QFV,                            false,      UPAdmin },
-            { Fields::aptExtraPriviledges,  S(TAPI::PrivObject_t),  QFV,                            QNull,      UPAdmin,    false, false },
+            { Fields::aptExtraPrivileges,  S(TAPI::PrivObject_t),  QFV,                            QNull,      UPAdmin,    false, false },
             { Fields::aptExpiryDate,        S(TAPI::DateTime_t),    QFV,                            QNull,      UPAdmin },
             { Fields::aptLastActivity,      S(TAPI::DateTime_t),    QFV,                            QInvalid,   UPNone },
             { Fields::aptAccessCount,       S(quint32),             QFV.integer().minValue(1),      QInvalid,   UPNone },
@@ -116,7 +116,7 @@ namespace tblAPITokens {
         SF_quint32                  (apt_svcID),
         SF_QString                  (aptLang),
         SF_bool                     (aptValidateIP),
-        SF_JSON_t                   (aptExtraPriviledges),
+        SF_JSON_t                   (aptExtraPrivileges),
         SF_DateTime_t               (aptExpiryDate),
         SF_DateTime_t               (aptLastActivity),
         SF_quint32                  (aptAccessCount),
@@ -135,8 +135,8 @@ class APITokens : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get APITokens information")
-    quint64 ORMCREATE("Create a new APITokens by priviledged user")
-    bool ORMUPDATE("Update token info by priviledged user")
+    quint64 ORMCREATE("Create a new APITokens by an authorized user")
+    bool ORMUPDATE("Update token info by an authorized user")
     bool ORMDELETE("Delete an APIToken")
 };
 

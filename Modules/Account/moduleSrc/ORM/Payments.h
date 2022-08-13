@@ -433,7 +433,7 @@ class OfflinePayments : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get OfflinePayment information.")
-    bool ORMUPDATE("Update OfflinePayment info by priviledged user")
+    bool ORMUPDATE("Update OfflinePayment info by an authorized user")
 };
 
 /*****************************************************************/

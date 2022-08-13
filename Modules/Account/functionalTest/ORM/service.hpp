@@ -31,7 +31,7 @@ class testService: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void Service_CREATE_Unpriviledged() {
+    void Service_CREATE_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::PUT, QString("Account/Service/"),{},{
                                 {"svcName", UT_ServiceName},
                              }) == gInvalid);
@@ -86,7 +86,7 @@ private slots:
                              }) == gInvalid);
     }
 
-    void Service_GET_Unpriviledged() {
+    void Service_GET_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Service/")).toMap().isEmpty());
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Service/%1").arg(gServiceID), {

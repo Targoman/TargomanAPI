@@ -103,8 +103,8 @@ class BlockingRules : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get BlockingRules information")
-    quint64 ORMCREATE("Create a new BlockingRule by priviledged user")
-    bool ORMUPDATE("Update blocking rule info by priviledged user")
+    quint64 ORMCREATE("Create a new BlockingRule by an authorized user")
+    bool ORMUPDATE("Update blocking rule info by an authorized user")
     bool ORMDELETE("Delete a BlockingRules")
 };
 

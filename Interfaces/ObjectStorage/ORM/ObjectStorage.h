@@ -377,8 +377,8 @@ public:
 
 private slots:
     QVariant ORMGET("Get object storage gateway information")
-    quint32 ORMCREATE("Create a new object storage gateway by priviledged user")
-    bool ORMUPDATE("Update object storage gateway info by priviledged user")
+    quint32 ORMCREATE("Create a new object storage gateway by an authorized user")
+    bool ORMUPDATE("Update object storage gateway info by an authorized user")
     bool ORMDELETE("Delete an object storage gateway")
 };
 

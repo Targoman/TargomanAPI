@@ -113,7 +113,7 @@ class Currency : public intfSQLBasedModule
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Currency information")
     quint64 ORMCREATE("Create a new Currency")
-    bool ORMUPDATE("Update Currency info by priviledged user")
+    bool ORMUPDATE("Update Currency info by an authorized user")
     bool ORMDELETE("Delete a Currency. Take note that default Currency can not be deleted")
 
     bool REST_UPDATE(

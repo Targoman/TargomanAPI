@@ -250,8 +250,8 @@ class PaymentGatewayTypes : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get payment gateway type information")
-    quint32 ORMCREATE("Create a new payment gateway type by priviledged user")
-    bool ORMUPDATE("Update payment gateway type info by priviledged user")
+    quint32 ORMCREATE("Create a new payment gateway type by an authorized user")
+    bool ORMUPDATE("Update payment gateway type info by an authorized user")
     bool ORMDELETE("Delete a payment gateway type")
 };
 
@@ -262,8 +262,8 @@ class PaymentGateways : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get payment gateway information")
-    quint32 ORMCREATE("Create a new payment gateway by priviledged user")
-    bool ORMUPDATE("Update payment gateway info by priviledged user")
+    quint32 ORMCREATE("Create a new payment gateway by an authorized user")
+    bool ORMUPDATE("Update payment gateway info by an authorized user")
     bool ORMDELETE("Delete a payment gateway")
 
     QVariantList REST_GET_OR_POST(

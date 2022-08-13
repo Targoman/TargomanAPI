@@ -67,7 +67,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
     if (Privs.contains("ALL") == false)
         foreach (auto Service, _services)
             if (Privs.contains(Service) == false)
-                throw exAuthorization("Not enough priviledges to access <"+Service+">");
+                throw exAuthorization("Not enough privileges to access <"+Service+">");
 
     return  { MinTTL, Privs };
 }
@@ -113,7 +113,7 @@ bool PrivHelpers::hasPrivBase(const QJsonObject& _privs, const QString& _require
     return true;
 }
 
-QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess) {
+QJsonObject PrivHelpers::confirmPrivilegeBase(const QJsonObject& _privs, const QStringList& _requiredAccess) {
     if (_requiredAccess.isEmpty())
         return _privs;
 
@@ -122,7 +122,7 @@ QJsonObject PrivHelpers::confirmPriviledgeBase(const QJsonObject& _privs, const 
 
     foreach (auto AccessItem, _requiredAccess)
         if (AccessItem.size() && PrivHelpers::hasPrivBase(_privs, AccessItem) == false)
-            throw exAuthorization("Not enough priviledges on <" + AccessItem + ">");
+            throw exAuthorization("Not enough privileges on <" + AccessItem + ">");
 
     return _privs;
 }
@@ -175,7 +175,7 @@ stuActiveAccount PrivHelpers::processUserObject(
                     static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble()),
                     _services);
 
-        _userObj[AAACommonItems::privs] = PrivHelpers::confirmPriviledgeBase(ActiveAccount.Privs, _requiredAccess);
+        _userObj[AAACommonItems::privs] = PrivHelpers::confirmPrivilegeBase(ActiveAccount.Privs, _requiredAccess);
 
         return { ActiveAccount.TTL, _userObj };
 

@@ -465,7 +465,7 @@ private slots:
             quint64 _amount,
             QString _desc
         ),
-        "Add prize to a user by priviledged user"
+        "Add prize to a user by an authorized user"
     )
 
     quint64 REST_POST(
@@ -476,7 +476,7 @@ private slots:
             quint64 _amount,
             QString _desc
         ),
-        "Add income to a user by priviledged user"
+        "Add income to a user by an authorized user"
     )
 
     bool REST_POST(
