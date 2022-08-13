@@ -1216,7 +1216,7 @@ public:
         }
 
         if (this->Alias.length())
-            this->BaseQueryPreparedItems.From += " " + this->Alias;
+            this->BaseQueryPreparedItems.From += " AS " + this->Alias;
     }
 
     friend clsQueryJoinTraitData<itmplDerived>;
@@ -1424,7 +1424,7 @@ public:
             j += " ";
             j += ReferenceTable;
             if (Join.Alias.size())
-                j += " " + Join.Alias;
+                j += " AS " + Join.Alias;
             if (Join.JoinType != enuJoinType::CROSS) {
                 if (Join.On.isEmpty())
                     throw exHTTPInternalServerError("Condition part of relation not defined.");
@@ -1874,7 +1874,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _jo
 
     clsTable* ForeignTable = clsTable::Registry[_foreignTable];
 
-    ORMSelectQuery Query = ForeignTable->makeSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM, _alias);
+    ORMSelectQuery Query = ForeignTable->makeSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM); //, _alias);
 
     //no union, no where, no group by, no having
     if (Query.isPure()) {

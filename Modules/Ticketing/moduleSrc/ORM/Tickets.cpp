@@ -76,9 +76,17 @@ QVariant Tickets::apiGET(
             .orCond(
                 clsCondition({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Null })
                 .andCond({ tblTickets::Fields::tktType, enuConditionOperator::Equal, enuTicketType::Broadcast })
-            );
+            )
+            .orCond(
+                clsCondition({ "Base", tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, CurrentUserID })
+                    .orCond({ "Base", tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, CurrentUserID })
+            )
+        ;
 
     auto fnTouchQuery = [this, &APICALLBOOM_PARAM, &_baseTicketID, &_inReplyTicketID, &CurrentUserID](ORMSelectQuery &_query) {
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+            _query.leftJoinWith(tblTickets::Relation::Base, "Base");
+
         _query
             .addCols(this->selectableColumnNames())
             .leftJoin(tblUnits::Name)
