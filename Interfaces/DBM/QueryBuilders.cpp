@@ -2643,9 +2643,19 @@ ORMSelectQuery& ORMSelectQuery::removeCol(const QString& _col) {
 /***********************\
 |* Order               *|
 \***********************/
-ORMSelectQuery& ORMSelectQuery::orderBy(const QString& _col, enuOrderDir::Type _dir) {
-    if (_col.isEmpty() == false)
+ORMSelectQuery& ORMSelectQuery::orderBy(QString _col, enuOrderDir::Type _dir) {
+    if (_col.isEmpty() == false) {
+        if (_col.startsWith('+')) {
+            _col = _col.mid(1);
+            _dir = enuOrderDir::Ascending;
+        } else if (_col.startsWith('-')) {
+            _col = _col.mid(1);
+            _dir = enuOrderDir::Descending;
+        }
+
         this->Data->OrderByCols.append({ _col, _dir });
+    }
+
     return *this;
 }
 
