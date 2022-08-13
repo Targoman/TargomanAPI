@@ -92,7 +92,7 @@ private slots:
         QVERIFY(callAdminAPI(RESTClientHelper::DELETE, QString("Account/Roles/%1").arg(gServiceRoleID)).toBool());
     }
 
-    void Roles_GET_Unpriviledged() {
+    void Roles_GET_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/Roles/")) == gInvalid);
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/Roles/%1").arg(gServiceRoleID), {

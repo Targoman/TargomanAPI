@@ -117,7 +117,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     if (_dic) {
         if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})) {
             if (_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
-                throw exAuthorization("Not enought priviledges to retrieve dictionary full response.");
+                throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
             PreprocessTime = Timer.elapsed();Timer.restart();
             QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
@@ -134,7 +134,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
                 return DicResponse;
             }
         } else
-            throw exAuthorization("Not enought priviledges to retrieve dictionary response.");
+            throw exAuthorization("Not enought privileges to retrieve dictionary response.");
     }
 
     PreprocessTime += Timer.elapsed();

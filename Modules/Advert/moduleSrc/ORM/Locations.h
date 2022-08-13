@@ -108,8 +108,8 @@ class Locations : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get Locations information")
-    quint32 ORMCREATE("Create a new Location by priviledged user")
-    bool ORMUPDATE("Update Location info by priviledged user")
+    quint32 ORMCREATE("Create a new Location by an authorized user")
+    bool ORMUPDATE("Update Location info by an authorized user")
     bool ORMDELETE("Delete a Locations")
 };
 

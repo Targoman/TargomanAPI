@@ -106,8 +106,8 @@ class Props : public intfSQLBasedModule
 private slots:
     QVariant ORMGET("Get Props information")
     bool ORMDELETE("Delete a Prop")
-    bool ORMUPDATE("Update Prop info by priviledged user")
-    quint64 ORMCREATE("Create a new Prop by priviledged user")
+    bool ORMUPDATE("Update Prop info by an authorized user")
+    quint64 ORMCREATE("Create a new Prop by an authorized user")
 };
 
 } //namespace ORM

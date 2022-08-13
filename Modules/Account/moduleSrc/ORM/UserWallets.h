@@ -143,7 +143,7 @@ class UserWallets : public intfSQLBasedModule
 private slots:
     QVariant ORMGET("Get UserWallets information")
     quint64 ORMCREATE("Create a new Wallet")
-    bool ORMUPDATE("Update Wallet info by priviledged user")
+    bool ORMUPDATE("Update Wallet info by an authorized user")
     bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
 
     bool REST_UPDATE(
@@ -203,7 +203,7 @@ private slots:
             quint64 _targetUsrID,
             const QString &_desc = {}
         ),
-        "Create a new withdrawal request for another user by priviledged user. "
+        "Create a new withdrawal request for another user by an authorized user. "
         "Description object must contain at least an string field named 'desc'"
     )
 

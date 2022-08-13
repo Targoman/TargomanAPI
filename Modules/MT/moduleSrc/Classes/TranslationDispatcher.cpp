@@ -61,7 +61,7 @@ QVariantMap TranslationDispatcher::doTranslation(
     //@TODO: ujncomment and fix source of privInfo
     /*
     if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM, _privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
-        throw exAuthorization("Not enought priviledges to get detailed translation response.");
+        throw exAuthorization("Not enought privileges to get detailed translation response.");
 
     QTime CacheLookupTime; CacheLookupTime.start();
     QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();

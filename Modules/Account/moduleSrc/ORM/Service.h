@@ -108,8 +108,8 @@ class Service : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get Service information")
-    quint64 ORMCREATE("Create a new Service by priviledged user")
-    bool ORMUPDATE("Update Service info by priviledged user")
+    quint64 ORMCREATE("Create a new Service by an authorized user")
+    bool ORMUPDATE("Update Service info by an authorized user")
     bool ORMDELETE("Delete a Service")
 };
 

@@ -32,7 +32,7 @@ class testActiveSessions: public clsBaseTest
     Q_OBJECT
 
 private slots:
-    void ActiveSessions_GET_Unpriviledged() {
+    void ActiveSessions_GET_Unprivileged() {
         QVERIFY(callUserAPI(RESTClientHelper::GET, QString("Account/ActiveSessions/")).toString().isEmpty());
         QVERIFY(callUserAPI(RESTClientHelper::GET,
                         QString("Account/ActiveSessions/%1").arg(clsJWT(gJWT).session()), {

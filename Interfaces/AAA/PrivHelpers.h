@@ -44,7 +44,7 @@ struct stuActiveAccount{
 class PrivHelpers{
 public:
     static bool hasPrivBase(const QJsonObject& _privs, const QString& _requiredAccess, bool _isSelf = false);
-    static QJsonObject confirmPriviledgeBase(const QJsonObject& _privs, const QStringList& _requiredAccess);
+    static QJsonObject confirmPrivilegeBase(const QJsonObject& _privs, const QStringList& _requiredAccess);
     static void validateToken(const QString& _token);
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector, const QVariant &_defIfNotFoundAndAllIsDefined = {});
     static stuActiveAccount processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess = {}, const QStringList& _services = {});
