@@ -86,6 +86,8 @@ namespace tblTickets {
     }
 
     namespace Relation {
+        constexpr char Base[] = "Base";
+        constexpr char InReply[] = "InReply";
         constexpr char TicketRead[] = "TicketRead";
     }
 
@@ -109,12 +111,17 @@ namespace tblTickets {
 
         const QList<stuRelation> Relations = {
             //Col                           Reference Table                             ForeignCol                          Rename          LeftJoin
-            { Fields::tktInReply_tktID,     R(TicketingSchema, tblTickets::Name),       Fields::tktID,                      "InReply_",     true },
+            { Relation::Base, {
+              Fields::tktBase_tktID,        R(TicketingSchema, tblTickets::Name),       Fields::tktID,                      "Base_",        true }
+            },
+            { Relation::InReply, {
+              Fields::tktInReply_tktID,     R(TicketingSchema, tblTickets::Name),       Fields::tktID,                      "InReply_",     true }
+            },
             { Fields::tktTarget_usrID,      R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,             "Target_",      true },
-            { Fields::tktID,                R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID,   "ReadInfo_",    true },
             { Fields::tkt_untID,            R(TicketingSchema, tblUnits::Name),         tblUnits::Fields::untID },
-            { Relation::TicketRead,
-                { Fields::tktID,            R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID } },
+            { Relation::TicketRead, {
+              Fields::tktID,                R(TicketingSchema, tblTicketRead::Name),    tblTicketRead::Fields::tkr_tktID } //   "ReadInfo_",    true }
+            },
             ORM_RELATION_OF_CREATOR(Fields::tktCreatedBy_usrID),
             ORM_RELATION_OF_UPDATER(Fields::tktUpdatedBy_usrID),
         };
