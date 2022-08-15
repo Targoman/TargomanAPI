@@ -44,10 +44,20 @@ using namespace Common;
 using namespace AAA;
 //using namespace NLP;
 
+tmplConfigurableMultiMap<TranslationDispatcher::stuTrServerConfig> TranslationDispatcher::TranslationServers(
+//tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
+    clsConfigPath("TranslationServers"),
+    "List of valid translation servers to connect to them separated by their translation engine"
+);
+
+TranslationDispatcher::TranslationDispatcher() {
+    FormalityChecker::instance();
+}
+
 TranslationDispatcher::~TranslationDispatcher() { ; }
 
 QVariantMap TranslationDispatcher::doTranslation(
-    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QJsonObject& _privInfo,
     QString _text,
     const TranslationDir_t& _dir,
@@ -58,7 +68,7 @@ QVariantMap TranslationDispatcher::doTranslation(
     int& _preprocessTime,
     int& _translationTime
 ) {
-    //@TODO: ujncomment and fix source of privInfo
+    //@TODO: uncomment and fix source of privInfo
     /*
     if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM, _privInfo, {TARGOMAN_PRIV_PREFIX + "Detailed"}) == false)
         throw exAuthorization("Not enought privileges to get detailed translation response.");
@@ -193,8 +203,7 @@ void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _en
 
 void TranslationDispatcher::registerEngines() {
     foreach (const QString& Key, this->TranslationServers.keys()) {
-        const Targoman::Common::Configuration::tmplConfigurableArray<stuTrServerConfig>& ServersConfig =
-            this->TranslationServers.values(Key);
+        const tmplConfigurableArray<stuTrServerConfig>& ServersConfig = this->TranslationServers.values(Key);
 
         for (size_t i=0; i<ServersConfig.size(); ++i) {
             stuTrServerConfig Server = ServersConfig.at(i);
@@ -202,35 +211,32 @@ void TranslationDispatcher::registerEngines() {
                 continue;
 
             intfTranslatorEngine* Engine = nullptr;
+
             switch (enuEngine::toEnum(Key)) {
-            case enuEngine::NMT:
-                Engine = new Engines::clsBaseNMT(stuEngineSpecs(enuEngine::toEnum(Key),
-                                                                   Server.SourceLang.value(),
-                                                                   Server.DestLang.value(),
-                                                                   Server.Class.value(),
-                                                                   Server.SupportsIXML.value(),
-                                                                   Server.URL.value())
-                            );
-                break;
-            case enuEngine::Unknown:
-                throw exTargomanInitialization("Invalid engine type");
+                case enuEngine::NMT:
+                    Engine = new Engines::clsBaseNMT(stuEngineSpecs(
+                                                         enuEngine::toEnum(Key),
+                                                         Server.SourceLang.value(),
+                                                         Server.DestLang.value(),
+                                                         Server.Class.value(),
+                                                         Server.SupportsIXML.value(),
+                                                         Server.URL.value())
+                                                     );
+                    break;
+
+                case enuEngine::Unknown:
+                    throw exTargomanInitialization("Invalid engine type");
             }
 
             if (Engine)
-                this->RegisteredEngines.insert(stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value()),
-                                               Engine
-                                               );
+                this->RegisteredEngines.insert(
+                        stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value()),
+                        Engine
+                        );
 
         }
 
     }
 }
-
-TranslationDispatcher::TranslationDispatcher() {
-    FormalityChecker::instance();
-}
-
-/********************************************/
-intfTranslatorEngine::~intfTranslatorEngine() { ; }
 
 } // namespace Targoman::API::ModuleHelpers::MT::Classes

@@ -64,7 +64,7 @@ void appTargomanAPI::slotExecute() {
         auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {
             _module->setInstancePointer();
 
-            TargomanDebug(0) << "Loading module <" << _module->moduleFullName() << ">";
+            TargomanDebug(0) << "Registering module <" << _module->moduleFullName() << ">";
 
             foreach (auto ModuleMethod, _module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);

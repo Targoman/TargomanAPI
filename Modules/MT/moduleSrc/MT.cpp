@@ -22,8 +22,8 @@
  */
 
 #include "MT.h"
-#include "ModuleHelpers/MT/Classes/TranslationDispatcher.h"
 #include "Defs.hpp"
+#include "ModuleHelpers/MT/Classes/TranslationDispatcher.h"
 
 using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
@@ -37,6 +37,10 @@ MT::MT() :
         MTDomain,
         MTSchema
 ) {
+    TARGOMAN_API_IMPLEMENT_MIGRATIONS(MT, MTSchema);
+    TARGOMAN_API_IMPLEMENT_ACTIONLOG(MT, MTSchema);
+    TARGOMAN_API_IMPLEMENT_FAQ(MT, MTSchema);
+
     // Register translation engines
     TranslationDispatcher::instance().registerEngines();
 }

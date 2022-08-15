@@ -78,7 +78,7 @@ public:
        EngineSpecs(_specs)
     { ; }
 
-    virtual ~intfTranslatorEngine();
+    virtual ~intfTranslatorEngine() { ; }
     virtual QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokinize) = 0;
 
     QString fullName() {return this->EngineSpecs.fullName();}

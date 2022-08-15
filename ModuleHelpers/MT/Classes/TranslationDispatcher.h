@@ -29,6 +29,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "intfTranslatorEngine.hpp"
 #include "Interfaces/Server/APICallBoom.h"
+using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::Server;
 
 namespace Targoman::API::ModuleHelpers::MT::Classes {
@@ -46,27 +47,27 @@ TARGOMAN_DEFINE_ENUM (enuTranslationError,
                       )
 
 
-typedef QPair<QString, QString>  TranslationDir_t;
+typedef QPair<QString, QString> TranslationDir_t;
 
 class TranslationDispatcher
 {
 private:
     struct stuTrServerConfig{
         stuTrServerConfig(const QString& _basePath);
-        Targoman::Common::Configuration::tmplConfigurable<QUrl> URL;
-        Targoman::Common::Configuration::tmplConfigurable<QString>  Class;
-        Targoman::Common::Configuration::tmplConfigurable<QString>  SourceLang;
-        Targoman::Common::Configuration::tmplConfigurable<QString>  DestLang;
-        Targoman::Common::Configuration::tmplConfigurable<bool>     SupportsIXML;
-        Targoman::Common::Configuration::tmplConfigurable<bool>     Active;
+        tmplConfigurable<QUrl>      URL;
+        tmplConfigurable<QString>   Class;
+        tmplConfigurable<QString>   SourceLang;
+        tmplConfigurable<QString>   DestLang;
+        tmplConfigurable<bool>      SupportsIXML;
+        tmplConfigurable<bool>      Active;
 
         struct stuStatistics {
             stuStatistics(const QString& _basePath);
-            Targoman::Common::Configuration::tmplConfigurable<quint64> OkResponses;
-            Targoman::Common::Configuration::tmplConfigurable<quint64> FailedResponses;
+            tmplConfigurable<quint64> OkResponses;
+            tmplConfigurable<quint64> FailedResponses;
         } Statistics;
     };
-    static Targoman::Common::Configuration::tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
+    static tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
 
 public:
     static TranslationDispatcher& instance() {static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
