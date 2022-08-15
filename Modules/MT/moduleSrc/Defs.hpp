@@ -21,18 +21,16 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
-#define TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#ifndef TARGOMAN_API_MODULES_MT_DEFS_HPP
+#define TARGOMAN_API_MODULES_MT_DEFS_HPP
 
-#include "intfTranslatorEngine.hpp"
+#include "ModuleHelpers/MT/MTDefs.hpp"
 
-namespace Targoman::API::MTModule::Classes {
+constexpr char MTDomain[] = "MT";
+constexpr char MTSchema[] = "MT";
 
-class intfTranslatorBridge : public intfTranslatorEngine{
-public:
+namespace Targoman::API::MTModule {
 
-};
+} //namespace Targoman::API::MTModule
 
-} //namespace Targoman::API::MTModule::Classes
-
-#endif // TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#endif // TARGOMAN_API_MODULES_MT_DEFS_HPP

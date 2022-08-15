@@ -30,7 +30,7 @@
 
 #include <QtDebug>
 
-namespace Targoman::API::MTModule::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Engines {
 
 using namespace Classes;
 
@@ -206,4 +206,4 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
     return Result;
 }
 
-} // namespace Targoman::API::MTModule::Engines
+} // namespace Targoman::API::ModuleHelpers::MT::Engines

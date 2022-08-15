@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
-#define TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H
 
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
@@ -31,7 +31,7 @@
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::API::Server;
 
-namespace Targoman::API::MTModule::Classes {
+namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
@@ -119,6 +119,6 @@ private:
     QTime LastCorrectionRuleUpdateTime;
 };
 
-} //namespace Targoman::API::MTModule::Classes
+} //namespace Targoman::API::ModuleHelpers::MT::Classes
 
-#endif // TARGOMAN_API_MODULES_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H

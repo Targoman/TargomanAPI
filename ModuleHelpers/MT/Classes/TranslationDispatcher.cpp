@@ -34,7 +34,7 @@
 
 using namespace Targoman::API::ModuleHelpers::NLP;
 
-namespace Targoman::API::MTModule::Classes {
+namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 using namespace Apps;
 using namespace NLPLibs;
@@ -233,4 +233,4 @@ TranslationDispatcher::TranslationDispatcher() {
 /********************************************/
 intfTranslatorEngine::~intfTranslatorEngine() { ; }
 
-} // namespace Targoman::API::MTModule::Classes
+} // namespace Targoman::API::ModuleHelpers::MT::Classes

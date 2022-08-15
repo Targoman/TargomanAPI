@@ -81,7 +81,7 @@ namespace tblAPITokens {
             { Fields::apt_svcID,            S(quint32),             QFV.integer().minValue(1),      QRequired,  UPAdmin },
             { Fields::aptLang,              S(TAPI::ISO639_2_t),    QFV,                            "en",       UPAdmin },
             { Fields::aptValidateIP,        S(bool),                QFV,                            false,      UPAdmin },
-            { Fields::aptExtraPrivileges,  S(TAPI::PrivObject_t),  QFV,                            QNull,      UPAdmin,    false, false },
+            { Fields::aptExtraPrivileges,   S(TAPI::PrivObject_t),  QFV,                            QNull,      UPAdmin,    false, false },
             { Fields::aptExpiryDate,        S(TAPI::DateTime_t),    QFV,                            QNull,      UPAdmin },
             { Fields::aptLastActivity,      S(TAPI::DateTime_t),    QFV,                            QInvalid,   UPNone },
             { Fields::aptAccessCount,       S(quint32),             QFV.integer().minValue(1),      QInvalid,   UPNone },

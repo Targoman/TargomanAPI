@@ -21,13 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_MTDEFS_HPP
-#define TARGOMAN_API_MODULES_MT_MTDEFS_HPP
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP
+#define TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP
 
-constexpr char MTDomain[] = "MT";
-constexpr char MTSchema[] = "MT";
-
-namespace Targoman::API::MTModule {
+namespace Targoman::API::ModuleHelpers::MT::Engines {
 
 namespace RESULTItems {
     constexpr char ERRNO[]= "errno";
@@ -56,6 +53,6 @@ namespace RESULTItems {
     }
 }
 
-} //namespace Targoman::API::MTModule
+} //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_MODULES_MT_MTDEFS_HPP
+#endif // TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP

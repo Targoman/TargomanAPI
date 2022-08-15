@@ -33,7 +33,7 @@
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
-#include "MTDefs.hpp"
+#include "Defs.hpp"
 
 namespace Targoman::API::MTModule {
 

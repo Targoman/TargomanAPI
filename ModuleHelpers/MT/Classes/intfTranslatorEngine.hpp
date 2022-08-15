@@ -21,16 +21,16 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP
-#define TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
 
 #include <QString>
 #include <QVariantMap>
 #include <QUrl>
 #include "libTargomanCommon/Macros.h"
-#include "MTDefs.hpp"
+#include "../MTDefs.hpp"
 
-namespace Targoman::API::MTModule::Classes {
+namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuEngine,
                                NMT,
@@ -89,6 +89,6 @@ protected:
     stuEngineSpecs EngineSpecs;
 };
 
-} //namespace Targoman::API::MTModule::Classes
+} //namespace Targoman::API::ModuleHelpers::MT::Classes
 
-#endif // TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP

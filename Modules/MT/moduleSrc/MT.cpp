@@ -22,12 +22,12 @@
  */
 
 #include "MT.h"
-#include "Classes/TranslationDispatcher.h"
-#include "MTDefs.hpp"
+#include "ModuleHelpers/MT/Classes/TranslationDispatcher.h"
+#include "Defs.hpp"
+
+using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
 namespace Targoman::API::MTModule {
-
-using namespace Classes;
 
 TARGOMAN_IMPL_API_MODULE(MT)
 TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)

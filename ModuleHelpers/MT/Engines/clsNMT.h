@@ -21,13 +21,13 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_ENGINES_CLSBASENMT_H
-#define TARGOMAN_API_MODULES_MT_ENGINES_CLSBASENMT_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
+#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
 
 #include <QUrl>
 #include "../Classes/intfTranslatorEngine.hpp"
 
-namespace Targoman::API::MTModule::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Engines {
 
 class clsBaseNMT : public Classes::intfTranslatorEngine
 {
@@ -40,6 +40,6 @@ private:
     QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
 };
 
-} //namespace Targoman::API::MTModule::Engines
+} //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_ENGINES_CLSBASENMT_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
