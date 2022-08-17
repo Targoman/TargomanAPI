@@ -21,25 +21,18 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
-
-#include <QUrl>
-#include "../Classes/intfTranslatorEngine.hpp"
+//#include <QString>
+//#include <QRegularExpression>
+#include "gtwAmunRNN.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Engines {
 
-class clsBaseNMT : public Classes::intfTranslatorEngine
-{
-public:
-    clsBaseNMT(const Classes::stuEngineSpecs& _specs);
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwAmunRNN)
 
-    QVariantMap  doTranslation(const QString& _text, bool _detailed, bool _detokenize);
+//moved to TranslationDispatcher::preprocessText
+//QString gtwAmunRNN::preprocessText(QString _sourceText) {
+////        return preg_replace("/(\S)('(?:s|ll|d|t))/", "$1 $2", _sourceText);
+//    return _sourceText.replace(QRegularExpression("/(\\S)('(?:s|ll|d|t))/"), "$1 $2");
+//}
 
-private:
-    QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
-};
-
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
-
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSBASENMT_H
+} // namespace Targoman::API::ModuleHelpers::MT::Engines

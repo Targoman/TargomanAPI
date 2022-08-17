@@ -54,11 +54,12 @@ tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile(
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway*  _driver) {
+void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway* _driver) {
     if (PaymentLogic::RegisteredDrivers.contains(_driverName))
         throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
 
-    qDebug() << "registering payment gateway driver:" << _driverName;
+    TargomanDebug(0) << "registering payment gateway driver:" << _driverName;
+
     PaymentLogic::RegisteredDrivers.insert(_driverName,  _driver);
 }
 intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {

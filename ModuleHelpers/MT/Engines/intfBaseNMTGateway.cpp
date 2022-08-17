@@ -24,7 +24,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include "clsNMT.h"
+#include "intfBaseNMTGateway.h"
 #include "QtCUrl.h"
 #include "../Classes/TranslationDispatcher.h"
 
@@ -34,9 +34,10 @@ namespace Targoman::API::ModuleHelpers::MT::Engines {
 
 using namespace Classes;
 
-namespace NMTResponse{
+namespace NMTResponse {
     TARGOMAN_CREATE_CONSTEXPR(rslt);
     TARGOMAN_CREATE_CONSTEXPR(serverName);
+
     namespace Result {
         TARGOMAN_CREATE_CONSTEXPR(phrases);
         TARGOMAN_CREATE_CONSTEXPR(alignments);
@@ -44,19 +45,22 @@ namespace NMTResponse{
     }
 }
 
-clsBaseNMT::clsBaseNMT(const Classes::stuEngineSpecs& _specs) :
-    Classes::intfTranslatorEngine(_specs) { ; }
+intfBaseNMTGateway::intfBaseNMTGateway(const Classes::stuEngineSpecs& _specs) :
+    Classes::intfTranslatorEngine(_specs)
+{ ; }
 
-QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {
+QVariantMap intfBaseNMTGateway::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {
     int Retries = 0;
     QVariantMap Result;
 
-    auto makeSourceArray = [](const QString& _text) {
-        QVariantList  List;
-        foreach (auto Line, _text.split("\n", QString::SkipEmptyParts))
-            List.append(QVariantMap({{"src", Line}}));
-        return List;
-    };
+//    auto makeSourceArray = [](const QString& _text) {
+//        QVariantList  List;
+//        foreach (auto Line, _text.split("\n", QString::SkipEmptyParts))
+//            List.append(QVariantMap({ { "src", Line } }));
+//        return List;
+//    };
+
+    QVariantList SourceSentences = this->makeSrcSentences(_text);
 
     while (Retries < 5) {
         QtCUrl CUrl;
@@ -68,9 +72,10 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
         Opt[CURLOPT_TIMEOUT] = 1;
         Opt[CURLOPT_FAILONERROR] = true;
         Opt[CURLOPT_HTTPHEADER] = QStringList({
-                                                  {"Content-Type: application/json"},
+                                                  { "Content-Type: application/json" },
                                               });
-        Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(makeSourceArray(_text)).toJson(QJsonDocument::Compact);
+//        Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(makeSourceArray(_text)).toJson(QJsonDocument::Compact);
+        Opt[CURLOPT_POSTFIELDS] = QJsonDocument::fromVariant(SourceSentences).toJson(QJsonDocument::Compact);
         QString CUrlResult = CUrl.exec(Opt);
 
         if (CUrl.lastError().code() == CURLE_OPERATION_TIMEDOUT) {
@@ -102,13 +107,21 @@ QVariantMap clsBaseNMT::doTranslation(const QString& _text, bool _detailed, bool
     return  Result;
 }
 
-QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {
+QVariantList intfBaseNMTGateway::makeSrcSentences(const QString &_sourceText) {
+    QVariantList Result;
+    foreach (auto Part, _sourceText.split("\n", QString::SkipEmptyParts)) {
+        Result.append(QVariantMap({ { "src", Part } }));
+    }
+    return Result;
+}
+
+QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {
     Q_UNUSED(_detailed)
 
-    auto invalidResponse = [_doc]() -> QVariantMap{
-            return  {
-                {RESULTItems::ERRNO, enuTranslationError::InvalidServerResponse},
-                {RESULTItems::MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact)}
+    auto invalidResponse = [_doc]() -> QVariantMap {
+            return {
+                { RESULTItems::ERRNO,   enuTranslationError::InvalidServerResponse },
+                { RESULTItems::MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact) }
             };
     };
 
@@ -125,19 +138,22 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
     static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults) {
         QStringList TrTokens;
-        foreach (auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList()) {
+
+        foreach (auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList())
             TrTokens.append(Phrase.toList().at(0).toString());
-        }
+
         if (_detok)
             return TranslationDispatcher::instance().detokenize(TrTokens.join(" "), this->EngineSpecs.DestLang);
-        else
-            return  TrTokens.join(" ");
+
+        return TrTokens.join(" ");
     };
 
     if (!_detailed) {
         QStringList TrSentences;
+
         foreach (QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
-            TrSentences.append (baseTranslation(SentenceResults.toMap()));
+            TrSentences.append(baseTranslation(SentenceResults.toMap()));
+
         Result[RESULTItems::SIMPLE] = TrSentences.join('\n');
     } else {
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
@@ -150,30 +166,36 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
             foreach (auto Token, TokensList)
                 TempStringList.append(Token.toString());
-            ResultBaseList.push_back(QVariantList({{TempStringList.join(" ")},{baseTranslation(SentenceResultMap)}}));
+
+            ResultBaseList.push_back(QVariantList({
+                                                      { TempStringList.join(" ") },
+                                                      { baseTranslation(SentenceResultMap) }
+                                                  }));
 
             quint16 Index = 0;
             foreach (auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
-                                                    {_detok ?
-                                                     TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang) :
-                                                     Phrases.toList().at(0)},
-                                                    {Index++}
+                                                    { _detok
+                                                      ? TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang)
+                                                      : Phrases.toList().at(0) },
+                                                    { Index++ }
                                                 }));
             ResultPhrasesList.push_back(TempList);
 
-            Index = 0; TempList.clear();
+            Index = 0;
+            TempList.clear();
 
             static auto buildAlignments = [this, _detok](const QVariantList& _phrases) {
                 QVariantList Result;
                 bool IsFirst = true;
+
                 foreach (auto Phrase, _phrases) {
                     if (Phrase.toString().size())
                         Result.push_back(QVariantList({
-                                                          {_detok ?
-                                                           TranslationDispatcher::instance().detokenize(Phrase.toString(), this->EngineSpecs.DestLang) :
-                                                           Phrase},
-                                                          {IsFirst}
+                                                          { _detok
+                                                            ? TranslationDispatcher::instance().detokenize(Phrase.toString(), this->EngineSpecs.DestLang)
+                                                            : Phrase },
+                                                          { IsFirst }
                                                       }));
                     IsFirst = false;
                 }
@@ -185,22 +207,22 @@ QVariantMap clsBaseNMT::buildProperResponse(const QJsonDocument& _doc, bool _det
 
                 foreach (auto AlignmentItem, Alignment.toList())
                     TempStringList.append(TokensList.at(AlignmentItem.toInt()).toString());
+
                 TempList.push_back(QVariantList({
-                                                    {TempStringList.join(' ')},
-                                                    {Alignment.toList().at(0).toInt() + 1},
-                                                    {buildAlignments(SentenceResultMap[NMTResponse::Result::phrases].toList().at(Index).toList())}
+                                                    { TempStringList.join(' ') },
+                                                    { Alignment.toList().at(0).toInt() + 1 },
+                                                    { buildAlignments(SentenceResultMap[NMTResponse::Result::phrases].toList().at(Index).toList()) }
                                                 }));
                 Index++;
             }
             ResultAlignmentsList.push_back(TempList);
-
         }
 
         Result[RESULTItems::TRANSLATION] = QVariantMap({
-                                                     {RESULTItems::TRANSLATIONItems::BASE, ResultBaseList},
-                                                     {RESULTItems::TRANSLATIONItems::PHRASES, ResultPhrasesList},
-                                                     {RESULTItems::TRANSLATIONItems::ALIGNMENTS, ResultAlignmentsList},
-                                                 });
+                                                           { RESULTItems::TRANSLATIONItems::BASE, ResultBaseList },
+                                                           { RESULTItems::TRANSLATIONItems::PHRASES, ResultPhrasesList },
+                                                           { RESULTItems::TRANSLATIONItems::ALIGNMENTS, ResultAlignmentsList },
+                                                       });
     }
 
     return Result;

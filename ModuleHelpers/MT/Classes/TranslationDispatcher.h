@@ -32,50 +32,95 @@
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::Server;
 
+/***********************************************************************************/
+///@TODO: move this to common
+#define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
+    struct _##_className##_static_constructor { \
+        _##_className##_static_constructor() {
+
+#define TARGOMAN_END_STATIC_CTOR(_className) \
+        } \
+    }; \
+    static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
+
+///@TODO: move this to common
+#define instanceGetterPtr(_class) static _class* instancePtr() { \
+    static _class* Instance = nullptr; return (Q_LIKELY(Instance) ? Instance : (Instance = new _class)); \
+}
+
+///@TODO: move this to common
+#define TAPI_DISABLE_COPY(Class) \
+    Q_DISABLE_COPY(Class)
+
+#define TARGOMAN_API_MT_GATEWAY_DEFINE(_gatewayClassName) \
+public: \
+    instanceGetterPtr(_gatewayClassName); \
+private: \
+    _gatewayClassName(); \
+    TAPI_DISABLE_COPY(_gatewayClassName); \
+    TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
+        Targoman::API::ModuleHelpers::MT::Classes::TranslationDispatcher::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+    TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
+
+#define TARGOMAN_API_MT_GATEWAY_IMPL(_gatewayClassName) \
+    _gatewayClassName::_gatewayClassName() { ; }
+
+/***********************************************************************************/
 namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
 
-TARGOMAN_DEFINE_ENUM (enuTranslationError,
-                      Ok = 0,
-                      OperationTimedOut = -10,
-                      ConnectionRefused  = -20,
-                      JsonParseError = -30,
-                      InvalidServerResponse = -40,
-                      CURLError = -100
-                      )
-
+TARGOMAN_DEFINE_ENUM(enuTranslationError,
+                     Ok = 0,
+                     OperationTimedOut = -10,
+                     ConnectionRefused = -20,
+                     JsonParseError = -30,
+                     InvalidServerResponse = -40,
+                     CURLError = -100
+                     )
 
 typedef QPair<QString, QString> TranslationDir_t;
 
 class TranslationDispatcher
 {
 private:
-    struct stuTrServerConfig{
-        stuTrServerConfig(const QString& _basePath);
-        tmplConfigurable<QUrl>      URL;
-        tmplConfigurable<QString>   Class;
+    struct stuTrServerConfig {
         tmplConfigurable<QString>   SourceLang;
         tmplConfigurable<QString>   DestLang;
+        tmplConfigurable<QString>   Class; //formal, informal, all
+        tmplConfigurable<QUrl>      URL;
         tmplConfigurable<bool>      SupportsIXML;
         tmplConfigurable<bool>      Active;
+        tmplConfigurable<QString>   Driver;
 
         struct stuStatistics {
             stuStatistics(const QString& _basePath);
             tmplConfigurable<quint64> OkResponses;
             tmplConfigurable<quint64> FailedResponses;
         } Statistics;
+
+        stuTrServerConfig(const QString& _basePath);
     };
+
     static tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
 
 public:
-    static TranslationDispatcher& instance() {static TranslationDispatcher* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));}
+    static TranslationDispatcher& instance() {
+        static TranslationDispatcher* Instance = nullptr;
+        return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));
+    }
     ~TranslationDispatcher();
+
+    void registerEngines();
+
+    inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir) {
+        return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+    }
 
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const QJsonObject& _privInfo,
+//        const QJsonObject& _privInfo,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -93,18 +138,15 @@ public:
     void addDicLog(const QString& _lang, quint64 _worcCount, const QString& _text);
     void addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, qint32 _errorCode);
     void addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, int _trTime);
-    void registerEngines();
-
-    inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir) {
-        return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
-    }
 
     static inline TranslationDir_t dirLangs(const QString& _dir) {
         if (_dir.contains("2"))
             return qMakePair(_dir.split("2").first(), _dir.split("2").last());
-        else if (_dir.contains("_"))
+
+        if (_dir.contains("_"))
             return qMakePair(_dir.split("_").first(), _dir.split("_").last());
-        return  qMakePair(QString(),QString());
+
+        return qMakePair(QString(), QString());
     }
 
 private:
@@ -114,10 +156,16 @@ private:
     TranslationDispatcher();
     Q_DISABLE_COPY(TranslationDispatcher)
 
-    QHash<QString,  intfTranslatorEngine*> RegisteredEngines;
+    QHash<QString, intfTranslatorEngine*> RegisteredEngines;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;
+
+public:
+    static void registerGateway(const QString& _gatewayName, intfTranslatorEngine* _gateway);
+    static intfTranslatorEngine* getGateway(const QString& _gatewayName);
+private:
+    static inline QMap<QString, intfTranslatorEngine*> RegisteredGateways;
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes

@@ -13,16 +13,33 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Engines/clsEngine.h \
+    MTDefs.hpp \
     Classes/intfTranslatorBridge.hpp \
     Classes/intfTranslatorEngine.hpp \
     Classes/TranslationDispatcher.h \
-    Engines/clsNMT.h \ \
-    MTDefs.hpp
+    Engines/intfBaseNMTGateway.h \
+    Engines/gtwAmunRNN.h \
+    Engines/gtwMarianTransBPE.v1.4.h \
+    Engines/ActiveGateways.h
+
+#    Engines/intfBaseNMT.h \
+#    Engines/intfLuaOpenNMT.h \
+#    Engines/intfMarianTransBPE.v1.10.h \
+#    Engines/intfMarianTransBPE.v1.5.h \
+#    Engines/intfMarianTransBPE.v1.6.h \
+#    Engines/intfMarianTransBPE.v1.7.h \
+#    Engines/intfMarianTransSPM.v1.10.h \
+#    Engines/intfPROMT.h \
+#    Engines/intfTargomanSMT.h \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
     Classes/TranslationDispatcher.cpp \
-    Engines/clsNMT.cpp \
+    Engines/clsEngine.cpp \
+    Engines/gtwAmunRNN.cpp \
+    Engines/gtwMarianTransBPE.v1.4.cpp \
+    Engines/intfBaseNMTGateway.cpp
 
 OTHER_FILES += \
 

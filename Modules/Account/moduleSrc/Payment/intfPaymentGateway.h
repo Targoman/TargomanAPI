@@ -86,6 +86,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 
 namespace Payment {
 
+///@TODO: move this to common
 #define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
     struct _##_className##_static_constructor { \
         _##_className##_static_constructor() {
@@ -95,6 +96,7 @@ namespace Payment {
     }; \
     static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
 
+///@TODO: move this to common
 #define instanceGetterPtr(_class) static _class* instancePtr() { \
     static _class* Instance = nullptr; return (Q_LIKELY(Instance) ? Instance : (Instance = new _class)); \
 }

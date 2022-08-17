@@ -21,34 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
-#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#include "gtwMarianTransBPE.v1.4.h"
 
-#include <QString>
-#include <QVariantMap>
-#include <QUrl>
-#include "libTargomanCommon/Macros.h"
-#include "../MTDefs.hpp"
+namespace Targoman::API::ModuleHelpers::MT::Engines {
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwMarianTransBPE_v1_4)
 
-class intfTranslatorEngine
-{
-public:
-    explicit intfTranslatorEngine() { ; }
-    virtual ~intfTranslatorEngine() { ; }
-
-public:
-    virtual QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokinize) = 0;
-
-//    QString fullName() { return this->EngineSpecs.fullName(); }
-
-//    inline const stuEngineSpecs& specs() { return this->EngineSpecs; }
-
-//protected:
-//    stuEngineSpecs EngineSpecs;
-};
-
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
-
-#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+} // namespace Targoman::API::ModuleHelpers::MT::Engines
