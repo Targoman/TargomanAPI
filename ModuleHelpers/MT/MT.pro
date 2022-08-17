@@ -13,33 +13,33 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
-    Engines/clsEngine.h \
     MTDefs.hpp \
+    Classes/clsEngine.h \
     Classes/intfTranslatorBridge.hpp \
-    Classes/intfTranslatorEngine.hpp \
     Classes/TranslationDispatcher.h \
-    Engines/intfBaseNMTGateway.h \
-    Engines/gtwAmunRNN.h \
-    Engines/gtwMarianTransBPE.v1.4.h \
-    Engines/ActiveGateways.h
+    Gateways/intfTranslatorGateway.hpp \
+    Gateways/intfBaseNMTGateway.h \
+    Gateways/gtwAmunRNN.h \
+    Gateways/gtwMarianTransBPE.v1.4.h \
+    Gateways/ActiveGateways.h
 
-#    Engines/intfBaseNMT.h \
-#    Engines/intfLuaOpenNMT.h \
-#    Engines/intfMarianTransBPE.v1.10.h \
-#    Engines/intfMarianTransBPE.v1.5.h \
-#    Engines/intfMarianTransBPE.v1.6.h \
-#    Engines/intfMarianTransBPE.v1.7.h \
-#    Engines/intfMarianTransSPM.v1.10.h \
-#    Engines/intfPROMT.h \
-#    Engines/intfTargomanSMT.h \
+#    Gateways/intfBaseNMT.h \
+#    Gateways/intfLuaOpenNMT.h \
+#    Gateways/intfMarianTransBPE.v1.10.h \
+#    Gateways/intfMarianTransBPE.v1.5.h \
+#    Gateways/intfMarianTransBPE.v1.6.h \
+#    Gateways/intfMarianTransBPE.v1.7.h \
+#    Gateways/intfMarianTransSPM.v1.10.h \
+#    Gateways/intfPROMT.h \
+#    Gateways/intfTargomanSMT.h \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
     Classes/TranslationDispatcher.cpp \
-    Engines/clsEngine.cpp \
-    Engines/gtwAmunRNN.cpp \
-    Engines/gtwMarianTransBPE.v1.4.cpp \
-    Engines/intfBaseNMTGateway.cpp
+    Classes/clsEngine.cpp \
+    Gateways/gtwAmunRNN.cpp \
+    Gateways/gtwMarianTransBPE.v1.4.cpp \
+    Gateways/intfBaseNMTGateway.cpp
 
 OTHER_FILES += \
 
