@@ -23,5 +23,5 @@
 
 #include "clsEngine.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+namespace Targoman::API::ModuleHelpers::MT::Classes {
+} //namespace Targoman::API::ModuleHelpers::MT::Classes

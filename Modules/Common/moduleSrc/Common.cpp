@@ -28,8 +28,8 @@ namespace Targoman::API::CommonModule {
 
 using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(Common)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Common, CommonSchema);
+TARGOMAN_API_MODULE_IMPLEMENT(Common)
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Common, CommonSchema);
 
 Common::Common() :
     intfSQLBasedModule(
@@ -37,7 +37,7 @@ Common::Common() :
         CommonSchema,
         ""
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
 
     this->addSubModule(&Alerts::instance());
 }

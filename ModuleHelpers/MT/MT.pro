@@ -15,7 +15,6 @@ PRIVATE_HEADERS += \
 HEADERS += \
     MTDefs.hpp \
     Classes/clsEngine.h \
-    Classes/intfTranslatorBridge.hpp \
     Classes/TranslationDispatcher.h \
     Gateways/intfTranslatorGateway.hpp \
     Gateways/intfBaseNMTGateway.h \
@@ -35,8 +34,8 @@ HEADERS += \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
-    Classes/TranslationDispatcher.cpp \
     Classes/clsEngine.cpp \
+    Classes/TranslationDispatcher.cpp \
     Gateways/gtwAmunRNN.cpp \
     Gateways/gtwMarianTransBPE.v1.4.cpp \
     Gateways/intfBaseNMTGateway.cpp

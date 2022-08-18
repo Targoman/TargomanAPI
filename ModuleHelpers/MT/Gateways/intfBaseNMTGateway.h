@@ -21,28 +21,31 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_INTFBASENMTGATEWAY_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_INTFBASENMTGATEWAY_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFBASENMTGATEWAY_H
+#define TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFBASENMTGATEWAY_H
 
 #include <QUrl>
-#include "../Classes/intfTranslatorEngine.hpp"
+#include "intfTranslatorGateway.hpp"
+#include "Classes/clsEngine.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class intfBaseNMTGateway : public Classes::intfTranslatorEngine
+using namespace Classes;
+
+class intfBaseNMTGateway : public intfTranslatorGateway
 {
 public:
     intfBaseNMTGateway();
 
 public:
-    QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokenize);
+    QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
 
 private:
 //    virtual QString preprocessText(QString _sourceText);
     virtual QVariantList makeSrcSentences(const QString &_sourceText);
-    virtual QVariantMap buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok);
+    virtual QVariantMap buildProperResponse(const stuEngineSpecs& _engineSpecs, const QJsonDocument& _doc, bool _detailed, bool _detok);
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+} //namespace Targoman::API::ModuleHelpers::MT::Gateways
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_INTFBASENMTGATEWAY_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFBASENMTGATEWAY_H

@@ -108,13 +108,13 @@ public: \
     { ; } \
 };
 
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_MIGRATIONS(_module, _schema) \
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(_module, _schema) \
 protected: \
     QScopedPointer<Migrations>  _Migrations;
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_MIGRATIONS(_module, _schema) \
+#define TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(_module, _schema) \
     this->_Migrations.reset(&Migrations::instance()); \
     this->addSubModule(this->_Migrations.data());
 

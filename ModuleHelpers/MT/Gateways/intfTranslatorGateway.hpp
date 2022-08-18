@@ -21,25 +21,28 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
-#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFTRANSLATORGATEWAY_HPP
+#define TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFTRANSLATORGATEWAY_HPP
 
 #include <QString>
 #include <QVariantMap>
 #include <QUrl>
 #include "libTargomanCommon/Macros.h"
 #include "../MTDefs.hpp"
+#include "../Classes/clsEngine.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class intfTranslatorEngine
+using namespace Classes;
+
+class intfTranslatorGateway
 {
 public:
-    explicit intfTranslatorEngine() { ; }
-    virtual ~intfTranslatorEngine() { ; }
+    explicit intfTranslatorGateway() { ; }
+    virtual ~intfTranslatorGateway() { ; }
 
 public:
-    virtual QVariantMap doTranslation(const QString& _text, bool _detailed, bool _detokinize) = 0;
+    virtual QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokinize) = 0;
 
 //    QString fullName() { return this->EngineSpecs.fullName(); }
 
@@ -49,6 +52,6 @@ public:
 //    stuEngineSpecs EngineSpecs;
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+} //namespace Targoman::API::ModuleHelpers::MT::Gateways
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_INTFTRANSLATORENGINE_HPP
+#endif // TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_INTFTRANSLATORGATEWAY_HPP

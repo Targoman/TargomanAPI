@@ -21,16 +21,19 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSENGINE_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSENGINE_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSENGINE_H
+#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSENGINE_H
 
 #include <QString>
 #include <QVariantMap>
 #include <QUrl>
 #include "libTargomanCommon/Macros.h"
 #include "../MTDefs.hpp"
+//#include "../Gateways/intfTranslatorGateway.hpp"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Classes {
+
+//using namespace Gateways;
 
 //TARGOMAN_DEFINE_ENHANCED_ENUM(enuEngine,
 TARGOMAN_DEFINE_ENUM(enuEngine,
@@ -46,6 +49,7 @@ struct stuEngineSpecs
     QUrl    URL;
     bool    SupportsIXML;
     QString DriverName;
+//    intfTranslatorGateway* Driver;
 
     stuEngineSpecs(
         enuEngine::Type _engine, // = enuEngine::Unknown,
@@ -55,6 +59,7 @@ struct stuEngineSpecs
         const QUrl& _url, // = QUrl(),
         bool _supportsIXML, // = true,
         const QString& _driverName
+//        intfTranslatorGateway* _driver
     ) :
         Engine(_engine),
         SourceLang(_sourceLang),
@@ -63,6 +68,7 @@ struct stuEngineSpecs
         URL(_url),
         SupportsIXML(_supportsIXML),
         DriverName(_driverName)
+//        Driver(_driver)
     { ; }
 
     inline QString fullName() {
@@ -97,6 +103,6 @@ protected:
     stuEngineSpecs EngineSpecs;
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+} //namespace Targoman::API::ModuleHelpers::MT::Classes
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_CLSENGINE_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSENGINE_H

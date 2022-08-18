@@ -28,7 +28,7 @@
 
 namespace Targoman::API::Server {
 
-TARGOMAN_IMPL_API_MODULE(StaticModule)
+TARGOMAN_API_MODULE_IMPLEMENT(StaticModule)
 
 StaticModule::StaticModule() :
     intfPureModule("")

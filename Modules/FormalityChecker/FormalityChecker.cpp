@@ -28,7 +28,7 @@ namespace API {
 
 using namespace Targoman::API::ModuleHelpers;
 
-TARGOMAN_IMPL_API_MODULE(FormalityChecker)
+TARGOMAN_API_MODULE_IMPLEMENT(FormalityChecker)
 
 FormalityChecker::FormalityChecker() :
     intfPureModule("FormalityChecker")

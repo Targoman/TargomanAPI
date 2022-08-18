@@ -45,12 +45,12 @@ class Ticketing : public intfSQLBasedWithActionLogsModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Ticketing);
-    TARGOMAN_DEFINE_API_MODULE(Ticketing);
-    TARGOMAN_API_DEFINE_MIGRATIONS(Ticketing, TicketingSchema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
-    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
-    TARGOMAN_API_DEFINE_FAQ(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE(Ticketing);
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Ticketing);
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(Ticketing, TicketingSchema);
 
 private:
     quint64 insertTicket(

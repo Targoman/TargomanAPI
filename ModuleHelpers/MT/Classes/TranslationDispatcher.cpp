@@ -27,16 +27,14 @@
 
 #include "TranslationDispatcher.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
-#include "Engines/intfBaseNMTGateway.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ModuleHelpers/NLP/FormalityChecker.h"
 #include "libTargomanCommon/Configuration/tmplConfigurableArray.hpp"
-#include "MTDefs.hpp"
 
 /***********************************************************************************/
 /***********************************************************************************/
 /***********************************************************************************/
-#include "Engines/ActiveGateways.h"
+#include "Gateways/ActiveGateways.h"
 /***********************************************************************************/
 /***********************************************************************************/
 /***********************************************************************************/
@@ -52,11 +50,10 @@ using namespace Common;
 //using namespace Common::Configuration;
 using namespace AAA;
 //using namespace NLP;
-using namespace Engines;
+using namespace Gateways;
 
-tmplConfigurableMultiMap<TranslationDispatcher::stuTrServerConfig> TranslationDispatcher::TranslationServers(
-//tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
-    clsConfigPath("TranslationServers"),
+tmplConfigurableMultiMap<stuCfgTranslationEngine> TranslationConfigs::Engines(
+    TranslationConfigs::makeConfig("Engines"),
     "List of valid translation servers to connect to them separated by their translation engine"
 );
 
@@ -66,15 +63,15 @@ TranslationDispatcher::TranslationDispatcher() {
 
 TranslationDispatcher::~TranslationDispatcher() { ; }
 
-void TranslationDispatcher::registerGateway(const QString& _gatewayName, intfTranslatorEngine* _gateway) {
+void TranslationDispatcher::registerGateway(const QString& _gatewayName, intfTranslatorGateway* _gateway) {
     if (TranslationDispatcher::RegisteredGateways.contains(_gatewayName))
         throw Targoman::Common::exTargomanBase(QString("The class for gateway name `%1` has been already registered").arg(_gatewayName));
 
     TargomanDebug(0) << "registering MT gateway:" << _gatewayName;
 
-    TranslationDispatcher::RegisteredGateways.insert(_gatewayName,  _gateway);
+    TranslationDispatcher::RegisteredGateways.insert(_gatewayName, _gateway);
 }
-intfTranslatorEngine* TranslationDispatcher::getGateway(const QString& _gatewayName) {
+intfTranslatorGateway* TranslationDispatcher::getGateway(const QString& _gatewayName) {
     if (TranslationDispatcher::RegisteredGateways.contains(_gatewayName) == false)
         throw Targoman::Common::exTargomanBase(QString("The class with gateway name `%1` has not been registered").arg(_gatewayName));
 
@@ -82,27 +79,42 @@ intfTranslatorEngine* TranslationDispatcher::getGateway(const QString& _gatewayN
 }
 
 void TranslationDispatcher::registerEngines() {
-    foreach (const QString& Key, this->TranslationServers.keys()) {
-        const tmplConfigurableArray<stuTrServerConfig>& ServersConfig = this->TranslationServers.values(Key);
+    auto Keys = TranslationConfigs::Engines.keys();
+
+    foreach (const QString& Key, Keys) {
+        const tmplConfigurableArray<stuCfgTranslationEngine>& ServersConfig = TranslationConfigs::Engines.values(Key);
 
         for (size_t i=0; i<ServersConfig.size(); ++i) {
-            stuTrServerConfig Server = ServersConfig.at(i);
+            stuCfgTranslationEngine Server = ServersConfig.at(i);
+
+            TargomanDebug(0) << "registering MT engine:"
+                             << Key
+                             << Server.SourceLang.value()
+                             << Server.DestLang.value()
+                             << Server.Class.value()
+                             << Server.URL.value()
+                             << Server.SupportsIXML.value()
+                             << Server.Active.value()
+                             << Server.Driver.value()
+                             ;
+
             if (Server.Active.value() == false)
                 continue;
 
-            intfTranslatorEngine* Engine = nullptr;
+            clsEngine* Engine = nullptr;
 
             switch (enuEngine::toEnum(Key)) {
                 case enuEngine::NMT:
-                    Engine = new Engines::/*intfBaseNMTGateway*/clsEngine(stuEngineSpecs(
-                                                                 enuEngine::toEnum(Key),
-                                                                 Server.SourceLang.value(),
-                                                                 Server.DestLang.value(),
-                                                                 Server.Class.value(),
-                                                                 Server.URL.value(),
-                                                                 Server.SupportsIXML.value(),
-                                                                 Server.Driver.value()
-                                                            ));
+                    Engine = new clsEngine(stuEngineSpecs(
+                                               enuEngine::toEnum(Key),
+                                               Server.SourceLang.value(),
+                                               Server.DestLang.value(),
+                                               Server.Class.value(),
+                                               Server.URL.value(),
+                                               Server.SupportsIXML.value(),
+                                               Server.Driver.value()
+//                                               this->getGateway(Server.Driver.value())
+                                          ));
                     break;
 
 //                case enuEngine::Unknown:
@@ -115,6 +127,7 @@ void TranslationDispatcher::registerEngines() {
                     Engine->fullName(),
                     Engine
                     );
+        }
     }
 }
 
@@ -145,7 +158,7 @@ QVariantMap TranslationDispatcher::doTranslation(
         QTime Timer;
         Timer.start();
 
-        intfTranslatorEngine* TranslationEngine = nullptr;
+        /*intfTranslatorGateway*/clsEngine* TranslationEngine = nullptr;
         QString Class;
 
         if (_useSpecialClass) {

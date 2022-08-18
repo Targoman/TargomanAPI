@@ -30,7 +30,7 @@
 
 #include <QtDebug>
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 using namespace Classes;
 
@@ -45,11 +45,15 @@ namespace NMTResponse {
     }
 }
 
-intfBaseNMTGateway::intfBaseNMTGateway(const Classes::stuEngineSpecs& _specs) :
-    Classes::intfTranslatorEngine(_specs)
+intfBaseNMTGateway::intfBaseNMTGateway()
 { ; }
 
-QVariantMap intfBaseNMTGateway::doTranslation(const QString& _text, bool _detailed, bool _detokenize) {
+QVariantMap intfBaseNMTGateway::doTranslation(
+    const stuEngineSpecs& _engineSpecs,
+    const QString& _text,
+    bool _detailed,
+    bool _detokenize
+) {
     int Retries = 0;
     QVariantMap Result;
 
@@ -67,7 +71,7 @@ QVariantMap intfBaseNMTGateway::doTranslation(const QString& _text, bool _detail
         CUrl.setTextCodec("UTF-8");
 
         QtCUrl::Options Opt;
-        Opt[CURLOPT_URL] = this->EngineSpecs.URL;
+        Opt[CURLOPT_URL] = _engineSpecs.URL;
         Opt[CURLOPT_POST] = true;
         Opt[CURLOPT_TIMEOUT] = 1;
         Opt[CURLOPT_FAILONERROR] = true;
@@ -99,7 +103,7 @@ QVariantMap intfBaseNMTGateway::doTranslation(const QString& _text, bool _detail
                 ++Retries;
                 continue;
             }
-            Result = this->buildProperResponse(Doc, _detailed, _detokenize);
+            Result = this->buildProperResponse(_engineSpecs, Doc, _detailed, _detokenize);
 
             return Result;
         }
@@ -115,7 +119,12 @@ QVariantList intfBaseNMTGateway::makeSrcSentences(const QString &_sourceText) {
     return Result;
 }
 
-QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, bool _detailed, bool _detok) {
+QVariantMap intfBaseNMTGateway::buildProperResponse(
+    const stuEngineSpecs& _engineSpecs,
+    const QJsonDocument& _doc,
+    bool _detailed,
+    bool _detok
+) {
     Q_UNUSED(_detailed)
 
     auto invalidResponse = [_doc]() -> QVariantMap {
@@ -136,14 +145,14 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, b
     if (BaseMap.contains(NMTResponse::serverName))
         Result[RESULTItems::SERVERID] = BaseMap[NMTResponse::serverName].toString();
 
-    static auto baseTranslation = [_detok, this](const QVariantMap& SentenceResults) {
+    static auto baseTranslation = [_engineSpecs, _detok](const QVariantMap& SentenceResults) {
         QStringList TrTokens;
 
         foreach (auto Phrase, SentenceResults[NMTResponse::Result::phrases].toList())
             TrTokens.append(Phrase.toList().at(0).toString());
 
         if (_detok)
-            return TranslationDispatcher::instance().detokenize(TrTokens.join(" "), this->EngineSpecs.DestLang);
+            return TranslationDispatcher::instance().detokenize(TrTokens.join(" "), _engineSpecs.DestLang);
 
         return TrTokens.join(" ");
     };
@@ -176,7 +185,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, b
             foreach (auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
                                                     { _detok
-                                                      ? TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), this->EngineSpecs.DestLang)
+                                                      ? TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), _engineSpecs.DestLang)
                                                       : Phrases.toList().at(0) },
                                                     { Index++ }
                                                 }));
@@ -185,7 +194,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, b
             Index = 0;
             TempList.clear();
 
-            static auto buildAlignments = [this, _detok](const QVariantList& _phrases) {
+            static auto buildAlignments = [_engineSpecs, _detok](const QVariantList& _phrases) {
                 QVariantList Result;
                 bool IsFirst = true;
 
@@ -193,7 +202,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, b
                     if (Phrase.toString().size())
                         Result.push_back(QVariantList({
                                                           { _detok
-                                                            ? TranslationDispatcher::instance().detokenize(Phrase.toString(), this->EngineSpecs.DestLang)
+                                                            ? TranslationDispatcher::instance().detokenize(Phrase.toString(), _engineSpecs.DestLang)
                                                             : Phrase },
                                                           { IsFirst }
                                                       }));
@@ -228,4 +237,4 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(const QJsonDocument& _doc, b
     return Result;
 }
 
-} // namespace Targoman::API::ModuleHelpers::MT::Engines
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

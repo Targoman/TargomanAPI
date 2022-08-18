@@ -21,13 +21,13 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_4_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_4_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_MARIANTRANSBPE_V1_4_H
+#define TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_MARIANTRANSBPE_V1_4_H
 
 #include "intfBaseNMTGateway.h"
 #include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 /**
  * CAUTION:
@@ -68,6 +68,6 @@ public:
 //    }
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+} //namespace Targoman::API::ModuleHelpers::MT::Gateways
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_4_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_MARIANTRANSBPE_V1_4_H

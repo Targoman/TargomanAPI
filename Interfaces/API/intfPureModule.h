@@ -375,8 +375,8 @@ public:
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
     virtual stuDBInfo requiredDB() const { return {}; }
 
-    virtual bool init() { return true; }
-    virtual void setInstancePointer() { ; };
+    virtual void initializeModule() { ; }
+    virtual void setInstancePointer() { ; }
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
@@ -412,7 +412,7 @@ Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
 //QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }
 
-#define TARGOMAN_DEFINE_API_MODULE(_name) \
+#define TARGOMAN_API_MODULE_DEFINE(_name) \
 public: \
     QString parentModuleName() const final { return QString(); } \
     QString moduleBaseName() { return this->ModuleName; }  \
@@ -429,7 +429,7 @@ public: \
             throw Targoman::Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
         for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
-        _submodule->init(); \
+        _submodule->initializeModule(); \
     } \
 private: \
     TAPI_DISABLE_COPY(_name); \
@@ -440,7 +440,7 @@ public: \
 protected: \
     static _name* InstancePointer;
 
-#define TARGOMAN_IMPL_API_MODULE(_name) \
+#define TARGOMAN_API_MODULE_IMPLEMENT(_name) \
     _name* _name::InstancePointer;
 
 #define TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
@@ -461,7 +461,7 @@ private: \
     _name();
 
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }
-#define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
+#define TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(_module) \
     struct DB { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); } \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Host;   \
@@ -484,7 +484,7 @@ public: \
 /**
   * Host must be no default, because requiredDB() uses this
   */
-#define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module, _schema)\
+#define TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(_module, _schema)\
     using namespace Targoman::Common::Configuration;        \
     tmplConfigurable<QString> _module::DB::Host(            \
         _module::DB::makeConfig("Host"),                    \

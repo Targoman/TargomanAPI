@@ -27,7 +27,9 @@
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
-#include "intfTranslatorEngine.hpp"
+#include "../MTDefs.hpp"
+#include "clsEngine.h"
+#include "../Gateways/intfTranslatorGateway.hpp"
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::Server;
@@ -68,6 +70,8 @@ private: \
 /***********************************************************************************/
 namespace Targoman::API::ModuleHelpers::MT::Classes {
 
+using namespace Gateways;
+
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
 
@@ -82,29 +86,42 @@ TARGOMAN_DEFINE_ENUM(enuTranslationError,
 
 typedef QPair<QString, QString> TranslationDir_t;
 
+struct stuCfgTranslationEngine {
+    tmplConfigurable<QString>   SourceLang;
+    tmplConfigurable<QString>   DestLang;
+    tmplConfigurable<QString>   Class; //formal, informal, all
+    tmplConfigurable<QString>   URL;
+    tmplConfigurable<bool>      SupportsIXML;
+    tmplConfigurable<bool>      Active;
+    tmplConfigurable<QString>   Driver;
+
+//        struct stuStatistics {
+//            tmplConfigurable<quint64> OkResponses;
+//            tmplConfigurable<quint64> FailedResponses;
+
+//            stuStatistics(const QString& _basePath);
+//        } Statistics;
+
+    stuCfgTranslationEngine(const QString& _basePath) :
+        SourceLang  (_basePath + "SourceLang", "", ""),
+        DestLang    (_basePath + "DestLang", "", ""),
+        Class       (_basePath + "Class", "", ""),
+        URL         (_basePath + "URL", "", ""),
+        SupportsIXML(_basePath + "SupportsIXML", "", true),
+        Active      (_basePath + "Active", "", true),
+        Driver      (_basePath + "Driver", "", "")
+    { ; }
+};
+
+struct TranslationConfigs
+{
+    static inline QString makeConfig(const QString &_name) { return "/Translation/" + _name; }
+
+    static tmplConfigurableMultiMap<stuCfgTranslationEngine> Engines;
+};
+
 class TranslationDispatcher
 {
-private:
-    struct stuTrServerConfig {
-        tmplConfigurable<QString>   SourceLang;
-        tmplConfigurable<QString>   DestLang;
-        tmplConfigurable<QString>   Class; //formal, informal, all
-        tmplConfigurable<QUrl>      URL;
-        tmplConfigurable<bool>      SupportsIXML;
-        tmplConfigurable<bool>      Active;
-        tmplConfigurable<QString>   Driver;
-
-        struct stuStatistics {
-            stuStatistics(const QString& _basePath);
-            tmplConfigurable<quint64> OkResponses;
-            tmplConfigurable<quint64> FailedResponses;
-        } Statistics;
-
-        stuTrServerConfig(const QString& _basePath);
-    };
-
-    static tmplConfigurableMultiMap<stuTrServerConfig> TranslationServers;
-
 public:
     static TranslationDispatcher& instance() {
         static TranslationDispatcher* Instance = nullptr;
@@ -156,16 +173,16 @@ private:
     TranslationDispatcher();
     Q_DISABLE_COPY(TranslationDispatcher)
 
-    QHash<QString, intfTranslatorEngine*> RegisteredEngines;
+    QHash<QString, /*intfTranslatorGateway*/clsEngine*> RegisteredEngines;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;
 
 public:
-    static void registerGateway(const QString& _gatewayName, intfTranslatorEngine* _gateway);
-    static intfTranslatorEngine* getGateway(const QString& _gatewayName);
+    static void registerGateway(const QString& _gatewayName, intfTranslatorGateway* _gateway);
+    static intfTranslatorGateway* getGateway(const QString& _gatewayName);
 private:
-    static inline QMap<QString, intfTranslatorEngine*> RegisteredGateways;
+    static inline QMap<QString, intfTranslatorGateway*> RegisteredGateways;
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes

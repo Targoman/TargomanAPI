@@ -21,13 +21,13 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_AMUNRNN_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_AMUNRNN_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_AMUNRNN_H
+#define TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_AMUNRNN_H
 
 #include "intfBaseNMTGateway.h"
 #include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 /**
  * CAUTION:
@@ -55,6 +55,6 @@ public:
 
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+} //namespace Targoman::API::ModuleHelpers::MT::Gateways
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_AMUNRNN_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_AMUNRNN_H

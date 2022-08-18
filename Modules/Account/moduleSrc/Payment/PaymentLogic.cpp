@@ -54,36 +54,36 @@ tmplConfigurable<FilePath_t> PaymentLogic::TransactionLogFile(
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-void PaymentLogic::registerDriver(const QString& _driverName, intfPaymentGateway* _driver) {
-    if (PaymentLogic::RegisteredDrivers.contains(_driverName))
-        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
+void PaymentLogic::registerGateway(const QString& _gatewayName, intfPaymentGateway* _gateway) {
+    if (PaymentLogic::RegisteredGateways.contains(_gatewayName))
+        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_gatewayName));
 
-    TargomanDebug(0) << "registering payment gateway driver:" << _driverName;
+    TargomanDebug(0) << "registering payment gateway:" << _gatewayName;
 
-    PaymentLogic::RegisteredDrivers.insert(_driverName,  _driver);
+    PaymentLogic::RegisteredGateways.insert(_gatewayName, _gateway);
 }
-intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName) {
-    if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
-        throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
+intfPaymentGateway* PaymentLogic::getGateway(const QString& _gatewayName) {
+    if (PaymentLogic::RegisteredGateways.contains(_gatewayName) == false)
+        throw Targoman::Common::exTargomanBase(QString("The class with gateway name `%1` has not been registered").arg(_gatewayName));
 
-    return PaymentLogic::RegisteredDrivers[_driverName];
+    return PaymentLogic::RegisteredGateways[_gatewayName];
 }
 
 //template <class TPaymentGatewayClass>
-//void PaymentLogic::registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)())
+//void PaymentLogic::registerGateway(const QString& _gatewayName, TPaymentGatewayClass* (*_instanceFunc)())
 //{
-//    if (PaymentLogic::RegisteredDrivers.contains(_driverName))
-//        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_driverName));
+//    if (PaymentLogic::RegisteredGateways.contains(_gatewayName))
+//        throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_gatewayName));
 
-//    qDebug() << "registering payment gateway driver:" << _driverName;
-//    PaymentLogic::RegisteredDrivers.insert(_driverName, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
+//    qDebug() << "registering payment gateway driver:" << _gatewayName;
+//    PaymentLogic::RegisteredGateways.insert(_gatewayName, (PAYMENTGATEWAY_INSTANCE_FUNC)_instanceFunc);
 //}
-//intfPaymentGateway* PaymentLogic::getDriver(const QString& _driverName)
+//intfPaymentGateway* PaymentLogic::getGateway(const QString& _gatewayName)
 //{
-//    if (PaymentLogic::RegisteredDrivers.contains(_driverName) == false)
-//        throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_driverName));
+//    if (PaymentLogic::RegisteredGateways.contains(_gatewayName) == false)
+//        throw Targoman::Common::exTargomanBase(QString("The class with driver name `%1` has not been registered").arg(_gatewayName));
 
-//    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredDrivers[_driverName];
+//    PAYMENTGATEWAY_INSTANCE_FUNC InstanceFunc = PaymentLogic::RegisteredGateways[_gatewayName];
 
 //    return InstanceFunc();
 //}
@@ -295,7 +295,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                                                          _domain);
 
     //2: get payment gateway driver
-    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(PaymentGatewayDTO.pgwDriver);
+    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getGateway(PaymentGatewayDTO.pgwDriver);
 
     //3: create payment
     TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP(APICALLBOOM_PARAM,
@@ -395,7 +395,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
     if (OnlinePayment.OnlinePayment.onpStatus != Targoman::API::AccountModule::enuPaymentStatus::Pending)
         throw exPayment("Only Pending online payments allowed");
 
-    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getDriver(OnlinePayment.PaymentGateway.pgwDriver);
+    intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getGateway(OnlinePayment.PaymentGateway.pgwDriver);
 
     try {
         auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(

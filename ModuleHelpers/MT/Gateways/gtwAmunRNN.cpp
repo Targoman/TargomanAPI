@@ -25,7 +25,7 @@
 //#include <QRegularExpression>
 #include "gtwAmunRNN.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 TARGOMAN_API_MT_GATEWAY_IMPL(gtwAmunRNN)
 
@@ -35,4 +35,4 @@ TARGOMAN_API_MT_GATEWAY_IMPL(gtwAmunRNN)
 //    return _sourceText.replace(QRegularExpression("/(\\S)('(?:s|ll|d|t))/"), "$1 $2");
 //}
 
-} // namespace Targoman::API::ModuleHelpers::MT::Engines
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

@@ -53,15 +53,16 @@ class Account : public intfSQLBasedWithActionLogsModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Account);
-    TARGOMAN_DEFINE_API_MODULE(Account);
-    TARGOMAN_API_DEFINE_MIGRATIONS(Account, AAASchema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
-    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Account, AAASchema);
-    TARGOMAN_API_DEFINE_FAQ(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE(Account);
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Account);
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(Account, AAASchema);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
+    void initializeModule();
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 

@@ -180,14 +180,14 @@ private slots:
         { ; } \
     };
 
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_FAQ(_module, _schema) \
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_FAQ(_module, _schema) \
     protected: \
     QScopedPointer<FaqQuestions>  _FaqQuestions; \
     QScopedPointer<FaqAnswers>    _FaqAnswers;
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_FAQ(_module, _schema) \
+#define TARGOMAN_API_MODULE_IMPLEMENT_FAQ(_module, _schema) \
     this->_FaqQuestions.reset(&FaqQuestions::instance()); \
     this->_FaqAnswers.reset(&FaqAnswers::instance()); \
     this->addSubModule(this->_FaqQuestions.data()); \

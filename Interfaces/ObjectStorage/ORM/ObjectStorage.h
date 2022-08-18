@@ -449,8 +449,8 @@ public: \
     { ; } \
 };
 
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
     QScopedPointer<UploadFiles>     _UploadFiles;    \
     QScopedPointer<UploadGateways>  _UploadGateways; \
@@ -477,7 +477,7 @@ public: \
 //    QString("/var/spool/tapi/%1/objectstorage").arg(TARGOMAN_M2STR(_module))
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema)  \
+#define TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(_module, _schema)  \
     this->_UploadFiles   .reset(&UploadFiles   ::instance());   \
     this->_UploadGateways.reset(&UploadGateways::instance());   \
     this->_UploadQueue   .reset(&UploadQueue   ::instance());   \

@@ -125,11 +125,11 @@ private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::AccountModule::Payment::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::AccountModule::Payment::PaymentLogic::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
-//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
-//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name);
+//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
+//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name);
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
     _gatewayClassName::_gatewayClassName() { ; }
@@ -143,7 +143,7 @@ class intfPaymentGateway
 
 protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
-//    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
+//    virtual TAPI::enuPaymentGatewayDriver::Type getGateway() = 0;
 
     /*[Response, TrackID, PaymentLink]*/
     virtual std::tuple<QString, QString, QString> prepareAndRequest(

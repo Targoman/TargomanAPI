@@ -23,8 +23,8 @@
 
 #include "gtwMarianTransBPE.v1.4.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 TARGOMAN_API_MT_GATEWAY_IMPL(gtwMarianTransBPE_v1_4)
 
-} // namespace Targoman::API::ModuleHelpers::MT::Engines
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

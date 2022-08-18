@@ -29,18 +29,20 @@ using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
 namespace Targoman::API::MTModule {
 
-TARGOMAN_IMPL_API_MODULE(MT)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT(MT)
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MT, MTSchema)
 
 MT::MT() :
     intfSQLBasedWithActionLogsModule(
         MTDomain,
         MTSchema
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(MT, MTSchema);
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(MT, MTSchema);
-    TARGOMAN_API_IMPLEMENT_FAQ(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MT, MTSchema);
+}
 
+void MT::initializeModule() {
     // Register translation engines
     TranslationDispatcher::instance().registerEngines();
 }

@@ -47,9 +47,9 @@ class PaymentLogic
 {
 public:
 //    template <class TPaymentGatewayClass>
-//    static void registerDriver(const QString& _driverName, TPaymentGatewayClass* (*_instanceFunc)());
-    static void registerDriver(const QString& _driverName, intfPaymentGateway* _driver);
-    static intfPaymentGateway* getDriver(const QString& _driverName);
+//    static void registerGateway(const QString& _gatewayName, TPaymentGatewayClass* (*_instanceFunc)());
+    static void registerGateway(const QString& _gatewayName, intfPaymentGateway* _gateway);
+    static intfPaymentGateway* getGateway(const QString& _gatewayName);
 
     static QVariantList findAvailableGatewayTypes(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
@@ -104,8 +104,8 @@ protected:
      * @brief RegisteredPaymentGateways stores one instance of payment gateways classes
      * key: QString Driver Name
      */
-//    static inline QMap<PAYMENTGATEWAY_REGISTERED_DRIVERS_PAIR_TYPES> RegisteredDrivers;
-    static inline QMap<QString, intfPaymentGateway*> RegisteredDrivers;
+//    static inline QMap<PAYMENTGATEWAY_REGISTERED_DRIVERS_PAIR_TYPES> RegisteredGateways;
+    static inline QMap<QString, intfPaymentGateway*> RegisteredGateways;
 };
 
 } //namespace Targoman::API::AccountModule::Payment

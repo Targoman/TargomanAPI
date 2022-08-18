@@ -61,12 +61,12 @@ class Advert : public intfAccountingBasedModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Advert);
-    TARGOMAN_DEFINE_API_MODULE(Advert);
-    TARGOMAN_API_DEFINE_MIGRATIONS(Advert, AdvertSchema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(Advert, AdvertSchema);
-    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
-    TARGOMAN_API_DEFINE_FAQ(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE(Advert);
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Advert);
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(Advert, AdvertSchema);
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);

@@ -61,7 +61,7 @@ void appTargomanAPI::slotExecute() {
 
         QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
 
-        auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {
+        auto RegisterModule = [&RequiredDBs](intfPureModule *_module) {
             _module->setInstancePointer();
 
             TargomanDebug(0) << "Registering module <" << _module->moduleFullName() << ">";
@@ -74,13 +74,13 @@ void appTargomanAPI::slotExecute() {
             if (DBInfo.Schema.size())
                 RequiredDBs.insert(_module->moduleBaseName(), DBInfo);
 
-            return _module->init();
+            //_module->initializeModule();
         };
 
         //-- StaticModule --
         static StaticModule *StaticModuleInstance = new StaticModule();
-        if (RegisterModule(StaticModuleInstance) == false)
-            throw exAPIModuleInitiailization("Unable to init StaticModule");
+        RegisterModule(StaticModuleInstance);
+//            throw exAPIModuleInitiailization("Unable to init StaticModule");
 
         //-- Dynamic Modules --
 //#ifndef QT_DEBUG
@@ -94,8 +94,8 @@ void appTargomanAPI::slotExecute() {
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
-            if (RegisterModule(Module) == false)
-                throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
+            RegisterModule(Module);
+//                throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
         }
 //#endif
 
@@ -140,6 +140,14 @@ void appTargomanAPI::slotExecute() {
                                 );
                 }
             }
+        }
+
+        //-- init modules
+        StaticModuleInstance->initializeModule();
+
+        foreach (auto Plugin, LoadedModules) {
+            intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
+            Module->initializeModule();
         }
 
         RESTServer::instance().start();

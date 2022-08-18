@@ -46,8 +46,8 @@ namespace Targoman::API::TicketingModule {
 
 using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(Ticketing)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
+TARGOMAN_API_MODULE_IMPLEMENT(Ticketing)
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Ticketing, TicketingSchema);
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
@@ -55,10 +55,10 @@ Ticketing::Ticketing() :
         TicketingDomain,
         TicketingSchema
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
 
     this->addSubModule(&Departments::instance());
     this->addSubModule(&Units::instance());

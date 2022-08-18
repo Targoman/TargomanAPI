@@ -140,17 +140,17 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
-TARGOMAN_IMPL_API_MODULE(Account)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
+TARGOMAN_API_MODULE_IMPLEMENT(Account)
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Account, AAASchema)
 
 Account::Account() :
     intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
 {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_FAQ(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());
@@ -175,7 +175,9 @@ Account::Account() :
     this->addSubModule(&WalletsBalanceHistory::instance());
     this->addSubModule(&Auth::instance());
     this->addSubModule(&Currency::instance());
+}
 
+void Account::initializeModule() {
     if (Account::InvalidPasswordsFile.value().size()) {
         QFile InputFile(Account::InvalidPasswordsFile.value());
         if (InputFile.open(QIODevice::ReadOnly)) {

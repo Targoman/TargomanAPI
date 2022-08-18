@@ -24,7 +24,7 @@
 #ifndef TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP
 #define TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT {
 
 namespace RESULTItems {
     constexpr char ERRNO[]= "errno";
@@ -53,6 +53,6 @@ namespace RESULTItems {
     }
 }
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
+} //namespace Targoman::API::ModuleHelpers::MT
 
 #endif // TARGOMAN_API_MODULEHELPERS_MT_MTDEFS_HPP
