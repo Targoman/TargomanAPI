@@ -87,13 +87,13 @@ TARGOMAN_DEFINE_ENUM(enuTranslationError,
 typedef QPair<QString, QString> TranslationDir_t;
 
 struct stuCfgTranslationEngine {
-    tmplConfigurable<QString>   SourceLang;
-    tmplConfigurable<QString>   DestLang;
-    tmplConfigurable<QString>   Class; //formal, informal, all
-    tmplConfigurable<QString>   URL;
-    tmplConfigurable<bool>      SupportsIXML;
-    tmplConfigurable<bool>      Active;
-    tmplConfigurable<QString>   Driver;
+    tmplConfigurable<QString>       SourceLang;
+    tmplConfigurable<QString>       DestLang;
+    tmplConfigurable<QString>       Class; //formal, informal, all
+    tmplConfigurable<QStringList>   URLs;
+    tmplConfigurable<bool>          SupportsIXML;
+    tmplConfigurable<bool>          Active;
+    tmplConfigurable<QString>       Driver;
 
 //        struct stuStatistics {
 //            tmplConfigurable<quint64> OkResponses;
@@ -106,10 +106,18 @@ struct stuCfgTranslationEngine {
         SourceLang  (_basePath + "SourceLang", "", ""),
         DestLang    (_basePath + "DestLang", "", ""),
         Class       (_basePath + "Class", "", ""),
-        URL         (_basePath + "URL", "", ""),
+        URLs        (_basePath + "URLs", ""),
         SupportsIXML(_basePath + "SupportsIXML", "", true),
         Active      (_basePath + "Active", "", true),
         Driver      (_basePath + "Driver", "", "")
+    { ; }
+};
+
+struct stuCfgTranslationEngineAlias {
+    tmplConfigurable<QString>       Name;
+
+    stuCfgTranslationEngineAlias(const QString& _basePath) :
+        Name  (_basePath + "Name", "", "")
     { ; }
 };
 
@@ -118,6 +126,7 @@ struct TranslationConfigs
     static inline QString makeConfig(const QString &_name) { return "/Translation/" + _name; }
 
     static tmplConfigurableMultiMap<stuCfgTranslationEngine> Engines;
+    static tmplConfigurableMultiMap<stuCfgTranslationEngineAlias> Aliases;
 };
 
 class TranslationDispatcher

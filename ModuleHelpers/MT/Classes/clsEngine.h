@@ -38,25 +38,40 @@ namespace Targoman::API::ModuleHelpers::MT::Classes {
 //TARGOMAN_DEFINE_ENHANCED_ENUM(enuEngine,
 TARGOMAN_DEFINE_ENUM(enuEngine,
                      NMT,
+                     ENT,
+                     ITT,
+                     TST,
+                     SMT,
                      )
 
 struct stuEngineSpecs
 {
     enuEngine::Type Engine;
-    QString SourceLang;
-    QString DestLang;
-    QString Class; //formal, informal, all
-    QUrl    URL;
-    bool    SupportsIXML;
-    QString DriverName;
+    QString         SourceLang;
+    QString         DestLang;
+    QString         Class; //formal, informal, all
+    QStringList     URLs;
+    bool            SupportsIXML;
+    QString         DriverName;
 //    intfTranslatorGateway* Driver;
+
+    stuEngineSpecs(const stuEngineSpecs& _other) :
+        Engine(_other.Engine),
+        SourceLang(_other.SourceLang),
+        DestLang(_other.DestLang),
+        Class(_other.Class),
+        URLs(_other.URLs),
+        SupportsIXML(_other.SupportsIXML),
+        DriverName(_other.DriverName)
+//        Driver(_other.Driver)
+    { ; }
 
     stuEngineSpecs(
         enuEngine::Type _engine, // = enuEngine::Unknown,
         const QString& _sourceLang, // = {},
         const QString& _destLang, // = {},
         const QString& _class, // = {},
-        const QUrl& _url, // = QUrl(),
+        const QStringList& _urls, // = QUrl(),
         bool _supportsIXML, // = true,
         const QString& _driverName
 //        intfTranslatorGateway* _driver
@@ -65,7 +80,7 @@ struct stuEngineSpecs
         SourceLang(_sourceLang),
         DestLang(_destLang),
         Class(_class),
-        URL(_url),
+        URLs(_urls),
         SupportsIXML(_supportsIXML),
         DriverName(_driverName)
 //        Driver(_driver)

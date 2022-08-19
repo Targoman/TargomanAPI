@@ -375,7 +375,11 @@ public:
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
     virtual stuDBInfo requiredDB() const { return {}; }
 
+    /**
+     * @brief initializeModule called after module loaded and db config is registered
+     */
     virtual void initializeModule() { ; }
+
     virtual void setInstancePointer() { ; }
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {

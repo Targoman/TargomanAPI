@@ -24,6 +24,8 @@
 #include <QVariantMap>
 #include <QTime>
 #include <QUrl>
+#include <QMutex>
+#include <QMutexLocker>
 
 #include "TranslationDispatcher.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
@@ -57,6 +59,11 @@ tmplConfigurableMultiMap<stuCfgTranslationEngine> TranslationConfigs::Engines(
     "List of valid translation servers to connect to them separated by their translation engine"
 );
 
+tmplConfigurableMultiMap<stuCfgTranslationEngineAlias> TranslationConfigs::Aliases(
+    TranslationConfigs::makeConfig("Aliases"),
+    ""
+);
+
 TranslationDispatcher::TranslationDispatcher() {
     FormalityChecker::instance();
 }
@@ -78,21 +85,31 @@ intfTranslatorGateway* TranslationDispatcher::getGateway(const QString& _gateway
     return TranslationDispatcher::RegisteredGateways[_gatewayName];
 }
 
+//called by MT, Targoman, Tarjomyar, ...
+static QMutex RegisterEnginesLock;
 void TranslationDispatcher::registerEngines() {
-    auto Keys = TranslationConfigs::Engines.keys();
+    QMutexLocker Locker(&RegisterEnginesLock);
 
+    QStringList ValidEngines = enuEngine::options();
+
+    auto Keys = TranslationConfigs::Engines.keys();
     foreach (const QString& Key, Keys) {
         const tmplConfigurableArray<stuCfgTranslationEngine>& ServersConfig = TranslationConfigs::Engines.values(Key);
 
         for (size_t i=0; i<ServersConfig.size(); ++i) {
             stuCfgTranslationEngine Server = ServersConfig.at(i);
 
+            QString EngineRegKey = stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value());
+            if (this->RegisteredEngines.contains(EngineRegKey))
+                continue;
+//                throw exTargomanInitialization(QString("Engine %1 already registered").arg(Engine->fullName()));
+
             TargomanDebug(0) << "registering MT engine:"
                              << Key
                              << Server.SourceLang.value()
                              << Server.DestLang.value()
                              << Server.Class.value()
-                             << Server.URL.value()
+                             << Server.URLs.value()
                              << Server.SupportsIXML.value()
                              << Server.Active.value()
                              << Server.Driver.value()
@@ -101,30 +118,23 @@ void TranslationDispatcher::registerEngines() {
             if (Server.Active.value() == false)
                 continue;
 
-            clsEngine* Engine = nullptr;
+            if (ValidEngines.contains(Key) == false)
+                throw exTargomanInitialization(QString("Invalid engine type `%1`").arg(Key));
 
-            switch (enuEngine::toEnum(Key)) {
-                case enuEngine::NMT:
-                    Engine = new clsEngine(stuEngineSpecs(
+            clsEngine* Engine = new clsEngine(stuEngineSpecs(
                                                enuEngine::toEnum(Key),
                                                Server.SourceLang.value(),
                                                Server.DestLang.value(),
                                                Server.Class.value(),
-                                               Server.URL.value(),
+                                               Server.URLs.value(),
                                                Server.SupportsIXML.value(),
                                                Server.Driver.value()
 //                                               this->getGateway(Server.Driver.value())
                                           ));
-                    break;
-
-//                case enuEngine::Unknown:
-                default:
-                    throw exTargomanInitialization(QString("Invalid engine type %1").arg(Key));
-            }
 
             this->RegisteredEngines.insert(
-                    //stuEngineSpecs::makeFullName(Key, Server.SourceLang.value(), Server.DestLang.value(), Server.Class.value()),
-                    Engine->fullName(),
+                    EngineRegKey,
+//                    Engine->fullName(),
                     Engine
                     );
         }

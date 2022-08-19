@@ -71,7 +71,10 @@ QVariantMap intfBaseNMTGateway::doTranslation(
         CUrl.setTextCodec("UTF-8");
 
         QtCUrl::Options Opt;
-        Opt[CURLOPT_URL] = _engineSpecs.URL;
+
+        ///@TODO: use URLs another item if failed
+        Opt[CURLOPT_URL] = _engineSpecs.URLs.at(0);
+
         Opt[CURLOPT_POST] = true;
         Opt[CURLOPT_TIMEOUT] = 1;
         Opt[CURLOPT_FAILONERROR] = true;
