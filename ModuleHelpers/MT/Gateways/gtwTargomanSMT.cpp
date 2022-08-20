@@ -21,19 +21,29 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
+#include "gtwTargomanSMT.h"
 
-#include "../Classes/intfTranslatorEngine.hpp"
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwTargomanSMT)
 
-class intfTargomanSMT  extends clsBaseTranslation {
+QVariantMap gtwTargomanSMT::doTranslation(
+    const stuEngineSpecs& _engineSpecs,
+    const QString& _text,
+    bool _detailed,
+    bool _detokenize
+) {
+
+    return {};
+}
+
+
+/*
 
     public function __construct($requiredDBs = 'base', $requiredSingleShema = 'MT'){
         clsBaseTranslation::__construct($requiredDBs, $requiredSingleShema);
     }
-    
+
     protected $en2faServers = NULL;
     protected $fa2enServers = NULL;
 
@@ -95,7 +105,10 @@ class intfTargomanSMT  extends clsBaseTranslation {
 
             $Data = curl_exec($ch);
             $Resp["TrTime"]=((microtime(true) - $time_start));
-            $Resp["serverID"] = preg_replace('/http\:\/\/(.*)\:.*/','\1',$CurrServers[$LastServer]) ;
+            $Resp["serverID"] = preg_replace(
+                "/http\:\/\/(.*)\:.*" . "/",
+                "\1",
+                $CurrServers[$LastServer]) ;
 
             if (curl_errno($ch) == 7) {
                 $Retry = $Retry + 1;
@@ -148,8 +161,8 @@ class intfTargomanSMT  extends clsBaseTranslation {
 
         return $Resp;
     }
-}
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
+*/
+
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

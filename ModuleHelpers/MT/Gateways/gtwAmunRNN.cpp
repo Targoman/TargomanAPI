@@ -21,8 +21,6 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-//#include <QString>
-//#include <QRegularExpression>
 #include "gtwAmunRNN.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Gateways {

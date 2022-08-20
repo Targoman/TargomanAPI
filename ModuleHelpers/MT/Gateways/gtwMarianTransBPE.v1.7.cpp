@@ -21,27 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_10_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_10_H
+#include "gtwMarianTransBPE.v1.7.h"
 
-#include "intfMarianTransBPE.v1.6.h"
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwMarianTransBPE_v1_7)
 
-class intfMarianTransBPE_v1_10  extends intfMarianTransBPE_v1_6 {
-
-    public function __construct($class, $loadBalancer){
-        intfMarianTransBPE_v1_6::__construct($class, $loadBalancer);
-    }
-
-    protected function preprocessText($sourceText) {
-//      dumpVar(array("ntfMarianTransBPE_v1_10::preprocessText"));
-      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
-      return $sourceText;
-    }
-
-}
-
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
-
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_10_H
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

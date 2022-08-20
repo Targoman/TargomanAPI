@@ -21,18 +21,23 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
+#include "gtwLuaOpenNMT.h"
 
-#include "../Classes/intfTranslatorEngine.hpp"
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwLuaOpenNMT)
 
-class intfLuaOpenNMT  extends clsBaseTranslation {
+QVariantMap gtwLuaOpenNMT::doTranslation(
+    const stuEngineSpecs& _engineSpecs,
+    const QString& _text,
+    bool _detailed,
+    bool _detokenize
+) {
 
-    public function __construct($requiredDBs = 'base', $requiredSingleShema = 'MT'){
-        clsBaseTranslation::__construct($requiredDBs, $requiredSingleShema);
-    }
+    return {};
+}
+
+/*
 
     protected $en2faLoadBalancer = NULL;
     protected $fa2enLoadBalancer = NULL;
@@ -66,7 +71,7 @@ class intfLuaOpenNMT  extends clsBaseTranslation {
         }
         return  $Resp;
     }
-    
+
     public function translate($dir, $sourceText, $clientIP, $tuid, $detailed = false, $defaultClass= null)
     {
         $Retry=0;
@@ -162,8 +167,8 @@ class intfLuaOpenNMT  extends clsBaseTranslation {
 
         return $Resp;
     }
-}
 
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
+*/
+
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

@@ -24,11 +24,27 @@
 #ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_PROMT_H
 #define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_PROMT_H
 
-//#include
+#include "intfTranslatorGateway.hpp"
+#include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class PROMPT {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
+
+class gtwPROMT : public intfTranslatorGateway
+{
+public:
+    constexpr static char Name[] = "PROMT";
+
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwPROMT)
+
+
+
+
+
 
     const BASE_URL = "http://pts.promt.com/pts/Services";
     const COOKIE_JAR = __DIR__."../../../temp/cookies.txt";

@@ -21,28 +21,30 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_7_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_7_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
+#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
 
-#include "intfMarianTransBPE.v1.6.h"
+#include "intfTranslatorGateway.hpp"
+#include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class intfMarianTransBPE_v1_7  extends intfMarianTransBPE_v1_6 {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
 
-    public function __construct($class, $loadBalancer){
-        //dumpVar(array($class, $loadBalancer));
-        intfMarianTransBPE_v1_6::__construct($class, $loadBalancer);
-    }
+class gtwTargomanSMT : public intfTranslatorGateway
+{
+public:
+    constexpr static char Name[] = "TargomanSMT";
 
-    protected function preprocessText($sourceText) {
-//      dumpVar(array("ntfMarianTransBPE_v1_7::preprocessText"));
-      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
-      return $sourceText;
-    }
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwTargomanSMT)
 
-}
+public:
+    QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
+};
 
 } //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_7_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H

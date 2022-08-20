@@ -31,7 +31,7 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 /**
  * CAUTION:
- * place #include "gtwMarianTransBPE.v1.4.h" in ActiveGateways.h for proper driver registration
+ * place #include this header file in ActiveGateways.h for proper driver registration
  */
 
 class gtwMarianTransBPE_v1_4 : public intfBaseNMTGateway
@@ -43,29 +43,29 @@ public:
 
 
 
+/*
+    gtwMarianTransBPE_v1_4(const Classes::stuEngineSpecs& _specs) :
+        intfBaseNMTGateway(_specs)
+    { ; }
 
+    protected function preprocessText($sourceText) {
+      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
+      $sourceText = preg_replace('/ \. /', " .\n", $sourceText);
+      return $sourceText;
+    }
 
+    protected function maxChars() {return 700;}
+    protected function maxCharPerWord() {return 30;}
 
-//    gtwMarianTransBPE_v1_4(const Classes::stuEngineSpecs& _specs) :
-//        intfBaseNMTGateway(_specs)
-//    { ; }
-
-//    protected function preprocessText($sourceText) {
-//      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
-//      $sourceText = preg_replace('/ \. /', " .\n", $sourceText);
-//      return $sourceText;
-//    }
-
-//    protected function maxChars() {return 700;}
-//    protected function maxCharPerWord() {return 30;}
-
-//    protected function makeSrcSentences($sourceText) {
-//        $makeSrc = function($phrase) {
-//            return ["src"=>$phrase];
-//        };
+    protected function makeSrcSentences($sourceText) {
+        $makeSrc = function($phrase) {
+            return ["src"=>$phrase];
+        };
         
-//        return array_slice(array_map($makeSrc, explode("\n", $sourceText)), 0, -1);
-//    }
+        return array_slice(array_map($makeSrc, explode("\n", $sourceText)), 0, -1);
+    }
+*/
+
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Gateways

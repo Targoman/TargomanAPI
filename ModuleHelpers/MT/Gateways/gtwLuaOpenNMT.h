@@ -21,27 +21,30 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
+#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
 
-#include "intfMarianTransBPE.v1.6.h"
+#include "intfTranslatorGateway.hpp"
+#include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class intfMarianTransSPM_v1_10  extends intfMarianTransBPE_v1_6 {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
 
-    public function __construct($class, $loadBalancer){
-        intfMarianTransBPE_v1_6::__construct($class, $loadBalancer);
-    }
+class gtwLuaOpenNMT : public intfTranslatorGateway
+{
+public:
+    constexpr static char Name[] = "LuaOpenNMT";
 
-    protected function preprocessText($sourceText) {
-//      dumpVar(array("ntfMarianTransBPE_v1_10::preprocessText"));
-      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
-      return $sourceText;
-    }
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwLuaOpenNMT)
 
-}
+public:
+    QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
+};
 
 } //namespace Targoman::API::ModuleHelpers::MT::Engines
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H

@@ -31,7 +31,7 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 /**
  * CAUTION:
- * place #include "gtwAmunRNN.h" in ActiveGateways.h for proper driver registration
+ * place #include this header file in ActiveGateways.h for proper driver registration
  */
 
 class gtwAmunRNN : public intfBaseNMTGateway

@@ -21,19 +21,38 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "TranslationDispatcher.h"
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
+#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+#include "gtwMarianTransBPE.v1.6.h"
+#include "../Classes/TranslationDispatcher.h"
 
-using namespace Gateways;
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-QVariantMap clsEngine::doTranslation(const QString& _text, bool _detailed, bool _detokinize) {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
 
-    intfTranslatorGateway* Gateway = TranslationDispatcher::instance().getGateway(this->EngineSpecs.DriverName);
+class gtwMarianTransSPM_v1_10 : public gtwMarianTransBPE_v1_6
+{
+public:
+    constexpr static char Name[] = "MarianTransSPM_v1_10";
 
-    return Gateway->doTranslation(this->EngineSpecs, _text, _detailed, _detokinize);
-}
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwMarianTransSPM_v1_10)
 
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+
+
+/*
+    protected function preprocessText($sourceText) {
+//      dumpVar(array("ntfMarianTransBPE_v1_10::preprocessText"));
+      $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
+      return $sourceText;
+    }
+*/
+
+};
+
+} //namespace Targoman::API::ModuleHelpers::MT::Engines
+
+#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H

@@ -21,19 +21,36 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "TranslationDispatcher.h"
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_5_H
+#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_5_H
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+#include "intfBaseNMTGateway.h"
+#include "../Classes/TranslationDispatcher.h"
 
-using namespace Gateways;
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-QVariantMap clsEngine::doTranslation(const QString& _text, bool _detailed, bool _detokinize) {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
 
-    intfTranslatorGateway* Gateway = TranslationDispatcher::instance().getGateway(this->EngineSpecs.DriverName);
+class gtwMarianTransBPE_v1_5 : public intfBaseNMTGateway
+{
+public:
+    constexpr static char Name[] = "MarianTransBPE_v1_5";
 
-    return Gateway->doTranslation(this->EngineSpecs, _text, _detailed, _detokinize);
-}
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwMarianTransBPE_v1_5)
 
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+
+//    protected function preprocessText($sourceText) {
+//        return preg_replace("/(\S)('(?:s|ll|d|t))/", "$1 $2", $sourceText);
+//    }
+
+protected:
+    virtual QVariantList makeSrcSentences(const QString &_sourceText);
+    virtual QVariantMap buildProperResponse(const stuEngineSpecs& _engineSpecs, const QJsonDocument& _doc, bool _detailed, bool _detok);
+};
+
+} //namespace Targoman::API::ModuleHelpers::MT::Engines
+
+#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_5_H

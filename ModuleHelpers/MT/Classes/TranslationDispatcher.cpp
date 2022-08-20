@@ -121,6 +121,9 @@ void TranslationDispatcher::registerEngines() {
             if (ValidEngines.contains(Key) == false)
                 throw exTargomanInitialization(QString("Invalid engine type `%1`").arg(Key));
 
+            //Throws if not found
+            Q_DECL_UNUSED intfTranslatorGateway* Gateway = this->getGateway(Server.Driver.value());
+
             clsEngine* Engine = new clsEngine(stuEngineSpecs(
                                                enuEngine::toEnum(Key),
                                                Server.SourceLang.value(),

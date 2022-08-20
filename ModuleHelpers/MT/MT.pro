@@ -18,27 +18,35 @@ HEADERS += \
     Classes/TranslationDispatcher.h \
     Gateways/intfTranslatorGateway.hpp \
     Gateways/intfBaseNMTGateway.h \
+    Gateways/ActiveGateways.h \
     Gateways/gtwAmunRNN.h \
     Gateways/gtwMarianTransBPE.v1.4.h \
-    Gateways/ActiveGateways.h
+    Gateways/gtwMarianTransBPE.v1.6.h \
+    Gateways/gtwMarianTransBPE.v1.7.h \
+    Gateways/gtwMarianTransBPE.v1.10.h \
+    Gateways/gtwMarianTransSPM.v1.10.h \
+    Gateways/gtwLuaOpenNMT.h \
+    Gateways/gtwTargomanSMT.h
 
-#    Gateways/intfBaseNMT.h \
-#    Gateways/intfLuaOpenNMT.h \
-#    Gateways/intfMarianTransBPE.v1.10.h \
-#    Gateways/intfMarianTransBPE.v1.5.h \
-#    Gateways/intfMarianTransBPE.v1.6.h \
-#    Gateways/intfMarianTransBPE.v1.7.h \
-#    Gateways/intfMarianTransSPM.v1.10.h \
-#    Gateways/intfPROMT.h \
-#    Gateways/intfTargomanSMT.h \
+#Gateways/gtwMarianTransBPE.v1.5.h \
+#Gateways/gtwPROMT.h \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
     Classes/clsEngine.cpp \
     Classes/TranslationDispatcher.cpp \
+    Gateways/intfBaseNMTGateway.cpp \
     Gateways/gtwAmunRNN.cpp \
     Gateways/gtwMarianTransBPE.v1.4.cpp \
-    Gateways/intfBaseNMTGateway.cpp
+    Gateways/gtwMarianTransBPE.v1.6.cpp \
+    Gateways/gtwMarianTransBPE.v1.7.cpp \
+    Gateways/gtwMarianTransBPE.v1.10.cpp \
+    Gateways/gtwMarianTransSPM.v1.10.cpp \
+    Gateways/gtwLuaOpenNMT.cpp \
+    Gateways/gtwTargomanSMT.cpp
+
+#Gateways/gtwMarianTransBPE.v1.5.cpp \
+#Gateways/gtwPROMT.cpp \
 
 OTHER_FILES += \
 

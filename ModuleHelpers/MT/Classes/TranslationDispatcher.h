@@ -57,7 +57,7 @@ using namespace Targoman::API::Server;
 #define TARGOMAN_API_MT_GATEWAY_DEFINE(_gatewayClassName) \
 public: \
     instanceGetterPtr(_gatewayClassName); \
-private: \
+protected: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
@@ -114,10 +114,10 @@ struct stuCfgTranslationEngine {
 };
 
 struct stuCfgTranslationEngineAlias {
-    tmplConfigurable<QString>       Name;
+    tmplConfigurable<QString> Name;
 
     stuCfgTranslationEngineAlias(const QString& _basePath) :
-        Name  (_basePath + "Name", "", "")
+        Name(_basePath + "Name", "", "")
     { ; }
 };
 

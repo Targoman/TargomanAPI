@@ -21,19 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "TranslationDispatcher.h"
+#include "gtwMarianTransBPE.v1.6.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-using namespace Gateways;
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwMarianTransBPE_v1_6)
 
-QVariantMap clsEngine::doTranslation(const QString& _text, bool _detailed, bool _detokinize) {
-
-    intfTranslatorGateway* Gateway = TranslationDispatcher::instance().getGateway(this->EngineSpecs.DriverName);
-
-    return Gateway->doTranslation(this->EngineSpecs, _text, _detailed, _detokinize);
-}
-
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

@@ -34,17 +34,6 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 using namespace Classes;
 
-namespace NMTResponse {
-    TARGOMAN_CREATE_CONSTEXPR(rslt);
-    TARGOMAN_CREATE_CONSTEXPR(serverName);
-
-    namespace Result {
-        TARGOMAN_CREATE_CONSTEXPR(phrases);
-        TARGOMAN_CREATE_CONSTEXPR(alignments);
-        TARGOMAN_CREATE_CONSTEXPR(tokens);
-    }
-}
-
 intfBaseNMTGateway::intfBaseNMTGateway()
 { ; }
 
@@ -116,9 +105,11 @@ QVariantMap intfBaseNMTGateway::doTranslation(
 
 QVariantList intfBaseNMTGateway::makeSrcSentences(const QString &_sourceText) {
     QVariantList Result;
-    foreach (auto Part, _sourceText.split("\n", QString::SkipEmptyParts)) {
-        Result.append(QVariantMap({ { "src", Part } }));
+
+    foreach (auto Par, _sourceText.split("\n", QString::SkipEmptyParts)) {
+        Result.append(QVariantMap({ { "src", Par } }));
     }
+
     return Result;
 }
 
@@ -131,10 +122,10 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
     Q_UNUSED(_detailed)
 
     auto invalidResponse = [_doc]() -> QVariantMap {
-            return {
-                { RESULTItems::ERRNO,   enuTranslationError::InvalidServerResponse },
-                { RESULTItems::MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact) }
-            };
+                           return {
+                                      { RESULTItems::ERRNO,   enuTranslationError::InvalidServerResponse },
+                                      { RESULTItems::MESSAGE, "Invalid response from server" + _doc.toJson(QJsonDocument::Compact) }
+                                  };
     };
 
     if (_doc.isObject() == false)
@@ -143,7 +134,8 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
     QVariantMap BaseMap = _doc.toVariant().toMap();
     QVariantMap Result;
 
-    if (BaseMap.isEmpty()) return invalidResponse();
+    if (BaseMap.isEmpty())
+        return invalidResponse();
 
     if (BaseMap.contains(NMTResponse::serverName))
         Result[RESULTItems::SERVERID] = BaseMap[NMTResponse::serverName].toString();
@@ -166,26 +158,28 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
         foreach (QVariant SentenceResults, BaseMap[NMTResponse::rslt].toList())
             TrSentences.append(baseTranslation(SentenceResults.toMap()));
 
-        Result[RESULTItems::SIMPLE] = TrSentences.join('\n');
+        Result[RESULTItems::TRANSLATION] = QVariantMap({
+                                                           { RESULTItems::SIMPLE, TrSentences.join('\n') },
+                                                       });
     } else {
         QVariantList ResultBaseList, ResultPhrasesList, ResultAlignmentsList;
 
         foreach (auto SentenceResults, BaseMap[NMTResponse::rslt].toList()) {
             QStringList TempStringList;
             QVariantList TempList;
-            QVariantMap SentenceResultMap = SentenceResults.toMap();
-            QVariantList TokensList = SentenceResultMap[NMTResponse::Result::tokens].toList();
+            QVariantMap SentenceResultsMap = SentenceResults.toMap();
+            QVariantList TokensList = SentenceResultsMap[NMTResponse::Result::tokens].toList();
 
             foreach (auto Token, TokensList)
                 TempStringList.append(Token.toString());
 
             ResultBaseList.push_back(QVariantList({
                                                       { TempStringList.join(" ") },
-                                                      { baseTranslation(SentenceResultMap) }
+                                                      { baseTranslation(SentenceResultsMap) }
                                                   }));
 
             quint16 Index = 0;
-            foreach (auto Phrases, SentenceResultMap[NMTResponse::Result::phrases].toList())
+            foreach (auto Phrases, SentenceResultsMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
                                                     { _detok
                                                       ? TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), _engineSpecs.DestLang)
@@ -214,7 +208,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
                 return Result;
             };
 
-            foreach (auto Alignment, SentenceResultMap[NMTResponse::Result::alignments].toList()) {
+            foreach (auto Alignment, SentenceResultsMap[NMTResponse::Result::alignments].toList()) {
                 TempStringList.clear();
 
                 foreach (auto AlignmentItem, Alignment.toList())
@@ -223,7 +217,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
                 TempList.push_back(QVariantList({
                                                     { TempStringList.join(' ') },
                                                     { Alignment.toList().at(0).toInt() + 1 },
-                                                    { buildAlignments(SentenceResultMap[NMTResponse::Result::phrases].toList().at(Index).toList()) }
+                                                    { buildAlignments(SentenceResultsMap[NMTResponse::Result::phrases].toList().at(Index).toList()) }
                                                 }));
                 Index++;
             }

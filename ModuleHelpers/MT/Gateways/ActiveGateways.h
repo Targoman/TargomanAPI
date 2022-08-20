@@ -26,5 +26,13 @@
 
 #include "gtwAmunRNN.h"
 #include "gtwMarianTransBPE.v1.4.h"
+//#include "gtwMarianTransBPE.v1.5.h"
+#include "gtwMarianTransBPE.v1.6.h"
+#include "gtwMarianTransBPE.v1.7.h"
+#include "gtwMarianTransBPE.v1.10.h"
+#include "gtwMarianTransSPM.v1.10.h"
+#include "gtwLuaOpenNMT.h"
+#include "gtwTargomanSMT.h"
+//#include "gtwPROMT.h"
 
 #endif // TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_ACTIVEGATEWAYS_H

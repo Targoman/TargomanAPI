@@ -27,29 +27,29 @@
 namespace Targoman::API::ModuleHelpers::MT {
 
 namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
+    constexpr char ERRNO[]          = "errno";
+    constexpr char MESSAGE[]        = "message";
+    constexpr char CLASS[]          = "class";
+    constexpr char CACHE[]          = "byCache";
 
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
-    constexpr char TIME[]= "time";
+    constexpr char SIMPLE[]         = "simple";
+    constexpr char SERVERID[]       = "serverID";
+    constexpr char TRANSLATION[]    = "tr";
+    constexpr char TIMES[]          = "times";
+    constexpr char TIME[]           = "time";
 
     namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
+        constexpr char PHRASES[]    = "phrases";
+        constexpr char ALIGNMENTS[] = "alignments";
+        constexpr char BASE[]       = "base";
 
     }
 
     namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
+        constexpr char PRE[]        = "pre";
+        constexpr char TR[]         = "tr";
+        constexpr char POST[]       = "post";
+        constexpr char ALL[]        = "all";
     }
 }
 

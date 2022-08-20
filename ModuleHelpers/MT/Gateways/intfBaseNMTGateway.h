@@ -32,6 +32,20 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 using namespace Classes;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+namespace NMTResponse {
+    TARGOMAN_CREATE_CONSTEXPR(rslt);
+    TARGOMAN_CREATE_CONSTEXPR(serverName);
+
+    namespace Result {
+        TARGOMAN_CREATE_CONSTEXPR(phrases);
+        TARGOMAN_CREATE_CONSTEXPR(alignments);
+        TARGOMAN_CREATE_CONSTEXPR(tokens);
+    }
+}
+#pragma GCC diagnostic pop
+
 class intfBaseNMTGateway : public intfTranslatorGateway
 {
 public:
@@ -40,7 +54,7 @@ public:
 public:
     QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
 
-private:
+protected:
 //    virtual QString preprocessText(QString _sourceText);
     virtual QVariantList makeSrcSentences(const QString &_sourceText);
     virtual QVariantMap buildProperResponse(const stuEngineSpecs& _engineSpecs, const QJsonDocument& _doc, bool _detailed, bool _detok);

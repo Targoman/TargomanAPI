@@ -1,4 +1,4 @@
-/******************************************************************************
+    /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
 #   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
@@ -24,16 +24,26 @@
 #ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_6_H
 #define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSBPE_V1_6_H
 
-#include "clsBaseNMT.h"
+#include "intfBaseNMTGateway.h"
+#include "../Classes/TranslationDispatcher.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Engines {
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-class intfMarianTransBPE_v1_6  extends intfBaseNMT {
+/**
+ * CAUTION:
+ * place #include this header file in ActiveGateways.h for proper driver registration
+ */
 
-    public function __construct($class, $loadBalancer){
-        intfBaseNMT::__construct($class, $loadBalancer);
-    }
+class gtwMarianTransBPE_v1_6 : public intfBaseNMTGateway
+{
+public:
+    constexpr static char Name[] = "MarianTransBPE_v1_6";
 
+    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwMarianTransBPE_v1_6)
+
+
+
+/*
     protected function preprocessText($sourceText) {
 //      dumpVar(array("ntfMarianTransBPE_v1_6::preprocessText"));
       $sourceText = preg_replace('/(_ _ )+/', '_ _ ', $sourceText);
@@ -114,7 +124,9 @@ class intfMarianTransBPE_v1_6  extends intfBaseNMT {
         $resp['errno'] = "0";
         return $resp;
     }
-}
+*/
+
+};
 
 } //namespace Targoman::API::ModuleHelpers::MT::Engines
 
