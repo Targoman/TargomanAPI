@@ -27,7 +27,7 @@
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
@@ -41,7 +41,7 @@ TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfSQLBasedWithActionLogsModule
+class MT : public intfSQLBasedModule//<enuModuleActorType::API>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -56,21 +56,22 @@ public:
     void initializeModule();
 
 private slots:
-//    QVariantMap REST_GET_OR_POST(
-//        Translate,
-//        (
+    QVariantMap REST_GET_OR_POST(
+        Translate,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
 //            const TAPI::RemoteIP_t& _REMOTE_IP,
 //            const QString& _token,
-//            QString _text,
-//            QString _dir,
-//            const QString& _engine = "NMT",
-//            bool _detailed = false,
-//            bool _detok = true,
-//            bool _dic = false,
-//            bool _dicFull = false
-//        ),
-//        "Translates input text if specified engine and language are found."
-//    )
+            QString _text,
+            QString _dir,
+            const QString& _engine = "NMT",
+            bool _detailed = false,
+            bool _detok = true,
+            bool _dic = false,
+            bool _dicFull = false
+        ),
+        "Translates input text if specified engine and language are found."
+    )
 
 //    QVariantMap REST_GET_OR_POST(
 //        Test,

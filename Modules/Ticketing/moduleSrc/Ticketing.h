@@ -28,7 +28,7 @@
 #include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "ORM/Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::ORM;
@@ -40,7 +40,7 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class Ticketing : public intfSQLBasedWithActionLogsModule
+class Ticketing : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)

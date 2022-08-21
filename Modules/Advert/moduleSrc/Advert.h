@@ -28,7 +28,7 @@
 #include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"

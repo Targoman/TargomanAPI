@@ -51,7 +51,7 @@ TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Ticketing, TicketingSchema);
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
-    intfSQLBasedWithActionLogsModule(
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
         TicketingDomain,
         TicketingSchema
 ) {

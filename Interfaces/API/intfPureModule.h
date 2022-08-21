@@ -410,6 +410,12 @@ protected:
     QString ModuleName;
 };
 
+//template <enuModuleActorType _moduleActorType>
+//class tmplIntfPureModule : public intfPureModule
+//{
+
+//};
+
 } //namespace Targoman::API::API
 
 Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)

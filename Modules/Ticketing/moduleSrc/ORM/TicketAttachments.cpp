@@ -26,7 +26,7 @@
 //#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "Ticketing.h"
 
-using namespace Targoman::API::ORM;
+//using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
 

@@ -35,7 +35,6 @@ DIST_HEADERS += \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
-    API/intfSQLBasedWithActionLogsModule.h \
     ObjectStorage/ORM/ObjectStorage.h \
     ObjectStorage/ObjectStorageManager.h
 
@@ -102,7 +101,6 @@ SOURCES += \
     DBM/QueryBuilders.cpp \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
-    API/intfSQLBasedWithActionLogsModule.cpp \
     ORM/intfActionLogs.cpp \
     ORM/intfAlerts.cpp \
     ObjectStorage/ORM/ObjectStorage.cpp \

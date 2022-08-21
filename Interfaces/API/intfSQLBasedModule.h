@@ -32,13 +32,14 @@ using namespace Targoman::API::DBM;
 
 namespace Targoman::API::API {
 
-class intfSQLBasedModule : public intfPureModule, public clsTable
+//template <enuModuleActorType _moduleActorType>
+class intfSQLBasedModule : public intfPureModule/*<_moduleActorType>*/, public clsTable
 {
 public:
     intfSQLBasedModule(
         const QString& _module,
         const QString& _schema,
-        const QString& _name,
+        const QString& _name = "",
         const QList<clsORMField>& _cols = {},
         const QList<stuRelation>& _relations = {},
         const QList<stuDBIndex>& _indexes = {},
@@ -47,7 +48,7 @@ public:
     intfSQLBasedModule(
         const QString& _schema,
         const QString& _name,
-        const QList<clsORMField>& _cols = {},
+        const QList<clsORMField>& _cols, // = {},
         const QList<stuRelation>& _relations = {},
         const QList<stuDBIndex>& _indexes = {},
         const QVariantMap& _dbProperties = {}

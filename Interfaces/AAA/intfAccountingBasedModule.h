@@ -25,13 +25,15 @@
 #define TARGOMAN_API_AAA_ACCOUNTING_H
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 using namespace TAPI;
 
 namespace Targoman::API::AAA {
 
-class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
+using namespace API;
+
+class intfAccountingBasedModule : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
 

@@ -33,7 +33,7 @@ TARGOMAN_API_MODULE_IMPLEMENT(MT)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MT, MTSchema)
 
 MT::MT() :
-    intfSQLBasedWithActionLogsModule(
+    intfSQLBasedModule/*<enuModuleActorType::API>*/(
         MTDomain,
         MTSchema
 ) {
@@ -47,10 +47,10 @@ void MT::initializeModule() {
     TranslationDispatcher::instance().registerEngines();
 }
 
-/*
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
-    const TAPI::RemoteIP_t& _REMOTE_IP,
-    const QString& _token,
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    const TAPI::RemoteIP_t& _REMOTE_IP,
+//    const QString& _token,
     QString _text,
     QString _dir,
     const QString& _engine,
@@ -59,10 +59,22 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     bool _dic,
     bool _dicFull
 )) {
+
+
+
+
+
+
+
+
+
+
+/*
     QTime Timer, OverallTime;
+    Timer.start();
+    OverallTime.start();
 
     int PreprocessTime = 0;
-    Timer.start();OverallTime.start();
 
     _text = _text.trimmed();
     if (_text.isEmpty())
@@ -178,8 +190,11 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
         throw;
     }
+
+    */
 }
 
+/*
 QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
     const TAPI::RemoteIP_t& _REMOTE_IP,
     const QString& _token,

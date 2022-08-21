@@ -23,7 +23,7 @@
 
 #include "Departments.h"
 
-using namespace Targoman::API::ORM;
+//using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
 

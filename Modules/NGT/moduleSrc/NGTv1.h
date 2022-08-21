@@ -26,7 +26,7 @@
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
@@ -44,7 +44,7 @@ TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class NGTv1 : public intfSQLBasedWithActionLogsModule
+class NGTv1 : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)

@@ -31,7 +31,7 @@ TARGOMAN_API_MODULE_IMPLEMENT(NGTv1)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(NGTv1, NGTv1Schema);
 
 NGTv1::NGTv1() :
-    intfSQLBasedWithActionLogsModule(
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
         NGTv1Domain,
         NGTv1Schema
 ) {

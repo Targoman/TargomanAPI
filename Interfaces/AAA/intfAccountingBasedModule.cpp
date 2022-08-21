@@ -123,7 +123,8 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     intfAccountCoupons          *_discounts,
     intfAccountPrizes           *_prizes
 ) :
-    API::intfSQLBasedWithActionLogsModule(_module, _schema),
+//    intfSQLBasedWithActionLogsModule(_module, _schema),
+    intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
     AccountUnits(_units),
 //    AccountUnitsI18N(_unitsI18N),

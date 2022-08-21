@@ -145,7 +145,10 @@ TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
 TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Account, AAASchema)
 
 Account::Account() :
-    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
+                        AccountDomain,
+                        AAASchema
+                      )
 {
     TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
     TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
