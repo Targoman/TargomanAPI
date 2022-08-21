@@ -130,7 +130,7 @@ namespace tblOnlinePayments {
 class OnlinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OnlinePayments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OnlinePayments)
 
 private slots:
     QVariant ORMGET("Get OnlinePayment information.")
@@ -256,7 +256,7 @@ namespace tblOfflinePaymentClaims {
 class OfflinePaymentClaims : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaims)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePaymentClaims)
 
 private slots:
     QVariant ORMGET("Get OfflinePaymentClaim(s) information.")
@@ -339,7 +339,7 @@ namespace tblOfflinePaymentClaimsAttachments {
 class OfflinePaymentClaimsAttachments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaimsAttachments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePaymentClaimsAttachments)
 
 private slots:
     QVariant ORMGET("Get OfflinePaymentClaims Attachments")
@@ -429,7 +429,7 @@ namespace tblOfflinePayments {
 class OfflinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePayments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePayments)
 
 private slots:
     QVariant ORMGET("Get OfflinePayment information.")

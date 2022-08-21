@@ -22,6 +22,7 @@
  */
 
 #include "Roles.h"
+#include "../Account.h"
 #include "User.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
@@ -29,6 +30,8 @@
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuRoleStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Roles)
 
 Roles::Roles() :
     intfSQLBasedModule(

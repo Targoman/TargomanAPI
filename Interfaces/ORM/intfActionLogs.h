@@ -105,7 +105,7 @@ protected slots:
 class ActionLogs : public Targoman::API::ORM::intfActionLogs \
 { \
     Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, ActionLogs) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, ActionLogs) \
 public: \
     ActionLogs() : \
         intfActionLogs( \
@@ -120,8 +120,12 @@ public: \
 protected: \
     QScopedPointer<ActionLogs> _ActionLogs;
 
-//put this macro into module class constructor (.cpp)
+//put this macro before module class constructor (.cpp)
 #define TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(_module, _schema) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, ActionLogs)
+
+//put this macro into module class constructor (.cpp)
+#define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(_module, _schema) \
     this->_ActionLogs.reset(&ActionLogs::instance()); \
     this->addSubModule(this->_ActionLogs.data());
 

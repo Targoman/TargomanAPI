@@ -22,8 +22,11 @@
  */
 
 #include "Auth.h"
+#include "../Account.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Auth)
 
 Auth::Auth() :
     intfPureModule(

@@ -22,6 +22,7 @@
  */
 
 #include "Tickets.h"
+#include "../Ticketing.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketStatus);
 
@@ -37,6 +38,8 @@ namespace Targoman::API::TicketingModule::ORM {
 /******************************************************************************\
 |* Tickets ********************************************************************|
 \******************************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Ticketing, Tickets)
+
 Tickets::Tickets() :
     intfSQLBasedModule(
         TicketingSchema,
@@ -158,6 +161,8 @@ QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
 /******************************************************************************\
 |* TicketRead *****************************************************************|
 \******************************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Ticketing, TicketRead)
+
 TicketRead::TicketRead() :
     intfSQLBasedModule(
         TicketingSchema,

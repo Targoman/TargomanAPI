@@ -22,6 +22,7 @@
  */
 
 #include "WalletTransactions.h"
+#include "../Account.h"
 #include "Payment/PaymentLogic.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuWalletTransactionStatus);
@@ -44,6 +45,8 @@ ORDER BY wlt_walID, wltID -- , wltDateTime
 /*****************************************************************\
 |* WalletTransactions ********************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, WalletTransactions)
+
 WalletTransactions::WalletTransactions() :
     intfSQLBasedModule(
         AAASchema,
@@ -67,6 +70,8 @@ QVariant IMPL_ORMGET(WalletTransactions) {
 /*****************************************************************\
 |* WalletsBalanceHistory *****************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, WalletsBalanceHistory)
+
 WalletsBalanceHistory::WalletsBalanceHistory() :
     intfSQLBasedModule(
         AAASchema,

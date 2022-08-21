@@ -109,7 +109,7 @@ namespace tblIPBin {
 class IPBin : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPBin)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, IPBin)
 
 private slots:
     QVariant ORMGET("Get IPBin information")

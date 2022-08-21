@@ -41,13 +41,16 @@ TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfSQLBasedModule//<enuModuleActorType::API>
+class MT : public intfSQLBasedModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(MT);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(MT, enuModuleActorType::API);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(MT);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(MT, MTSchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(MT, MTSchema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(MT, MTSchema);

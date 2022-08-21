@@ -106,7 +106,7 @@ namespace tblForgotPassRequest {
 class ForgotPassRequest : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ForgotPassRequest)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, ForgotPassRequest)
 
 private slots:
     QVariant ORMGET("Get ForgotPassRequest information")

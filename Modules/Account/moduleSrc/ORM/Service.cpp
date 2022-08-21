@@ -22,11 +22,14 @@
  */
 
 #include "Service.h"
+#include "../Account.h"
 #include "User.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Service)
 
 Service::Service() :
     intfSQLBasedModule(

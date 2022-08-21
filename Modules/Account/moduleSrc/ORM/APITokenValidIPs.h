@@ -101,7 +101,7 @@ namespace tblAPITokenValidIPs {
 class APITokenValidIPs : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokenValidIPs)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokenValidIPs)
 
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")

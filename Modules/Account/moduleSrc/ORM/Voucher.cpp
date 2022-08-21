@@ -22,8 +22,11 @@
  */
 
 #include "Voucher.h"
+#include "../Account.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Voucher)
 
 Voucher::Voucher() :
     intfSQLBasedModule(

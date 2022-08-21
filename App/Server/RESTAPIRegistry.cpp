@@ -685,12 +685,17 @@ void RESTAPIRegistry::dumpAPIs()
 
             bool IsLastMethod = (Method == Methods.last());
 
+            QString JWTType = "";
+            if (API.APIObject->requiresJWT()) {
+                JWTType = QString(" (JWT:%1)").arg(enuModuleActorType::toStr(API.APIObject->moduleActorType()));
+            }
+
             TargomanDebug(5).noLabel().noquote().nospace()
                     << (IsLastAPI ? " " : "│") << "   "
                     << (IsLastMethod ? "└" : "├") << "──"
                     << "(" << QString::number(MethodsIndex++) << ") "
                     << Method.toUpper() // << " " << Name
-                    << (API.APIObject->requiresJWT() ? " (JWT)" : "")
+                    << JWTType
                     ;
 
             if (API.APIObject->ParamTypesName.isEmpty() == false) {

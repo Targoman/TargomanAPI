@@ -53,8 +53,11 @@ class Account : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(Account);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(Account, enuModuleActorType::User);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Account);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Account, AAASchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Account, AAASchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Account, AAASchema);

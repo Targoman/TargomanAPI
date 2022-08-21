@@ -22,10 +22,13 @@
  */
 
 #include "ActiveAds.h"
+#include "../Advert.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, ActiveAds)
 
 ActiveAds::ActiveAds() :
     intfSQLBasedModule(

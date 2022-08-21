@@ -138,7 +138,7 @@ namespace tblUserWallets {
 class UserWallets : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserWallets)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, UserWallets)
 
 private slots:
     QVariant ORMGET("Get UserWallets information")

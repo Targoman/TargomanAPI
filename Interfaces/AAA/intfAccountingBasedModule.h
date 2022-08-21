@@ -43,11 +43,8 @@ protected:
         const QString               &_schema,
         AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
         intfAccountUnits            *_units,
-    //    intfAccountUnitsI18N        *_unitsI18N,
         intfAccountProducts         *_products,
-    //    intfAccountProductsI18N     *_productsI18N,
         intfAccountSaleables        *_saleables,
-    //    intfAccountSaleablesI18N    *_saleablesI18N,
         intfAccountSaleablesFiles   *_saleablesFiles,
         intfAccountUserAssets       *_userAssets,
         intfAccountUserAssetsFiles  *_userAssetsFiles,
@@ -255,11 +252,8 @@ protected:
     QString ServiceName;
 
     QScopedPointer<intfAccountUnits>            AccountUnits;
-//    QScopedPointer<intfAccountUnitsI18N> AccountUnitsI18N;
     QScopedPointer<intfAccountProducts>         AccountProducts;
-//    QScopedPointer<intfAccountProductsI18N> AccountProductsI18N;
     QScopedPointer<intfAccountSaleables>        AccountSaleables;
-//    QScopedPointer<intfAccountSaleablesI18N> AccountSaleablesI18N;
     QScopedPointer<intfAccountSaleablesFiles>   AccountSaleablesFiles;
     QScopedPointer<intfAccountUserAssets>       AccountUserAssets;
     QScopedPointer<intfAccountUserAssetsFiles>  AccountUserAssetsFiles;

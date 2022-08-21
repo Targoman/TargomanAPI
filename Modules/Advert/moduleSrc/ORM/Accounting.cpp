@@ -22,6 +22,7 @@
  */
 
 #include "Accounting.h"
+#include "../Advert.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
@@ -32,6 +33,8 @@ namespace Targoman::API::AdvertModule::ORM {
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUnits)
+
 AccountUnits::AccountUnits() :
     intfAccountUnits(
         AdvertSchema,
@@ -43,6 +46,8 @@ AccountUnits::AccountUnits() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUnitsI18N)
+
 AccountUnitsI18N::AccountUnitsI18N() :
     intfAccountUnitsI18N(
         AdvertSchema,
@@ -54,6 +59,8 @@ AccountUnitsI18N::AccountUnitsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountProducts)
+
 AccountProducts::AccountProducts() :
     intfAccountProducts(
         AdvertSchema,
@@ -65,6 +72,8 @@ AccountProducts::AccountProducts() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountProductsI18N)
+
 AccountProductsI18N::AccountProductsI18N() :
     intfAccountProductsI18N(
         AdvertSchema,
@@ -76,6 +85,8 @@ AccountProductsI18N::AccountProductsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleables)
+
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
         AdvertSchema,
@@ -87,6 +98,8 @@ AccountSaleables::AccountSaleables() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleablesI18N)
+
 AccountSaleablesI18N::AccountSaleablesI18N() :
     intfAccountSaleablesI18N(
         AdvertSchema,
@@ -96,6 +109,8 @@ AccountSaleablesI18N::AccountSaleablesI18N() :
 ) { ; }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleablesFiles)
+
 AccountSaleablesFiles::AccountSaleablesFiles() :
     intfAccountSaleablesFiles(
         AdvertSchema,
@@ -107,6 +122,8 @@ AccountSaleablesFiles::AccountSaleablesFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUserAssets)
+
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
         AdvertSchema,
@@ -116,6 +133,8 @@ AccountUserAssets::AccountUserAssets() :
 ) { ; }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUserAssetsFiles)
+
 AccountUserAssetsFiles::AccountUserAssetsFiles() :
     intfAccountUserAssetsFiles(
         AdvertSchema,
@@ -127,6 +146,8 @@ AccountUserAssetsFiles::AccountUserAssetsFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountAssetUsage)
+
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
         AdvertSchema,
@@ -138,6 +159,8 @@ AccountAssetUsage::AccountAssetUsage() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountCoupons)
+
 AccountCoupons::AccountCoupons() :
     intfAccountCoupons(
         AdvertSchema,

@@ -40,7 +40,7 @@ namespace ORM {
 class User : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, User)
 
     ORMSelectQuery getPhotoQuery(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
@@ -218,7 +218,7 @@ namespace tblUserExtraInfo {
 class UserExtraInfo : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, UserExtraInfo)
 
 private slots:
 //    bool REST_UPDATE(

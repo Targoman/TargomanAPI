@@ -22,6 +22,7 @@
  */
 
 #include "Alerts.h"
+#include "../Common.h"
 #include "Interfaces/AAA/Authorization.h"
 //#include "Interfaces/AAA/AAADefs.hpp"
 //#include "Interfaces/AAA/clsJWT.hpp"
@@ -30,6 +31,8 @@
 using namespace Targoman::API::AAA;
 
 namespace Targoman::API::CommonModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Common, Alerts)
 
 Alerts::Alerts() :
     intfPureModule(

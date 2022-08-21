@@ -22,6 +22,7 @@
  */
 
 #include "User.h"
+#include "../Account.h"
 #include "Roles.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
@@ -37,6 +38,9 @@ namespace Targoman::API::AccountModule::ORM {
 |* User **********************************************************|
 \*****************************************************************/
 ///@TODO: BAD Gender causes assert
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, User)
+
 User::User() :
     intfSQLBasedModule(
         AAASchema,
@@ -488,6 +492,8 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 /*****************************************************************\
 |* UserExtraInfo *************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, UserExtraInfo)
+
 UserExtraInfo::UserExtraInfo() :
     intfSQLBasedModule (
         AAASchema,

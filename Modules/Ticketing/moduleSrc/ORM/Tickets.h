@@ -180,7 +180,7 @@ namespace tblTicketRead {
 class Tickets : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Tickets)
 
 private slots:
 //    QVariant ORMGET("Get Tickets")
@@ -219,7 +219,7 @@ private slots:
 class TicketRead : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, TicketRead)
 };
 
 } //namespace ORM

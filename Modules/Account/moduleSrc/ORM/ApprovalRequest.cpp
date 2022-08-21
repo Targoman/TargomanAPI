@@ -23,6 +23,7 @@
 
 #include "ApprovalRequest.h"
 #include "User.h"
+#include "../Account.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
 using namespace Targoman::API::Helpers;
 
@@ -54,6 +55,8 @@ tmplConfigurable<quint32> ApprovalRequest::MobileApprovalCodeTTL(
     "mobile-approval-code-ttl",
     enuConfigSource::Arg | enuConfigSource::File
 );
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, ApprovalRequest)
 
 ApprovalRequest::ApprovalRequest() :
     intfSQLBasedModule(

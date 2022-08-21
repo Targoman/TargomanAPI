@@ -22,6 +22,7 @@
  */
 
 #include "PaymentGateways.h"
+#include "../Account.h"
 #include "Payment/PaymentLogic.h"
 #include "Interfaces/Helpers/URLHelper.h"
 
@@ -42,6 +43,8 @@ namespace ORM {
 /*****************************************************************\
 |* PaymentGatewayTypes *******************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, PaymentGatewayTypes)
+
 PaymentGatewayTypes::PaymentGatewayTypes() :
     intfSQLBasedModule(
         AAASchema,
@@ -74,6 +77,8 @@ bool IMPL_ORMDELETE(PaymentGatewayTypes) {
 /*****************************************************************\
 |* PaymentGateways ***********************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, PaymentGateways)
+
 PaymentGateways::PaymentGateways() :
     intfSQLBasedModule(
         AAASchema,

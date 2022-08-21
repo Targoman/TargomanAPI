@@ -39,7 +39,7 @@ namespace ORM {
 class Alerts : public intfPureModule, public intfAlerts
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Common, Alerts)
+    TARGOMAN_API_SUBMODULE_DEFINE(Common, Alerts)
 
 private slots:
     QVariant ORMGET("Get Alerts")

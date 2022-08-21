@@ -113,7 +113,7 @@ namespace tblRoles {
 class Roles : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Roles)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, Roles)
 
 private slots:
     QVariant ORMGET("Get roles information")

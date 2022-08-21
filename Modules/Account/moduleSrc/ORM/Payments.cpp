@@ -22,6 +22,7 @@
  */
 
 #include "Payments.h"
+#include "../Account.h"
 #include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/URLHelper.h"
@@ -49,6 +50,8 @@ namespace ORM {
 /*****************************************************************\
 |* OnlinePayments ************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, OnlinePayments)
+
 OnlinePayments::OnlinePayments() :
     intfSQLBasedModule(
         AAASchema,
@@ -353,6 +356,8 @@ QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
 /*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, OfflinePayments)
+
 OfflinePayments::OfflinePayments() :
     intfSQLBasedModule(
         AAASchema,

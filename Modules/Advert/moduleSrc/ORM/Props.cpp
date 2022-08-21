@@ -22,8 +22,11 @@
  */
 
 #include "Props.h"
+#include "../Advert.h"
 
 namespace Targoman::API::AdvertModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, Props)
 
 Props::Props() :
     intfSQLBasedModule(

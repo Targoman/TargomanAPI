@@ -108,7 +108,7 @@ namespace tblCurrency {
 class Currency : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Currency)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, Currency)
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get Currency information")

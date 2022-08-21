@@ -48,17 +48,20 @@ using namespace ORM;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Ticketing)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Ticketing, TicketingSchema);
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
     intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
         TicketingDomain,
         TicketingSchema
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Ticketing, TicketingSchema)
 
     this->addSubModule(&Departments::instance());
     this->addSubModule(&Units::instance());

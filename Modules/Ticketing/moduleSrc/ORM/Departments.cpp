@@ -22,10 +22,13 @@
  */
 
 #include "Departments.h"
+#include "../Ticketing.h"
 
 //using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Ticketing, Departments)
 
 Departments::Departments() :
     intfSQLBasedModule(

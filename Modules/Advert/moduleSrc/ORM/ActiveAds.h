@@ -84,7 +84,7 @@ namespace tblActiveAds {
 class ActiveAds : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, ActiveAds)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, ActiveAds)
 
 private slots:
     QVariant ORMGET("Get Active Adveritsements")

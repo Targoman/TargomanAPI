@@ -123,7 +123,7 @@ namespace tblApprovalRequest {
 class ApprovalRequest : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, ApprovalRequest)
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;

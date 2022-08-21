@@ -131,7 +131,7 @@ namespace tblAPITokens {
 class APITokens : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, APITokens)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokens)
 
 private slots:
     QVariant ORMGET("Get APITokens information")

@@ -99,7 +99,7 @@ namespace tblBlockingRules {
 class BlockingRules : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, BlockingRules)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, BlockingRules)
 
 private slots:
     QVariant ORMGET("Get BlockingRules information")

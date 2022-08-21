@@ -56,10 +56,10 @@
 //#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
 #define APICALLBOOM_PARAM_STR               "APICALLBOOM_PARAM"
 
-//enum class enuModuleActorType {
-//    User,
-//    API
-//};
+TARGOMAN_DEFINE_ENUM(enuModuleActorType,
+                     User,
+                     API
+                     );
 
 namespace Targoman::API::Server {
 

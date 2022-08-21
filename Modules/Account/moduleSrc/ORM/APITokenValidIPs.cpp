@@ -23,8 +23,11 @@
 
 #include "APITokenValidIPs.h"
 #include "User.h"
+#include "../Account.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokenValidIPs)
 
 APITokenValidIPs::APITokenValidIPs() :
     intfSQLBasedModule(

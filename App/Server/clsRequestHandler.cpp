@@ -364,10 +364,13 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
+                enuModuleActorType::Type AcceptableActorType = _apiObject->moduleActorType();
+
                 try {
                     QJWT::verifyJWT(
                                 BearerToken,
                                 RemoteIP,
+                                AcceptableActorType,
                                 JWT
                                 );
                 } catch (exJWTExpired &exp) {

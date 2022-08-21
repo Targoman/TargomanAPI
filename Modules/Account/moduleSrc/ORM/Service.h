@@ -104,7 +104,7 @@ namespace tblService {
 class Service : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, Service)
 
 private slots:
     QVariant ORMGET("Get Service information")

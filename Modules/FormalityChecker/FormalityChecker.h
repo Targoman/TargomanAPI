@@ -37,7 +37,9 @@ class FormalityChecker : public intfPureModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(FormalityChecker);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(FormalityChecker, enuModuleActorType::User);
+    //---------------------------------------------------------
 
 public:
     bool init();

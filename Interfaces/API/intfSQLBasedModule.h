@@ -32,8 +32,7 @@ using namespace Targoman::API::DBM;
 
 namespace Targoman::API::API {
 
-//template <enuModuleActorType _moduleActorType>
-class intfSQLBasedModule : public intfPureModule/*<_moduleActorType>*/, public clsTable
+class intfSQLBasedModule : public intfPureModule, public clsTable
 {
 public:
     intfSQLBasedModule(

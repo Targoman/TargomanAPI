@@ -45,8 +45,11 @@ class Ticketing : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(Ticketing);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(Ticketing, enuModuleActorType::User);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Ticketing);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Ticketing, TicketingSchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);

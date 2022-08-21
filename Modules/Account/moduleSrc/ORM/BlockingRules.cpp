@@ -23,10 +23,13 @@
 
 #include "BlockingRules.h"
 #include "User.h"
+#include "../Account.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, BlockingRules)
 
 BlockingRules::BlockingRules() :
     intfSQLBasedModule(

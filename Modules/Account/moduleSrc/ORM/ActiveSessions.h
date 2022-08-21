@@ -122,7 +122,7 @@ namespace tblActiveSessions {
 class ActiveSessions : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ActiveSessions)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, ActiveSessions)
 
 private slots:
     QVariant ORMGET("Get ActiveSessions information.")

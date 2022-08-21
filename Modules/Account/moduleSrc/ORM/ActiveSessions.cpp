@@ -23,12 +23,15 @@
 
 #include "ActiveSessions.h"
 #include "User.h"
+#include "../Account.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, ActiveSessions)
 
 ActiveSessions::ActiveSessions() :
     intfSQLBasedModule(

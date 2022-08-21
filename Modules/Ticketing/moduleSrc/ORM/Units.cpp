@@ -22,10 +22,13 @@
  */
 
 #include "Units.h"
+#include "../Ticketing.h"
 
 //using namespace Targoman::API::ORM;
 
 namespace Targoman::API::TicketingModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Ticketing, Units)
 
 Units::Units() :
     intfSQLBasedModule(

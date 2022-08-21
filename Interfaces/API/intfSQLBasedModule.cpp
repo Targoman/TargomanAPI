@@ -32,7 +32,6 @@ using namespace Targoman::API::Helpers;
 
 namespace Targoman::API::API {
 
-//template <enuModuleActorType _moduleActorType>
 intfSQLBasedModule::intfSQLBasedModule(
         const QString& _module,
         const QString& _schema,
@@ -42,7 +41,7 @@ intfSQLBasedModule::intfSQLBasedModule(
         const QList<stuDBIndex>& _indexes,
         const QVariantMap& _dbProperties
     ) :
-    intfPureModule( //<_moduleActorType>(
+    intfPureModule(
         _module
     ),
     clsTable(
@@ -59,7 +58,6 @@ intfSQLBasedModule::intfSQLBasedModule(
     )
 { ; }
 
-//template <enuModuleActorType _moduleActorType>
 intfSQLBasedModule::intfSQLBasedModule(
         const QString& _schema,
         const QString& _name,
@@ -79,7 +77,6 @@ intfSQLBasedModule::intfSQLBasedModule(
     )
 { ; }
 
-//template <enuModuleActorType _moduleActorType>
 QVariantMap intfSQLBasedModule::SelectOne(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
@@ -125,7 +122,6 @@ QVariantMap intfSQLBasedModule::SelectOne(
     return Result;
 }
 
-//template <enuModuleActorType _moduleActorType>
 /*QVariantList*/ TAPI::stuTable intfSQLBasedModule::SelectAll(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
@@ -169,7 +165,6 @@ QVariantMap intfSQLBasedModule::SelectOne(
     return Result;
 }
 
-//template <enuModuleActorType _moduleActorType>
 TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
@@ -213,7 +208,6 @@ TAPI::stuTable intfSQLBasedModule::SelectAllWithCount(
     return Result;
 }
 
-//template <enuModuleActorType _moduleActorType>
 QVariant intfSQLBasedModule::Select(
     GET_METHOD_ARGS_IMPL_INTERNAL,
     const clsCondition& _extraFilters,
@@ -251,7 +245,6 @@ QVariant intfSQLBasedModule::Select(
                 );
 }
 
-//template <enuModuleActorType _moduleActorType>
 quint64 intfSQLBasedModule::Create(
     CREATE_METHOD_ARGS_IMPL_INTERNAL
 ) {
@@ -328,7 +321,6 @@ quint64 intfSQLBasedModule::Create(
     return LastID;
 }
 
-//template <enuModuleActorType _moduleActorType>
 bool intfSQLBasedModule::Update(
     UPDATE_METHOD_ARGS_IMPL_INTERNAL,
     const QVariantMap& _extraFilters
@@ -429,7 +421,6 @@ bool intfSQLBasedModule::Update(
     return NumRowsAffected;
 }
 
-//template <enuModuleActorType _moduleActorType>
 bool intfSQLBasedModule::DeleteByPks(
     DELETE_METHOD_ARGS_IMPL_INTERNAL,
     const QVariantMap& _extraFilters,

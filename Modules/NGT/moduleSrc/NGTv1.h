@@ -49,8 +49,11 @@ class NGTv1 : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(NGTv1)
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(NGTv1, enuModuleActorType::User);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(NGTv1);
+    //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(NGTv1, NGTv1Schema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(NGTv1, NGTv1Schema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(NGTv1, NGTv1Schema);

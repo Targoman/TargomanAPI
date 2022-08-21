@@ -71,12 +71,20 @@ public:
         return (this->BaseMethod.name() + QJsonValue::fromVariant(_args).toString().toUtf8()).constData();
     }
 
+    inline bool isHidden() const {
+        return this->BaseMethod.Hidden;
+    }
+
+//    intfPureModule* parentModule() {
+//        return this->Parent;
+//    }
+
     inline bool requiresJWT() const {
         return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
     }
 
-    inline bool isHidden() const {
-        return this->BaseMethod.Hidden;
+    inline enuModuleActorType::Type moduleActorType() const {
+        return this->Parent->actorType();
     }
 
 //    inline bool requiresCookies() const {

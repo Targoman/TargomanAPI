@@ -86,7 +86,7 @@ namespace tblUnits {
 class Units : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Units)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Units)
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get units")

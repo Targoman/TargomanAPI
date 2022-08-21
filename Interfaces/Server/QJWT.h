@@ -68,6 +68,7 @@ public:
     static void verifyJWT(
         const QString &_jwt,
         const QString &_remoteIP,
+        const enuModuleActorType::Type &_acceptableActorType,
         TAPI::JWT_t &_jWTPayload
     );
 

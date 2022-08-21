@@ -101,7 +101,7 @@ namespace tblProps {
 class Props : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Props)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Props)
 
 private slots:
     QVariant ORMGET("Get Props information")

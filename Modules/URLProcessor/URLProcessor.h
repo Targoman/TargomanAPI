@@ -33,7 +33,9 @@ class URLProcessor : public intfPureModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DEFINE(URLProcessor);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(URLProcessor, enuModuleActorType::User);
+    //---------------------------------------------------------
 
 private slots:
     QString REST_GET(

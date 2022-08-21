@@ -246,7 +246,7 @@ namespace tblPaymentGateways {
 class PaymentGatewayTypes : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGatewayTypes)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypes)
 
 private slots:
     QVariant ORMGET("Get payment gateway type information")
@@ -258,7 +258,7 @@ private slots:
 class PaymentGateways : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGateways)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGateways)
 
 private slots:
     QVariant ORMGET("Get payment gateway information")

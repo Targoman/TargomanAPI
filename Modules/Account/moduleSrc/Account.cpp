@@ -142,7 +142,10 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
 /*****************************************************************/
 TARGOMAN_API_MODULE_IMPLEMENT(Account)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Account, AAASchema)
 
 Account::Account() :
     intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
@@ -150,10 +153,10 @@ Account::Account() :
                         AAASchema
                       )
 {
-    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Account, AAASchema)
 
     this->addSubModule(&ActiveSessions::instance());
     this->addSubModule(&APITokens::instance());

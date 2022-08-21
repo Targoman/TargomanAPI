@@ -64,7 +64,10 @@ using namespace ORM;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Advert)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Advert, AdvertSchema)
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Advert, AdvertSchema)
 
 Advert::Advert() :
     intfAccountingBasedModule(
@@ -87,10 +90,10 @@ Advert::Advert() :
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Advert, AdvertSchema)
 
     this->addSubModule(AccountUnits.data());
 //    this->addSubModule(AccountUnitsI18N.data());

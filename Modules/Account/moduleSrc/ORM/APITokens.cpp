@@ -23,10 +23,13 @@
 
 #include "APITokens.h"
 #include "User.h"
+#include "../Account.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokens)
 
 APITokens::APITokens() :
     intfSQLBasedModule(

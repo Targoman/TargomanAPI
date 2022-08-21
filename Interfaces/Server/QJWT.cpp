@@ -192,10 +192,19 @@ void QJWT::extractAndDecryptPayload(
 
 void QJWT::verifyJWT(
     const QString &_jwt,
-    const QString &_remoteIP,
+    Q_DECL_UNUSED const QString &_remoteIP,
+    const enuModuleActorType::Type &_acceptableActorType,
     TAPI::JWT_t &_jWTPayload
 ) {
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
+
+    //-- check actor type -----
+    QString AcceptableActorTypeName = enuModuleActorType::toStr(_acceptableActorType).toLower();
+    QString TokenType = "user";
+    if (_jWTPayload.contains("typ"))
+        TokenType = _jWTPayload["typ"].toString().toLower();
+    if (TokenType != AcceptableActorTypeName)
+        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2").arg(TokenType).arg(AcceptableActorTypeName));
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {

@@ -400,6 +400,7 @@ public:
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;
+    virtual enuModuleActorType::Type actorType() const = 0;
 
 //    void addResponseHeaderNameToExpose(const QString &_header);
 //signals:
@@ -410,19 +411,14 @@ protected:
     QString ModuleName;
 };
 
-//template <enuModuleActorType _moduleActorType>
-//class tmplIntfPureModule : public intfPureModule
-//{
-
-//};
-
 } //namespace Targoman::API::API
 
 Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
 //QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }
 
-#define TARGOMAN_API_MODULE_DEFINE(_name) \
+//-------------------------------------------------------------------------------------------
+#define TARGOMAN_API_MODULE_DEFINE(_name, _actorType) \
 public: \
     QString parentModuleName() const final { return QString(); } \
     QString moduleBaseName() { return this->ModuleName; }  \
@@ -441,6 +437,7 @@ public: \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
         _submodule->initializeModule(); \
     } \
+    enuModuleActorType::Type actorType() const final { return _actorType; } \
 private: \
     TAPI_DISABLE_COPY(_name); \
 public: \
@@ -453,7 +450,8 @@ protected: \
 #define TARGOMAN_API_MODULE_IMPLEMENT(_name) \
     _name* _name::InstancePointer;
 
-#define TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
+//-------------------------------------------------------------------------------------------
+#define TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
 public: \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module, _name))); } \
@@ -462,14 +460,20 @@ public: \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
+    enuModuleActorType::Type actorType() const final; \
 private: \
     TAPI_DISABLE_COPY(_name)
 
-#define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
+#define TARGOMAN_API_SUBMODULE_DEFINE(_module, _name) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
 private: \
     _name();
 
+//put this macro before module class constructor (.cpp)
+#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name) \
+    enuModuleActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
+
+//-------------------------------------------------------------------------------------------
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }
 #define TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(_module) \
     struct DB { \

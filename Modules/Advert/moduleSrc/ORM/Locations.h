@@ -104,7 +104,7 @@ namespace tblLocations {
 class Locations : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Locations)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Locations)
 
 private slots:
     QVariant ORMGET("Get Locations information")

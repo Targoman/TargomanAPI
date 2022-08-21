@@ -22,6 +22,7 @@
  */
 
 #include "UserWallets.h"
+#include "../Account.h"
 #include "User.h"
 #include "Voucher.h"
 #include "Payment/PaymentLogic.h"
@@ -32,6 +33,8 @@ using namespace Targoman::API::Helpers;
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, UserWallets)
 
 UserWallets::UserWallets() :
     intfSQLBasedModule(

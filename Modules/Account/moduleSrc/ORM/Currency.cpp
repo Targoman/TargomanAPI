@@ -23,10 +23,13 @@
 
 #include "Currency.h"
 //#include "User.h"
+#include "../Account.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuCurrencyStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Currency)
 
 Currency::Currency() :
     intfSQLBasedModule(

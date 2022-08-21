@@ -78,7 +78,7 @@ namespace tblIPStats {
 class IPStats : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, IPStats)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, IPStats)
 
 private slots:
     QVariant ORMGET("Get IPStats information")

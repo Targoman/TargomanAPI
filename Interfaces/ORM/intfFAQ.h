@@ -158,7 +158,7 @@ private slots:
     class FaqQuestions : public Targoman::API::ORM::intfFaqQuestions \
     { \
         Q_OBJECT \
-        TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, FaqQuestions) \
+        TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqQuestions) \
     public: \
         FaqQuestions() : \
             intfFaqQuestions( \
@@ -170,7 +170,7 @@ private slots:
     class FaqAnswers : public Targoman::API::ORM::intfFaqAnswers \
     { \
         Q_OBJECT \
-        TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, FaqAnswers) \
+        TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqAnswers) \
     public: \
         FaqAnswers() : \
             intfFaqAnswers( \
@@ -186,8 +186,13 @@ private slots:
     QScopedPointer<FaqQuestions>  _FaqQuestions; \
     QScopedPointer<FaqAnswers>    _FaqAnswers;
 
-//put this macro into module class constructor (.cpp)
+//put this macro before module class constructor (.cpp)
 #define TARGOMAN_API_MODULE_IMPLEMENT_FAQ(_module, _schema) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, FaqQuestions) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, FaqAnswers)
+
+//put this macro into module class constructor (.cpp)
+#define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(_module, _schema) \
     this->_FaqQuestions.reset(&FaqQuestions::instance()); \
     this->_FaqAnswers.reset(&FaqAnswers::instance()); \
     this->addSubModule(this->_FaqQuestions.data()); \

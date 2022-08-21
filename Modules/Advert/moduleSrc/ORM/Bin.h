@@ -146,13 +146,13 @@ namespace tblBin {
 class Banners : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Banners)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Banners)
 };
 
 class Bin : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Bin)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Bin)
 
 private slots:
     QVariant ORMGET("Get Bin information")

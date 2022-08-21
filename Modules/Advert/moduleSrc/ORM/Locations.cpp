@@ -22,11 +22,14 @@
  */
 
 #include "Locations.h"
+#include "../Advert.h"
 #include "Defs.hpp"
 
 namespace Targoman::API::AdvertModule::ORM {
 
 //using namespace ORM;
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, Locations)
 
 Locations::Locations() :
     intfSQLBasedModule(
