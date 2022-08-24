@@ -66,18 +66,18 @@ TARGOMAN_DEFINE_ENUM (enuBannerSize,
                       LargeMobile_320x100      = 'Q',
                       );
 
-TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
-                      New       = 'N',
-                      Pending   = 'P',
-                      Approved  = 'A',
-                      Removed   = 'R',
-                      );
+//TARGOMAN_DEFINE_ENUM (enuAccountOrdersStatus,
+//                      New       = 'N',
+//                      Pending   = 'P',
+//                      Approved  = 'A',
+//                      Removed   = 'R',
+//                      );
 
 } //namespace Targoman::API::AdvertModule
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAdvertType);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuBannerSize);
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
+//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
 
 #endif // TARGOMAN_API_MODULES_ADVERTISEMENT_ORM_DEFS_HPP

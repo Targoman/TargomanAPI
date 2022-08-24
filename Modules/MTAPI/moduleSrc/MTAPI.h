@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_MT_H
-#define TARGOMAN_API_MODULES_MT_MT_H
+#ifndef TARGOMAN_API_MODULES_MTAPI_MT_H
+#define TARGOMAN_API_MODULES_MTAPI_MT_H
 
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/ORM/intfActionLogs.h"
@@ -33,29 +33,30 @@
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
-#include "Defs.hpp"
+#include "MTAPIDefs.hpp"
 
-namespace Targoman::API::MTModule {
+namespace Targoman::API::MTAPIModule {
 
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfSQLBasedModule
+class MTAPI : public intfSQLBasedModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE(MT, enuModuleActorType::API);
+    TARGOMAN_API_MODULE_DEFINE(MTAPI, enuModuleActorType::API);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(MT);
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(MT, MTSchema);
-    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(MT, MTSchema);
-    TARGOMAN_API_MODULE_DEFINE_FAQ(MT, MTSchema);
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(MTAPI, MTAPISchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(MTAPI, MTAPISchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(MTAPI, MTAPISchema);
 
 public:
+    virtual QMap<QString, stuModuleDBInfo> requiredDBs() const;
     void initializeModule();
 
 private slots:
@@ -87,10 +88,10 @@ private slots:
 //    )
 };
 
-TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);
-TARGOMAN_ACTIONLOG_POSTPARENT(MT, MTSchema);
-TARGOMAN_FAQ_POSTPARENT(MT, MTSchema);
+TARGOMAN_MIGRATIONS_POSTPARENT(MTAPI, MTAPISchema);
+TARGOMAN_ACTIONLOG_POSTPARENT(MTAPI, MTAPISchema);
+TARGOMAN_FAQ_POSTPARENT(MTAPI, MTAPISchema);
 
-} //namespace Targoman::API::MTModule
+} //namespace Targoman::API::MTAPIModule
 
-#endif // TARGOMAN_API_MODULES_MT_MT_H
+#endif // TARGOMAN_API_MODULES_MTAPI_MT_H

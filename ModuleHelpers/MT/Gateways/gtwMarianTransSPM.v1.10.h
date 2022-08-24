@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_MARIANTRANSSPM_V1_10_H
 
 #include "gtwMarianTransBPE.v1.6.h"
-#include "../Classes/TranslationDispatcher.h"
+#include "../Classes/MTHelper.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Gateways {
 

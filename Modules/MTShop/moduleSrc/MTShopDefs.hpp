@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -21,19 +21,17 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "MTHelper.h"
+#ifndef TARGOMAN_API_MODULES_MTSHOP_ORM_DEFS_HPP
+#define TARGOMAN_API_MODULES_MTSHOP_ORM_DEFS_HPP
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+#include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
-using namespace Gateways;
+constexpr char MTShopDomain[] = "MTShop";
+constexpr char MTShopSchema[] = "MTShop";
 
-QVariantMap clsEngine::doTranslation(const QString& _text, bool _detailed, bool _detokinize) {
+namespace Targoman::API::MTShopModule {
 
-    intfTranslatorGateway* Gateway = MTHelper::instance().getGateway(this->EngineSpecs.DriverName);
+} //namespace Targoman::API::MTShopModule
 
-    return Gateway->doTranslation(this->EngineSpecs, _text, _detailed, _detokinize);
-}
-
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+#endif // TARGOMAN_API_MODULES_MTSHOP_ORM_DEFS_HPP

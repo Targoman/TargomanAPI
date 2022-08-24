@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include "intfBaseNMTGateway.h"
 #include "QtCUrl.h"
-#include "../Classes/TranslationDispatcher.h"
+#include "../Classes/MTHelper.h"
 
 #include <QtDebug>
 
@@ -147,7 +147,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
             TrTokens.append(Phrase.toList().at(0).toString());
 
         if (_detok)
-            return TranslationDispatcher::instance().detokenize(TrTokens.join(" "), _engineSpecs.DestLang);
+            return MTHelper::instance().detokenize(TrTokens.join(" "), _engineSpecs.DestLang);
 
         return TrTokens.join(" ");
     };
@@ -182,7 +182,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
             foreach (auto Phrases, SentenceResultsMap[NMTResponse::Result::phrases].toList())
                 TempList.push_back(QVariantList({
                                                     { _detok
-                                                      ? TranslationDispatcher::instance().detokenize(Phrases.toList().at(0).toString(), _engineSpecs.DestLang)
+                                                      ? MTHelper::instance().detokenize(Phrases.toList().at(0).toString(), _engineSpecs.DestLang)
                                                       : Phrases.toList().at(0) },
                                                     { Index++ }
                                                 }));
@@ -199,7 +199,7 @@ QVariantMap intfBaseNMTGateway::buildProperResponse(
                     if (Phrase.toString().size())
                         Result.push_back(QVariantList({
                                                           { _detok
-                                                            ? TranslationDispatcher::instance().detokenize(Phrase.toString(), _engineSpecs.DestLang)
+                                                            ? MTHelper::instance().detokenize(Phrase.toString(), _engineSpecs.DestLang)
                                                             : Phrase },
                                                           { IsFirst }
                                                       }));

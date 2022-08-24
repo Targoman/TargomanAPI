@@ -27,7 +27,7 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
 TARGOMAN_API_MT_GATEWAY_IMPL(gtwAmunRNN)
 
-//moved to TranslationDispatcher::preprocessText
+//moved to MTHelper::preprocessText
 //QString gtwAmunRNN::preprocessText(QString _sourceText) {
 ////        return preg_replace("/(\S)('(?:s|ll|d|t))/", "$1 $2", _sourceText);
 //    return _sourceText.replace(QRegularExpression("/(\\S)('(?:s|ll|d|t))/"), "$1 $2");

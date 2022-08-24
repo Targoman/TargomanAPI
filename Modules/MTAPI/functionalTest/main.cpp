@@ -23,7 +23,7 @@
 
 #include <QtTest>
 #include "testBase.hpp"
-#include "testMT.hpp"
+#include "testMTAPI.hpp"
 
 TAPI_MARSHAL_TEST_VARIABLES
 
@@ -56,7 +56,7 @@ int main(int _argc, char *_argv[]) {
 
     try {
         FailedTests += QTest::qExec(new testBase(DBPrefix), progArgsCount, progArgs);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMT(DBPrefix), progArgsCount, progArgs);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMTAPI(DBPrefix), progArgsCount, progArgs);
     } catch (exTargomanBase &e) {
         ++FailedTests;
         qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());

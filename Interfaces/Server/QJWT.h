@@ -37,10 +37,18 @@ namespace Targoman::API::Server {
 TARGOMAN_ADD_EXCEPTION_HANDLER(exJWT, Targoman::Common::exTargomanBase);
 TARGOMAN_ADD_EXCEPTION_HANDLER(exJWTExpired, exJWT);
 
+// "typ" part of jwt:
+TARGOMAN_DEFINE_ENUM(enuTokenActorType,
+//                     System = 'S', //used only for trusted action
+                     User   = 'U',
+                     API    = 'A'
+                     )
+
 TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
                               HS384,
                               HS512)
+
 class QJWT
 {
 public:

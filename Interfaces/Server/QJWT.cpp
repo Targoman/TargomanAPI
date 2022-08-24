@@ -199,12 +199,16 @@ void QJWT::verifyJWT(
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     //-- check actor type -----
-    QString AcceptableActorTypeName = enuModuleActorType::toStr(_acceptableActorType).toLower();
-    QString TokenType = "user";
+    enuTokenActorType::Type TokenType = enuTokenActorType::User;
     if (_jWTPayload.contains("typ"))
-        TokenType = _jWTPayload["typ"].toString().toLower();
-    if (TokenType != AcceptableActorTypeName)
-        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2").arg(TokenType).arg(AcceptableActorTypeName));
+        TokenType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
+
+//    if (TokenType != enuTokenActorType::System) {
+        enuTokenActorType::Type AcceptableActorTypeName = enuTokenActorType::toEnum(enuModuleActorType::toStr(_acceptableActorType));
+
+        if (TokenType != AcceptableActorTypeName)
+            throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2").arg(TokenType).arg(AcceptableActorTypeName));
+//    }
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {

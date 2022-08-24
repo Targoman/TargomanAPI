@@ -9,7 +9,7 @@
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
 addSubdirs(moduleSrc, Dependencies)
-addSubdirs(functionalTest, Dependencies)
+#addSubdirs(functionalTest, Dependencies)
 
 OTHER_FILES += \
     migrations/db/* \
@@ -17,4 +17,3 @@ OTHER_FILES += \
     migrations/local/* \
     migrations/local/*.sh \
     migrations/local/.migrations
-

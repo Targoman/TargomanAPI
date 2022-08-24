@@ -59,7 +59,7 @@ void appTargomanAPI::slotExecute() {
         ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(QSysInfo::machineHostName()));
         TargomanDebug(0) << "Instance-ID: " << ServerCommonConfigs::InstanceID.value();
 
-        QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
+        QMap<QString, stuModuleDBInfo> RequiredDBs;
 
         auto RegisterModule = [&RequiredDBs](intfPureModule *_module) {
             _module->setInstancePointer();
@@ -69,10 +69,15 @@ void appTargomanAPI::slotExecute() {
             foreach (auto ModuleMethod, _module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
-            auto DBInfo = _module->requiredDB();
+            QMap<QString, stuModuleDBInfo> DBInfos = _module->requiredDBs();
 
-            if (DBInfo.Schema.size())
-                RequiredDBs.insert(_module->moduleBaseName(), DBInfo);
+            for (auto it = DBInfos.constBegin();
+                 it != DBInfos.constEnd();
+                 it++
+            ) {
+                if (it->Schema.size() && (RequiredDBs.contains(it.key()) == false))
+                    RequiredDBs.insert(/*_module->moduleBaseName()*/ it.key(), it.value());
+            }
 
             //_module->initializeModule();
         };
@@ -106,7 +111,7 @@ void appTargomanAPI::slotExecute() {
 
         if (ServerConfigs::MasterDB::Host.value().size()
                 && ServerConfigs::MasterDB::Schema.value().size()) {
-            intfPureModule::stuDBInfo MasterDBInfo = {
+            stuModuleDBInfo MasterDBInfo = {
                 ServerConfigs::MasterDB::Schema.value(),
                 ServerConfigs::MasterDB::Port.value(),
                 ServerConfigs::MasterDB::Host.value(),

@@ -6,16 +6,16 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-LibName=MTInterface
+LibName=MTHelper
 
 DIST_HEADERS += \
 
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    Classes/MTHelper.h \
     MTDefs.hpp \
     Classes/clsEngine.h \
-    Classes/TranslationDispatcher.h \
     Gateways/intfTranslatorGateway.hpp \
     Gateways/intfBaseNMTGateway.h \
     Gateways/ActiveGateways.h \
@@ -33,8 +33,8 @@ HEADERS += \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
+    Classes/MTHelper.cpp \
     Classes/clsEngine.cpp \
-    Classes/TranslationDispatcher.cpp \
     Gateways/intfBaseNMTGateway.cpp \
     Gateways/gtwAmunRNN.cpp \
     Gateways/gtwMarianTransBPE.v1.4.cpp \
@@ -49,6 +49,11 @@ SOURCES += \
 #Gateways/gtwPROMT.cpp \
 
 OTHER_FILES += \
+    migrations/db/* \
+    migrations/db/.dbdiff.dev_.cfg \
+    migrations/local/* \
+    migrations/local/*.sh \
+    migrations/local/.migrations
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/3rdParty/E4MT/
 

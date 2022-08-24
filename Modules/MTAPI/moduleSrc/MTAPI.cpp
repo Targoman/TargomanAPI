@@ -21,36 +21,45 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "MT.h"
-#include "Defs.hpp"
-#include "ModuleHelpers/MT/Classes/TranslationDispatcher.h"
+#include "MTAPI.h"
+#include "MTAPIDefs.hpp"
+#include "ModuleHelpers/MT/Classes/MTHelper.h"
 
 using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
-namespace Targoman::API::MTModule {
+namespace Targoman::API::MTAPIModule {
 
-TARGOMAN_API_MODULE_IMPLEMENT(MT)
-TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MT, MTSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MT, MTSchema);
-TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MT, MTSchema);
-TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MT, MTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT(MTAPI)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MTAPI, MTAPISchema)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MTAPI, MTAPISchema);
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MTAPI, MTAPISchema);
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MTAPI, MTAPISchema);
 
-MT::MT() :
+MTAPI::MTAPI() :
     intfSQLBasedModule(
-        MTDomain,
-        MTSchema
+        MTAPIDomain,
+        MTAPISchema
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MT, MTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MT, MTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MTAPI, MTAPISchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MTAPI, MTAPISchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MTAPI, MTAPISchema);
 }
 
-void MT::initializeModule() {
-    // Register translation engines
-    TranslationDispatcher::instance().registerEngines();
+QMap<QString, stuModuleDBInfo> MTAPI::requiredDBs() const {
+    QMap<QString, stuModuleDBInfo> RequiredDBs = intfSQLBasedModule::requiredDBs();
+
+    RequiredDBs.insert("MTHelper", MTHelper::instance().requiredDB());
+
+    return RequiredDBs;
 }
 
-QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
+void MTAPI::initializeModule() {
+    MTHelper::instance().initialize();
+}
+
+QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
 //    const TAPI::RemoteIP_t& _REMOTE_IP,
 //    const QString& _token,
@@ -84,11 +93,11 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         throw exHTTPBadRequest("Input text must not be empty");
     _dir = _dir.replace('_', '2');
 
-    TranslationDir_t Dir = TranslationDispatcher::dirLangs(_dir);
+    TranslationDir_t Dir = MTHelper::dirLangs(_dir);
     if (Dir.first.isNull())
         throw exHTTPBadRequest("Invalid translation direction format");
 
-    if (!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
+    if (!MTHelper::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
     QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
@@ -119,7 +128,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         {_dir},
     });
 
-    _text = TranslationDispatcher::instance().tokenize(_text, Dir.first);
+    _text = MTHelper::instance().tokenize(_text, Dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
     QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
@@ -141,7 +150,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
                 throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
             PreprocessTime = Timer.elapsed();Timer.restart();
-            QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
+            QVariantMap DicResponse =  MTHelper::instance().retrieveDicResponse(_text, Dir.first);
             if (DicResponse.size()) {
                 if (_detailed) {
                     DicResponse[RESULTItems::TIMES]= QVariantMap({
@@ -151,7 +160,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
                                                                      {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
                                                                  });
                 }
-                TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
+                MTHelper::instance().addDicLog(Dir.first, SourceWordCount, _text);
                 return DicResponse;
             }
         } else
@@ -162,7 +171,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 
     try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
-        QVariantMap Translation = TranslationDispatcher::instance().doTranslation(Privs,
+        QVariantMap Translation = MTHelper::instance().doTranslation(Privs,
                                                                                   _text,
                                                                                   Dir,
                                                                                   _engine,
@@ -183,14 +192,14 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         } else
             Translation[RESULTItems::TIME]= OverallTime.elapsed();
 
-        TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
+        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
         if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "ReportServer"}) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
     } catch (Common::exTargomanBase& ex) {
-        TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
+        MTHelper::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
         throw;
     }
 
@@ -210,4 +219,4 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
 }
 */
 
-} //namespace Targoman::API::MTModule
+} //namespace Targoman::API::MTAPIModule

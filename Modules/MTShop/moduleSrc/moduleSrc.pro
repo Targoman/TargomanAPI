@@ -6,20 +6,18 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=MT
+ModuleName=MTShop
 
 HEADERS += \
-    Defs.hpp \
-    MT.h
+    MTShop.h \
+    MTShopDefs.hpp \
+    ORM/Accounting.h
 
 SOURCES += \
-    MT.cpp
+    MTShop.cpp \
+    ORM/Accounting.cpp
 
-OTHER_FILES += \
-
-LIBS += -lNLPHelper \
-    -lMTInterface \
+OTHER_FILES +=
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
-

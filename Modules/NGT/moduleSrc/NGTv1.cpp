@@ -28,7 +28,9 @@
 namespace Targoman::API::NGTModule {
 
 TARGOMAN_API_MODULE_IMPLEMENT(NGTv1)
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(NGTv1, NGTv1Schema);
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(NGTv1, NGTv1Schema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(NGTv1, NGTv1Schema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(NGTv1, NGTv1Schema)

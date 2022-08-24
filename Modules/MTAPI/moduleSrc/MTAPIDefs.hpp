@@ -21,16 +21,16 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_DEFS_HPP
-#define TARGOMAN_API_MODULES_MT_DEFS_HPP
+#ifndef TARGOMAN_API_MODULES_MTAPI_DEFS_HPP
+#define TARGOMAN_API_MODULES_MTAPI_DEFS_HPP
 
 #include "ModuleHelpers/MT/MTDefs.hpp"
 
-constexpr char MTDomain[] = "MT";
-constexpr char MTSchema[] = "MT";
+constexpr char MTAPIDomain[] = "MTAPI";
+constexpr char MTAPISchema[] = "MTAPI";
 
-namespace Targoman::API::MTModule {
+namespace Targoman::API::MTAPIModule {
 
-} //namespace Targoman::API::MTModule
+} //namespace Targoman::API::MTAPIModule
 
-#endif // TARGOMAN_API_MODULES_MT_DEFS_HPP
+#endif // TARGOMAN_API_MODULES_MTAPI_DEFS_HPP

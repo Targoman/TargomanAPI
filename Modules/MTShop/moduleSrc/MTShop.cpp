@@ -21,22 +21,16 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Advert.h"
+#include "MTShop.h"
 #include "libQFieldValidator/QFieldValidator.h"
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
+#include "MTShopDefs.hpp"
 #include "ORM/Accounting.h"
-#include "ORM/Defs.hpp"
-#include "ORM/ActiveAds.h"
-#include "ORM/Bin.h"
-#include "ORM/Clicks.h"
-#include "ORM/Props.h"
-#include "ORM/Locations.h"
 
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
@@ -44,81 +38,54 @@ using namespace Targoman::API::Helpers;
 
 using namespace Targoman::API::AAA;
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuBannerSize);
-//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
-
-//    COMPLEXITY_Complex,
-TAPI_REGISTER_METATYPE_TYPE_STRUCT(
-    Targoman::API::AdvertModule,
-    stuAdvert
-);
-
-//using namespace Targoman::API::AAA;
-//using namespace AdvertModule;
-
-namespace Targoman::API::AdvertModule {
+namespace Targoman::API::MTShopModule {
 
 using namespace ORM;
 
-TARGOMAN_API_MODULE_IMPLEMENT(Advert)
+TARGOMAN_API_MODULE_IMPLEMENT(MTShop)
 //---------------------------------------------------------
-TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MTShop, MTShopSchema)
 //---------------------------------------------------------
-TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MTShop, MTShopSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MTShop, MTShopSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(MTShop, MTShopSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MTShop, MTShopSchema)
 
-Advert::Advert() :
+MTShop::MTShop() :
     intfAccountingBasedModule(
-        AdvertDomain,
-        AdvertSchema,
+        MTShopDomain,
+        MTShopSchema,
         {
             //           day                week   month                total
             { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
             { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
         },
         &AccountUnits::instance(),
-//        &AccountUnitsI18N::instance(),
         &AccountProducts::instance(),
-//        &AccountProductsI18N::instance(),
         &AccountSaleables::instance(),
-//        &AccountSaleablesI18N::instance(),
         &AccountSaleablesFiles::instance(),
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Advert, AdvertSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MTShop, MTShopSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MTShop, MTShopSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(MTShop, MTShopSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MTShop, MTShopSchema)
 
     this->addSubModule(AccountUnits.data());
-//    this->addSubModule(AccountUnitsI18N.data());
     this->addSubModule(AccountProducts.data());
-//    this->addSubModule(AccountProductsI18N.data());
     this->addSubModule(AccountSaleables.data());
-//    this->addSubModule(AccountSaleablesI18N.data());
     this->addSubModule(AccountSaleablesFiles.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsages.data());
     this->addSubModule(AccountCoupons.data());
-    //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
-
-    this->addSubModule(&ActiveAds::instance());
-    this->addSubModule(&Bin::instance());
-    this->addSubModule(&Locations::instance());
-    this->addSubModule(&Banners::instance());
-    this->addSubModule(&Clicks::instance());
-    this->addSubModule(&Props::instance());
+    //this->addSubModule(AccountPrizes); // There is no prize in mtshopisement module
 }
 
-stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
+stuServiceCreditsInfo MTShop::retrieveServiceCreditsInfo(quint64 _usrID) {
     ///@TODO: complete this
     return stuServiceCreditsInfo(
                 {},
@@ -129,16 +96,16 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
                 );
 }
 
-void Advert::breakCredit(quint64 _slbID) {
+void MTShop::breakCredit(quint64 _slbID) {
 }
 
-bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
+bool MTShop::isUnlimited(const UsageLimits_t& _limits) const {
 }
 
-bool Advert::isEmpty(const UsageLimits_t& _limits) const {
+bool MTShop::isEmpty(const UsageLimits_t& _limits) const {
 }
 
-void Advert::computeAdditives(
+void MTShop::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -148,7 +115,7 @@ void Advert::computeAdditives(
 //    AssetItem.UnitPrice *= 1.1;
 };
 
-void Advert::computeReferrer(
+void MTShop::computeReferrer(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -212,7 +179,7 @@ void Advert::computeReferrer(
 #endif
 };
 
-QVariantMap Advert::getCustomUserAssetFieldsForQuery(
+QVariantMap MTShop::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -221,69 +188,18 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 
     QVariantMap Result;
 
-    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+//    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+//        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
 
     return Result;
-}
-
-/***************************************************************************************************/
-//bool IMPL_REST_POST(Advert, processVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-//        Targoman::API::AAA::stuVoucherItem _voucherItem
-//    ))
-//{
-//    clsJWT JWT(_JWT);
-//    quint64 currentUserID = JWT.usrID();
-
-//    this->increaseDiscountUsage(_voucherItem);
-//    this->activateUserAsset(currentUserID, _voucherItem);
-
-//    return true;
-//}
-
-//bool IMPL_REST_POST(Advert, cancelVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-//        Targoman::API::AAA::stuVoucherItem _voucherItem
-//    ))
-//{
-//    clsJWT JWT(_JWT);
-//    quint64 currentUserID = JWT.usrID();
-
-//    this->decreaseDiscountUsage(_voucherItem);
-//    this->removeFromUserAssets(currentUserID, _voucherItem);
-
-//    return true;
-//}
-
-Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newBanner, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    QString _location,
-    Targoman::API::AdvertModule::enuAdvertOrder::Type _order
-)) {
-}
-
-Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    QString _location,
-    Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
-    const QString _keywords
-)) {
-}
-
-QString IMPL_REST_GET(Advert, retrieveURL, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
-    quint64 _id,
-    TAPI::IPv4_t _clientIP,
-    QString _agent
-)) {
 }
 
 /****************************************************************\
 |** fixture *****************************************************|
 \****************************************************************/
 #ifdef QT_DEBUG
-QVariant IMPL_REST_POST(Advert, fixtureSetup, (
+/*
+QVariant IMPL_REST_POST(MTShop, fixtureSetup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
@@ -326,7 +242,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         }) },
         { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
         { tblAccountProductsBase::Fields::prd_untID,            1 },
-        { tblAccountProducts::ExtraFields::prdType,           Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+        { tblAccountProducts::ExtraFields::prdType,           Targoman::API::MTShopModule::enuProductType::toStr(Targoman::API::MTShopModule::enuProductType::MTShopise) },
         { tblAccountProducts::ExtraFields::prd_locID,         LocationID },
     });
 
@@ -417,13 +333,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- add to basket --------------------------------------
     stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
         APICALLBOOM_PARAM,
-        /* saleableCode     */ SaleableCode,
-        /* orderAdditives   */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
-        /* qty              */ 1,
-        /* discountCode     */ CouponCode,
-        /* referrer         */ "",
-        /* referrerParams   */ {},
-        /* lastPreVoucher   */ LastPreVoucher
+        /* saleableCode     * / SaleableCode,
+        /* orderAdditives   * / { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
+        /* qty              * / 1,
+        /* discountCode     * / CouponCode,
+        /* referrer         * / "",
+        /* referrerParams   * / {},
+        /* lastPreVoucher   * / LastPreVoucher
     );
     LastPreVoucher = BasketActionResult.PreVoucher;
     Result.insert("LastPreVoucher", LastPreVoucher.toJson());
@@ -468,13 +384,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     return Result;
 }
 
-//bool IMPL_REST_POST(Advert, fixtureSetupVoucher, (
+//bool IMPL_REST_POST(MTShop, fixtureSetupVoucher, (
 //        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
 //    ))
 //{
 //}
 
-QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
+QVariant IMPL_REST_POST(MTShop, fixtureCleanup, (
     APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
@@ -553,6 +469,7 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
 
     return Result;
 }
+*/
 #endif
 
-} //namespace Targoman::API::AdvertModule
+} //namespace Targoman::API::MTShopModule

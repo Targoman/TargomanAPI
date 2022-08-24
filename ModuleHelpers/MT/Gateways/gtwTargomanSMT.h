@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
 
 #include "intfTranslatorGateway.hpp"
-#include "../Classes/TranslationDispatcher.h"
+#include "../Classes/MTHelper.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Gateways {
 

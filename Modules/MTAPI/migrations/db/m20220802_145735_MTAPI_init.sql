@@ -1,4 +1,4 @@
-/* Migration File: m20220314_145735_MT_init.sql */
+/* Migration File: m20220802_145735_MTAPI_init.sql */
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;

@@ -141,7 +141,9 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
 /*****************************************************************/
 /*****************************************************************/
 TARGOMAN_API_MODULE_IMPLEMENT(Account)
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)

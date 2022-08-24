@@ -47,7 +47,9 @@ namespace Targoman::API::TicketingModule {
 using namespace ORM;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Ticketing)
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Ticketing, TicketingSchema);
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)

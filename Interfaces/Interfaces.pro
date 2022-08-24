@@ -41,6 +41,7 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    API/intfModuleHelper.h \
     Helpers/IteratorHelper.hpp \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
@@ -77,6 +78,7 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    API/intfModuleHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \
     Server/APICallBoom.cpp \

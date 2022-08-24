@@ -42,12 +42,12 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
-class testMT : public clsBaseTest
+class testMTAPI : public clsBaseTest
 {
     Q_OBJECT
 
 public:
-    testMT(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
+    testMTAPI(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
     void cleanupUnitTestData() {
         clsDAC DAC;

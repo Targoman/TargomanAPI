@@ -21,8 +21,8 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H
-#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_MTHELPER_H
+#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_MTHELPER_H
 
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
@@ -31,7 +31,9 @@
 #include "clsEngine.h"
 #include "../Gateways/intfTranslatorGateway.hpp"
 #include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/API/intfModuleHelper.h"
 using namespace Targoman::Common::Configuration;
+using namespace Targoman::API::API;
 using namespace Targoman::API::Server;
 
 /***********************************************************************************/
@@ -61,7 +63,7 @@ protected: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::ModuleHelpers::MT::Classes::TranslationDispatcher::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::ModuleHelpers::MT::Classes::MTHelper::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
 #define TARGOMAN_API_MT_GATEWAY_IMPL(_gatewayClassName) \
@@ -129,17 +131,22 @@ struct TranslationConfigs
     static tmplConfigurableMultiMap<stuCfgTranslationEngineAlias> Aliases;
 };
 
-class TranslationDispatcher
+class MTHelper : public intfModuleHelper
 {
-public:
-    static TranslationDispatcher& instance() {
-        static TranslationDispatcher* Instance = nullptr;
-        return *(Q_LIKELY(Instance) ? Instance : (Instance = new TranslationDispatcher));
-    }
-    ~TranslationDispatcher();
+    TARGOMAN_API_MODULEHELPER_DEFINE_DB_CONFIGS(MTHelper)
 
+public:
+    static MTHelper& instance() {
+        static MTHelper* Instance = nullptr;
+        return *(Q_LIKELY(Instance) ? Instance : (Instance = new MTHelper));
+    }
+    ~MTHelper();
+
+    void initialize();
+private:
     void registerEngines();
 
+public:
     inline bool isValidEngine(const QString& _engine, const TranslationDir_t& _dir) {
         return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
     }
@@ -179,8 +186,8 @@ private:
     QVariantMap finalizeTranslation(QVariantMap& _translationResult, bool _detailed, const QString& _destLang);
 
 private:
-    TranslationDispatcher();
-    Q_DISABLE_COPY(TranslationDispatcher)
+    MTHelper();
+    Q_DISABLE_COPY(MTHelper)
 
     QHash<QString, /*intfTranslatorGateway*/clsEngine*> RegisteredEngines;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
@@ -196,4 +203,4 @@ private:
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes
 
-#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_TRANSLATIONDISPATCHER_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_MTHELPER_H

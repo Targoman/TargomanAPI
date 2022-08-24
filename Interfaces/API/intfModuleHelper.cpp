@@ -1,7 +1,7 @@
 /******************************************************************************
 #   TargomanAPI: REST API for Targoman
 #
-#   Copyright 2014-2019 by Targoman Intelligent Processing <http://tip.co.ir>
+#   Copyright 2014-2020 by Targoman Intelligent Processing <http://tip.co.ir>
 #
 #   TargomanAPI is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE as published by
@@ -17,23 +17,15 @@
 #   along with Targoman. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 /**
- * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author S.Mehran M.Ziabary <ziabary@targoman.com>
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "MTHelper.h"
+#include "intfModuleHelper.h"
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+namespace Targoman::API::API {
 
-using namespace Gateways;
+intfModuleHelper::intfModuleHelper()
+{ ; }
 
-QVariantMap clsEngine::doTranslation(const QString& _text, bool _detailed, bool _detokinize) {
-
-    intfTranslatorGateway* Gateway = MTHelper::instance().getGateway(this->EngineSpecs.DriverName);
-
-    return Gateway->doTranslation(this->EngineSpecs, _text, _detailed, _detokinize);
-}
-
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+} // namespace Targoman::API::API

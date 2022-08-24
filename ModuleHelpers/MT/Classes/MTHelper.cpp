@@ -27,7 +27,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "TranslationDispatcher.h"
+#include "MTHelper.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ModuleHelpers/NLP/FormalityChecker.h"
@@ -54,6 +54,8 @@ using namespace AAA;
 //using namespace NLP;
 using namespace Gateways;
 
+TARGOMAN_API_MODULEHELPER_IMPLEMENT_DB_CONFIG(MTHelper, "MTCommon")
+
 tmplConfigurableMultiMap<stuCfgTranslationEngine> TranslationConfigs::Engines(
     TranslationConfigs::makeConfig("Engines"),
     "List of valid translation servers to connect to them separated by their translation engine"
@@ -64,32 +66,38 @@ tmplConfigurableMultiMap<stuCfgTranslationEngineAlias> TranslationConfigs::Alias
     ""
 );
 
-TranslationDispatcher::TranslationDispatcher() {
+MTHelper::MTHelper() {
     FormalityChecker::instance();
 }
 
-TranslationDispatcher::~TranslationDispatcher() { ; }
+MTHelper::~MTHelper() { ; }
 
-void TranslationDispatcher::registerGateway(const QString& _gatewayName, intfTranslatorGateway* _gateway) {
-    if (TranslationDispatcher::RegisteredGateways.contains(_gatewayName))
+void MTHelper::registerGateway(const QString& _gatewayName, intfTranslatorGateway* _gateway) {
+    if (MTHelper::RegisteredGateways.contains(_gatewayName))
         throw Targoman::Common::exTargomanBase(QString("The class for gateway name `%1` has been already registered").arg(_gatewayName));
 
     TargomanDebug(0) << "registering MT gateway:" << _gatewayName;
 
-    TranslationDispatcher::RegisteredGateways.insert(_gatewayName, _gateway);
+    MTHelper::RegisteredGateways.insert(_gatewayName, _gateway);
 }
-intfTranslatorGateway* TranslationDispatcher::getGateway(const QString& _gatewayName) {
-    if (TranslationDispatcher::RegisteredGateways.contains(_gatewayName) == false)
+intfTranslatorGateway* MTHelper::getGateway(const QString& _gatewayName) {
+    if (MTHelper::RegisteredGateways.contains(_gatewayName) == false)
         throw Targoman::Common::exTargomanBase(QString("The class with gateway name `%1` has not been registered").arg(_gatewayName));
 
-    return TranslationDispatcher::RegisteredGateways[_gatewayName];
+    return MTHelper::RegisteredGateways[_gatewayName];
 }
 
 //called by MT, Targoman, Tarjomyar, ...
-static QMutex RegisterEnginesLock;
-void TranslationDispatcher::registerEngines() {
-    QMutexLocker Locker(&RegisterEnginesLock);
+static QMutex InitializeLock;
+void MTHelper::initialize() {
+    QMutexLocker Locker(&InitializeLock);
 
+    ///@TODO: register MTCommon database
+
+    this->registerEngines();
+}
+
+void MTHelper::registerEngines() {
     QStringList ValidEngines = enuEngine::options();
 
     auto Keys = TranslationConfigs::Engines.keys();
@@ -144,7 +152,7 @@ void TranslationDispatcher::registerEngines() {
     }
 }
 
-QVariantMap TranslationDispatcher::doTranslation(
+QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
 //    const QJsonObject& _privInfo,
     QString _text,
@@ -231,7 +239,7 @@ QVariantMap TranslationDispatcher::doTranslation(
     return CachedTranslation;
 }
 
-QString TranslationDispatcher::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
+QString MTHelper::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
     Q_UNUSED(_engine);
 
     if (gConfigs::Classifier::SupportsIXML.value() == false)
@@ -240,7 +248,7 @@ QString TranslationDispatcher::detectClass(const QString& _engine, const QString
     return FormalityChecker::instance().check(_lang, _text);
 }
 
-QString TranslationDispatcher::preprocessText(const QString& _text, const QString& _lang) {
+QString MTHelper::preprocessText(const QString& _text, const QString& _lang) {
     Q_UNUSED (_lang)
 
     clsDAC DAC; //TODO find moduleName
@@ -271,7 +279,7 @@ QString TranslationDispatcher::preprocessText(const QString& _text, const QStrin
     //_sourceText.replace(QRegularExpression("/(\\S)('(?:s|ll|d|t))/"), "$1 $2");
 }
 
-QString TranslationDispatcher::tokenize(const QString& _text, const QString& _lang) {
+QString MTHelper::tokenize(const QString& _text, const QString& _lang) {
     bool SpellCorrected;
     QList<stuIXMLReplacement> SentenceBreakReplacements;
     SentenceBreakReplacements.append(
@@ -291,24 +299,24 @@ QString TranslationDispatcher::tokenize(const QString& _text, const QString& _la
                 );
 }
 
-QString TranslationDispatcher::detokenize(const QString& _text, const QString& _lang) {
+QString MTHelper::detokenize(const QString& _text, const QString& _lang) {
     return TargomanTextProcessor::instance().ixml2Text(_text, true, _lang=="fa" || _lang=="ar", false);
 }
 
-QVariantMap TranslationDispatcher::retrieveDicResponse(const QString& _text, const QString& _lang) {
+QVariantMap MTHelper::retrieveDicResponse(const QString& _text, const QString& _lang) {
     Q_UNUSED(_text); Q_UNUSED (_lang);
     return QVariantMap();
 }
 
-void TranslationDispatcher::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text) {
+void MTHelper::addDicLog(const QString& _lang, quint64 _wordCount, const QString& _text) {
     Q_UNUSED(_text); Q_UNUSED (_lang); Q_UNUSED (_wordCount)
 }
 
-void TranslationDispatcher::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode) {
+void MTHelper::addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, qint32 _errorCode) {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID); Q_UNUSED (_errorCode);Q_UNUSED (_engine)
 }
 
-void TranslationDispatcher::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {
+void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
 

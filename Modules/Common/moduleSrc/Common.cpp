@@ -29,7 +29,9 @@ namespace Targoman::API::CommonModule {
 using namespace ORM;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Common)
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Common, CommonSchema);
+//---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
 
 Common::Common() :

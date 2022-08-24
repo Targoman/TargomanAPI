@@ -252,4 +252,22 @@ const QString PrependSchema(const QString &_schema) {
     return ServerCommonConfigs::DBPrefix.value() + _schema;
 }
 
+/***************************************************************/
+stuModuleDBInfo::stuModuleDBInfo(QString _schema, quint16 _port, QString _host, QString _user, QString _pass) :
+    Host(_host),
+    Port(_port),
+    User(_user),
+    Pass(_pass),
+    Schema(_schema)
+{ ; }
+
+QString stuModuleDBInfo::toConnStr(const QString &_dbPrefix, bool _noSchema) {
+    return QString("HOST=%1;PORT=%2;USER=%3;PASSWORD=%4;SCHEMA=%5")
+            .arg(this->Host)
+            .arg(this->Port)
+            .arg(this->User)
+            .arg(this->Pass)
+            .arg(_noSchema ? "" : _dbPrefix + this->Schema);
+}
+
 } //namespace Targoman::API::Server

@@ -373,13 +373,16 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 AcceptableActorType,
                                 JWT
                                 );
+
                 } catch (exJWTExpired &exp) {
-                    QString TokenType = "user";
+                    enuTokenActorType::Type TokenType = enuTokenActorType::User;
 
                     if (JWT.contains("typ"))
-                        TokenType = JWT["typ"].toString();
+                        TokenType = enuTokenActorType::toEnum(JWT["typ"].toString());
 
-                    if (TokenType == "user") {
+                    /*if (TokenType == enuTokenActorType::System) {
+                        //do nothing
+                    } else*/ if (TokenType == enuTokenActorType::User) {
                         auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
 
                         bool IsRenewed = false;
@@ -398,11 +401,12 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                             APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
                             APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
                         }
-                    } else if (TokenType == "api")
+                    } else if (TokenType == enuTokenActorType::API)
                         throw exHTTPForbidden("API token is expired");
                     else
-                        throw exHTTPForbidden("Unknown token type");
+                        throw exHTTPForbidden(QString("Unknown token type `%1`").arg(TokenType));
                 }
+
                 JWT["encodedJWT"] = BearerToken;
             } else
                 throw exHTTPForbidden("No valid authentication header is present");

@@ -36,7 +36,7 @@
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
-
+#include "Interfaces/Server/ServerCommon.h"
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::API::Server;
 
@@ -342,17 +342,6 @@ class intfPureModule : public Targoman::Common::Configuration::intfModule
     Q_OBJECT
 
 public:
-    struct stuDBInfo {
-        QString Host;
-        quint16 Port;
-        QString User;
-        QString Pass;
-        QString Schema;
-
-        stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "");
-        QString toConnStr(const QString &_dbPrefix="", bool _noSchema=false);
-    };
-
     struct stuModuleMethod {
         intfPureModule* Module;
         QMetaMethod Method;
@@ -373,7 +362,15 @@ public:
 //    virtual ~intfPureModule(); //= default;
 
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
-    virtual stuDBInfo requiredDB() const { return {}; }
+
+protected:
+    virtual stuModuleDBInfo requiredDB() const { return {}; }
+public:
+    virtual QMap<QString, stuModuleDBInfo> requiredDBs() const {
+        QMap<QString, stuModuleDBInfo> RequiredDBs;
+        RequiredDBs.insert(this->ModuleName, this->requiredDB());
+        return RequiredDBs;
+    }
 
     /**
      * @brief initializeModule called after module loaded and db config is registered
@@ -484,9 +481,9 @@ private: \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Pass;   \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Schema; \
     }; \
-public: \
-    stuDBInfo requiredDB() const { \
-        return stuDBInfo( \
+protected: \
+    virtual stuModuleDBInfo requiredDB() const { \
+        return stuModuleDBInfo( \
             DB::Schema.value(), \
             DB::Port.value(), \
             DB::Host.value(), \
