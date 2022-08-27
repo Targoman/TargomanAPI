@@ -49,11 +49,19 @@ SOURCES += \
 #Gateways/gtwPROMT.cpp \
 
 OTHER_FILES += \
-    migrations/db/* \
-    migrations/db/.dbdiff.dev_.cfg \
-    migrations/local/* \
-    migrations/local/*.sh \
-    migrations/local/.migrations
+    migrations/.gitkeep \
+    migrations/applytomodules/.gitkeep \
+    migrations/applytomodules/db/* \
+    migrations/applytomodules/db/.dbdiff.dev_.cfg \
+    migrations/applytomodules/local/* \
+    migrations/applytomodules/local/*.sh \
+    migrations/applytomodules/local/.migrations \
+    migrations/common/.gitkeep \
+    migrations/common/db/* \
+    migrations/common/db/.dbdiff.dev_.cfg \
+    migrations/common/local/* \
+    migrations/common/local/*.sh \
+    migrations/common/local/.migrations
 
 INCLUDEPATH += $$BASE_PROJECT_PATH/3rdParty/E4MT/
 

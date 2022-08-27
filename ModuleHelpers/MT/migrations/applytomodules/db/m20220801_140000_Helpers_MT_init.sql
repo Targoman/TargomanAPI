@@ -1,4 +1,4 @@
-/* Migration File: m20220801_140000_MTCommon_init.sql */
+/* Migration File: m20220801_140000_Helpers_MT_init.sql */
 
 CREATE TABLE IF NOT EXISTS `tblCorrectionRules` (
   `crlID` int unsigned NOT NULL AUTO_INCREMENT,
