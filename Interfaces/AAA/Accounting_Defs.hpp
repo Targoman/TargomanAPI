@@ -1066,6 +1066,7 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_QString          (DiscountCode),
     SF_QString          (Referrer),
     SF_JSON_t           (ReferrerParams),
+    SF_NULLABLE_quint64 (TokenID),
     SF_qreal            (Qty),
 
     //-- compute
@@ -1137,30 +1138,31 @@ TAPI_DEFINE_STRUCT(stuActiveCredit,
 
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_STRUCT(stuVoucherItem,
-    SF_QString          (Service),
-    SF_quint64          (OrderID), //AssetID per Service
-    SF_MD5_t            (UUID),
-    SF_QString          (Desc),
-    SF_qreal            (Qty),
-    SF_qreal            (UnitPrice),
-    SF_qreal            (SubTotal),
-    SF_QMapOfVarStruct  (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
-    SF_Struct           (CouponDiscount, stuCouponDiscount, v.ID),
-    SF_qreal            (DisAmount),
-    SF_qreal            (AfterDiscount),
-    SF_quint8           (VATPercent),
-    SF_qreal            (VATAmount),
-    SF_qreal            (TotalPrice),
+    SF_QString              (Service),
+    SF_quint64              (OrderID), //AssetID per Service
+    SF_MD5_t                (UUID),
+    SF_QString              (Desc),
+    SF_qreal                (Qty),
+    SF_qreal                (UnitPrice),
+    SF_qreal                (SubTotal),
+    SF_QMapOfVarStruct      (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
+    SF_Struct               (CouponDiscount, stuCouponDiscount, v.ID),
+    SF_qreal                (DisAmount),
+    SF_qreal                (AfterDiscount),
+    SF_quint8               (VATPercent),
+    SF_qreal                (VATAmount),
+    SF_qreal                (TotalPrice),
 
 //    SF_QListOfVarStruct (Referrers, stuVoucherItemReferrer),
-    SF_QMapOfQString    (Additives),
-    SF_QString          (Referrer),
-    SF_JSON_t           (ReferrerParams),
+    SF_QMapOfQString        (Additives),
+    SF_QString              (Referrer),
+    SF_JSON_t               (ReferrerParams),
+    SF_NULLABLE_quint64     (TokenID),
 
-    SF_QString          (Private), //encrypted + base64
-    SF_QListOfVarStruct (SubItems, stuVoucherItem),
+    SF_QString              (Private), //encrypted + base64
+    SF_QListOfVarStruct     (SubItems, stuVoucherItem),
 
-    SF_QString          (Sign)
+    SF_QString              (Sign)
 );
 
 //typedef QList<stuVoucherItem> InvItems_t;

@@ -1,4 +1,10 @@
 /* Migration File: m20220801_140000_Helpers_MT_init.sql */
+/* CAUTION: don't forget to use {{dbprefix}} for schemas */
+
+/* The next line is to prevent this file from being committed. When done, delete this and next line: */
+ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
+
+USE `{{dbprefix}}{{Schema}}`;
 
 CREATE TABLE IF NOT EXISTS `tblCorrectionRules` (
   `crlID` int unsigned NOT NULL AUTO_INCREMENT,
@@ -17,7 +23,7 @@ INSERT IGNORE INTO tblCorrectionRules(crlType, crlPattern, crlReplacement)
 CREATE TABLE IF NOT EXISTS `tblDigestedTranslationLogs` (
   `dtlDateTime` datetime NOT NULL,
   `dtl_aptID` bigint unsigned NOT NULL DEFAULT '0',
-  `dtl_usrID` bigint unsigned NOT NULL DEFAULT '0',
+  `dtl_actorID` bigint unsigned NOT NULL DEFAULT '0',
   `dtlEngine` char(3) COLLATE utf8mb4_general_ci NOT NULL,
   `dtlDir` char(5) COLLATE utf8mb4_general_ci NOT NULL,
   `dtlTotalWordsRequested` bigint unsigned NOT NULL,
@@ -31,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `tblDigestedTranslationLogs` (
   `dtlErrLongCount` bigint unsigned NOT NULL,
   `dtlErrNoResourceCount` bigint unsigned NOT NULL,
   `dtlErrOtherCount` bigint unsigned NOT NULL,
-  PRIMARY KEY (`dtlDateTime`,`dtl_aptID`,`dtlEngine`,`dtlDir`,`dtl_usrID`)
+  PRIMARY KEY (`dtlDateTime`,`dtl_aptID`,`dtl_actorID`,`dtlEngine`,`dtlDir`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPACT;
 
 CREATE TABLE IF NOT EXISTS `tblMultiDic` (
@@ -41,15 +47,15 @@ CREATE TABLE IF NOT EXISTS `tblMultiDic` (
   `dicTranslation` json DEFAULT NULL,
   `dicStatus` char(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'A' COMMENT 'A: Active, R: Removed',
   `_dicVersion` int unsigned NOT NULL DEFAULT '0',
-  `dicInsertedBy_usrID` bigint NOT NULL,
-  `dicInsertionDate` datetime DEFAULT CURRENT_TIMESTAMP,
-  `dicUpdatedBy_urID` bigint DEFAULT NULL,
+  `dicCreationDateTime` datetime DEFAULT CURRENT_TIMESTAMP,
+  `dicCreatedBy_actorID` bigint NOT NULL,
+  `dicUpdatedBy_actorID` bigint DEFAULT NULL,
   PRIMARY KEY (`dicID`),
   UNIQUE KEY `dicWord` (`dicWord`),
   KEY `dicLang` (`dicSourceLang`),
-  KEY `dicInsertedBy_usrID` (`dicInsertedBy_usrID`),
-  KEY `dicInsertionDate` (`dicInsertionDate`),
-  KEY `dicUpdatedBy_urID` (`dicUpdatedBy_urID`),
+  KEY `dicCreatedBy_actorID` (`dicCreatedBy_actorID`),
+  KEY `dicCreationDateTime` (`dicCreationDateTime`),
+  KEY `dicUpdatedBy_actorID` (`dicUpdatedBy_actorID`),
   KEY `dicStatus` (`dicStatus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -73,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `tblTranslatedPhrases` (
 
 CREATE TABLE IF NOT EXISTS `tblTranslationLogs` (
   `tlsID` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `tls_usrID` bigint unsigned NOT NULL,
+  `tls_actorID` bigint unsigned NOT NULL,
   `tls_aptID` int unsigned DEFAULT NULL,
   `tlsRequestTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tlsDir` char(5) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Translation like en2fa or fa2en',
@@ -103,7 +109,7 @@ CREATE TRIGGER `tblMultiDic_after_update` AFTER UPDATE ON `tblMultiDic` FOR EACH
   IF NEW.dicTranslation    != OLD.dicTranslation    THEN SET Changes = JSON_MERGE_PATCH(Changes, JSON_OBJECT("dicTranslation", OLD.dicTranslation)); END IF;
 
   INSERT INTO tblActionLogs
-     SET tblActionLogs.atlBy_usrID = NEW.dicUpdatedBy_urID,
+     SET tblActionLogs.atlBy_usrID = NEW.dicUpdatedBy_actorID,
          tblActionLogs.atlType = "tblMultiDic-Updated",
          tblActionLogs.atlDescription = Changes;
 END//

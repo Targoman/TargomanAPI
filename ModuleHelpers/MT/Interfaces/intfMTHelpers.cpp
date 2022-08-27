@@ -26,97 +26,46 @@
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuCorrectionRuleType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuMultiDicStatus);
 
+#define TAPI_ORM_SUBMODULE_IMPLEMENT(_className, _baseName, _tblName) \
+    _className::_className( \
+        const QString& _schema, \
+        const QList<DBM::clsORMField>& _exclusiveCols, \
+        const QList<DBM::stuRelation>& _exclusiveRelations, \
+        const QList<DBM::stuDBIndex>& _exclusiveIndexes \
+    ) : \
+        _baseName( \
+            _schema, \
+            _tblName::Name, \
+            _tblName::Private::ORMFields + _exclusiveCols, \
+            _tblName::Private::Relations(_schema) + _exclusiveRelations, \
+            _tblName::Private::Indexes + _exclusiveIndexes \
+    )
+
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 /******************************************************/
-intfCorrectionRules::intfCorrectionRules(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblCorrectionRulesBase::Name,
-        tblCorrectionRulesBase::Private::ORMFields + _exclusiveCols,
-        tblCorrectionRulesBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblCorrectionRulesBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfCorrectionRules, intfSQLBasedModule, tblCorrectionRulesBase)
+{ ; }
 
 /******************************************************/
-intfDigestedTranslationLogs::intfDigestedTranslationLogs(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblDigestedTranslationLogsBase::Name,
-        tblDigestedTranslationLogsBase::Private::ORMFields + _exclusiveCols,
-        tblDigestedTranslationLogsBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblDigestedTranslationLogsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfDigestedTranslationLogs, intfSQLBasedModule, tblDigestedTranslationLogsBase)
+{ ; }
 
 /******************************************************/
-intfMultiDic::intfMultiDic(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblMultiDicBase::Name,
-        tblMultiDicBase::Private::ORMFields + _exclusiveCols,
-        tblMultiDicBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblMultiDicBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfMultiDic, intfSQLBasedModule, tblMultiDicBase)
+{ ; }
 
 /******************************************************/
-intfTokenStats::intfTokenStats(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblTokenStatsBase::Name,
-        tblTokenStatsBase::Private::ORMFields + _exclusiveCols,
-        tblTokenStatsBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblTokenStatsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfTokenStats, intfSQLBasedModule, tblTokenStatsBase)
+{ ; }
 
 /******************************************************/
-intfTranslatedPhrases::intfTranslatedPhrases(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblTranslatedPhrasesBase::Name,
-        tblTranslatedPhrasesBase::Private::ORMFields + _exclusiveCols,
-        tblTranslatedPhrasesBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblTranslatedPhrasesBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfTranslatedPhrases, intfSQLBasedModule, tblTranslatedPhrasesBase)
+{ ; }
 
 /******************************************************/
-intfTranslationLogs::intfTranslationLogs(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblTranslationLogsBase::Name,
-        tblTranslationLogsBase::Private::ORMFields + _exclusiveCols,
-        tblTranslationLogsBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblTranslationLogsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+TAPI_ORM_SUBMODULE_IMPLEMENT(intfTranslationLogs, intfSQLBasedModule, tblTranslationLogsBase)
+{ ; }
 
 /******************************************************/
 

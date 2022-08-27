@@ -71,7 +71,7 @@ namespace tblDigestedTranslationLogsBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(dtlDateTime);
         TARGOMAN_CREATE_CONSTEXPR(dtl_aptID);
-        TARGOMAN_CREATE_CONSTEXPR(dtl_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(dtl_actorID);
         TARGOMAN_CREATE_CONSTEXPR(dtlEngine);
         TARGOMAN_CREATE_CONSTEXPR(dtlDir);
         TARGOMAN_CREATE_CONSTEXPR(dtlTotalWordsRequested);
@@ -98,9 +98,9 @@ namespace tblMultiDicBase {
         TARGOMAN_CREATE_CONSTEXPR(dicTranslation);
         TARGOMAN_CREATE_CONSTEXPR(dicStatus);
         TARGOMAN_CREATE_CONSTEXPR(_dicVersion);
-        TARGOMAN_CREATE_CONSTEXPR(dicInsertedBy_usrID);
-        TARGOMAN_CREATE_CONSTEXPR(dicInsertionDate);
-        TARGOMAN_CREATE_CONSTEXPR(dicUpdatedBy_urID);
+        TARGOMAN_CREATE_CONSTEXPR(dicCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(dicCreatedBy_actorID);
+        TARGOMAN_CREATE_CONSTEXPR(dicUpdatedBy_actorID);
     }
 }
 
@@ -132,7 +132,7 @@ namespace tblTranslationLogsBase {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tlsID);
-        TARGOMAN_CREATE_CONSTEXPR(tls_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(tls_actorID);
         TARGOMAN_CREATE_CONSTEXPR(tls_aptID);
         TARGOMAN_CREATE_CONSTEXPR(tlsRequestTime);
         TARGOMAN_CREATE_CONSTEXPR(tlsDir);
@@ -188,7 +188,7 @@ namespace tblDigestedTranslationLogsBase {
             //ColName                               Type                Validation          Default     UpBy    Sort    Filter  Self    Virt    PK
             { Fields::dtlDateTime,                  S(TAPI::Date_t),    QFV,                QRequired,  UPNone },
             { Fields::dtl_aptID,                    S(quint64),         QFV,                QRequired,  UPNone },
-            { Fields::dtl_usrID,                    S(quint64),         QFV,                QRequired,  UPNone },
+            { Fields::dtl_actorID,                  S(quint64),         QFV,                QRequired,  UPNone },
             { Fields::dtlEngine,                    S(QString),         QFV.maxLenght(3),   QRequired,  UPNone },
             { Fields::dtlDir,                       S(QString),         QFV.maxLenght(5),   QRequired,  UPNone },
             { Fields::dtlTotalWordsRequested,       S(quint64),         QFV,                QRequired,  UPOwner },
@@ -212,7 +212,7 @@ namespace tblDigestedTranslationLogsBase {
             { {
                 Fields::dtlDateTime,
                 Fields::dtl_aptID,
-                Fields::dtl_usrID,
+                Fields::dtl_actorID,
                 Fields::dtlEngine,
                 Fields::dtlDir,
               }, enuDBIndex::Primary },
@@ -223,7 +223,7 @@ namespace tblDigestedTranslationLogsBase {
 #define SF_tblDigestedTranslationLogsBase_DTO \
     SF_Date_t                   (dtlDateTime), \
     SF_quint64                  (dtl_aptID), \
-    SF_quint64                  (dtl_usrID), \
+    SF_quint64                  (dtl_actorID), \
     SF_QString                  (dtlEngine), \
     SF_QString                  (dtlDir), \
     SF_quint64                  (dtlTotalWordsRequested), \
@@ -256,9 +256,9 @@ namespace tblMultiDicBase {
             { Fields::dicTranslation,       S(TAPI::JSON_t),    QFV,                        QNull,      UPOwner },
             { Fields::dicStatus,            ORM_STATUS_FIELD(Targoman::API::ModuleHelpers::MT::enuMultiDicStatus, Targoman::API::ModuleHelpers::MT::enuMultiDicStatus::Active) },
             { Fields::_dicVersion,          S(quint32),         QFV.integer().minValue(1),  0,          UPOwner },
-            { Fields::dicInsertedBy_usrID,  ORM_CREATED_BY },
-            { Fields::dicInsertionDate,     ORM_CREATED_ON },
-            { Fields::dicUpdatedBy_urID,    ORM_UPDATED_BY },
+            { Fields::dicCreationDateTime,  ORM_CREATED_ON },
+            { Fields::dicCreatedBy_actorID, ORM_CREATED_BY },
+            { Fields::dicUpdatedBy_actorID, ORM_UPDATED_BY },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -277,9 +277,9 @@ namespace tblMultiDicBase {
     SF_JSON_t                   (dicTranslation), \
     SF_ORM_STATUS_FIELD         (dicStatus, Targoman::API::ModuleHelpers::MT::enuMultiDicStatus, Targoman::API::ModuleHelpers::MT::enuMultiDicStatus::Active), \
     SF_quint32                  (_dicVersion), \
-    SF_ORM_CREATED_ON           (dicInsertionDate), \
-    SF_ORM_CREATED_BY           (dicInsertedBy_usrID), \
-    SF_ORM_UPDATED_BY           (dicUpdatedBy_urID)
+    SF_ORM_CREATED_ON           (dicCreationDateTime), \
+    SF_ORM_CREATED_BY           (dicCreatedBy_actorID), \
+    SF_ORM_UPDATED_BY           (dicUpdatedBy_actorID)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblMultiDicBase_DTO
@@ -288,7 +288,6 @@ namespace tblMultiDicBase {
 
 namespace tblTokenStatsBase {
     namespace Relation {
-        constexpr char Saleable[] = "Saleable";
     }
 
     namespace Private {
@@ -372,7 +371,7 @@ namespace tblTranslationLogsBase {
         const QList<clsORMField> ORMFields = {
             //ColName                       Type                        Validation  Default     UpBy    Sort    Filter  Self    Virt    PK
             { Fields::tlsID,                ORM_PRIMARYKEY_64 },
-            { Fields::tls_usrID,            S(quint64),                 QFV,        QRequired,  UPOwner },
+            { Fields::tls_actorID,          S(quint64),                 QFV,        QRequired,  UPOwner },
             { Fields::tls_aptID,            S(NULLABLE_TYPE(quint32)),  QFV,        QNull,      UPOwner },
             { Fields::tlsRequestTime,       S(TAPI::DateTime_t),        QFV,        QNow,       UPOwner },
             { Fields::tlsDir,               S(QString),                 QFV,        QRequired,  UPOwner },
@@ -395,7 +394,7 @@ namespace tblTranslationLogsBase {
 
 #define SF_tblTranslationLogsBase_DTO \
     SF_ORM_PRIMARYKEY_64        (tlsID), \
-    SF_quint64                  (tls_usrID), \
+    SF_quint64                  (tls_actorID), \
     SF_NULLABLE_quint32         (tls_aptID), \
     SF_DateTime_t               (tlsRequestTime), \
     SF_QString                  (tlsDir), \
@@ -425,12 +424,6 @@ public:
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-//private slots:
-//    QVariant ANONYMOUSE_ORMGET("Get Available Units")
-//    quint32 ORMCREATE("Create a new Unit by an authorized user")
-//    bool ORMUPDATE("Update a Unit info by an authorized user")
-//    bool ORMDELETE("Delete a Unit")
 };
 
 /******************************************************/
@@ -443,12 +436,6 @@ public:
                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-//private slots:
-//    QVariant ANONYMOUSE_ORMGET("Get Available Products")
-//    quint32 ORMCREATE("Create a new Product by an authorized user")
-//    bool ORMUPDATE("Update a Product info by an authorized user")
-//    bool ORMDELETE("Delete a Product")
 };
 
 /******************************************************/
@@ -461,15 +448,6 @@ public:
                  const QList<DBM::clsORMField>& _exclusiveCols = {},
                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-//public:
-//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
-
-//private slots:
-//    QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
-//    quint32 ORMCREATE("Create a new Saleable by an authorized user")
-//    bool ORMUPDATE("Update a Saleable info by an authorized user")
-//    bool ORMDELETE("Delete a Saleable")
 };
 
 /******************************************************/
@@ -482,30 +460,6 @@ public:
                    const QList<DBM::clsORMField>& _exclusiveCols = {},
                    const QList<DBM::stuRelation>& _exclusiveRelations = {},
                    const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-//public:
-//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
-
-//private slots:
-//    QVariant ORMGET("Get User Assets")
-
-//    bool REST_UPDATE(
-//        disablePackage,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            TAPI::PKsByPath_t _pksByPath
-//        ),
-//        "Mark a user Asset banned by an authorized user"
-//    )
-
-//    bool REST_UPDATE(
-//        setAsPrefered,
-//        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
-//            TAPI::PKsByPath_t _pksByPath
-//        ),
-//        "Mark a user Asset as prefered"
-//    )
 };
 
 /******************************************************/
@@ -518,12 +472,6 @@ public:
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-//private slots:
-//    QVariant ORMGET("Get Active Discounts")
-//    quint32 ORMCREATE("Create a new Discount by an authorized user")
-//    bool ORMUPDATE("Update a Discount info by an authorized user")
-//    bool ORMDELETE("Delete a Discount")
 };
 
 /******************************************************/
@@ -536,11 +484,6 @@ public:
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-//private slots:
-//    QVariant ORMGET("Get Active Prizes")
-//    quint32 ORMCREATE("Create a new Prizes by an authorized user")
-//    bool ORMUPDATE("Update a Prizes info by an authorized user")
-//    bool ORMDELETE("Delete a Prizes")
 };
 
 /******************************************************/

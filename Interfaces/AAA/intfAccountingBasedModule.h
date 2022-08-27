@@ -191,6 +191,7 @@ protected slots:
             TAPI::CouponCode_t                      _discountCode = {},
             QString                                 _referrer = {},
             TAPI::JSON_t                            _referrerParams = {},
+            NULLABLE_TYPE(quint64)                  _tokenID = NULLABLE_NULL_VALUE,
             Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
 //            TAPI::MD5_t                             _parentItemUUID = {}
         ),

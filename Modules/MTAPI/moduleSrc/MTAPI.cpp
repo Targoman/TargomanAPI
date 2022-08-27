@@ -89,7 +89,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
     bool _dic,
     bool _dicFull
 )) {
-
+    quint64 TokenID = APICALLBOOM_PARAM.getActorID();
 
 
 
