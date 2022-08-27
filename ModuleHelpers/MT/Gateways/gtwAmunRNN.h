@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULEHELPERS_MT_GATEWAYS_AMUNRNN_H
 
 #include "intfBaseNMTGateway.h"
-#include "../Classes/MTHelper.h"
+#include "../MTHelper.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Gateways {
 

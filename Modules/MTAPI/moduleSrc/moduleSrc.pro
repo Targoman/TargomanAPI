@@ -10,10 +10,12 @@ ModuleName=MTAPI
 
 HEADERS += \
     MTAPI.h \
-    MTAPIDefs.hpp
+    MTAPIDefs.hpp \
+    ORM/MTHelpers.h
 
 SOURCES += \
-    MTAPI.cpp
+    MTAPI.cpp \
+    ORM/MTHelpers.cpp
 
 OTHER_FILES += \
 

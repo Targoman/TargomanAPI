@@ -21,27 +21,36 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
-#include "MTHelper.h"
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSDERIVEDHELPERSUBMODULES_H
+#define TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSDERIVEDHELPERSUBMODULES_H
+
+#include "../Interfaces/intfMTHelpers.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Classes {
 
-using namespace Gateways;
+using namespace Interfaces;
 
-QVariantMap clsEngine::doTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const QString& _text,
-    bool _detailed,
-    bool _detokinize
-) {
-    intfTranslatorGateway* Gateway = MTHelper::instance().getGateway(this->EngineSpecs.DriverName);
+class clsDerivedHelperSubmodules
+{
+public:
+    clsDerivedHelperSubmodules(
+        intfCorrectionRules         *_correctionRules,
+        intfDigestedTranslationLogs *_digestedTranslationLogs,
+        intfMultiDic                *_multiDic,
+        intfTokenStats              *_tokenStats,
+        intfTranslatedPhrases       *_translatedPhrases,
+        intfTranslationLogs         *_translationLogs
+    );
 
-    return Gateway->doTranslation(APICALLBOOM_PARAM,
-                                  this->EngineSpecs,
-                                  _text,
-                                  _detailed,
-                                  _detokinize);
-}
+public:
+    QScopedPointer<intfCorrectionRules>         CorrectionRules;
+    QScopedPointer<intfDigestedTranslationLogs> DigestedTranslationLogs;
+    QScopedPointer<intfMultiDic>                MultiDic;
+    QScopedPointer<intfTokenStats>              TokenStats;
+    QScopedPointer<intfTranslatedPhrases>       TranslatedPhrases;
+    QScopedPointer<intfTranslationLogs>         TranslationLogs;
+};
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes
+
+#endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_CLSDERIVEDHELPERSUBMODULES_H

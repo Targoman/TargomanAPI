@@ -43,7 +43,7 @@
 
 using namespace Targoman::API::ModuleHelpers::NLP;
 
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+namespace Targoman::API::ModuleHelpers::MT {
 
 using namespace Apps;
 using namespace NLPLibs;
@@ -155,6 +155,7 @@ void MTHelper::registerEngines() {
 QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
 //    const QJsonObject& _privInfo,
+    clsDerivedHelperSubmodules &DerivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -197,7 +198,12 @@ QVariantMap MTHelper::doTranslation(
         if (TranslationEngine == nullptr)
             throw exHTTPInternalServerError(QString("Unable to find %1 translator engine").arg(Class));
 
-        _text = this->preprocessText(_text, _dir.first);
+        _text = this->preprocessText(
+                    APICALLBOOM_PARAM,
+                    DerivedHelperSubmodules,
+                    _text,
+                    _dir.first
+                    );
 
         _preprocessTime = Timer.elapsed();
         Timer.restart();
@@ -206,7 +212,11 @@ QVariantMap MTHelper::doTranslation(
             _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
 
         /********************************/
-        CachedTranslation = TranslationEngine->doTranslation(_text, _detailed, _detokenize);
+        CachedTranslation = TranslationEngine->doTranslation(
+                                APICALLBOOM_PARAM,
+                                _text,
+                                _detailed,
+                                _detokenize);
         /********************************/
 
         _translationTime = Timer.elapsed();
@@ -248,35 +258,44 @@ QString MTHelper::detectClass(const QString& _engine, const QString& _text, cons
     return FormalityChecker::instance().check(_lang, _text);
 }
 
-QString MTHelper::preprocessText(const QString& _text, const QString& _lang) {
+QString MTHelper::preprocessText(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+    const QString& _text,
+    const QString& _lang
+) {
     Q_UNUSED (_lang)
 
-    clsDAC DAC; //TODO find moduleName
-
     if (this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600) {
-        clsDACResult Result = DAC.execQueryCacheable(3600, QString(),
-                                                     "SELECT crlPattern, crlReplacement FROM MT.tblCorrectionRules WHERE crlType = 'R'"
-                                                     );
+        QVariant Result = DerivedHelperSubmodules.CorrectionRules->Select(APICALLBOOM_PARAM,
+                                                                          {}, 0, 0, {}, {}, {}, {}, false, false,
+                                                                          clsCondition(tblCorrectionRulesBase::Fields::crlType,
+                                                                                       enuConditionOperator::Equal,
+                                                                                       enuCorrectionRuleType::Replace),
+                                                                          3600);
+
         if (Result.isValid()) {
+            TAPI::stuTable ResultTable = Result.value<TAPI::stuTable>();
+
             this->CorrectionRule.clear();
-            while (Result.next())
+            foreach (auto Row, ResultTable.Rows) {
                 this->CorrectionRule.append(
                         qMakePair(
-                            QRegularExpression(Result.value(0).toString(),
+                            QRegularExpression(Row.toMap()[tblCorrectionRulesBase::Fields::crlPattern].toString(),
                                                QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::MultilineOption),
-                            Result.value(1).toString())
+                            Row.toMap()[tblCorrectionRulesBase::Fields::crlReplacement].toString())
                         );
+            }
             this->LastCorrectionRuleUpdateTime.start();
         }
     }
 
     QString Text = _text;
+
     foreach (auto Rule, this->CorrectionRule)
         Text = Text.replace(Rule.first, Rule.second);
 
     return Text;
-
-    //_sourceText.replace(QRegularExpression("/(\\S)('(?:s|ll|d|t))/"), "$1 $2");
 }
 
 QString MTHelper::tokenize(const QString& _text, const QString& _lang) {
@@ -320,4 +339,4 @@ void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const Q
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
 
-} // namespace Targoman::API::ModuleHelpers::MT::Classes
+} // namespace Targoman::API::ModuleHelpers::MT

@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include "intfBaseNMTGateway.h"
 #include "QtCUrl.h"
-#include "../Classes/MTHelper.h"
+#include "../MTHelper.h"
 
 #include <QtDebug>
 
@@ -38,6 +38,7 @@ intfBaseNMTGateway::intfBaseNMTGateway()
 { ; }
 
 QVariantMap intfBaseNMTGateway::doTranslation(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const stuEngineSpecs& _engineSpecs,
     const QString& _text,
     bool _detailed,

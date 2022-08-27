@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_LUAOPENNMT_H
 
 #include "intfTranslatorGateway.hpp"
-#include "../Classes/MTHelper.h"
+#include "../MTHelper.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
@@ -42,7 +42,13 @@ public:
     TARGOMAN_API_MT_GATEWAY_DEFINE(gtwLuaOpenNMT)
 
 public:
-    QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
+    QVariantMap doTranslation(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            const stuEngineSpecs& _engineSpecs,
+            const QString& _text,
+            bool _detailed,
+            bool _detokenize
+            );
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Engines

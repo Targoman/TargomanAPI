@@ -23,11 +23,14 @@
 
 #include "MTAPI.h"
 #include "MTAPIDefs.hpp"
-#include "ModuleHelpers/MT/Classes/MTHelper.h"
+#include "ModuleHelpers/MT/MTHelper.h"
+#include "ORM/MTHelpers.h"
 
-using namespace Targoman::API::ModuleHelpers::MT::Classes;
+using namespace Targoman::API::ModuleHelpers::MT;
 
 namespace Targoman::API::MTAPIModule {
+
+using namespace ORM;
 
 TARGOMAN_API_MODULE_IMPLEMENT(MTAPI)
 //---------------------------------------------------------
@@ -41,16 +44,31 @@ MTAPI::MTAPI() :
     intfSQLBasedModule(
         MTAPIDomain,
         MTAPISchema
+    ),
+    DerivedHelperSubmodules(
+        &CorrectionRules::instance(),
+        &DigestedTranslationLogs::instance(),
+        &MultiDic::instance(),
+        &TokenStats::instance(),
+        &TranslatedPhrases::instance(),
+        &TranslationLogs::instance()
 ) {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MTAPI, MTAPISchema);
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MTAPI, MTAPISchema);
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MTAPI, MTAPISchema);
+
+    this->addSubModule(&CorrectionRules::instance());
+    this->addSubModule(&DigestedTranslationLogs::instance());
+    this->addSubModule(&MultiDic::instance());
+    this->addSubModule(&TokenStats::instance());
+    this->addSubModule(&TranslatedPhrases::instance());
+    this->addSubModule(&TranslationLogs::instance());
 }
 
 QMap<QString, stuModuleDBInfo> MTAPI::requiredDBs() const {
     QMap<QString, stuModuleDBInfo> RequiredDBs = intfSQLBasedModule::requiredDBs();
 
-    RequiredDBs.insert("MTHelper", MTHelper::instance().requiredDB());
+//    RequiredDBs.insert("MTHelper", MTHelper::instance().requiredDB());
 
     return RequiredDBs;
 }
@@ -77,11 +95,11 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
 
 
 
-
-
-
-
 /*
+
+
+
+
     QTime Timer, OverallTime;
     Timer.start();
     OverallTime.start();
@@ -171,16 +189,19 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
 
     try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
-        QVariantMap Translation = MTHelper::instance().doTranslation(Privs,
-                                                                                  _text,
-                                                                                  Dir,
-                                                                                  _engine,
-                                                                                  true,
-                                                                                  _detailed,
-                                                                                  _detok,
-                                                                                  InternalPreprocessTime,
-                                                                                  InternalTranslationTime
-                                                                                  );
+        QVariantMap Translation = MTHelper::instance().doTranslation(
+                                      APICALLBOOM_PARAM,
+//                                      Privs,
+                                      this->DerivedHelperSubmodules,
+                                      _text,
+                                      Dir,
+                                      _engine,
+                                      true,
+                                      _detailed,
+                                      _detok,
+                                      InternalPreprocessTime,
+                                      InternalTranslationTime
+                                      );
         Timer.restart();
         if (_detailed) {
             Translation[RESULTItems::TIMES]= QVariantMap({

@@ -67,7 +67,7 @@ struct stuRelation
 };
 
 TARGOMAN_DEFINE_ENUM(enuDBIndex,
-    //Primary,
+    Primary,
     Unique,
     Key,
     FullText,

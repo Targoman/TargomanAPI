@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS `tblCorrectionRules` (
   KEY `crlType` (`crlType`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT IGNORE INTO tblCorrectionRules(crlType, crlPattern, crlReplacement)
+    VALUES('R', '/(\\S)(''(?:s|ll|d|t))/', '$1 $2')
+;
+
 CREATE TABLE IF NOT EXISTS `tblDigestedTranslationLogs` (
   `dtlDateTime` datetime NOT NULL,
   `dtl_aptID` bigint unsigned NOT NULL DEFAULT '0',
@@ -64,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `tblTranslatedPhrases` (
   `tpsSourceString` longtext COLLATE utf8mb4_general_ci NOT NULL,
   `tpsTargetString` longtext COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`tps_tlsID`),
-  CONSTRAINT `FK__tbl_SMT_TranslationLogs` FOREIGN KEY (`tps_tlsID`) REFERENCES `tblTranslationLogs` (`tlsid`) ON DELETE CASCADE
+  CONSTRAINT `FK_tblTranslatedPhrases_tblTranslationLogs` FOREIGN KEY (`tps_tlsID`) REFERENCES `tblTranslationLogs` (`tlsid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS `tblTranslationLogs` (

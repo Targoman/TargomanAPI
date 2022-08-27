@@ -52,7 +52,13 @@ public:
     intfBaseNMTGateway();
 
 public:
-    QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokenize);
+    QVariantMap doTranslation(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            const stuEngineSpecs& _engineSpecs,
+            const QString& _text,
+            bool _detailed,
+            bool _detokenize
+            );
 
 protected:
 //    virtual QString preprocessText(QString _sourceText);

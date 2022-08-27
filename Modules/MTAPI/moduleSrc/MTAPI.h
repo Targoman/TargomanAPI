@@ -34,6 +34,9 @@
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 #include "MTAPIDefs.hpp"
+#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
+
+using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
 namespace Targoman::API::MTAPIModule {
 
@@ -86,6 +89,9 @@ private slots:
 //        ),
 //        "Test"
 //    )
+
+private:
+    clsDerivedHelperSubmodules DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MTAPI, MTAPISchema);

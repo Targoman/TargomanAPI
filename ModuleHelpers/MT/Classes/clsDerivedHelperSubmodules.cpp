@@ -21,36 +21,24 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
-#define TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
+#include "clsDerivedHelperSubmodules.h"
 
-#include "intfTranslatorGateway.hpp"
-#include "../MTHelper.h"
+namespace Targoman::API::ModuleHelpers::MT::Classes {
 
-namespace Targoman::API::ModuleHelpers::MT::Gateways {
+clsDerivedHelperSubmodules::clsDerivedHelperSubmodules(
+    intfCorrectionRules         *_correctionRules,
+    intfDigestedTranslationLogs *_digestedTranslationLogs,
+    intfMultiDic                *_multiDic,
+    intfTokenStats              *_tokenStats,
+    intfTranslatedPhrases       *_translatedPhrases,
+    intfTranslationLogs         *_translationLogs
+) :
+    CorrectionRules         (_correctionRules),
+    DigestedTranslationLogs (_digestedTranslationLogs),
+    MultiDic                (_multiDic),
+    TokenStats              (_tokenStats),
+    TranslatedPhrases       (_translatedPhrases),
+    TranslationLogs         (_translationLogs)
+{ ; }
 
-/**
- * CAUTION:
- * place #include this header file in ActiveGateways.h for proper driver registration
- */
-
-class gtwTargomanSMT : public intfTranslatorGateway
-{
-public:
-    constexpr static char Name[] = "TargomanSMT";
-
-    TARGOMAN_API_MT_GATEWAY_DEFINE(gtwTargomanSMT)
-
-public:
-    QVariantMap doTranslation(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            const stuEngineSpecs& _engineSpecs,
-            const QString& _text,
-            bool _detailed,
-            bool _detokenize
-            );
-};
-
-} //namespace Targoman::API::ModuleHelpers::MT::Engines
-
-#endif // TARGOMAN_API_MODULEHELPERS_MT_ENGINES_TARGOMANSMT_H
+} //namespace Targoman::API::ModuleHelpers::MT::Classes

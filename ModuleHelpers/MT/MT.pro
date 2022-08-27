@@ -13,7 +13,9 @@ DIST_HEADERS += \
 PRIVATE_HEADERS += \
 
 HEADERS += \
-    Classes/MTHelper.h \
+    Classes/clsDerivedHelperSubmodules.h \
+    Interfaces/intfMTHelpers.h \
+    MTHelper.h \
     MTDefs.hpp \
     Classes/clsEngine.h \
     Gateways/intfTranslatorGateway.hpp \
@@ -33,7 +35,9 @@ HEADERS += \
 
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
-    Classes/MTHelper.cpp \
+    Classes/clsDerivedHelperSubmodules.cpp \
+    Interfaces/intfMTHelpers.cpp \
+    MTHelper.cpp \
     Classes/clsEngine.cpp \
     Gateways/intfBaseNMTGateway.cpp \
     Gateways/gtwAmunRNN.cpp \

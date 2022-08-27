@@ -42,7 +42,13 @@ public:
     virtual ~intfTranslatorGateway() { ; }
 
 public:
-    virtual QVariantMap doTranslation(const stuEngineSpecs& _engineSpecs, const QString& _text, bool _detailed, bool _detokinize) = 0;
+    virtual QVariantMap doTranslation(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const stuEngineSpecs& _engineSpecs,
+        const QString& _text,
+        bool _detailed,
+        bool _detokinize
+    ) = 0;
 
 //    QString fullName() { return this->EngineSpecs.fullName(); }
 

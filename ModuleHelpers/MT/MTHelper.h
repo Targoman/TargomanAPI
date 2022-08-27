@@ -27,9 +27,10 @@
 #include <QJsonObject>
 #include "libTargomanCommon/tmplBoundedCache.hpp"
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
-#include "../MTDefs.hpp"
-#include "clsEngine.h"
-#include "../Gateways/intfTranslatorGateway.hpp"
+#include "MTDefs.hpp"
+#include "Classes/clsEngine.h"
+#include "Classes/clsDerivedHelperSubmodules.h"
+#include "Gateways/intfTranslatorGateway.hpp"
 #include "Interfaces/Server/APICallBoom.h"
 #include "Interfaces/API/intfModuleHelper.h"
 using namespace Targoman::Common::Configuration;
@@ -63,15 +64,16 @@ protected: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::ModuleHelpers::MT::Classes::MTHelper::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::ModuleHelpers::MT::MTHelper::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
 #define TARGOMAN_API_MT_GATEWAY_IMPL(_gatewayClassName) \
     _gatewayClassName::_gatewayClassName() { ; }
 
 /***********************************************************************************/
-namespace Targoman::API::ModuleHelpers::MT::Classes {
+namespace Targoman::API::ModuleHelpers::MT {
 
+using namespace Classes;
 using namespace Gateways;
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
@@ -154,6 +156,7 @@ public:
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
 //        const QJsonObject& _privInfo,
+        clsDerivedHelperSubmodules &DerivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -166,7 +169,14 @@ public:
     QString tokenize(const QString& _text, const QString& _lang);
     QString detokenize(const QString& _text, const QString& _lang);
     QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
-    QString preprocessText(const QString& _text, const QString& _lang);
+
+    QString preprocessText(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+            const QString& _text,
+            const QString& _lang
+            );
+
     QVariantMap retrieveDicResponse(const QString& _text, const QString& _lang);
     void addDicLog(const QString& _lang, quint64 _worcCount, const QString& _text);
     void addErrorLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _worcCount, const QString& _text, qint32 _errorCode);
@@ -201,6 +211,6 @@ private:
     static inline QMap<QString, intfTranslatorGateway*> RegisteredGateways;
 };
 
-} //namespace Targoman::API::ModuleHelpers::MT::Classes
+} //namespace Targoman::API::ModuleHelpers::MT
 
 #endif // TARGOMAN_API_MODULEHELPERS_MT_CLASSES_MTHELPER_H
