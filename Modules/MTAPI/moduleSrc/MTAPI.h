@@ -49,7 +49,7 @@ class MTAPI : public intfSQLBasedModule
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE(MTAPI, enuModuleActorType::API);
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(MT);
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(MTAPI);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(MTAPI, MTAPISchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(MTAPI, MTAPISchema);
