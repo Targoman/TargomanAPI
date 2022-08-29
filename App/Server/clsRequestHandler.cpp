@@ -131,7 +131,8 @@ void clsRequestHandler::process(const QString& _api) {
 
                         for (auto JSONObjectIter = JSONObject.begin();
                                 JSONObjectIter != JSONObject.end();
-                                ++JSONObjectIter) {
+                                ++JSONObjectIter
+                        ) {
                             if (JSONObjectIter.value().isBool())
                                 this->Request->addUserDefinedData(JSONObjectIter.key(), JSONObjectIter.value().toBool() ? "1" : "0");
                             else if (JSONObjectIter.value().isNull())

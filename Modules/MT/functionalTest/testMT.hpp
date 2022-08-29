@@ -164,32 +164,6 @@ private slots:
     }
 
     /***************************************************/
-    void create_api() {
-        QT_TRY {
-            QVariant Result = this->callUserAPI(
-                        RESTClientHelper::enuHTTPMethod::POST,
-                        "Account/APITokens/request",
-                        {},
-                        {
-                            { "name", "test mt" },
-//                            { "services", QStringList({
-//                                "MTAPI",
-//                                "blablabla",
-//                            }) },
-                        });
-
-            QVERIFY(Result.isValid());
-
-            QVariantMap ResultToMap = Result.toMap();
-
-            this->TokenID  = ResultToMap["ID"].toULongLong();
-            this->TokenJWT = ResultToMap["Token"].toString();
-
-        } QT_CATCH (const std::exception &exp) {
-            QTest::qFail(exp.what(), __FILE__, __LINE__);
-        }
-    }
-
     void createProduct_mt() {
         this->MTProductCode = QString("p%1").arg(QRandomGenerator::global()->generate());
 
@@ -212,7 +186,7 @@ private slots:
                           { "fa", "شرح فارسی ۱۲۳" },
                           { "ar", "شرح عربی ۱۲۳" },
                     }) },
-                    { tblAccountProductsBase::Fields::prdJustForAPIToken,   1 },
+                    { tblAccountProductsBase::Fields::prdJustForAPIToken,   true },
                 }
             );
 
@@ -222,7 +196,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-
+private:
     void createSaleable_mt() {
         this->MTSaleableCode = QString("%1-s%2").arg(this->MTProductCode).arg(QRandomGenerator::global()->generate());
 
@@ -244,6 +218,32 @@ private slots:
             );
 
             QVERIFY(this->MTSaleableID > 0);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void create_api() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/request",
+                        {},
+                        {
+                            { "name", "test mt" },
+//                            { "services", QStringList({
+//                                "MTAPI",
+//                                "blablabla",
+//                            }) },
+                        });
+
+            QVERIFY(Result.isValid());
+
+            QVariantMap ResultToMap = Result.toMap();
+
+            this->TokenID  = ResultToMap["ID"].toULongLong();
+            this->TokenJWT = ResultToMap["Token"].toString();
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
