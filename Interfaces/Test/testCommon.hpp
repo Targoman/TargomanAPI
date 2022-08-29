@@ -184,7 +184,7 @@ protected:
     };
 
     QVariant callAPI(
-        JWTMode _JWTMode,
+        QString &_JWT,
         RESTClientHelper::enuHTTPMethod _method,
         const QString& _api,
         const QVariantMap& _urlArgs = {},
@@ -194,12 +194,8 @@ protected:
     ) {
         QVariantMap ResponseHeaders;
 
-        QString GuestJWT = "";
-
         QVariant Result = RESTClientHelper::callAPI(
-                              (_JWTMode == JWTMode::Guest
-                                ? GuestJWT
-                                : (_JWTMode == JWTMode::Admin ? gEncodedAdminJWT : gEncodedJWT)),
+                              _JWT,
                               _method,
                               _api,
                               _urlArgs,
@@ -230,6 +226,30 @@ protected:
             *_outResponseHeaders = ResponseHeaders;
 
         return Result;
+    }
+
+    QVariant callAPI(
+        JWTMode _JWTMode,
+        RESTClientHelper::enuHTTPMethod _method,
+        const QString& _api,
+        const QVariantMap& _urlArgs = {},
+        const QVariantMap& _postOrFormFields = {},
+        const QVariantMap& _formFiles = {},
+        QVariantMap *_outResponseHeaders = nullptr
+    ) {
+        QString GuestJWT = "";
+
+        return this->callAPI(
+                      (_JWTMode == JWTMode::Guest
+                        ? GuestJWT
+                        : (_JWTMode == JWTMode::Admin ? gEncodedAdminJWT : gEncodedJWT)),
+                      _method,
+                      _api,
+                      _urlArgs,
+                      _postOrFormFields,
+                      _formFiles,
+                      _outResponseHeaders
+                      );
     }
 
     QVariant callGuestAPI(

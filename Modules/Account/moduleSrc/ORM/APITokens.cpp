@@ -32,6 +32,11 @@ using namespace Targoman::API::Helpers;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
+    /* namespace          */ Targoman::API::AccountModule,
+    /* type               */ stuRequestTokenResult
+);
+
 namespace Targoman::API::AccountModule::ORM {
 
 /******************************************************/
@@ -46,7 +51,35 @@ APITokens::APITokens() :
         tblAPITokens::Private::Indexes
 ) { ; }
 
-TAPI::EncodedJWT_t APITokens::create(
+QVariant IMPL_ORMGET(APITokens) {
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+//quint64 IMPL_ORMCREATE(APITokens) {
+//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+
+//    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
+//}
+
+//bool IMPL_ORMUPDATE(APITokens) {
+//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+
+//    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
+//}
+
+//bool IMPL_ORMDELETE(APITokens) {
+//    TAPI::ORMFields_t ExtraFilters;
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+//        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
+////    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+
+//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
+//}
+
+stuRequestTokenResult APITokens::create(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const QString &_name,
@@ -71,7 +104,7 @@ TAPI::EncodedJWT_t APITokens::create(
             ServiceDTO.fromJson(QJsonObject::fromVariantMap(Row.toMap()));
 
             if (ServiceDTO.svcAcceptableTokenType != enuTokenActorType::API)
-                throw exHTTPExpectationFailed("Service Acceptable Token Type is not API");
+                throw exHTTPExpectationFailed(QString("Acceptable Token Type of service `%1` is not API").arg(ServiceDTO.svcName));
 
             ServiceIDs.append(ServiceDTO.svcID);
         }
@@ -154,35 +187,20 @@ TAPI::EncodedJWT_t APITokens::create(
     }
 
     //--
-    return JWT;
+    return stuRequestTokenResult(APITokenID, JWT);
 }
 
-QVariant IMPL_ORMGET(APITokens) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
-
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
-}
-
-quint64 IMPL_ORMCREATE(APITokens) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-
-    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
-}
-
-bool IMPL_ORMUPDATE(APITokens) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-
-    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
-}
-
-bool IMPL_ORMDELETE(APITokens) {
-    TAPI::ORMFields_t ExtraFilters;
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
-//    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
-
-    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
+Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_GET_OR_POST(APITokens, request, (
+    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    const QString &_name,
+    const QStringList &_services
+)) {
+    return this->create(
+                APICALLBOOM_PARAM,
+                APICALLBOOM_PARAM.getActorID(),
+                _name,
+                _services
+                );
 }
 
 /******************************************************/

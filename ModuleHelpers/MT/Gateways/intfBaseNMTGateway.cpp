@@ -66,7 +66,7 @@ QVariantMap intfBaseNMTGateway::doTranslation(
         Opt[CURLOPT_URL] = _engineSpecs.URLs.at(0);
 
         Opt[CURLOPT_POST] = true;
-        Opt[CURLOPT_TIMEOUT] = 1;
+        Opt[CURLOPT_TIMEOUT] = 1000;
         Opt[CURLOPT_FAILONERROR] = true;
         Opt[CURLOPT_HTTPHEADER] = QStringList({
                                                   { "Content-Type: application/json" },
@@ -101,6 +101,7 @@ QVariantMap intfBaseNMTGateway::doTranslation(
             return Result;
         }
     }
+
     return  Result;
 }
 

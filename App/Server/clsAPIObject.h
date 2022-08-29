@@ -75,9 +75,9 @@ public:
         return this->BaseMethod.Hidden;
     }
 
-//    intfPureModule* parentModule() {
-//        return this->Parent;
-//    }
+    intfPureModule* parentModule() {
+        return this->Parent;
+    }
 
     inline bool requiresJWT() const {
         return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);

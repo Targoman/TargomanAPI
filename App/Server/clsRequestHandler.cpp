@@ -376,6 +376,17 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                                 JWT
                                 );
 
+                    //check svcs just for API tokens
+                    if ((AcceptableActorType == enuTokenActorType::API)
+                            && JWT.contains("prv") && JWT["prv"].toObject().contains("svc")) {
+                        QString ModuleBaseName = _apiObject->parentModule()->moduleBaseName().split(":").first();
+                        if (ModuleBaseName.isEmpty() == false) {
+                            QStringList AllowedServices = JWT["prv"].toObject()["svc"].toString().split(",", QString::SkipEmptyParts);
+                            if (AllowedServices.contains(ModuleBaseName) == false)
+                                throw exHTTPForbidden(QString("Service `%1` not allowed by this token").arg(ModuleBaseName));
+                        }
+                    }
+
                 } catch (exJWTExpired &exp) {
                     enuTokenActorType::Type TokenType = enuTokenActorType::User;
 

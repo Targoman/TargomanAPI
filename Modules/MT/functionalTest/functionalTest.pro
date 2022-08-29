@@ -6,12 +6,10 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-TEST_NAME = mtshopFunctionalTest
+TEST_NAME = mtFunctionalTest
 
 HEADERS += \
-    ORM/actionLogs.hpp \
-    testMTShop.hpp \
-    testMTShopFixture.hpp
+    testMT.hpp
 
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \

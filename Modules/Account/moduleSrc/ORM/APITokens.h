@@ -39,9 +39,15 @@ TARGOMAN_DEFINE_ENUM(enuAPITokensStatus,
                      Removed        = 'R'
                      )
 
+TAPI_DEFINE_STRUCT(stuRequestTokenResult,
+    SF_quint64          (ID),
+    SF_QString          (Token)
+);
+
 } //namespace Targoman::API::AccountModule
 
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
+TAPI_DECLARE_METATYPE(Targoman::API::AccountModule::stuRequestTokenResult)  // -> TAPI_REGISTER_METATYPE() in Accounting_Interfaces.cpp
 
 namespace Targoman::API::AccountModule {
 namespace ORM {
@@ -263,7 +269,7 @@ class APITokens : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokens);
 
 public:
-    TAPI::EncodedJWT_t create(
+    stuRequestTokenResult create(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const QString &_name,
@@ -272,9 +278,20 @@ public:
 
 private slots:
     QVariant ORMGET("Get APITokens information")
-    quint64 ORMCREATE("Create a new APITokens by an authorized user")
-    bool ORMUPDATE("Update token info by an authorized user")
-    bool ORMDELETE("Delete an APIToken")
+//    quint64 ORMCREATE("Create a new APITokens by an authorized user")
+//    bool ORMUPDATE("Update token info by an authorized user")
+//    bool ORMDELETE("Delete an APIToken")
+
+    Targoman::API::AccountModule::stuRequestTokenResult REST_GET_OR_POST(
+        request,
+        (
+            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            const QString &_name,
+            const QStringList &_services = {}
+        ),
+        "create new empty api token"
+    )
+
 };
 
 /******************************************************/

@@ -57,8 +57,8 @@ MTShop::MTShop() :
         MTShopSchema,
         {
             //           day                week   month                total
-            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
-            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+//            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
+//            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
         },
         &AccountUnits::instance(),
         &AccountProducts::instance(),

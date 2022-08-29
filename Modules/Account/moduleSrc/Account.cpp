@@ -2408,14 +2408,14 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
     Result.insert("PaymentGateway", PaymentGatewayReport);
 
     //-- apitoken --------------------------------------
-    QString APIToken = APITokens::instance().create(
+    Targoman::API::AccountModule::stuRequestTokenResult TokenInfo = APITokens::instance().create(
                 APICALLBOOM_PARAM,
                 UserID,
                 "token for me",
                 { "MTAPI" }
                 );
 
-    Result.insert("APIToken", APIToken);
+    Result.insert("APIToken", TokenInfo.toJson());
 
     //----------------------------------------
     return Result;
