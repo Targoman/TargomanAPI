@@ -45,6 +45,8 @@ using namespace Targoman::API::Helpers;
 #include "Interfaces/AAA/Authentication.h"
 using namespace Targoman::API::AAA;
 
+using namespace TAPI;
+
 namespace Targoman::API::Server {
 
 using namespace qhttp::server;
@@ -364,7 +366,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
-                enuModuleActorType::Type AcceptableActorType = _apiObject->moduleActorType();
+                enuTokenActorType::Type AcceptableActorType = _apiObject->moduleActorType();
 
                 try {
                     QJWT::verifyJWT(

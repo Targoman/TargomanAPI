@@ -78,7 +78,7 @@ QString renewExpiredJWT(
 ) {
     clsJWT JWT(_JWTPayload);
 
-    QString SessionKey =  JWT.session().trimmed();
+    QString SessionKey = JWT.session().trimmed();
     if (SessionKey.isEmpty())
         throw exHTTPUnauthorized("Session key not provided in jwt");
 
@@ -156,6 +156,7 @@ QString renewExpiredJWT(
 
     QString NewJWT = Server::QJWT::createSigned(
             _JWTPayload,
+            TAPI::enuTokenActorType::User,
             _JWTPayload.contains("prv") ? _JWTPayload["prv"].toObject() : QJsonObject(),
             Duration,
             _JWTPayload["jti"].toString(),

@@ -687,7 +687,7 @@ void RESTAPIRegistry::dumpAPIs()
 
             QString JWTType = "";
             if (API.APIObject->requiresJWT()) {
-                JWTType = QString(" (JWT:%1)").arg(enuModuleActorType::toStr(API.APIObject->moduleActorType()));
+                JWTType = QString(" (JWT:%1)").arg(enuTokenActorType::toStr(API.APIObject->moduleActorType()));
             }
 
             TargomanDebug(5).noLabel().noquote().nospace()

@@ -28,8 +28,11 @@
 #include "libTargomanCommon/Macros.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/GenericTypes.h"
+#include "Interfaces/Server/QJWT.h"
 
 namespace Targoman::API::AAA {
+
+using namespace Server;
 
 namespace JWTItems {
 TARGOMAN_CREATE_CONSTEXPR(jti);
@@ -37,6 +40,7 @@ TARGOMAN_CREATE_CONSTEXPR(iat);
 TARGOMAN_CREATE_CONSTEXPR(exp);
 //
 TARGOMAN_CREATE_CONSTEXPR(uid); //usrID -> actor id
+TARGOMAN_CREATE_CONSTEXPR(typ); //enuTokenActorType
 //
 TARGOMAN_CREATE_CONSTEXPR(priv);
 TARGOMAN_CREATE_CONSTEXPR(privs);
@@ -58,6 +62,7 @@ public:
     inline quint64 expireAt() const                             { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
     //
     inline quint64 actorID() const                              { return static_cast<quint64>(this->Token.value(JWTItems::uid).toDouble()); }
+    inline TAPI::enuTokenActorType::Type actorType() const     { return TAPI::enuTokenActorType::toEnum(this->Token.value(JWTItems::typ).toString()); }
     //
     inline QVariantMap privatePart() const                      { return this->Token.value(JWTItems::priv).toObject().toVariantMap(); }
     inline QVariantMap privs() const                            { return this->Token.value(JWTItems::privs).toObject().toVariantMap(); }

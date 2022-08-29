@@ -25,8 +25,10 @@
 #include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
+
+#include "ORM/User.h"
 #include "ORM/APITokens.h"
-#include "ORM/APITokenValidIPs.h"
+//#include "ORM/APITokenValidIPs.h"
 #include "ORM/ActiveSessions.h"
 #include "ORM/ApprovalRequest.h"
 #include "ORM/BlockingRules.h"
@@ -36,7 +38,6 @@
 #include "ORM/IPStats.h"
 #include "ORM/Payments.h"
 #include "ORM/Service.h"
-#include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 #include "ORM/Auth.h"
@@ -160,9 +161,8 @@ Account::Account() :
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Account, AAASchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Account, AAASchema)
 
+    this->addSubModule(&User::instance());
     this->addSubModule(&ActiveSessions::instance());
-    this->addSubModule(&APITokens::instance());
-    this->addSubModule(&APITokenValidIPs::instance());
     this->addSubModule(&ApprovalRequest::instance());
     this->addSubModule(&BlockingRules::instance());
     this->addSubModule(&ForgotPassRequest::instance());
@@ -176,13 +176,15 @@ Account::Account() :
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&Roles::instance());
     this->addSubModule(&Service::instance());
-    this->addSubModule(&User::instance());
     this->addSubModule(&UserExtraInfo::instance());
     this->addSubModule(&UserWallets::instance());
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletsBalanceHistory::instance());
     this->addSubModule(&Auth::instance());
     this->addSubModule(&Currency::instance());
+    this->addSubModule(&APITokens::instance());
+    this->addSubModule(&APITokenServices::instance());
+    this->addSubModule(&APITokenValidIPs::instance());
 }
 
 void Account::initializeModule() {
@@ -226,6 +228,7 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
 
     TAPI::EncodedJWT_t JWT = QJWT::createSigned(
         Payload,
+        enuTokenActorType::User,
         QJsonObject({ { "svc", _services } }),
         _activeAccount.TTL,
         _activeAccount.Privs["ssnKey"].toString()
@@ -2210,9 +2213,13 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
             UserEmail
         });
 
+    quint64 UserID;
+
     if (UserDACResult.isValid()) {
+        UserID = UserDACResult.value("usrID").toULongLong();
+
         Result.insert("User", QVariantMap({
-                                              { "usrID", UserDACResult.value("usrID") },
+                                              { "usrID", UserID },
                                               { "email", UserEmail },
                                           }));
     } else {
@@ -2233,7 +2240,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
 
         Result.insert("User", SignupUserResult);
 
-        quint64 UserID = SignupUserResult["usrID"].toUInt();
+        UserID = SignupUserResult["usrID"].toUInt();
 
         //-- approve user email --------------------------------------
         QString Code = DAC.execQuery("",
@@ -2399,6 +2406,16 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
     }
 
     Result.insert("PaymentGateway", PaymentGatewayReport);
+
+    //-- apitoken --------------------------------------
+    QString APIToken = APITokens::instance().create(
+                APICALLBOOM_PARAM,
+                UserID,
+                "token for me",
+                { "MTAPI" }
+                );
+
+    Result.insert("APIToken", APIToken);
 
     //----------------------------------------
     return Result;

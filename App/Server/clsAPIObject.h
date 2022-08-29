@@ -83,7 +83,7 @@ public:
         return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
     }
 
-    inline enuModuleActorType::Type moduleActorType() const {
+    inline enuTokenActorType::Type moduleActorType() const {
         return this->Parent->actorType();
     }
 

@@ -39,6 +39,7 @@
 #include "Interfaces/Server/ServerCommon.h"
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::API::Server;
+using namespace TAPI;
 
 //#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "x-pagination-total-count"
 //#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "x-pagination-page-count"
@@ -397,7 +398,7 @@ public:
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;
-    virtual enuModuleActorType::Type actorType() const = 0;
+    virtual enuTokenActorType::Type actorType() const = 0;
 
 //    void addResponseHeaderNameToExpose(const QString &_header);
 //signals:
@@ -434,7 +435,7 @@ public: \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
         _submodule->initializeModule(); \
     } \
-    enuModuleActorType::Type actorType() const final { return _actorType; } \
+    enuTokenActorType::Type actorType() const final { return _actorType; } \
 private: \
     TAPI_DISABLE_COPY(_name); \
 public: \
@@ -457,7 +458,7 @@ public: \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
-    enuModuleActorType::Type actorType() const final; \
+    enuTokenActorType::Type actorType() const final; \
 private: \
     TAPI_DISABLE_COPY(_name)
 
@@ -468,7 +469,7 @@ private: \
 
 //put this macro before module class constructor (.cpp)
 #define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name) \
-    enuModuleActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
+    enuTokenActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
 
 //-------------------------------------------------------------------------------------------
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }

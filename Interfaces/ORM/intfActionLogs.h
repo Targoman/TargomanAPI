@@ -61,7 +61,7 @@ namespace tblActionLogs {
         };
 
         const QList<stuRelation> Relations = {
-            { Fields::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
+//            { Fields::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
         };
 
         const QList<stuDBIndex> Indexes = {

@@ -178,9 +178,9 @@ stuActiveAccount PrivHelpers::processUserObject(
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPrivilegeBase(ActiveAccount.Privs, _requiredAccess);
 
         return { ActiveAccount.TTL, _userObj };
+    }
 
-    } else
-        return { -1, _userObj };
+    return { -1, _userObj };
 }
 
 QByteArray PrivHelpers::getURL(const QString& _url) {

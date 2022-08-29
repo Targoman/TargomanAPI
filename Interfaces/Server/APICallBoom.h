@@ -56,12 +56,6 @@
 //#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
 #define APICALLBOOM_PARAM_STR               "APICALLBOOM_PARAM"
 
-//must be same as enuTokenActorType
-TARGOMAN_DEFINE_ENUM(enuModuleActorType,
-                     User   = 'U',
-                     API    = 'A'
-                     );
-
 namespace Targoman::API::Server {
 
 class APICallBoomData;

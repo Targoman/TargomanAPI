@@ -65,6 +65,21 @@ private slots:
         cleanupUnitTestData();
     }
 
+    void translate() {
+        QString EncodedJWT = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjIyODk5ODcsImlhdCI6MTY2MTc2NDM4NywicHJpdnMiOnt9LCJwcnYiOiJBd1FNZENzVVJZdnRWN0IxSzd6YkFTQmJGejVWNktQcVVTSzdOV1BEaXZVNGVjWmlOTk09IiwidHlwIjoiQVBJIiwidWlkIjo3fQ==.H7tjrluMSIDHskLAy1bVSpxE9Xv2jCZnrA3/0y6MpAw=";
+
+        RESTClientHelper::callAPI(
+                    EncodedJWT,
+                    RESTClientHelper::enuHTTPMethod::POST,
+                    "MTAPI/translate",
+                    {},
+                    {
+                        { "text", "apple" },
+                        { "dir", "en2fa" },
+                    }
+                    );
+    }
+
 };
 
 #endif // TEST_MT_HPP
