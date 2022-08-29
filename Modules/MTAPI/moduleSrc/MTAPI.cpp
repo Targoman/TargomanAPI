@@ -89,17 +89,6 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
     bool _dic,
     bool _dicFull
 )) {
-    quint64 TokenID = APICALLBOOM_PARAM.getActorID();
-
-
-
-
-
-/*
-
-
-
-
     QTime Timer, OverallTime;
     Timer.start();
     OverallTime.start();
@@ -109,6 +98,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
     _text = _text.trimmed();
     if (_text.isEmpty())
         throw exHTTPBadRequest("Input text must not be empty");
+
     _dir = _dir.replace('_', '2');
 
     TranslationDir_t Dir = MTHelper::dirLangs(_dir);
@@ -118,38 +108,38 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
     if (!MTHelper::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
-    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
-                                                             _REMOTE_IP, {
-                                                                 TARGOMAN_PRIV_PREFIX + _engine,
-                                                                 TARGOMAN_PRIV_PREFIX + _dir,
-                                                                 _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
-                                                                 _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
-                                                             });
+//    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
+//                                                             _REMOTE_IP, {
+//                                                                 TARGOMAN_PRIV_PREFIX + _engine,
+//                                                                 TARGOMAN_PRIV_PREFIX + _dir,
+//                                                                 _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
+//                                                                 _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
+//                                                             });
 
 
-    QJsonObject Stats = this->execQuery(
-            "SELECT * FROM tblTokenStats "
-            "WHERE tks_tokID = ? "
-            "  AND tksEngine=? "
-            "  AND tksDir=? ",
-    {
-        {TokenInfo[TOKENItems::tokID]},
-        {_engine},
-        {_dir},
-    }
-    ).toJson(true).object ();
+//    QJsonObject Stats = this->execQuery(
+//            "SELECT * FROM tblTokenStats "
+//            "WHERE tks_tokID = ? "
+//            "  AND tksEngine=? "
+//            "  AND tksDir=? ",
+//    {
+//        {TokenInfo[TOKENItems::tokID]},
+//        {_engine},
+//        {_dir},
+//    }
+//    ).toJson(true).object ();
 
-    if (Stats.isEmpty())
-        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
-        {TokenInfo[TOKENItems::tokID]},
-        {_engine},
-        {_dir},
-    });
+//    if (Stats.isEmpty())
+//        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+//        {TokenInfo[TOKENItems::tokID]},
+//        {_engine},
+//        {_dir},
+//    });
 
     _text = MTHelper::instance().tokenize(_text, Dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
-    QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
+//    QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
 
     //@TODO: fix
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
@@ -163,21 +153,22 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
     if (_dic) {
-        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})) {
-            if (_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
+            if (_dicFull && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
                 throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
             PreprocessTime = Timer.elapsed();Timer.restart();
-            QVariantMap DicResponse =  MTHelper::instance().retrieveDicResponse(_text, Dir.first);
+            QVariantMap DicResponse = MTHelper::instance().retrieveDicResponse(_text, Dir.first);
             if (DicResponse.size()) {
                 if (_detailed) {
-                    DicResponse[RESULTItems::TIMES]= QVariantMap({
-                                                                     {RESULTItems::TIMESItems::PRE, PreprocessTime},
-                                                                     {RESULTItems::TIMESItems::TR, Timer.elapsed()},
-                                                                     {RESULTItems::TIMESItems::POST, 0},
-                                                                     {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
-                                                                 });
+                    DicResponse[RESULTItems::TIMES] = QVariantMap({
+                                                                      {RESULTItems::TIMESItems::PRE, PreprocessTime},
+                                                                      {RESULTItems::TIMESItems::TR, Timer.elapsed()},
+                                                                      {RESULTItems::TIMESItems::POST, 0},
+                                                                      {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
+                                                                  });
                 }
+
                 MTHelper::instance().addDicLog(Dir.first, SourceWordCount, _text);
                 return DicResponse;
             }
@@ -189,6 +180,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
 
     try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
+
         QVariantMap Translation = MTHelper::instance().doTranslation(
                                       APICALLBOOM_PARAM,
 //                                      Privs,
@@ -204,27 +196,34 @@ QVariantMap IMPL_REST_GET_OR_POST(MTAPI, Translate, (
                                       );
         Timer.restart();
         if (_detailed) {
-            Translation[RESULTItems::TIMES]= QVariantMap({
-                                                             {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
-                                                             {RESULTItems::TIMESItems::TR, InternalTranslationTime},
-                                                             {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
-                                                             {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
-                                                         });
+            Translation[RESULTItems::TIMES] = QVariantMap({
+                                                              {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
+                                                              {RESULTItems::TIMESItems::TR, InternalTranslationTime},
+                                                              {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
+                                                              {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
+                                                          });
         } else
-            Translation[RESULTItems::TIME]= OverallTime.elapsed();
+            Translation[RESULTItems::TIME] = OverallTime.elapsed();
 
-        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
+//        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
-        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "ReportServer"}) == false)
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
-    } catch (Common::exTargomanBase& ex) {
-        MTHelper::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
+
+    } catch (exTargomanBase &_exp) {
+        MTHelper::instance().addErrorLog(
+                    //static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()),
+                    APICALLBOOM_PARAM.getActorID(),
+                    _engine,
+                    _dir,
+                    SourceWordCount,
+                    _text,
+                    _exp.code());
+
         throw;
     }
-
-    */
 }
 
 /*

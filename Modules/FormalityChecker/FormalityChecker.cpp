@@ -18,13 +18,13 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "FormalityChecker.h"
 #include "ModuleHelpers/NLP/FormalityChecker.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API::FormalityCheckerModule {
 
 using namespace Targoman::API::ModuleHelpers;
 
@@ -34,10 +34,8 @@ FormalityChecker::FormalityChecker() :
     intfPureModule("FormalityChecker")
 { ; }
 
-bool FormalityChecker::init() {
+void FormalityChecker::initializeModule() {
     NLP::FormalityChecker::instance();
-
-    return true;
 }
 
 QString IMPL_REST_GET_OR_POST(FormalityChecker, check, (
@@ -48,6 +46,4 @@ QString IMPL_REST_GET_OR_POST(FormalityChecker, check, (
     return NLP::FormalityChecker::instance().check(_lang, _text);
 }
 
-}
-}
-
+} //namespace Targoman::API::FormalityCheckerModule

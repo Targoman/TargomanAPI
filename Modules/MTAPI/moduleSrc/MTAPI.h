@@ -60,7 +60,7 @@ class MTAPI : public intfSQLBasedModule
 
 public:
     virtual QMap<QString, stuModuleDBInfo> requiredDBs() const;
-    void initializeModule();
+    virtual void initializeModule();
 
 private slots:
     QVariantMap REST_GET_OR_POST(

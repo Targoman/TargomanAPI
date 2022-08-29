@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H
@@ -25,12 +26,7 @@
 
 #include "Interfaces/API/intfPureModule.h"
 
-namespace Targoman {
-namespace API {
-
-//#ifndef API
-//#define API(_method, _name, _sig, _doc) api##_method##_name _sig; QString signOf##_method##_name() { return #_sig; } QString docOf##_method##_name() { return _doc; }
-//#endif
+namespace Targoman::API::FormalityCheckerModule {
 
 class FormalityChecker : public intfPureModule
 {
@@ -42,7 +38,7 @@ class FormalityChecker : public intfPureModule
     //---------------------------------------------------------
 
 public:
-    bool init();
+    virtual void initializeModule();
 
 private slots:
     QString REST_GET_OR_POST(
@@ -57,7 +53,6 @@ private slots:
 
 };
 
-}
-}
+} //namespace Targoman::API::FormalityCheckerModule
 
 #endif // TARGOMAN_API_MODULES_FORMALITYCHECKER_FORMALITYCHECKER_H

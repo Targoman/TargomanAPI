@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
@@ -25,8 +26,7 @@
 
 #include "Interfaces/API/intfPureModule.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API::TextProcessorModule {
 
 class TextProcessor : public intfPureModule
 {
@@ -38,7 +38,7 @@ class TextProcessor : public intfPureModule
     //---------------------------------------------------------
 
 public:
-    bool init();
+    virtual void initializeModule();
 
 private slots:
     QString REST_GET_OR_POST(
@@ -90,7 +90,6 @@ private slots:
     )
 };
 
-}
-}
+} //namespace Targoman::API::TextProcessorModule
 
 #endif // TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H

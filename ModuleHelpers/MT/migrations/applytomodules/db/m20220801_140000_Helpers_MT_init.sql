@@ -69,14 +69,6 @@ CREATE TABLE IF NOT EXISTS `tblTokenStats` (
   PRIMARY KEY (`tks_tokID`,`tksEngine`,`tksDir`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `tblTranslatedPhrases` (
-  `tps_tlsID` bigint unsigned NOT NULL,
-  `tpsSourceString` longtext COLLATE utf8mb4_general_ci NOT NULL,
-  `tpsTargetString` longtext COLLATE utf8mb4_general_ci,
-  PRIMARY KEY (`tps_tlsID`),
-  CONSTRAINT `FK_tblTranslatedPhrases_tblTranslationLogs` FOREIGN KEY (`tps_tlsID`) REFERENCES `tblTranslationLogs` (`tlsid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE IF NOT EXISTS `tblTranslationLogs` (
   `tlsID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `tls_actorID` bigint unsigned NOT NULL,
@@ -98,6 +90,14 @@ CREATE TABLE IF NOT EXISTS `tblTranslationLogs` (
   KEY `tls_aptID` (`tls_aptID`),
   KEY `tlsServer` (`tlsServer`),
   KEY `tlsClass` (`tlsClass`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `tblTranslatedPhrases` (
+  `tps_tlsID` bigint unsigned NOT NULL,
+  `tpsSourceString` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `tpsTargetString` longtext COLLATE utf8mb4_general_ci,
+  PRIMARY KEY (`tps_tlsID`),
+  CONSTRAINT `FK_tblTranslatedPhrases_tblTranslationLogs` FOREIGN KEY (`tps_tlsID`) REFERENCES `tblTranslationLogs` (`tlsid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DELIMITER //

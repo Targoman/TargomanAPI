@@ -18,18 +18,18 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #include "TextProcessor.h"
-#include "libTargomanCommon/Configuration/ConfigManager.h"
 #include "ModuleHelpers/NLP/TextProcessor.hpp"
+//#include "libTargomanCommon/Configuration/ConfigManager.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API::TextProcessorModule {
 
 using namespace Targoman::NLPLibs;
-using namespace Targoman::Common;
-using namespace Targoman::Common::Configuration;
+//using namespace Targoman::Common;
+//using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::ModuleHelpers;
 
 TARGOMAN_API_MODULE_IMPLEMENT(TextProcessor)
@@ -38,11 +38,9 @@ TextProcessor::TextProcessor() :
     intfPureModule("TextProcessor")
 { ; }
 
-bool TextProcessor::init() {
+void TextProcessor::initializeModule() {
     NLP::TextProcessor::instance().init();
-        //Targoman::Common::Configuration::ConfigManager::instance().configSettings());
-
-    return true;
+    //Targoman::Common::Configuration::ConfigManager::instance().configSettings());
 }
 
 QString IMPL_REST_GET_OR_POST(TextProcessor, normalize, (
@@ -115,6 +113,4 @@ QString IMPL_REST_GET_OR_POST(TextProcessor, tokenize, (
     return NLP::TextProcessor::instance().ixml2Text(Tokenized, false, _hindiNumerals, _arabicPunctuations, false);
 }
 
-}
-}
-
+} //namespace Targoman::API::TextProcessorModule
