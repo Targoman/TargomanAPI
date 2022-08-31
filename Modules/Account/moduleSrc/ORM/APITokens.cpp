@@ -51,6 +51,31 @@ APITokens::APITokens() :
         tblAPITokens::Private::Indexes
 ) { ; }
 
+ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
+
+    if (_isRoot) {
+        Query.addCols(this->selectableColumnNames())
+                .nestedLeftJoin(APITokenServices::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
+                                .addCol(tblAPITokenServices::Fields::aptsvc_aptID, tblAPITokenServices::Fields::aptsvc_aptID)
+                                .addCol(DBExpression::VALUE("GROUP_CONCAT(tblAPITokenServices.aptsvc_svcID)"), "ServiceIDs")
+                                .addCol(DBExpression::VALUE("GROUP_CONCAT(tblService.svcName)"), "ServiceNames")
+                                .innerJoinWith(tblAPITokenServices::Relation::Service)
+                                .groupBy(tblAPITokenServices::Fields::aptsvc_aptID)
+                                , "tmpServices"
+                                , { "tmpServices", tblAPITokenServices::Fields::aptsvc_aptID,
+                                    enuConditionOperator::Equal,
+                                    tblAPITokens::Name, tblAPITokens::Fields::aptID }
+                                )
+                .addCol("tmpServices.ServiceIDs")
+                .addCol("tmpServices.ServiceNames")
+        ;
+    }
+
+    return Query;
+}
+
 QVariant IMPL_ORMGET(APITokens) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);

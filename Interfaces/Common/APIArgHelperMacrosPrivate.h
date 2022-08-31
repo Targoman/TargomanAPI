@@ -563,8 +563,9 @@ inline QString toCammel(const QString& _name) {
 //#define INTERNAL_V2double(v) INTERNAL_V2DBL(v)
 
 #define INTERNAL_C2bool(v)      static_cast<bool>(v)
-#define INTERNAL_V2bool(v)      static_cast<bool>(v.toDouble())
-#define INTERNAL_N2bool(_value) INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(bool, _value)
+//static_cast<bool>(v.toDouble())
+#define INTERNAL_V2bool(v)      [](auto v) -> bool { return ((v == true) || (v == 1) || (v == "1")); }(v)
+#define INTERNAL_N2bool(_value) INTERNAL_NULLABLE_FROM_JSONVALUE_TO_BOOL(_value)
 
 #define INTERNAL_V2U8(v) static_cast<quint8>(v.toDouble())
 #define INTERNAL_V2uint8(v) INTERNAL_V2U8(v)
@@ -634,6 +635,15 @@ inline QString toCammel(const QString& _name) {
 /************************************************************/
 /************************************************************/
 /************************************************************/
+#define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_BOOL(_value) \
+    [](auto v) -> NULLABLE_TYPE(bool) { \
+        if (v.isNull()) \
+            return NULLABLE_NULL_VALUE; \
+        auto Storage = NULLABLE_TYPE(bool)(); \
+        Storage = INTERNAL_V2bool(v); \
+        return Storage; \
+    } (_value)
+
 #define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(_type, _value) \
     [](auto v)->NULLABLE_TYPE(_type) { \
         if (v.isNull()) \

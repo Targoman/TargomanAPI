@@ -483,6 +483,9 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
         if (NULLABLE_IS_NULL(_tokenID))
             throw exHTTPInternalServerError("This product is token related");
 
+        if (NULLABLE_VALUE(_tokenID) == 0)
+            throw exHTTPInternalServerError("Invalid token id provided");
+
         ///@TODO: check token's owner and CurrentUserID
         //call api : GET Account/APIToken/%1
     }

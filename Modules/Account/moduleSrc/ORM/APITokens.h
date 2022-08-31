@@ -168,13 +168,17 @@ namespace tblAPITokens {
         SF_ORM_STATUS_FIELD         (aptStatus, Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active),
         SF_ORM_CREATED_BY           (aptCreatedBy_usrID),
         SF_ORM_CREATED_ON           (aptCreationDateTime),
-        SF_ORM_UPDATED_BY           (aptUpdatedBy_usrID)
+        SF_ORM_UPDATED_BY           (aptUpdatedBy_usrID),
+
+        SF_QString                  (ServiceIDs),
+        SF_QString                  (ServiceNames)
     );
 }
 
 namespace tblAPITokenServices {
     namespace Relation {
-        // constexpr char AAA[] = "aaa";
+        constexpr char APIToken[] = "APIToken";
+        constexpr char Service[] = "Service";
     }
 
     namespace Private {
@@ -188,8 +192,12 @@ namespace tblAPITokenServices {
 
         const QList<stuRelation> Relations = {
             //Col                               Reference Table                     ForeignCol                  Rename      LeftJoin
-            { Fields::aptsvc_aptID,             R(AAASchema, tblAPITokens::Name),   tblAPITokens::Fields::aptID },
-            { Fields::aptsvc_svcID,             R(AAASchema, tblService::Name),     tblService::Fields::svcID },
+            { Relation::APIToken,
+                { Fields::aptsvc_aptID,         R(AAASchema, tblAPITokens::Name),   tblAPITokens::Fields::aptID }
+            },
+            { Relation::Service,
+                { Fields::aptsvc_svcID,         R(AAASchema, tblService::Name),     tblService::Fields::svcID }
+            },
             ORM_RELATION_OF_CREATOR(Fields::aptsvcCreatedBy_usrID),
         };
 
@@ -276,6 +284,9 @@ public:
         const QStringList &_services = {}
     );
 
+public:
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+
 private slots:
     QVariant ORMGET("Get APITokens information")
 //    quint64 ORMCREATE("Create a new APITokens by an authorized user")
@@ -314,9 +325,9 @@ class APITokenValidIPs : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET("Get APITokenValidIPs information")
-    bool ORMDELETE("Delete an APITokenValidIP")
-    bool ORMUPDATE("Update token valid IP info")
     quint64 ORMCREATE("Create a new APITokenValidIP")
+    bool ORMUPDATE("Update token valid IP info")
+    bool ORMDELETE("Delete an APITokenValidIP")
 };
 
 /******************************************************/

@@ -65,3 +65,6 @@ DELIMITER ;
 
 ALTER TABLE `tblService`
     ADD COLUMN `svcAcceptableTokenType` CHAR(1) NOT NULL DEFAULT 'U' COMMENT 'U:User, A:API' AFTER `svcCancelVoucherItemEndPoint`;
+
+ALTER TABLE `tblService`
+    ADD COLUMN `svcOppositeTokenTypeServiceName` VARCHAR(50) NULL AFTER `svcName`;

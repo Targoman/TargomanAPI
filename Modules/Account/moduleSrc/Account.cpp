@@ -1828,11 +1828,11 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
 
         QVariantList Services = Service::instance().makeSelectQuery(APICALLBOOM_PARAM)
-                .addCols({
-                             tblService::Fields::svcID,
-                             tblService::Fields::svcName,
-                             tblService::Fields::svcProcessVoucherItemEndPoint,
-                         })
+//                .addCols({
+//                             tblService::Fields::svcID,
+//                             tblService::Fields::svcName,
+//                             tblService::Fields::svcProcessVoucherItemEndPoint,
+//                         })
                 .all().Rows;
 
         if (Services.isEmpty())
@@ -1840,6 +1840,17 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         QVariantMap vchProcessResult = VoucherDTO.vchProcessResult.object().toVariantMap();
         quint8 ErrorCount = 0;
+
+        struct stuTokenInfo {
+//            quint64 TokenID;
+            tblAPITokens::DTO TokensDTO;
+
+            QList<quint32> OldServices;
+            QList<quint32> NewServices;
+            QList<QString> AllServiceNames;
+        };
+
+        QMap<quint64, stuTokenInfo> ChangingTokens;
 
         //1: process voucher items
         foreach (stuVoucherItem VoucherItem, PreVoucher.Items) {
@@ -1863,14 +1874,20 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             QVariantMap ServiceInfo = _service.toMap();
                             return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
                         })
-                        .runFirst([/*&APICALLBOOM_PARAM, */&VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
-                            QVariantMap ServiceInfo = _service.toMap();
+                        .runFirst([&APICALLBOOM_PARAM, &ChangingTokens, &VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
+//                            QVariantMap ServiceInfo = _service.toMap();
 
-                            NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                            TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
+                            tblService::DTO ServiceDTO;
+                            ServiceDTO.fromJson(QJsonObject::fromVariantMap(_service.toMap()));
+
+//                            NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
+//                            TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
+
+                            if (ServiceDTO.svcProcessVoucherItemEndPoint.isEmpty())
+                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
 
                             //bypass process by end point?
-                            if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
+//                            if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
                                 stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
                                 VoucherItemForTrustedAction.UserID = VoucherDTO.vch_usrID; //APICALLBOOM_PARAM.getActorID();
                                 VoucherItemForTrustedAction.VoucherID = _voucherID;
@@ -1880,7 +1897,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
                                 QVariant Result = RESTClientHelper::callAPI(
                                     RESTClientHelper::POST,
-                                    NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
+                                    ServiceDTO.svcProcessVoucherItemEndPoint,
                                     {},
                                     {
                                         { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
@@ -1895,10 +1912,54 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                     ItemResult.remove("error");
 
                                 vchProcessResult[VoucherItem.UUID] = ItemResult;
-                            } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
-                            else {
-                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
-                            }
+
+                                //check token changes
+                                if (NULLABLE_HAS_VALUE(VoucherItem.TokenID)) {
+                                    if (ChangingTokens.contains(NULLABLE_VALUE(VoucherItem.TokenID)) == false) {
+                                        tblAPITokens::DTO APITokensDTO = APITokens::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                                                .where({ tblAPITokens::Fields::aptID,
+                                                       enuConditionOperator::Equal,
+                                                       NULLABLE_VALUE(VoucherItem.TokenID) })
+                                                .one<tblAPITokens::DTO>();
+
+                                        stuTokenInfo TokenInfo;
+//                                        TokenInfo.TokenID = APITokensDTO.aptID;
+                                        TokenInfo.TokensDTO = APITokensDTO;
+
+                                        auto IDParts = APITokensDTO.ServiceIDs.split(",", QString::SkipEmptyParts);
+                                        foreach (auto ID, IDParts)
+                                            TokenInfo.OldServices.append(ID.toUInt());
+
+                                        auto NameParts = APITokensDTO.ServiceNames.split(",", QString::SkipEmptyParts);
+                                        foreach (auto Name, NameParts)
+                                            TokenInfo.AllServiceNames.append(Name);
+
+//                                        TokenInfo.NewServices = TokenInfo.OldServices;
+
+                                        ChangingTokens.insert(APITokensDTO.aptID, TokenInfo);
+                                    } //if (ChangingTokens.contains(...
+
+                                    stuTokenInfo TokenInfo = ChangingTokens[NULLABLE_VALUE(VoucherItem.TokenID)];
+
+//                                    quint32 ServiceID = ServiceInfo.value(tblService::Fields::svcID).toUInt();
+                                    if ((TokenInfo.OldServices.contains(ServiceDTO.svcID) == false)
+                                            && (TokenInfo.NewServices.contains(ServiceDTO.svcID) == false)
+                                    ) {
+                                        TokenInfo.NewServices.append(ServiceDTO.svcID);
+                                        TokenInfo.AllServiceNames.append(ServiceDTO.svcName);
+
+                                        if (ServiceDTO.svcOppositeTokenTypeServiceName.isEmpty() == false)
+                                            TokenInfo.AllServiceNames.append(ServiceDTO.svcOppositeTokenTypeServiceName);
+                                    }
+
+                                    ChangingTokens[NULLABLE_VALUE(VoucherItem.TokenID)] = TokenInfo;
+
+                                } //if (NULLABLE_HAS_VALUE(VoucherItem.TokenID))
+
+//                            } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
+//                            else {
+//                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
+//                            }
 
                             return true;
                         });
@@ -1926,6 +1987,57 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                    {
                                       { tblVoucher::Fields::vchID, _voucherID }
                                    });
+
+        //3: save token changes
+        if (ChangingTokens.isEmpty() == false) {
+            foreach (auto TokenInfo, ChangingTokens) {
+                if (TokenInfo.NewServices.isEmpty())
+                    continue;
+
+                //create new Token
+                QString Token = TokenInfo.TokensDTO.aptToken;
+
+                TAPI::JWT_t JWTPayload;
+                QJWT::extractAndDecryptPayload(Token, JWTPayload);
+
+                QJsonObject PrivatePayload;
+                if (JWTPayload.contains("prv"))
+                    PrivatePayload = JWTPayload["prv"].toObject();
+
+                PrivatePayload["svc"] = TokenInfo.AllServiceNames.join(",");
+                qint64 TTL = 1 * 365 * 24 * 3600; //1 year
+
+                Token = QJWT::createSigned(
+                    JWTPayload,
+                    enuTokenActorType::API,
+                    PrivatePayload,
+                    TTL
+            //        _activeAccount.Privs["ssnKey"].toString()
+                );
+
+                //save into tblAPITokens
+                APITokens::instance().makeUpdateQuery(APICALLBOOM_PARAM)
+                        .set(tblAPITokens::Fields::aptToken, Token)
+                        .setPksByPath(TokenInfo.TokensDTO.aptID)
+                        .execute(VoucherDTO.vch_usrID) //APICALLBOOM_PARAM.getActorID())
+                        ;
+
+                //save into tblAPITokenServices
+                ORMCreateQuery CreateQueryServices = APITokenServices::instance().makeCreateQuery(APICALLBOOM_PARAM)
+                                                     .addCol(tblAPITokenServices::Fields::aptsvc_aptID)
+                                                     .addCol(tblAPITokenServices::Fields::aptsvc_svcID)
+                                                     ;
+
+                foreach (quint32 SvcID, TokenInfo.NewServices) {
+                    CreateQueryServices.values({
+                                                   { tblAPITokenServices::Fields::aptsvc_aptID, TokenInfo.TokensDTO.aptID },
+                                                   { tblAPITokenServices::Fields::aptsvc_svcID, SvcID },
+                                               });
+                }
+
+                CreateQueryServices.execute(VoucherDTO.vch_usrID); //APICALLBOOM_PARAM.getActorID());
+            }
+        }
 
         //--------------------------
         /*

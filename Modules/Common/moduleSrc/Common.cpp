@@ -23,6 +23,7 @@
 
 #include "Common.h"
 #include "ORM/Alerts.h"
+#include "ORM/AlertTemplates.h"
 
 namespace Targoman::API::CommonModule {
 
@@ -43,6 +44,7 @@ Common::Common() :
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Common, CommonSchema)
 
     this->addSubModule(&Alerts::instance());
+    this->addSubModule(&AlertTemplates::instance());
 }
 
 } //namespace Targoman::API::CommonModule

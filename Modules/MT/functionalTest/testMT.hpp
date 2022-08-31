@@ -170,7 +170,8 @@ private slots:
         QT_TRY {
             this->MTProductID = callAdminAPI(
                 RESTClientHelper::PUT,
-                "MTShop/AccountProducts",
+//                "MTShop/AccountProducts",
+                "MT/AccountProducts",
                 {},
                 {
                     { tblAccountProductsBase::Fields::prdCode,          this->MTProductCode },
@@ -196,14 +197,15 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-private:
+
     void createSaleable_mt() {
         this->MTSaleableCode = QString("%1-s%2").arg(this->MTProductCode).arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
             this->MTSaleableID = callAdminAPI(
                 RESTClientHelper::PUT,
-                "MTShop/AccountSaleables",
+//                "MTShop/AccountSaleables",
+                "MT/AccountSaleables",
                 {},
                 {
                     { tblAccountSaleablesBase::Fields::slbCode,             this->MTSaleableCode },
@@ -242,8 +244,11 @@ private:
 
             QVariantMap ResultToMap = Result.toMap();
 
-            this->TokenID  = ResultToMap["ID"].toULongLong();
-            this->TokenJWT = ResultToMap["Token"].toString();
+            this->TokenID  = ResultToMap["iD"].toULongLong();
+            this->TokenJWT = ResultToMap["token"].toString();
+
+            QVERIFY(this->TokenID > 0);
+            QVERIFY(this->TokenJWT.isEmpty() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -256,7 +261,8 @@ private:
 
             QVariant Result = callUserAPI(
                 RESTClientHelper::POST,
-                "MTShop/addToBasket",
+//                "MTShop/addToBasket",
+                "MT/addToBasket",
                 {},
                 {
                     { "saleableCode",           this->MTSaleableCode },
@@ -340,7 +346,8 @@ private:
             QVariant Result = this->callAPI(
                         this->TokenJWT,
                         RESTClientHelper::enuHTTPMethod::POST,
-                        "MTAPI/translate",
+//                        "MTAPI/translate",
+                        "MT/translate",
                         {},
                         {
                             { "text", "apple" },

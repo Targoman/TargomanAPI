@@ -462,7 +462,7 @@ public:
 /*class clsAccountPrizes: public Accounting::intfAccountPrizes
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop,clsAccountPrizes)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT,clsAccountPrizes)
 
 private slots:
 public:
