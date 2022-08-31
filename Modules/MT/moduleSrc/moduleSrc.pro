@@ -6,16 +6,18 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-ModuleName=MTAPI
+ModuleName=MT
 
 HEADERS += \
-    MTAPI.h \
-    MTAPIDefs.hpp \
-    ORM/MTHelpers.h
+    MT.h \
+    MTDefs.hpp \
+    ORM/MTHelpers.h \
+    ORM/Accounting.h
 
 SOURCES += \
     MTAPI.cpp \
-    ORM/MTHelpers.cpp
+    ORM/MTHelpers.cpp \
+    ORM/Accounting.cpp
 
 OTHER_FILES += \
 
