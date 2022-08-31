@@ -62,7 +62,7 @@ class Advert : public intfAccountingBasedModule
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE(Advert, enuTokenActorType::User);
+    TARGOMAN_API_MODULE_DEFINE(Advert); //, enuTokenActorType::User);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Advert);
     //---------------------------------------------------------
@@ -100,7 +100,7 @@ protected slots:
 //    bool REST_POST(
 //        processVoucher,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
@@ -109,7 +109,7 @@ protected slots:
 //    bool REST_POST(
 //        cancelVoucher,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
@@ -152,7 +152,7 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -161,7 +161,7 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Cleanup sample data"
@@ -169,7 +169,7 @@ protected slots:
 //    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
-//                APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+//                APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
 //        ),
 //        "Sets up basket and voucher"
 //    )

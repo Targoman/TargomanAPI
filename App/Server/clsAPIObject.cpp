@@ -55,7 +55,8 @@ clsAPIObject::clsAPIObject(
     RequiredParamsCount(static_cast<quint8>(_method.parameterCount())),
     HasExtraMethodName(_hasExtraMethodName),
     Parent(_module),
-    RequiresJWT(false)
+//    RequiresJWT(false)
+    TokenActorType(enuTokenActorType::Unknown)
 {
     QList<QByteArray> parameterTypes = _method.parameterTypes();
     quint8 i = 0;
@@ -63,7 +64,7 @@ clsAPIObject::clsAPIObject(
     foreach (const QByteArray &ParamName, _method.parameterNames()) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        /*if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_DECL)) {
+        /*if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL)) {
             this->ParamNames.append("JWT");
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
@@ -71,8 +72,11 @@ clsAPIObject::clsAPIObject(
         } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) { //APICALLBOOM_TYPE_NO_JWT_DECL)) {
             --this->RequiredParamsCount;
             this->BaseMethod.DefaultValues.removeAt(0);
-            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_DECL_STR))
-                this->RequiresJWT = true;
+//            this->RequiresJWT = true;
+            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL_STR))
+                this->TokenActorType = enuTokenActorType::User;
+            else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_DECL_STR))
+                this->TokenActorType = enuTokenActorType::API;
         } else {
             QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
             this->ParamNames.append(ParamNameNoUnderScore);

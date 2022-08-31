@@ -6,9 +6,10 @@ ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
 
 USE `{{dbprefix}}{{Schema}}`;
 
+/*
 ALTER TABLE `tblAccountProducts`
     ADD COLUMN `prdJustForAPIToken` BIT(1) NOT NULL DEFAULT 0 AFTER `prdQtyIsDecimal`;
 
 ALTER TABLE `tblAccountUserAssets`
     ADD COLUMN `uasRelatedAPITokenID` BIGINT UNSIGNED NULL AFTER `uasOrderDateTime`;
-
+*/

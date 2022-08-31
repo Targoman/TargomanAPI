@@ -342,9 +342,12 @@ clsRequestHandler::stuResult clsRequestHandler::run(
     };
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
-    if (_apiObject->requiresJWT())
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_DECL(fnTiming));
-    else
+//    if (_apiObject->requiresJWT())
+    if (_apiObject->tokenActorType() == enuTokenActorType::User)
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
+    else if (_apiObject->tokenActorType() == enuTokenActorType::API)
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
+    else //enuTokenActorType::Unknown
         APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming));
 
     try {
@@ -359,7 +362,10 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         qhttp::THeaderHash Cookies;
         TAPI::JWT_t JWT;
 
-        if (_apiObject->requiresJWT()) {
+//        enuTokenActorType::Type AcceptableActorType = _apiObject->moduleActorType();
+        enuTokenActorType::Type TokenActorType = _apiObject->tokenActorType();
+//        if (_apiObject->requiresJWT()) {
+        if (TokenActorType != enuTokenActorType::Unknown) {
             auto ServerTiming = APICALLBOOM->createScopeTiming("jwt");
 
             QString Auth = Headers.value("authorization");
@@ -367,18 +373,17 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
 
-                enuTokenActorType::Type AcceptableActorType = _apiObject->moduleActorType();
 
                 try {
                     QJWT::verifyJWT(
                                 BearerToken,
                                 RemoteIP,
-                                AcceptableActorType,
+                                TokenActorType,
                                 JWT
                                 );
 
                     //check svcs just for API tokens
-                    if ((AcceptableActorType == enuTokenActorType::API)
+                    if ((TokenActorType == enuTokenActorType::API)
                             && JWT.contains("prv") && JWT["prv"].toObject().contains("svc")) {
                         QString ModuleBaseName = _apiObject->parentModule()->moduleBaseName().split(":").first();
                         if (ModuleBaseName.isEmpty() == false) {

@@ -39,7 +39,7 @@ class Common : public intfSQLBasedModule
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE(Common, enuTokenActorType::User);
+    TARGOMAN_API_MODULE_DEFINE(Common); //, enuTokenActorType::User);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Common);
     //---------------------------------------------------------

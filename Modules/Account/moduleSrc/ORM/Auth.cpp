@@ -35,7 +35,7 @@ Auth::Auth() :
 { ; }
 
 bool IMPL_REST_GET_OR_POST(Auth, validateJWT, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     return true;
 }

@@ -269,7 +269,7 @@ private slots:
     QVariantList REST_GET_OR_POST(
         availableGatewayTypes,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint32 _amount,
             QString _domain
         ),

@@ -75,6 +75,7 @@ Advert::Advert() :
     intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
+        false,
         {
             //           day                week   month                total
             { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
@@ -229,7 +230,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 
 /***************************************************************************************************/
 //bool IMPL_REST_POST(Advert, processVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -243,7 +244,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 //}
 
 //bool IMPL_REST_POST(Advert, cancelVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -284,7 +285,7 @@ QString IMPL_REST_GET(Advert, retrieveURL, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Advert, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;
@@ -470,13 +471,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 }
 
 //bool IMPL_REST_POST(Advert, fixtureSetupVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 //    ))
 //{
 //}
 
 QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;

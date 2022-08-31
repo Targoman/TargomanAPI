@@ -46,7 +46,7 @@ class Ticketing : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE(Ticketing, enuTokenActorType::User);
+    TARGOMAN_API_MODULE_DEFINE(Ticketing); //, enuTokenActorType::User);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Ticketing);
     //---------------------------------------------------------
@@ -73,7 +73,7 @@ private slots:
     QVariantMap REST_PUT(
         newMessage,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             const QString &_title,
             const QString &_body,
             quint32 _serviceID,
@@ -90,7 +90,7 @@ private slots:
     QVariantMap REST_PUT(
         newFeedback,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             const QString &_title,
             const QString &_body,
             Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -109,7 +109,7 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -118,7 +118,7 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _random = {}
         ),
         "Cleanup sample data"

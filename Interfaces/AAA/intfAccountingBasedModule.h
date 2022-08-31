@@ -41,6 +41,7 @@ protected:
     intfAccountingBasedModule(
         const QString               &_module,
         const QString               &_schema,
+        bool                        _isTokenBase,
         AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
         intfAccountUnits            *_units,
         intfAccountProducts         *_products,
@@ -184,7 +185,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_DECL               &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL               &APICALLBOOM_PARAM,
             TAPI::SaleableCode_t                    _saleableCode,
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
             qreal                                   _qty = 1,
@@ -201,7 +202,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL           &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID,
             qreal                               _newQty,
@@ -213,7 +214,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         removeBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL           &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID
         ),
@@ -251,6 +252,7 @@ protected slots:
 
 protected:
     QString ServiceName;
+    bool IsTokenBase;
 
     QScopedPointer<intfAccountUnits>            AccountUnits;
     QScopedPointer<intfAccountProducts>         AccountProducts;

@@ -77,9 +77,9 @@ using namespace TAPI;
     bool                _reportCount, \
     bool                _translate
 
-#define            GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_DECL)
+#define            GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_DECL)
 #define ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
-#define            GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_IMPL)
+#define            GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_IMPL)
 #define ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_NO_JWT_IMPL)
 
 #define ANONYMOUSE_ORMGET(_doc, ...)                apiGET(ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
@@ -121,8 +121,8 @@ using namespace TAPI;
 |** CREATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define CREATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
 
 #define ORMCREATE(_doc, ...)                        apiCREATE(CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
     QString signOfCREATE() { return TARGOMAN_M2STR((CREATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -140,8 +140,8 @@ using namespace TAPI;
 |** UPDATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define UPDATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+#define UPDATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
 #define ORMUPDATE(_doc, ...)                        apiUPDATE(UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
     QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -159,8 +159,8 @@ using namespace TAPI;
 |** DELETE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define DELETE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
 
 #define ORMDELETE(_doc, ...)                        apiDELETE(DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
     QString signOfDELETE() { return TARGOMAN_M2STR((DELETE_METHOD_ARGS_DECL_APICALL)); } \
@@ -398,7 +398,7 @@ public:
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;
-    virtual enuTokenActorType::Type actorType() const = 0;
+//    virtual enuTokenActorType::Type actorType() const = 0;
 
 //    void addResponseHeaderNameToExpose(const QString &_header);
 //signals:
@@ -416,7 +416,10 @@ Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 //QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }
 
 //-------------------------------------------------------------------------------------------
-#define TARGOMAN_API_MODULE_DEFINE(_name, _actorType) \
+//, _actorType)
+//enuTokenActorType::Type actorType() const final { return _actorType; }
+
+#define TARGOMAN_API_MODULE_DEFINE(_name) \
 public: \
     QString parentModuleName() const final { return QString(); } \
     QString moduleBaseName() { return this->ModuleName; }  \
@@ -435,7 +438,6 @@ public: \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
         _submodule->initializeModule(); \
     } \
-    enuTokenActorType::Type actorType() const final { return _actorType; } \
 private: \
     TAPI_DISABLE_COPY(_name); \
 public: \
@@ -449,6 +451,8 @@ protected: \
     _name* _name::InstancePointer;
 
 //-------------------------------------------------------------------------------------------
+//enuTokenActorType::Type actorType() const final;
+
 #define TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
 public: \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
@@ -458,7 +462,6 @@ public: \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
-    enuTokenActorType::Type actorType() const final; \
 private: \
     TAPI_DISABLE_COPY(_name)
 
@@ -468,8 +471,9 @@ private: \
     _name();
 
 //put this macro before module class constructor (.cpp)
-#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name) \
-    enuTokenActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
+#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name)
+
+//enuTokenActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
 
 //-------------------------------------------------------------------------------------------
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }

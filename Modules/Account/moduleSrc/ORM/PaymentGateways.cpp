@@ -113,7 +113,7 @@ bool IMPL_ORMDELETE(PaymentGateways) {
 }
 
 QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     QString _domain
 )) {

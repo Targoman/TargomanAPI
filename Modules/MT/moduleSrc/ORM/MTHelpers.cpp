@@ -22,79 +22,79 @@
  */
 
 #include "MTHelpers.h"
-#include "../MTAPI.h"
+#include "../MT.h"
 
-//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::MTAPIModule, enu...);
+//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::MTModule, enu...);
 
 //using namespace Targoman::API::AAA;
 
-namespace Targoman::API::MTAPIModule::ORM {
+namespace Targoman::API::MTModule::ORM {
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, CorrectionRules)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, CorrectionRules)
 
 CorrectionRules::CorrectionRules() :
     intfCorrectionRules(
-        MTAPISchema,
+        MTSchema,
         tblCorrectionRules::Private::ExtraORMFields,
         tblCorrectionRules::Private::ExtraRelations,
         tblCorrectionRules::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, DigestedTranslationLogs)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, DigestedTranslationLogs)
 
 DigestedTranslationLogs::DigestedTranslationLogs() :
     intfDigestedTranslationLogs(
-        MTAPISchema,
+        MTSchema,
         tblDigestedTranslationLogs::Private::ExtraORMFields,
         tblDigestedTranslationLogs::Private::ExtraRelations,
         tblDigestedTranslationLogs::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, MultiDic)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, MultiDic)
 
 MultiDic::MultiDic() :
     intfMultiDic(
-        MTAPISchema,
+        MTSchema,
         tblMultiDic::Private::ExtraORMFields,
         tblMultiDic::Private::ExtraRelations,
         tblMultiDic::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, TokenStats)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, TokenStats)
 
 TokenStats::TokenStats() :
     intfTokenStats(
-        MTAPISchema,
+        MTSchema,
         tblTokenStats::Private::ExtraORMFields,
         tblTokenStats::Private::ExtraRelations,
         tblTokenStats::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, TranslatedPhrases)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, TranslatedPhrases)
 
 TranslatedPhrases::TranslatedPhrases() :
     intfTranslatedPhrases(
-        MTAPISchema,
+        MTSchema,
         tblTranslatedPhrases::Private::ExtraORMFields,
         tblTranslatedPhrases::Private::ExtraRelations,
         tblTranslatedPhrases::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTAPI, TranslationLogs)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, TranslationLogs)
 
 TranslationLogs::TranslationLogs() :
     intfTranslationLogs(
-        MTAPISchema,
+        MTSchema,
         tblTranslationLogs::Private::ExtraORMFields,
         tblTranslationLogs::Private::ExtraRelations,
         tblTranslationLogs::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-} // namespace Targoman::API::MTAPIModule::ORM
+} // namespace Targoman::API::MTModule::ORM

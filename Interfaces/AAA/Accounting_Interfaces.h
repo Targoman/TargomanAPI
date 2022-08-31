@@ -40,12 +40,13 @@ class intfAccountUnitsI18N : public intfSQLBasedModule
 
 public:
     intfAccountUnitsI18N(const QString& _schema,
-                              const QList<DBM::clsORMField>& _exclusiveCols = {},
-                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+                         const QList<DBM::clsORMField>& _exclusiveCols = {},
+                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountUnitsI18N* myInstance;
+    //key: schema
+    static QMap<QString, intfAccountUnitsI18N*> myInstance;
     friend class intfAccountUnits;
 };
 
@@ -79,12 +80,13 @@ class intfAccountProductsI18N : public intfSQLBasedModule
 
 public:
     intfAccountProductsI18N(const QString& _schema,
-                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+                            const QList<DBM::clsORMField>& _exclusiveCols = {},
+                            const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                            const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountProductsI18N* myInstance;
+    //key: schema
+    static QMap<QString, intfAccountProductsI18N*> myInstance;
     friend class intfAccountProducts;
 };
 
@@ -118,12 +120,13 @@ class intfAccountSaleablesI18N : public intfSQLBasedModule
 
 public:
     intfAccountSaleablesI18N(const QString& _schema,
-                                  const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+                             const QList<DBM::clsORMField>& _exclusiveCols = {},
+                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                             const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountSaleablesI18N* myInstance;
+    //key: schema
+    static QMap<QString, intfAccountSaleablesI18N*> myInstance;
     friend class intfAccountSaleables;
 };
 
@@ -163,7 +166,8 @@ public:
 //    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 protected:
-    static intfAccountSaleablesFiles* myInstance;
+    //key: schema
+    static QMap<QString, intfAccountSaleablesFiles*> myInstance;
     friend class intfAccountUserAssets;
 
 private slots:
@@ -195,7 +199,7 @@ private slots:
     bool REST_UPDATE(
         disablePackage,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset banned by an authorized user"
@@ -204,7 +208,7 @@ private slots:
     bool REST_UPDATE(
         setAsPrefered,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset as prefered"
@@ -223,7 +227,8 @@ public:
                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 protected:
-    static intfAccountUserAssetsFiles* myInstance;
+    //key: schema
+    static QMap<QString, intfAccountUserAssetsFiles*> myInstance;
     friend class intfAccountUserAssets;
 
 private slots:

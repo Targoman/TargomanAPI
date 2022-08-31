@@ -150,7 +150,7 @@ ORMSelectQuery User::getPhotoQuery(
 }
 
 TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -168,7 +168,7 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
 }
 
 bool IMPL_REST_UPDATE(User, photo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -200,7 +200,7 @@ bool IMPL_REST_UPDATE(User, photo, (
 }
 
 bool IMPL_REST_POST(User, deletePhoto, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
@@ -227,7 +227,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
 }
 
 bool IMPL_REST_UPDATE(User, email, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -260,7 +260,7 @@ bool IMPL_REST_UPDATE(User, email, (
 }
 
 bool IMPL_REST_UPDATE(User, mobile, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -293,7 +293,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
 }
 
 bool IMPL_REST_UPDATE(User, personalInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
@@ -322,7 +322,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, financialInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 )) {
@@ -365,7 +365,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, extraInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
     QString         _education,
@@ -503,7 +503,7 @@ UserExtraInfo::UserExtraInfo() :
         tblUserExtraInfo::Private::Indexes
 ) { ; }
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
+//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -517,7 +517,7 @@ UserExtraInfo::UserExtraInfo() :
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
+//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name

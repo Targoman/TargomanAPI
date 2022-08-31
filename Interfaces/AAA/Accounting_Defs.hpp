@@ -131,7 +131,6 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdVAT);
         TARGOMAN_CREATE_CONSTEXPR(prd_untID);
         TARGOMAN_CREATE_CONSTEXPR(prdQtyIsDecimal);
-        TARGOMAN_CREATE_CONSTEXPR(prdJustForAPIToken);
 
         ///@TODO: create trigger for this 3 fields
         TARGOMAN_CREATE_CONSTEXPR(prdInStockQty);
@@ -391,7 +390,6 @@ namespace tblAccountProductsBase {
             { Fields::prdVAT,               S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
             { Fields::prd_untID,            S(NULLABLE_TYPE(quint16)),      QFV,                                    QNull,      UPOwner },
             { Fields::prdQtyIsDecimal,      S(bool),                        QFV,                                    false,      UPAdmin },
-            { Fields::prdJustForAPIToken,   S(bool),                        QFV,                                    false,      UPAdmin },
             { Fields::prdInStockQty,        S(double),                      QFV.integer().minValue(0),              QRequired,  UPAdmin },
             { Fields::prdOrderedQty,        S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
             { Fields::prdReturnedQty,       S(NULLABLE_TYPE(double)),       QFV,                                    QNull,      UPAdmin },
@@ -445,7 +443,6 @@ namespace tblAccountProductsBase {
     SF_NULLABLE_qreal           (prdVAT), \
     SF_NULLABLE_quint16         (prd_untID), \
     SF_bool                     (prdQtyIsDecimal), \
-    SF_bool                     (prdJustForAPIToken), \
     SF_qreal                    (prdInStockQty), \
     SF_NULLABLE_qreal           (prdOrderedQty), \
     SF_NULLABLE_qreal           (prdReturnedQty), \

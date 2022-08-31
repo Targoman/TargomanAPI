@@ -128,8 +128,8 @@ stuRequestTokenResult APITokens::create(
             tblService::DTO ServiceDTO;
             ServiceDTO.fromJson(QJsonObject::fromVariantMap(Row.toMap()));
 
-            if (ServiceDTO.svcAcceptableTokenType != enuTokenActorType::API)
-                throw exHTTPExpectationFailed(QString("Acceptable Token Type of service `%1` is not API").arg(ServiceDTO.svcName));
+//            if (ServiceDTO.svcAcceptableTokenType != enuTokenActorType::API)
+//                throw exHTTPExpectationFailed(QString("Acceptable Token Type of service `%1` is not API").arg(ServiceDTO.svcName));
 
             ServiceIDs.append(ServiceDTO.svcID);
         }
@@ -216,7 +216,7 @@ stuRequestTokenResult APITokens::create(
 }
 
 Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_GET_OR_POST(APITokens, request, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_name,
     const QStringList &_services
 )) {

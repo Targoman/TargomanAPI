@@ -509,19 +509,21 @@ QJsonObject OpenAPIGenerator::retrieveJson(
                                                        });
             }
 
-            if (APIObject->requiresJWT()) {
-                ResponseModel["401"] = QJsonObject({{"description", "Authorization information is missing or invalid"}});
-                ResponseModel["403"] = QJsonObject({{"description", "Access forbidden"}});
+//            if (APIObject->requiresJWT()) {
+            if (APIObject->tokenActorType() != enuTokenActorType::Unknown) {
+                ResponseModel["401"] = QJsonObject({{ "description", "Authorization information is missing or invalid" }});
+                ResponseModel["403"] = QJsonObject({{ "description", "Access forbidden" }});
             }
 
             PathInfo["responses"] = ResponseModel;
 
-            if (APIObject->requiresJWT()) {
-                PathInfo["security"] =  QJsonArray({
-                                                       QJsonObject({
-                                                           {"Bearer", QJsonArray()}
-                                                       })
-                                                   });
+//            if (APIObject->requiresJWT()) {
+            if (APIObject->tokenActorType() != enuTokenActorType::Unknown) {
+                PathInfo["security"] = QJsonArray({
+                                                      QJsonObject({
+                                                          { "Bearer", QJsonArray() },
+                                                      })
+                                                  });
             }
             return PathInfo;
         }; // lambda createPathInfo

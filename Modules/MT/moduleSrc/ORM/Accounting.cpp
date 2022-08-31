@@ -22,20 +22,20 @@
  */
 
 #include "Accounting.h"
-#include "../MTShop.h"
+#include "../MT.h"
 
 using namespace Targoman::API::AAA;
 
-namespace Targoman::API::MTShopModule::ORM {
+namespace Targoman::API::MTModule::ORM {
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountUnits)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountUnits)
 
 AccountUnits::AccountUnits() :
     intfAccountUnits(
-        MTShopSchema,
+        MTSchema,
         tblAccountUnits::Private::ExtraORMFields,
         tblAccountUnits::Private::ExtraRelations,
         tblAccountUnits::Private::ExtraIndexes
@@ -44,11 +44,11 @@ AccountUnits::AccountUnits() :
 }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountUnitsI18N)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountUnitsI18N)
 
 AccountUnitsI18N::AccountUnitsI18N() :
     intfAccountUnitsI18N(
-        MTShopSchema,
+        MTSchema,
         tblAccountUnitsI18N::Private::ExtraORMFields,
         tblAccountUnitsI18N::Private::ExtraRelations,
         tblAccountUnitsI18N::Private::ExtraIndexes
@@ -57,11 +57,11 @@ AccountUnitsI18N::AccountUnitsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountProducts)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountProducts)
 
 AccountProducts::AccountProducts() :
     intfAccountProducts(
-        MTShopSchema,
+        MTSchema,
         tblAccountProducts::Private::ExtraORMFields,
         tblAccountProducts::Private::ExtraRelations,
         tblAccountProducts::Private::ExtraIndexes
@@ -70,11 +70,11 @@ AccountProducts::AccountProducts() :
 }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountProductsI18N)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountProductsI18N)
 
 AccountProductsI18N::AccountProductsI18N() :
     intfAccountProductsI18N(
-        MTShopSchema,
+        MTSchema,
         tblAccountProductsI18N::Private::ExtraORMFields,
         tblAccountProductsI18N::Private::ExtraRelations,
         tblAccountProductsI18N::Private::ExtraIndexes
@@ -83,11 +83,11 @@ AccountProductsI18N::AccountProductsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountSaleables)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountSaleables)
 
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
-        MTShopSchema,
+        MTSchema,
         tblAccountSaleables::Private::ExtraORMFields,
         tblAccountSaleables::Private::ExtraRelations,
         tblAccountSaleables::Private::ExtraIndexes
@@ -96,22 +96,22 @@ AccountSaleables::AccountSaleables() :
 }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountSaleablesI18N)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountSaleablesI18N)
 
 AccountSaleablesI18N::AccountSaleablesI18N() :
     intfAccountSaleablesI18N(
-        MTShopSchema,
+        MTSchema,
         tblAccountSaleablesI18N::Private::ExtraORMFields,
         tblAccountSaleablesI18N::Private::ExtraRelations,
         tblAccountSaleablesI18N::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountSaleablesFiles)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountSaleablesFiles)
 
 AccountSaleablesFiles::AccountSaleablesFiles() :
     intfAccountSaleablesFiles(
-        MTShopSchema,
+        MTSchema,
         tblAccountSaleablesFiles::Private::ExtraORMFields,
         tblAccountSaleablesFiles::Private::ExtraRelations,
         tblAccountSaleablesFiles::Private::ExtraIndexes
@@ -120,22 +120,22 @@ AccountSaleablesFiles::AccountSaleablesFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountUserAssets)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountUserAssets)
 
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
-        MTShopSchema,
+        MTSchema,
         tblAccountUserAssets::Private::ExtraORMFields,
         tblAccountUserAssets::Private::ExtraRelations,
         tblAccountUserAssets::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountUserAssetsFiles)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountUserAssetsFiles)
 
 AccountUserAssetsFiles::AccountUserAssetsFiles() :
     intfAccountUserAssetsFiles(
-        MTShopSchema,
+        MTSchema,
         tblAccountUserAssetsFiles::Private::ExtraORMFields,
         tblAccountUserAssetsFiles::Private::ExtraRelations,
         tblAccountUserAssetsFiles::Private::ExtraIndexes
@@ -144,11 +144,11 @@ AccountUserAssetsFiles::AccountUserAssetsFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountAssetUsage)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountAssetUsage)
 
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
-        MTShopSchema,
+        MTSchema,
         tblAccountAssetUsage::Private::ExtraORMFields,
         tblAccountAssetUsage::Private::ExtraRelations,
         tblAccountAssetUsage::Private::ExtraIndexes
@@ -157,14 +157,14 @@ AccountAssetUsage::AccountAssetUsage() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MTShop, AccountCoupons)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountCoupons)
 
 AccountCoupons::AccountCoupons() :
     intfAccountCoupons(
-        MTShopSchema,
+        MTSchema,
         tblAccountCoupons::Private::ExtraORMFields,
         tblAccountCoupons::Private::ExtraRelations,
         tblAccountCoupons::Private::ExtraIndexes
 ) { ; }
 
-} // namespace Targoman::API::MTShopModule::ORM
+} // namespace Targoman::API::MTModule::ORM

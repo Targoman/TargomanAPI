@@ -574,7 +574,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
 //}
 
 bool IMPL_REST_GET_OR_POST(Account, logout, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     clsJWT JWT(APICALLBOOM_PARAM.getJWT());
 
@@ -665,7 +665,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
 }
 
 bool IMPL_REST_GET_OR_POST(Account, changePass, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::MD5_t _oldPass,
     QString _oldPassSalt,
     TAPI::MD5_t _newPass
@@ -690,7 +690,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 //Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, mergeBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
 //    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 //)) {
 //    ///@TODO: must be implemented
@@ -698,14 +698,14 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 //}
 
 //Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, getBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL   &APICALLBOOM_PARAM
+//    APICALLBOOM_TYPE_JWT_USER_IMPL   &APICALLBOOM_PARAM
 //)) {
 //    ///@TODO: must be implemented
 
 //}
 
 //bool IMPL_REST_POST(Account, deleteBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
 //    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 //)) {
 //    ///@TODO: must be implemented
@@ -744,7 +744,7 @@ bool IMPL_REST_GET(Account, checkBasketVoucherExpirity, (
 }
 
 bool IMPL_REST_POST(Account, cancelVoucher, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
     quint64 CurrentUserID = 0;
@@ -793,7 +793,7 @@ void migratePreVoucher(
  * call Account/PaymentGateways/availableGatewayTypes for list of gateway types
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
     QString _domain,
     enuPaymentGatewayType::Type _gatewayType,
@@ -1160,7 +1160,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 }
 
 //Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payForBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //    QString _domain,
 //    quint64 _voucherID,
 //    NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType,
@@ -1181,7 +1181,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
 /*
 Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _domain,
     quint64 _voucherID,
     NULLABLE_TYPE(enuPaymentGatewayType::Type) _gatewayType,
@@ -1483,7 +1483,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
  *     owner
  */
 quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _bank,
     QString _receiptCode,
     TAPI::Date_t _receiptDate,
@@ -1561,7 +1561,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
  *     owner
  */
 bool IMPL_REST_POST(Account, rejectOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentID
 )) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
@@ -1604,7 +1604,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
  *     operator
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentID
 )) {
     tblOfflinePayments::DTO OfflinePaymentDTO = OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
@@ -1699,7 +1699,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
 /*
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_withBankInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,
     const QString& _receiptCode,
@@ -1948,8 +1948,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                         TokenInfo.NewServices.append(ServiceDTO.svcID);
                                         TokenInfo.AllServiceNames.append(ServiceDTO.svcName);
 
-                                        if (ServiceDTO.svcOppositeTokenTypeServiceName.isEmpty() == false)
-                                            TokenInfo.AllServiceNames.append(ServiceDTO.svcOppositeTokenTypeServiceName);
+//                                        if (ServiceDTO.svcOppositeTokenTypeServiceName.isEmpty() == false)
+//                                            TokenInfo.AllServiceNames.append(ServiceDTO.svcOppositeTokenTypeServiceName);
                                     }
 
                                     ChangingTokens[NULLABLE_VALUE(VoucherItem.TokenID)] = TokenInfo;
@@ -2216,7 +2216,7 @@ void Account::tryCancelVoucher(
  *     operator
  */
 quint64 IMPL_REST_POST(Account, addPrizeTo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     QString _desc
@@ -2247,7 +2247,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
  *     operator
  */
 quint64 IMPL_REST_POST(Account, addIncomeTo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     QString _desc
@@ -2274,7 +2274,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
 }
 
 bool IMPL_REST_POST(Account, checkVoucherTTL, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
 }
@@ -2524,7 +2524,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
                 APICALLBOOM_PARAM,
                 UserID,
                 "token for me",
-                { "MTAPI" }
+                { "MT" }
                 );
 
     Result.insert("APIToken", TokenInfo.toJson());

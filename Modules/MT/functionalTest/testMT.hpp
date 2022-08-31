@@ -187,7 +187,6 @@ private slots:
                           { "fa", "شرح فارسی ۱۲۳" },
                           { "ar", "شرح عربی ۱۲۳" },
                     }) },
-                    { tblAccountProductsBase::Fields::prdJustForAPIToken,   true },
                 }
             );
 
@@ -235,7 +234,7 @@ private slots:
                         {
                             { "name", "test mt" },
 //                            { "services", QStringList({
-//                                "MTAPI",
+//                                "MT",
 //                                "blablabla",
 //                            }) },
                         });
@@ -346,7 +345,6 @@ private slots:
             QVariant Result = this->callAPI(
                         this->TokenJWT,
                         RESTClientHelper::enuHTTPMethod::POST,
-//                        "MTAPI/translate",
                         "MT/translate",
                         {},
                         {

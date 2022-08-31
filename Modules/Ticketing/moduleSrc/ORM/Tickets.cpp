@@ -51,7 +51,7 @@ Tickets::Tickets() :
 
 QVariant Tickets::apiGET(
 //    GET_METHOD_ARGS_IMPL_APICALL,
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath,
     quint64 _pageIndex,
     quint16 _pageSize,
@@ -138,7 +138,7 @@ QVariant Tickets::apiGET(
 }
 
 QVariant IMPL_REST_UPDATE(Tickets, setAsRead, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();

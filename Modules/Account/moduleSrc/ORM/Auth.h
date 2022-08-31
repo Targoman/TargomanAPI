@@ -42,7 +42,7 @@ private slots:
     bool REST_GET_OR_POST(
         validateJWT,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
         ),
         "Check JWT"
     )

@@ -21,20 +21,20 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MTSHOP_ORM_ACCOUNTING_H
-#define TARGOMAN_API_MODULES_MTSHOP_ORM_ACCOUNTING_H
+#ifndef TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H
+#define TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/AAA/AAA.hpp"
-#include "../MTShopDefs.hpp"
+#include "../MTDefs.hpp"
 
-namespace Targoman::API::MTShopModule {
+namespace Targoman::API::MTModule {
 
 //structures and enumes goes here
 
-} //namespace Targoman::API::MTShopModule
+} //namespace Targoman::API::MTModule
 
-namespace Targoman::API::MTShopModule {
+namespace Targoman::API::MTModule {
 namespace ORM {
 
 #pragma GCC diagnostic push
@@ -349,7 +349,7 @@ namespace tblAccountCoupons {
 class AccountUnits : public intfAccountUnits
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountUnits)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnits)
 
 protected:
     QScopedPointer<intfAccountUnitsI18N> AccountUnitsI18N;
@@ -359,7 +359,7 @@ protected:
 class AccountUnitsI18N : public intfAccountUnitsI18N
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountUnitsI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnitsI18N)
 
 public:
 };
@@ -370,7 +370,7 @@ public:
 class AccountProducts : public intfAccountProducts
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountProducts)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProducts)
 
 protected:
     QScopedPointer<intfAccountProductsI18N> AccountProductsI18N;
@@ -380,7 +380,7 @@ protected:
 class AccountProductsI18N : public intfAccountProductsI18N
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountProductsI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProductsI18N)
 
 public:
 };
@@ -391,7 +391,7 @@ public:
 class AccountSaleables : public intfAccountSaleables
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountSaleables)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleables)
 
 protected:
     QScopedPointer<intfAccountSaleablesI18N> AccountSaleablesI18N;
@@ -401,7 +401,7 @@ protected:
 class AccountSaleablesI18N : public intfAccountSaleablesI18N
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountSaleablesI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesI18N)
 
 //public:
 };
@@ -410,7 +410,7 @@ class AccountSaleablesI18N : public intfAccountSaleablesI18N
 class AccountSaleablesFiles : public intfAccountSaleablesFiles
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountSaleablesFiles)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesFiles)
 };
 
 /******************************************************/
@@ -419,7 +419,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFiles
 class AccountUserAssets : public intfAccountUserAssets
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountUserAssets)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssets)
 
 //public:
 };
@@ -428,7 +428,7 @@ class AccountUserAssets : public intfAccountUserAssets
 class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountUserAssetsFiles)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssetsFiles)
 
 //public:
 };
@@ -439,7 +439,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
 class AccountAssetUsage : public intfAccountAssetUsage
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountAssetUsage)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountAssetUsage)
 
 public:
 };
@@ -450,7 +450,7 @@ public:
 class AccountCoupons : public intfAccountCoupons
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTShop, AccountCoupons)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountCoupons)
 
 public:
 };
@@ -470,6 +470,6 @@ public:
 */
 
 } //namespace ORM
-} //namespace Targoman::API::MTShopModule
+} //namespace Targoman::API::MTModule
 
-#endif // TARGOMAN_API_MODULES_MTSHOP_ORM_ACCOUNTING_H
+#endif // TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H

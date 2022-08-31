@@ -296,7 +296,7 @@ private slots:
     Targoman::API::AccountModule::stuRequestTokenResult REST_GET_OR_POST(
         request,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             const QString &_name,
             const QStringList &_services = {}
         ),

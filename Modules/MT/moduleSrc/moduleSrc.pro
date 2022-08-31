@@ -15,7 +15,7 @@ HEADERS += \
     ORM/Accounting.h
 
 SOURCES += \
-    MTAPI.cpp \
+    MT.cpp \
     ORM/MTHelpers.cpp \
     ORM/Accounting.cpp
 

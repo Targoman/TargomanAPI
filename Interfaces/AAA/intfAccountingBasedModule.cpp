@@ -109,6 +109,7 @@ intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
 intfAccountingBasedModule::intfAccountingBasedModule(
     const QString               &_module,
     const QString               &_schema,
+    bool                        _isTokenBase,
     AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
     intfAccountUnits            *_units,
     intfAccountProducts         *_products,
@@ -123,6 +124,7 @@ intfAccountingBasedModule::intfAccountingBasedModule(
 //    intfSQLBasedWithActionLogsModule(_module, _schema),
     intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
+    IsTokenBase(_isTokenBase),
     AccountUnits(_units),
     AccountProducts(_products),
     AccountSaleables(_saleables),
@@ -350,7 +352,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL               &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL               &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
     qreal                                   _qty,
@@ -479,7 +481,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     AssetItem.Saleable.fromJson(JsonSaleableInfo);
 
     //-- --------------------------------
-    if (AssetItem.Product.prdJustForAPIToken) {
+    if (this->IsTokenBase) {
         if (NULLABLE_IS_NULL(_tokenID))
             throw exHTTPInternalServerError("This product is token related");
 
@@ -490,7 +492,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
         //call api : GET Account/APIToken/%1
     }
 
-    if ((AssetItem.Product.prdJustForAPIToken == false) && NULLABLE_HAS_VALUE(_tokenID))
+    if ((this->IsTokenBase == false) && NULLABLE_HAS_VALUE(_tokenID))
         throw exHTTPInternalServerError("This product is NOT token related");
 
     //-- --------------------------------
@@ -666,7 +668,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID,
     qreal                               _newQty,
@@ -694,7 +696,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID
 )) {

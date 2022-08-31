@@ -68,7 +68,7 @@ bool IMPL_ORMDELETE(Currency) {
  *     owner
  */
 bool IMPL_REST_UPDATE(Currency, setAsDefault, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
     Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canChangeDefault" });

@@ -21,25 +21,25 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MTAPI_ORM_MTHELPERS_H
-#define TARGOMAN_API_MODULES_MTAPI_ORM_MTHELPERS_H
+#ifndef TARGOMAN_API_MODULES_MT_ORM_MTHELPERS_H
+#define TARGOMAN_API_MODULES_MT_ORM_MTHELPERS_H
 
 #include "ModuleHelpers/MT/Interfaces/intfMTHelpers.h"
-#include "../MTAPIDefs.hpp"
+#include "../MTDefs.hpp"
 
 using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
 
-namespace Targoman::API::MTAPIModule {
+namespace Targoman::API::MTModule {
 
 //structures and enumes goes here
 
 //TARGOMAN_DEFINE_ENUM (enu...,
 
-} //namespace Targoman::API::MTAPIModule
+} //namespace Targoman::API::MTModule
 
-//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::MTAPIModule, enu...);
+//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::MTModule, enu...);
 
-namespace Targoman::API::MTAPIModule::ORM {
+namespace Targoman::API::MTModule::ORM {
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -209,45 +209,45 @@ namespace tblTranslationLogs {
 class CorrectionRules : public intfCorrectionRules
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, CorrectionRules)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, CorrectionRules)
 };
 
 /******************************************************/
 class DigestedTranslationLogs : public intfDigestedTranslationLogs
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, DigestedTranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, DigestedTranslationLogs)
 };
 
 /******************************************************/
 class MultiDic : public intfMultiDic
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, MultiDic)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MultiDic)
 };
 
 /******************************************************/
 class TokenStats : public intfTokenStats
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, TokenStats)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, TokenStats)
 };
 
 /******************************************************/
 class TranslatedPhrases : public intfTranslatedPhrases
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, TranslatedPhrases)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslatedPhrases)
 };
 
 /******************************************************/
 class TranslationLogs : public intfTranslationLogs
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MTAPI, TranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslationLogs)
 };
 
 /******************************************************/
-} //namespace Targoman::API::MTAPIModule::ORM
+} //namespace Targoman::API::MTModule::ORM
 
-#endif // TARGOMAN_API_MODULES_MTAPI_ORM_MTHELPERS_H
+#endif // TARGOMAN_API_MODULES_MT_ORM_MTHELPERS_H
