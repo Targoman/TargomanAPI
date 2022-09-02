@@ -163,15 +163,15 @@ stuRequestTokenResult APITokens::create(
 
                                    })
                            ;
-    qint64 APITokenID = CreateQuery.execute(_userID); //APICALLBOOM_PARAM.getActorID());
+    quint64 APITokenID = CreateQuery.execute(_userID); //APICALLBOOM_PARAM.getActorID());
 
     //3: create jwt
     QJsonObject Privs;
 
     QJsonObject Payload = {
 //        { JWTItems::iat,             },
-        { JWTItems::own,            QString::number(_userID) }, //APICALLBOOM_PARAM.getActorID() },
-        { JWTItems::uid,            APITokenID },
+        { JWTItems::own,            static_cast<double>(_userID) }, //APICALLBOOM_PARAM.getActorID() },
+        { JWTItems::uid,            static_cast<double>(APITokenID) },
         { JWTItems::privs,          Privs },
 //        { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
 //        { JWTItems::rolID,          _activeAccount.Privs["usr_rolID"] },
@@ -192,7 +192,7 @@ stuRequestTokenResult APITokens::create(
     this->makeUpdateQuery(APICALLBOOM_PARAM)
             .set(tblAPITokens::Fields::aptToken, JWT)
             .set(tblAPITokens::Fields::aptStatus, enuAPITokensStatus::Active)
-            .setPksByPath((quint64)APITokenID)
+            .setPksByPath(APITokenID)
             .execute(_userID) //APICALLBOOM_PARAM.getActorID())
             ;
 

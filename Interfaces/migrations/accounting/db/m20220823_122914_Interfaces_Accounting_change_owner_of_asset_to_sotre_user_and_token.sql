@@ -1,9 +1,6 @@
 /* Migration File: m20220823_122914_Interfaces_Accounting_change_owner_of_asset_to_sotre_user_and_token.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
-/* The next line is to prevent this file from being committed. When done, delete this and next line: */
-ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
-
 USE `{{dbprefix}}{{Schema}}`;
 
 ALTER TABLE `tblAccountUserAssets`

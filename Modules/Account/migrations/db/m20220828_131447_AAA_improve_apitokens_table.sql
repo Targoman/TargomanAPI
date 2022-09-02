@@ -1,9 +1,6 @@
 /* Migration File: m20220828_131447_AAA_improve_apitokens_table.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
-/* The next line is to prevent this file from being committed. When done, delete this and next line: */
-ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
-
 USE `{{dbprefix}}{{Schema}}`;
 
 ALTER TABLE `tblAPITokens`

@@ -267,7 +267,7 @@ private slots:
                     { "saleableCode",           this->MTSaleableCode },
 //                    { "orderAdditives",         QVariantMap({ { "adtv1", "1 1 1" }, { "adtv2", 111 } }) },
                     { "qty",                    1 },
-                    { "tokenID",                this->TokenID },
+                    { "apiToken",               this->TokenJWT },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 }
             );
