@@ -625,7 +625,7 @@ inline QString toCammel(const QString& _name) {
 #define INTERNAL_SF_INTEGRAL_0()                 INTERNAL_SF_INTEGRAL_1(0)
 
 #define INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, _validator) _def, _validator
-#define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v==v)
+#define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v!=NULLABLE_NULL_VALUE)
 #define INTERNAL_SF_NULLABLE_INTEGRAL_0()                 INTERNAL_SF_NULLABLE_INTEGRAL_1(NULLABLE_NULL_VALUE)
 
 /************************************************************/
