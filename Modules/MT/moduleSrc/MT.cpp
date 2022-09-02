@@ -507,8 +507,6 @@ QVariant IMPL_REST_POST(MT, fixtureCleanup, (
 
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM,
-//    const TAPI::RemoteIP_t& _REMOTE_IP,
-//    const QString& _token,
     QString _text,
     QString _dir,
     const QString& _engine,

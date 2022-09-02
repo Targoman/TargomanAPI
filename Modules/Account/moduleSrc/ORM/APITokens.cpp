@@ -76,26 +76,26 @@ ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARA
     return Query;
 }
 
-QVariant IMPL_ORMGET(APITokens) {
+QVariant IMPL_ORMGET_USER(APITokens) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-//quint64 IMPL_ORMCREATE(APITokens) {
+//quint64 IMPL_ORMCREATE_USER(APITokens) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 //}
 
-//bool IMPL_ORMUPDATE(APITokens) {
+//bool IMPL_ORMUPDATE_USER(APITokens) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
 //    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 //}
 
-//bool IMPL_ORMDELETE(APITokens) {
+//bool IMPL_ORMDELETE_USER(APITokens) {
 //    TAPI::ORMFields_t ExtraFilters;
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
 //        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
@@ -106,6 +106,7 @@ QVariant IMPL_ORMGET(APITokens) {
 
 stuRequestTokenResult APITokens::create(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const QString &_name,
     const QStringList &_services
@@ -169,6 +170,7 @@ stuRequestTokenResult APITokens::create(
 
     QJsonObject Payload = {
 //        { JWTItems::iat,             },
+        { JWTItems::own,            QString::number(_userID) }, //APICALLBOOM_PARAM.getActorID() },
         { JWTItems::uid,            APITokenID },
         { JWTItems::privs,          Privs },
 //        { JWTItems::usrStatus,      TAPI::enuUserStatus::toStr(_activeAccount.Privs["usrStatus"].toString()) },
@@ -240,20 +242,20 @@ APITokenServices::APITokenServices() :
         tblAPITokenServices::Private::Indexes
 ) { ; }
 
-//QVariant IMPL_ORMGET(APITokenServices) {
+//QVariant IMPL_ORMGET_USER(APITokenServices) {
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        this->setSelfFilters({{tblAPITokenServices::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
 //    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 //}
 
-//quint64 IMPL_ORMCREATE(APITokenServices) {
+//quint64 IMPL_ORMCREATE_USER(APITokenServices) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 //}
 
-//bool IMPL_ORMDELETE(APITokenServices) {
+//bool IMPL_ORMDELETE_USER(APITokenServices) {
 //    TAPI::ORMFields_t ExtraFilters;
 
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
@@ -274,7 +276,7 @@ APITokenValidIPs::APITokenValidIPs() :
         tblAPITokenValidIPs::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(APITokenValidIPs) {
+QVariant IMPL_ORMGET_USER(APITokenValidIPs) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
@@ -285,13 +287,13 @@ QVariant IMPL_ORMGET(APITokenValidIPs) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
-quint64 IMPL_ORMCREATE(APITokenValidIPs) {
+quint64 IMPL_ORMCREATE_USER(APITokenValidIPs) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(APITokenValidIPs) {
+bool IMPL_ORMUPDATE_USER(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())) == false)
         ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
@@ -301,7 +303,7 @@ bool IMPL_ORMUPDATE(APITokenValidIPs) {
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
 
-bool IMPL_ORMDELETE(APITokenValidIPs) {
+bool IMPL_ORMDELETE_USER(APITokenValidIPs) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)

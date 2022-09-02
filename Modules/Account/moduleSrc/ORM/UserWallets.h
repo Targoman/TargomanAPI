@@ -141,10 +141,10 @@ class UserWallets : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, UserWallets)
 
 private slots:
-    QVariant ORMGET("Get UserWallets information")
-    quint64 ORMCREATE("Create a new Wallet")
-    bool ORMUPDATE("Update Wallet info by an authorized user")
-    bool ORMDELETE("Delete a Wallet. Take note that default wallet can not be deleted")
+    QVariant ORMGET_USER("Get UserWallets information")
+    quint64 ORMCREATE_USER("Create a new Wallet")
+    bool ORMUPDATE_USER("Update Wallet info by an authorized user")
+    bool ORMDELETE_USER("Delete a Wallet. Take note that default wallet can not be deleted")
 
     bool REST_UPDATE(
         setAsDefault, //defaultWallet,

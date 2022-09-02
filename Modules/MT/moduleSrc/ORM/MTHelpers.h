@@ -206,42 +206,42 @@ namespace tblTranslationLogs {
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class CorrectionRules : public intfCorrectionRules
+class CorrectionRules : public intfCorrectionRules<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, CorrectionRules)
 };
 
 /******************************************************/
-class DigestedTranslationLogs : public intfDigestedTranslationLogs
+class DigestedTranslationLogs : public intfDigestedTranslationLogs<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, DigestedTranslationLogs)
 };
 
 /******************************************************/
-class MultiDic : public intfMultiDic
+class MultiDic : public intfMultiDic<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MultiDic)
 };
 
 /******************************************************/
-class TokenStats : public intfTokenStats
+class TokenStats : public intfTokenStats<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, TokenStats)
 };
 
 /******************************************************/
-class TranslatedPhrases : public intfTranslatedPhrases
+class TranslatedPhrases : public intfTranslatedPhrases<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslatedPhrases)
 };
 
 /******************************************************/
-class TranslationLogs : public intfTranslationLogs
+class TranslationLogs : public intfTranslationLogs<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslationLogs)

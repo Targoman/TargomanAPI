@@ -67,7 +67,7 @@ ApprovalRequest::ApprovalRequest() :
         tblApprovalRequest::Private::Indexes
     ) { ; }
 
-QVariant IMPL_ORMGET(ApprovalRequest) {
+QVariant IMPL_ORMGET_USER(ApprovalRequest) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -77,7 +77,7 @@ QVariant IMPL_ORMGET(ApprovalRequest) {
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool IMPL_ORMDELETE(ApprovalRequest) {
+bool IMPL_ORMDELETE_USER(ApprovalRequest) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, {}, true);

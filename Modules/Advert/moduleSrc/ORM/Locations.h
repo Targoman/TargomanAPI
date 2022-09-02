@@ -107,10 +107,10 @@ class Locations : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, Locations)
 
 private slots:
-    QVariant ORMGET("Get Locations information")
-    quint32 ORMCREATE("Create a new Location by an authorized user")
-    bool ORMUPDATE("Update Location info by an authorized user")
-    bool ORMDELETE("Delete a Locations")
+    QVariant ORMGET_USER("Get Locations information")
+    quint32 ORMCREATE_USER("Create a new Location by an authorized user")
+    bool ORMUPDATE_USER("Update Location info by an authorized user")
+    bool ORMDELETE_USER("Delete a Locations")
 };
 
 } //namespace ORM

@@ -39,8 +39,9 @@ TARGOMAN_CREATE_CONSTEXPR(jti);
 TARGOMAN_CREATE_CONSTEXPR(iat);
 TARGOMAN_CREATE_CONSTEXPR(exp);
 //
+TARGOMAN_CREATE_CONSTEXPR(own); //owner usr id for token only
 TARGOMAN_CREATE_CONSTEXPR(uid); //usrID -> actor id
-TARGOMAN_CREATE_CONSTEXPR(typ); //enuTokenActorType
+TARGOMAN_CREATE_CONSTEXPR(typ); //enuTokenActorType::Type
 //
 TARGOMAN_CREATE_CONSTEXPR(priv);
 TARGOMAN_CREATE_CONSTEXPR(privs);
@@ -62,7 +63,7 @@ public:
     inline quint64 expireAt() const                             { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
     //
     inline quint64 actorID() const                              { return static_cast<quint64>(this->Token.value(JWTItems::uid).toDouble()); }
-    inline TAPI::enuTokenActorType::Type actorType() const     { return TAPI::enuTokenActorType::toEnum(this->Token.value(JWTItems::typ).toString()); }
+    inline TAPI::enuTokenActorType::Type actorType() const      { return TAPI::enuTokenActorType::toEnum(this->Token.value(JWTItems::typ).toString()); }
     //
     inline QVariantMap privatePart() const                      { return this->Token.value(JWTItems::priv).toObject().toVariantMap(); }
     inline QVariantMap privs() const                            { return this->Token.value(JWTItems::privs).toObject().toVariantMap(); }
@@ -75,6 +76,8 @@ public:
     inline bool canChangePass() const                           { return this->Token.value(JWTItems::canChangePass).toBool(); }
     inline QString rolName() const                              { return this->Token.value(JWTItems::rolName).toString(); }
     inline quint64 rolID() const                                { return static_cast<quint64>(this->Token.value(JWTItems::rolID).toDouble()); }
+
+    inline quint64 ownerID() const                              { return static_cast<quint64>(this->Token.contains(JWTItems::own) ? this->Token.value(JWTItems::own).toDouble() : 0); }
 
     inline QJsonValue value(const QLatin1String& _key) const    { return this->Token.value(_key); }
 

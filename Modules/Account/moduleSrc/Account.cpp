@@ -228,7 +228,7 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
 
     TAPI::EncodedJWT_t JWT = QJWT::createSigned(
         Payload,
-        enuTokenActorType::User,
+        enuTokenActorType::USER,
         QJsonObject({ { "svc", _services } }),
         _activeAccount.TTL,
         _activeAccount.Privs["ssnKey"].toString()
@@ -1914,12 +1914,12 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                 vchProcessResult[VoucherItem.UUID] = ItemResult;
 
                                 //check token changes
-                                if (NULLABLE_HAS_VALUE(VoucherItem.TokenID)) {
-                                    if (ChangingTokens.contains(NULLABLE_VALUE(VoucherItem.TokenID)) == false) {
+                                if (NULLABLE_HAS_VALUE(VoucherItem.APITokenID)) {
+                                    if (ChangingTokens.contains(NULLABLE_VALUE(VoucherItem.APITokenID)) == false) {
                                         tblAPITokens::DTO APITokensDTO = APITokens::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                                 .where({ tblAPITokens::Fields::aptID,
                                                        enuConditionOperator::Equal,
-                                                       NULLABLE_VALUE(VoucherItem.TokenID) })
+                                                       NULLABLE_VALUE(VoucherItem.APITokenID) })
                                                 .one<tblAPITokens::DTO>();
 
                                         stuTokenInfo TokenInfo;
@@ -1939,7 +1939,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                         ChangingTokens.insert(APITokensDTO.aptID, TokenInfo);
                                     } //if (ChangingTokens.contains(...
 
-                                    stuTokenInfo TokenInfo = ChangingTokens[NULLABLE_VALUE(VoucherItem.TokenID)];
+                                    stuTokenInfo TokenInfo = ChangingTokens[NULLABLE_VALUE(VoucherItem.APITokenID)];
 
 //                                    quint32 ServiceID = ServiceInfo.value(tblService::Fields::svcID).toUInt();
                                     if ((TokenInfo.OldServices.contains(ServiceDTO.svcID) == false)
@@ -1952,7 +1952,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 //                                            TokenInfo.AllServiceNames.append(ServiceDTO.svcOppositeTokenTypeServiceName);
                                     }
 
-                                    ChangingTokens[NULLABLE_VALUE(VoucherItem.TokenID)] = TokenInfo;
+                                    ChangingTokens[NULLABLE_VALUE(VoucherItem.APITokenID)] = TokenInfo;
 
                                 } //if (NULLABLE_HAS_VALUE(VoucherItem.TokenID))
 

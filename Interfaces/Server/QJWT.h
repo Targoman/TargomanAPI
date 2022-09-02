@@ -55,7 +55,7 @@ public:
 
     static QString createSigned(
         INOUT QJsonObject &_payload,
-        TAPI::enuTokenActorType::Type _tokenType = TAPI::enuTokenActorType::User,
+        TAPI::enuTokenActorType::Type _tokenType = TAPI::enuTokenActorType::USER,
         QJsonObject _privatePayload = QJsonObject(),
         const qint64 _expiry = -1,
         const QString &_sessionID = {},

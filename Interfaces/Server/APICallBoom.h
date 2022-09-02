@@ -33,20 +33,27 @@
 
 namespace TAPI {
 
-TARGOMAN_DEFINE_ENHANCED_ENUM(enuTokenActorType,
-                              User, //   = 'U',
-                              API, //    = 'A'
-                              );
+TARGOMAN_DEFINE_ENUM(enuTokenActorType,
+                     ANONYMOUSE,
+                     USER, //   = 'U',
+                     API, //    = 'A'
+                     );
+
+//enum struct enuTokenActorType {
+//    ANONYMOUSE,
+//    USER,
+//    API
+//};
 
 }
 
-//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuTokenActorType);
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuTokenActorType::Type);
 
 #define APICALLBOOM_TYPE_BASE_STR               "APICallBoom<"
 
 //-- NO JWT
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_NO_JWT_DECL            APICallBoom<TAPI::enuTokenActorType::Unknown> //false>
+#define APICALLBOOM_TYPE_NO_JWT_DECL            APICallBoom<TAPI::enuTokenActorType::ANONYMOUSE> //false>
 #define APICALLBOOM_TYPE_NO_JWT_DECL_STR        TARGOMAN_M2STR(APICALLBOOM_TYPE_NO_JWT_DECL)
 
 //just for use in api methods (.cpp)
@@ -54,7 +61,7 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuTokenActorType,
 
 //-- JWT : USER
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_USER_DECL          APICallBoom<TAPI::enuTokenActorType::User> //true>
+#define APICALLBOOM_TYPE_JWT_USER_DECL          APICallBoom<TAPI::enuTokenActorType::USER> //true>
 #define APICALLBOOM_TYPE_JWT_USER_DECL_STR      TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_USER_DECL)
 
 //just for use in api methods (.cpp)

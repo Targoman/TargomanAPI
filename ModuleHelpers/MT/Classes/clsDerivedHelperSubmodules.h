@@ -30,25 +30,26 @@ namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 using namespace Interfaces;
 
+template <TAPI::enuTokenActorType::Type _tokenActorType>
 class clsDerivedHelperSubmodules
 {
 public:
     clsDerivedHelperSubmodules(
-        intfCorrectionRules         *_correctionRules,
-        intfDigestedTranslationLogs *_digestedTranslationLogs,
-        intfMultiDic                *_multiDic,
-        intfTokenStats              *_tokenStats,
-        intfTranslatedPhrases       *_translatedPhrases,
-        intfTranslationLogs         *_translationLogs
+        intfCorrectionRules<_tokenActorType>         *_correctionRules,
+        intfDigestedTranslationLogs<_tokenActorType> *_digestedTranslationLogs,
+        intfMultiDic<_tokenActorType>                *_multiDic,
+        intfTokenStats<_tokenActorType>              *_tokenStats,
+        intfTranslatedPhrases<_tokenActorType>       *_translatedPhrases,
+        intfTranslationLogs<_tokenActorType>         *_translationLogs
     );
 
 public:
-    QScopedPointer<intfCorrectionRules>         CorrectionRules;
-    QScopedPointer<intfDigestedTranslationLogs> DigestedTranslationLogs;
-    QScopedPointer<intfMultiDic>                MultiDic;
-    QScopedPointer<intfTokenStats>              TokenStats;
-    QScopedPointer<intfTranslatedPhrases>       TranslatedPhrases;
-    QScopedPointer<intfTranslationLogs>         TranslationLogs;
+    QScopedPointer<intfCorrectionRules<_tokenActorType>>         CorrectionRules;
+    QScopedPointer<intfDigestedTranslationLogs<_tokenActorType>> DigestedTranslationLogs;
+    QScopedPointer<intfMultiDic<_tokenActorType>>                MultiDic;
+    QScopedPointer<intfTokenStats<_tokenActorType>>              TokenStats;
+    QScopedPointer<intfTranslatedPhrases<_tokenActorType>>       TranslatedPhrases;
+    QScopedPointer<intfTranslationLogs<_tokenActorType>>         TranslationLogs;
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes

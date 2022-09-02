@@ -47,10 +47,10 @@ class User : public intfSQLBasedModule
         quint64 _usrID);
     
 private slots:
-    QVariant ORMGET("Get user information")
-    quint64 ORMCREATE("Create a new user by an authorized user. Email or Mobile is required")
-    bool ORMUPDATE("Update User info by an authorized user")
-    bool ORMDELETE("Delete a User by an authorized user")
+    QVariant ORMGET_USER("Get user information")
+    quint64 ORMCREATE_USER("Create a new user by an authorized user. Email or Mobile is required")
+    bool ORMUPDATE_USER("Update User info by an authorized user")
+    bool ORMDELETE_USER("Delete a User by an authorized user")
 
     TAPI::Base64Image_t REST_GET(
         photo,

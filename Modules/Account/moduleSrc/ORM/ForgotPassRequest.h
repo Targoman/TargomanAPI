@@ -109,8 +109,8 @@ class ForgotPassRequest : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, ForgotPassRequest)
 
 private slots:
-    QVariant ORMGET("Get ForgotPassRequest information")
-    bool ORMDELETE("Delete a ForgotPassRequest")
+    QVariant ORMGET_USER("Get ForgotPassRequest information")
+    bool ORMDELETE_USER("Delete a ForgotPassRequest")
 };
 
 } //namespace ORM

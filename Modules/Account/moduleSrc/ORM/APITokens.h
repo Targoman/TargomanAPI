@@ -279,6 +279,7 @@ class APITokens : public intfSQLBasedModule
 public:
     stuRequestTokenResult create(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const QString &_name,
         const QStringList &_services = {}
@@ -288,10 +289,10 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ORMGET("Get APITokens information")
-//    quint64 ORMCREATE("Create a new APITokens by an authorized user")
-//    bool ORMUPDATE("Update token info by an authorized user")
-//    bool ORMDELETE("Delete an APIToken")
+    QVariant ORMGET_USER("Get APITokens information")
+//    quint64 ORMCREATE_USER("Create a new APITokens by an authorized user")
+//    bool ORMUPDATE_USER("Update token info by an authorized user")
+//    bool ORMDELETE_USER("Delete an APIToken")
 
     Targoman::API::AccountModule::stuRequestTokenResult REST_GET_OR_POST(
         request,
@@ -312,9 +313,9 @@ class APITokenServices : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokenServices)
 
 private slots:
-//    QVariant ORMGET("Get APITokenServices information")
-//    quint64 ORMCREATE("Create a new APITokenServices by an authorized user")
-//    bool ORMDELETE("Delete an APIToken")
+//    QVariant ORMGET_USER("Get APITokenServices information")
+//    quint64 ORMCREATE_USER("Create a new APITokenServices by an authorized user")
+//    bool ORMDELETE_USER("Delete an APIToken")
 };
 
 /******************************************************/
@@ -324,10 +325,10 @@ class APITokenValidIPs : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokenValidIPs)
 
 private slots:
-    QVariant ORMGET("Get APITokenValidIPs information")
-    quint64 ORMCREATE("Create a new APITokenValidIP")
-    bool ORMUPDATE("Update token valid IP info")
-    bool ORMDELETE("Delete an APITokenValidIP")
+    QVariant ORMGET_USER("Get APITokenValidIPs information")
+    quint64 ORMCREATE_USER("Create a new APITokenValidIP")
+    bool ORMUPDATE_USER("Update token valid IP info")
+    bool ORMDELETE_USER("Delete an APITokenValidIP")
 };
 
 /******************************************************/

@@ -42,7 +42,7 @@ Alerts::Alerts() :
     ),
     intfAlerts() { ; }
 
-QVariant IMPL_ORMGET(Alerts) {
+QVariant IMPL_ORMGET_USER(Alerts) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
 //    return this->Select(GET_METHOD_ARGS_CALL_VALUES);

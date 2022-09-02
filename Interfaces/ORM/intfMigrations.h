@@ -84,7 +84,7 @@ public:
     );
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET_HIDDEN("Get migrations")
+    QVariant ORMGET_ANONYMOUSE_HIDDEN("Get migrations")
 };
 
 } //namespace Targoman::API::ORM

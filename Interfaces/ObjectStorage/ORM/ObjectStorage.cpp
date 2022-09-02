@@ -64,7 +64,7 @@ intfUploadFiles::intfUploadFiles(
         tblUploadFiles::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(intfUploadFiles) {
+QVariant IMPL_ORMGET_USER(intfUploadFiles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -85,12 +85,12 @@ intfUploadGateways::intfUploadGateways(
         tblUploadGateways::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(intfUploadGateways) {
+QVariant IMPL_ORMGET_USER(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-quint32 IMPL_ORMCREATE(intfUploadGateways) {
+quint32 IMPL_ORMCREATE_USER(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    if (_createInfo.contains(tblintfUploadGateways::Fields::ugwAllowedDomainName))
@@ -99,12 +99,12 @@ quint32 IMPL_ORMCREATE(intfUploadGateways) {
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfUploadGateways) {
+bool IMPL_ORMUPDATE_USER(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfUploadGateways) {
+bool IMPL_ORMDELETE_USER(intfUploadGateways) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -125,7 +125,7 @@ intfUploadQueue::intfUploadQueue(
         tblUploadQueue::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(intfUploadQueue) {
+QVariant IMPL_ORMGET_USER(intfUploadQueue) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }

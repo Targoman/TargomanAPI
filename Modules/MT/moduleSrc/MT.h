@@ -97,8 +97,6 @@ private slots:
         Translate,
         (
             APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM,
-//            const TAPI::RemoteIP_t& _REMOTE_IP,
-//            const QString& _token,
             QString _text,
             QString _dir,
             const QString& _engine = "NMT",
@@ -131,7 +129,7 @@ private slots:
 #endif
 
 private:
-    clsDerivedHelperSubmodules DerivedHelperSubmodules;
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);

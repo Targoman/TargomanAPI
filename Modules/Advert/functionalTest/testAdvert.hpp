@@ -626,13 +626,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 13'800);
-            QVERIFY(item.TotalPrice == 46'200);
-
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 200);
             QVERIFY(this->LastPreVoucher.ToPay == 46'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 13'800);
+            QVERIFY(item.TotalPrice == 46'200);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -689,13 +689,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 22'080);
-            QVERIFY(item.TotalPrice == 73'920);
-
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 920);
             QVERIFY(this->LastPreVoucher.ToPay == 73'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 22'080);
+            QVERIFY(item.TotalPrice == 73'920);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -722,13 +722,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 27'600);
-            QVERIFY(item.TotalPrice == 92'400);
-
             QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 400);
             QVERIFY(this->LastPreVoucher.ToPay == 92'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 27'600);
+            QVERIFY(item.TotalPrice == 92'400);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -755,13 +755,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 6'000);
-            QVERIFY(item.TotalPrice == 114'000);
-
             QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 0);
             QVERIFY(this->LastPreVoucher.ToPay == 114'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 6'000);
+            QVERIFY(item.TotalPrice == 114'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -791,13 +791,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 38'640);
-            QVERIFY(item.TotalPrice == 129'360);
-
             QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 360);
             QVERIFY(this->LastPreVoucher.ToPay == 243'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 38'640);
+            QVERIFY(item.TotalPrice == 129'360);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -827,13 +827,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 41'400);
-            QVERIFY(item.TotalPrice == 138'600);
-
             QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
             QVERIFY(this->LastPreVoucher.Round == 600);
             QVERIFY(this->LastPreVoucher.ToPay == 252'000);
+
+            auto item = this->LastPreVoucher.Items.last();
+            QVERIFY(item.DisAmount == 41'400);
+            QVERIFY(item.TotalPrice == 138'600);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);

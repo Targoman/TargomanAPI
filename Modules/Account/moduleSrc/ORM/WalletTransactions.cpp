@@ -56,7 +56,7 @@ WalletTransactions::WalletTransactions() :
         tblWalletsTransactions::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(WalletTransactions) {
+QVariant IMPL_ORMGET_USER(WalletTransactions) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 

@@ -145,6 +145,7 @@ public:
     ~MTHelper();
 
     void initialize();
+
 private:
     void registerEngines();
 
@@ -153,10 +154,11 @@ public:
         return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
     }
 
+    template <TAPI::enuTokenActorType::Type _tokenActorType>
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
 //        const QJsonObject& _privInfo,
-        clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+        clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -170,9 +172,10 @@ public:
     QString detokenize(const QString& _text, const QString& _lang);
     QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
 
+    template <TAPI::enuTokenActorType::Type _tokenActorType>
     QString preprocessText(
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+            clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
             const QString& _text,
             const QString& _lang
             );

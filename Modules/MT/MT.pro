@@ -9,7 +9,7 @@
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
 addSubdirs(moduleSrc, Dependencies)
-addSubdirs(functionalTest, Dependencies)
+#addSubdirs(functionalTest, Dependencies)
 
 OTHER_FILES += \
     migrations/.gitkeep \

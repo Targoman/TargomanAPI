@@ -362,7 +362,7 @@ public:
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;
 
 private slots:
-    QVariant ORMGET("Get uploaded files")
+    QVariant ORMGET_USER("Get uploaded files")
 };
 
 class intfUploadGateways : public intfSQLBasedModule
@@ -376,10 +376,10 @@ public:
     );
 
 private slots:
-    QVariant ORMGET("Get object storage gateway information")
-    quint32 ORMCREATE("Create a new object storage gateway by an authorized user")
-    bool ORMUPDATE("Update object storage gateway info by an authorized user")
-    bool ORMDELETE("Delete an object storage gateway")
+    QVariant ORMGET_USER("Get object storage gateway information")
+    quint32 ORMCREATE_USER("Create a new object storage gateway by an authorized user")
+    bool ORMUPDATE_USER("Update object storage gateway info by an authorized user")
+    bool ORMDELETE_USER("Delete an object storage gateway")
 };
 
 class intfUploadQueue : public intfSQLBasedModule
@@ -393,7 +393,7 @@ public:
     );
 
 private slots:
-    QVariant ORMGET("Get upload queue")
+    QVariant ORMGET_USER("Get upload queue")
 };
 
 } //namespace Targoman::API::ObjectStorage::ORM

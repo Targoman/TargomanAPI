@@ -130,7 +130,7 @@ QString QJWT::createSigned(
 //        _payload.remove("exp");
 
     bool ssnRemember = true;
-    if (_tokenType == enuTokenActorType::User) {
+    if (_tokenType == enuTokenActorType::USER) {
         if (_payload.contains("ssnexp") == false)
             _payload["ssnexp"] = _payload["iat"].toInt()
                     + (qint32)(ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value());
@@ -209,7 +209,7 @@ void QJWT::verifyJWT(
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     //-- check actor type -----
-    enuTokenActorType::Type TokenType = enuTokenActorType::User;
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
     if (_jWTPayload.contains("typ"))
         TokenType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
 
@@ -231,7 +231,7 @@ void QJWT::verifyJWT(
     uint currentDateTime = QDateTime::currentDateTime().toTime_t();
 
     //-- check large expiration -----
-    if (TokenType == enuTokenActorType::User) {
+    if (TokenType == enuTokenActorType::USER) {
         if (_jWTPayload.contains("ssnexp") == false)
             throw exHTTPForbidden("Invalid ssnexp in JWT");
 

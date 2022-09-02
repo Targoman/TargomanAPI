@@ -343,11 +343,11 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
 //    if (_apiObject->requiresJWT())
-    if (_apiObject->tokenActorType() == enuTokenActorType::User)
+    if (_apiObject->tokenActorType() == enuTokenActorType::USER)
         APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
     else if (_apiObject->tokenActorType() == enuTokenActorType::API)
         APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
-    else //enuTokenActorType::Unknown
+    else //enuTokenActorType::ANONYMOUSE
         APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming));
 
     try {
@@ -365,14 +365,13 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 //        enuTokenActorType::Type AcceptableActorType = _apiObject->moduleActorType();
         enuTokenActorType::Type TokenActorType = _apiObject->tokenActorType();
 //        if (_apiObject->requiresJWT()) {
-        if (TokenActorType != enuTokenActorType::Unknown) {
+        if (TokenActorType != enuTokenActorType::ANONYMOUSE) {
             auto ServerTiming = APICALLBOOM->createScopeTiming("jwt");
 
             QString Auth = Headers.value("authorization");
             if (Auth.startsWith("Bearer ")) {
                 QString BearerToken = Auth.mid(sizeof("Bearer"));
                 Headers.remove("authorization");
-
 
                 try {
                     QJWT::verifyJWT(
@@ -394,14 +393,14 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     }
 
                 } catch (exJWTExpired &exp) {
-                    enuTokenActorType::Type TokenType = enuTokenActorType::User;
+                    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
 
                     if (JWT.contains("typ"))
                         TokenType = enuTokenActorType::toEnum(JWT["typ"].toString());
 
                     /*if (TokenType == enuTokenActorType::System) {
                         //do nothing
-                    } else*/ if (TokenType == enuTokenActorType::User) {
+                    } else*/ if (TokenType == enuTokenActorType::USER) {
                         auto ServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
 
                         bool IsRenewed = false;

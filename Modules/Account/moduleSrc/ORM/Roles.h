@@ -116,10 +116,10 @@ class Roles : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, Roles)
 
 private slots:
-    QVariant ORMGET("Get roles information")
-    quint32 ORMCREATE("Create a new Role by an authorized user")
-    bool ORMUPDATE("Update role info by an authorized user")
-    bool ORMDELETE("Delete a Role")
+    QVariant ORMGET_USER("Get roles information")
+    quint32 ORMCREATE_USER("Create a new Role by an authorized user")
+    bool ORMUPDATE_USER("Update role info by an authorized user")
+    bool ORMDELETE_USER("Delete a Role")
 };
 
 } //namespace ORM

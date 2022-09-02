@@ -167,7 +167,7 @@ class WalletTransactions : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, WalletTransactions)
 
 private slots:
-    QVariant ORMGET("Get WalletTransactions information.")
+    QVariant ORMGET_USER("Get WalletTransactions information.")
 };
 
 class WalletsBalanceHistory : public intfSQLBasedModule

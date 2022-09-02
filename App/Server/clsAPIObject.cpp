@@ -56,7 +56,7 @@ clsAPIObject::clsAPIObject(
     HasExtraMethodName(_hasExtraMethodName),
     Parent(_module),
 //    RequiresJWT(false)
-    TokenActorType(enuTokenActorType::Unknown)
+    TokenActorType(enuTokenActorType::ANONYMOUSE)
 {
     QList<QByteArray> parameterTypes = _method.parameterTypes();
     quint8 i = 0;
@@ -74,7 +74,7 @@ clsAPIObject::clsAPIObject(
             this->BaseMethod.DefaultValues.removeAt(0);
 //            this->RequiresJWT = true;
             if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL_STR))
-                this->TokenActorType = enuTokenActorType::User;
+                this->TokenActorType = enuTokenActorType::USER;
             else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_DECL_STR))
                 this->TokenActorType = enuTokenActorType::API;
         } else {

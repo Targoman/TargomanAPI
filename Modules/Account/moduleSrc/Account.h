@@ -54,7 +54,7 @@ class Account : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
     //---------------------------------------------------------
-    TARGOMAN_API_MODULE_DEFINE(Account); //, enuTokenActorType::User);
+    TARGOMAN_API_MODULE_DEFINE(Account); //, enuTokenActorType::USER);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Account);
     //---------------------------------------------------------

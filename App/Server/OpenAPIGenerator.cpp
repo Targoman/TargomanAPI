@@ -510,7 +510,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(
             }
 
 //            if (APIObject->requiresJWT()) {
-            if (APIObject->tokenActorType() != enuTokenActorType::Unknown) {
+            if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE) {
                 ResponseModel["401"] = QJsonObject({{ "description", "Authorization information is missing or invalid" }});
                 ResponseModel["403"] = QJsonObject({{ "description", "Access forbidden" }});
             }
@@ -518,7 +518,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(
             PathInfo["responses"] = ResponseModel;
 
 //            if (APIObject->requiresJWT()) {
-            if (APIObject->tokenActorType() != enuTokenActorType::Unknown) {
+            if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE) {
                 PathInfo["security"] = QJsonArray({
                                                       QJsonObject({
                                                           { "Bearer", QJsonArray() },

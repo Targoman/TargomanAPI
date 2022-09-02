@@ -33,7 +33,7 @@
 //using namespace Targoman::API;
 using namespace Targoman::API::Common;
 
-//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTokenActorType);
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTokenActorType::Type);
 
 namespace Targoman::API::Server {
 

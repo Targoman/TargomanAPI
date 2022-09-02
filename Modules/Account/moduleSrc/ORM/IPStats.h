@@ -81,7 +81,7 @@ class IPStats : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, IPStats)
 
 private slots:
-    QVariant ORMGET("Get IPStats information")
+    QVariant ORMGET_USER("Get IPStats information")
 };
 
 } //namespace ORM

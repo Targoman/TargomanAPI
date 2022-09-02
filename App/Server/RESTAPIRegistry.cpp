@@ -381,7 +381,7 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
         QStringList Parameters;
 
 //        if (APIObject->requiresJWT())
-        if (APIObject->tokenActorType() != enuTokenActorType::Unknown)
+        if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE)
             Parameters.append(QString(_showTypes ? "TAPI::JWT_t " : "") + "JWT");
 
         for (quint8 i=0; i<APIObject->/*BaseMethod.parameterCount()*/ParamTypesName.count(); ++i) {
@@ -688,7 +688,7 @@ void RESTAPIRegistry::dumpAPIs()
 
             QString JWTType = "";
 //            if (API.APIObject->requiresJWT())
-            if (API.APIObject->tokenActorType() != enuTokenActorType::Unknown)
+            if (API.APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE)
                 JWTType = QString(" (JWT:%1)").arg(enuTokenActorType::toStr(API.APIObject->tokenActorType()));
 
             TargomanDebug(5).noLabel().noquote().nospace()

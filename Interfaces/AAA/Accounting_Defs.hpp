@@ -223,7 +223,7 @@ namespace tblAccountUserAssetsBase {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(uasID);
-        TARGOMAN_CREATE_CONSTEXPR(uas_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(uas_actorID);
         TARGOMAN_CREATE_CONSTEXPR(uas_slbID);
         TARGOMAN_CREATE_CONSTEXPR(uasQty);
         TARGOMAN_CREATE_CONSTEXPR(uas_vchID);
@@ -233,7 +233,6 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uasDiscountAmount);
         TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
         TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
-        TARGOMAN_CREATE_CONSTEXPR(uasRelatedAPITokenID);
         TARGOMAN_CREATE_CONSTEXPR(uasStatus);
         TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
     }
@@ -669,7 +668,7 @@ namespace tblAccountUserAssetsBase {
         const QList<clsORMField> ORMFields = {
             //Col                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::uasID,                ORM_PRIMARYKEY_64 },
-            { Fields::uas_usrID,            S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::uas_actorID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::uas_slbID,            S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
             { Fields::uasQty,               S(double),                  QFV,                        QRequired,  UPAdmin },
             { Fields::uas_vchID,            S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPAdmin },
@@ -679,7 +678,6 @@ namespace tblAccountUserAssetsBase {
             { Fields::uasDiscountAmount,    S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
             { Fields::uasPrefered,          S(bool),                    QFV,                        false,      UPOwner },
             { Fields::uasOrderDateTime,     S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
-            { Fields::uasRelatedAPITokenID, S(NULLABLE_TYPE(quint64)),  QFV,                        QNull,      UPAdmin },
             { Fields::uasStatus,            ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::uasUpdatedBy_usrID,   ORM_UPDATED_BY },
@@ -688,7 +686,7 @@ namespace tblAccountUserAssetsBase {
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 //<Col                      Reference Table                             ForeignCol                              Rename     LeftJoin
-                { Fields::uas_usrID,        R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,                 "Owner_" },
+//                { Fields::uas_usrID,        R(AAASchema, tblUser::Name),                tblUser::Fields::usrID,                 "Owner_" },
                 { Relation::Saleable,
                     { Fields::uas_slbID,    R(_schema, tblAccountSaleablesBase::Name),  tblAccountSaleablesBase::Fields::slbID, "",         true } },
                 { Fields::uas_cpnID,        R(_schema, tblAccountCouponsBase::Name),    tblAccountCouponsBase::Fields::cpnID,   "",         true },
@@ -698,11 +696,11 @@ namespace tblAccountUserAssetsBase {
 
         const QList<stuDBIndex> Indexes = {
             { {
-                  Fields::uas_usrID,
+                  Fields::uas_actorID,
                   Fields::uasVoucherItemUUID,
                   ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
-            { Fields::uas_usrID },
+            { Fields::uas_actorID },
             { Fields::uas_slbID },
             { Fields::uas_vchID },
             { Fields::uasVoucherItemUUID },
@@ -716,7 +714,7 @@ namespace tblAccountUserAssetsBase {
 
 #define SF_tblAccountUserAssetsBase_DTO \
     SF_ORM_PRIMARYKEY_64        (uasID), \
-    SF_quint64                  (uas_usrID), \
+    SF_quint64                  (uas_actorID), \
     SF_quint64                  (uas_slbID), \
     SF_qreal                    (uasQty), \
     SF_NULLABLE_quint64         (uas_vchID), \
@@ -726,7 +724,6 @@ namespace tblAccountUserAssetsBase {
     SF_NULLABLE_quint32         (uasDiscountAmount), \
     SF_bool                     (uasPrefered), \
     SF_DateTime_t               (uasOrderDateTime), \
-    SF_NULLABLE_quint64         (uasRelatedAPITokenID), \
     SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
     SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
 
@@ -1063,8 +1060,10 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_QString          (DiscountCode),
     SF_QString          (Referrer),
     SF_JSON_t           (ReferrerParams),
-    SF_NULLABLE_quint64 (TokenID),
     SF_qreal            (Qty),
+
+    SF_QJsonObject      (APITokenPayload),
+    SF_quint64          (AssetActorID), //CurrentUserID or APIToken.Payload[uid]
 
     //-- compute
     SF_qreal            (UnitPrice),
@@ -1136,7 +1135,7 @@ TAPI_DEFINE_STRUCT(stuActiveCredit,
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_QString              (Service),
-    SF_quint64              (OrderID), //AssetID per Service
+    SF_quint64              (AssetID), //AssetID per Service
     SF_MD5_t                (UUID),
     SF_QString              (Desc),
     SF_qreal                (Qty),
@@ -1154,7 +1153,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_QMapOfQString        (Additives),
     SF_QString              (Referrer),
     SF_JSON_t               (ReferrerParams),
-    SF_NULLABLE_quint64     (TokenID),
+    SF_NULLABLE_quint64     (APITokenID),
 
     SF_QString              (Private), //encrypted + base64
     SF_QListOfVarStruct     (SubItems, stuVoucherItem),

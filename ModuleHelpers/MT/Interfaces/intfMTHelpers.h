@@ -413,11 +413,32 @@ namespace tblTranslationLogsBase {
 #pragma GCC diagnostic pop
 
 /******************************************************/
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfHelperORMBase
+{
+public:
+    typedef typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
+                             APICALLBOOM_TYPE_JWT_USER_DECL,
+                             APICALLBOOM_TYPE_JWT_API_DECL>::type
+    ACCOUNTING_JWT_TYPE_DECL;
+
+    typedef Q_DECL_UNUSED typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
+                             APICALLBOOM_TYPE_JWT_USER_DECL,
+                             APICALLBOOM_TYPE_JWT_API_DECL>::type
+    ACCOUNTING_JWT_TYPE_IMPL;
+
+public:
+    TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
+    bool IsTokenBase() { return _tokenActorType == TAPI::enuTokenActorType::API; }
+};
+
+/******************************************************/
 /* intf classes ***************************************/
 /******************************************************/
-class intfCorrectionRules : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfCorrectionRules : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfCorrectionRules(const QString& _schema,
@@ -427,9 +448,10 @@ public:
 };
 
 /******************************************************/
-class intfDigestedTranslationLogs : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfDigestedTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfDigestedTranslationLogs(const QString& _schema,
@@ -439,9 +461,10 @@ public:
 };
 
 /******************************************************/
-class intfMultiDic : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfMultiDic : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfMultiDic(const QString& _schema,
@@ -451,9 +474,10 @@ public:
 };
 
 /******************************************************/
-class intfTokenStats : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfTokenStats : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfTokenStats(const QString& _schema,
@@ -463,9 +487,10 @@ public:
 };
 
 /******************************************************/
-class intfTranslatedPhrases : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfTranslatedPhrases : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfTranslatedPhrases(const QString& _schema,
@@ -475,9 +500,10 @@ public:
 };
 
 /******************************************************/
-class intfTranslationLogs : public intfSQLBasedModule
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+class intfTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfTranslationLogs(const QString& _schema,

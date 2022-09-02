@@ -155,7 +155,7 @@ class Bin : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, Bin)
 
 private slots:
-    QVariant ORMGET("Get Bin information")
+    QVariant ORMGET_USER("Get Bin information")
 };
 
 } //namespace ORM

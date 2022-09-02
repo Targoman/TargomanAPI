@@ -152,10 +152,11 @@ void MTHelper::registerEngines() {
     }
 }
 
+template <TAPI::enuTokenActorType::Type _tokenActorType>
 QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
 //    const QJsonObject& _privInfo,
-    clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -258,9 +259,10 @@ QString MTHelper::detectClass(const QString& _engine, const QString& _text, cons
     return FormalityChecker::instance().check(_lang, _text);
 }
 
+template <TAPI::enuTokenActorType::Type _tokenActorType>
 QString MTHelper::preprocessText(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules &DerivedHelperSubmodules,
+    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
     const QString& _text,
     const QString& _lang
 ) {

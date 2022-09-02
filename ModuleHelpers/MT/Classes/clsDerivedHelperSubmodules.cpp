@@ -25,13 +25,14 @@
 
 namespace Targoman::API::ModuleHelpers::MT::Classes {
 
-clsDerivedHelperSubmodules::clsDerivedHelperSubmodules(
-    intfCorrectionRules         *_correctionRules,
-    intfDigestedTranslationLogs *_digestedTranslationLogs,
-    intfMultiDic                *_multiDic,
-    intfTokenStats              *_tokenStats,
-    intfTranslatedPhrases       *_translatedPhrases,
-    intfTranslationLogs         *_translationLogs
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+clsDerivedHelperSubmodules<_tokenActorType>::clsDerivedHelperSubmodules(
+    intfCorrectionRules<_tokenActorType>         *_correctionRules,
+    intfDigestedTranslationLogs<_tokenActorType> *_digestedTranslationLogs,
+    intfMultiDic<_tokenActorType>                *_multiDic,
+    intfTokenStats<_tokenActorType>              *_tokenStats,
+    intfTranslatedPhrases<_tokenActorType>       *_translatedPhrases,
+    intfTranslationLogs<_tokenActorType>         *_translationLogs
 ) :
     CorrectionRules         (_correctionRules),
     DigestedTranslationLogs (_digestedTranslationLogs),
@@ -40,5 +41,8 @@ clsDerivedHelperSubmodules::clsDerivedHelperSubmodules(
     TranslatedPhrases       (_translatedPhrases),
     TranslationLogs         (_translationLogs)
 { ; }
+
+template class clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER>;
+template class clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes

@@ -156,7 +156,7 @@ QString renewExpiredJWT(
 
     QString NewJWT = Server::QJWT::createSigned(
             _JWTPayload,
-            TAPI::enuTokenActorType::User,
+            TAPI::enuTokenActorType::USER,
             _JWTPayload.contains("prv") ? _JWTPayload["prv"].toObject() : QJsonObject(),
             Duration,
             _JWTPayload["jti"].toString(),

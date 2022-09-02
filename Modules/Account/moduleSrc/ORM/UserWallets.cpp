@@ -45,14 +45,14 @@ UserWallets::UserWallets() :
         tblUserWallets::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(UserWallets) {
+QVariant IMPL_ORMGET_USER(UserWallets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID() } }, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-quint64 IMPL_ORMCREATE(UserWallets) {
+quint64 IMPL_ORMCREATE_USER(UserWallets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
@@ -63,13 +63,13 @@ quint64 IMPL_ORMCREATE(UserWallets) {
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(UserWallets) {
+bool IMPL_ORMUPDATE_USER(UserWallets) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(UserWallets) {
+bool IMPL_ORMDELETE_USER(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {

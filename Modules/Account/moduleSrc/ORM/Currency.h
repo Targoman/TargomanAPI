@@ -111,10 +111,10 @@ class Currency : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, Currency)
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Currency information")
-    quint64 ORMCREATE("Create a new Currency")
-    bool ORMUPDATE("Update Currency info by an authorized user")
-    bool ORMDELETE("Delete a Currency. Take note that default Currency can not be deleted")
+    QVariant ORMGET_ANONYMOUSE("Get Currency information")
+    quint64 ORMCREATE_USER("Create a new Currency")
+    bool ORMUPDATE_USER("Update Currency info by an authorized user")
+    bool ORMDELETE_USER("Delete a Currency. Take note that default Currency can not be deleted")
 
     bool REST_UPDATE(
         setAsDefault,

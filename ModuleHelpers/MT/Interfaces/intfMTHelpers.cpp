@@ -26,47 +26,63 @@
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuCorrectionRuleType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuMultiDicStatus);
 
-#define TAPI_ORM_SUBMODULE_IMPLEMENT(_className, _baseName, _tblName) \
-    _className::_className( \
+#define TAPI_HELPERORM_SUBMODULE_IMPLEMENT(_className, _tblName) \
+    template <TAPI::enuTokenActorType::Type _tokenActorType> \
+    _className<_tokenActorType>::_className( \
         const QString& _schema, \
         const QList<DBM::clsORMField>& _exclusiveCols, \
         const QList<DBM::stuRelation>& _exclusiveRelations, \
         const QList<DBM::stuDBIndex>& _exclusiveIndexes \
     ) : \
-        _baseName( \
+        intfSQLBasedModule( \
             _schema, \
             _tblName::Name, \
             _tblName::Private::ORMFields + _exclusiveCols, \
             _tblName::Private::Relations(_schema) + _exclusiveRelations, \
             _tblName::Private::Indexes + _exclusiveIndexes \
-    )
+        ), \
+        intfHelperORMBase<_tokenActorType>()
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfCorrectionRules, intfSQLBasedModule, tblCorrectionRulesBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfCorrectionRules, tblCorrectionRulesBase)
 { ; }
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfDigestedTranslationLogs, intfSQLBasedModule, tblDigestedTranslationLogsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfDigestedTranslationLogs, tblDigestedTranslationLogsBase)
 { ; }
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfMultiDic, intfSQLBasedModule, tblMultiDicBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMultiDic, tblMultiDicBase)
 { ; }
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfTokenStats, intfSQLBasedModule, tblTokenStatsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTokenStats, tblTokenStatsBase)
 { ; }
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfTranslatedPhrases, intfSQLBasedModule, tblTranslatedPhrasesBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTranslatedPhrases, tblTranslatedPhrasesBase)
 { ; }
 
 /******************************************************/
-TAPI_ORM_SUBMODULE_IMPLEMENT(intfTranslationLogs, intfSQLBasedModule, tblTranslationLogsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTranslationLogs, tblTranslationLogsBase)
 { ; }
 
 /******************************************************/
+
+template class intfCorrectionRules<TAPI::enuTokenActorType::USER>;
+template class intfDigestedTranslationLogs<TAPI::enuTokenActorType::USER>;
+template class intfMultiDic<TAPI::enuTokenActorType::USER>;
+template class intfTokenStats<TAPI::enuTokenActorType::USER>;
+template class intfTranslatedPhrases<TAPI::enuTokenActorType::USER>;
+template class intfTranslationLogs<TAPI::enuTokenActorType::USER>;
+
+template class intfCorrectionRules<TAPI::enuTokenActorType::API>;
+template class intfDigestedTranslationLogs<TAPI::enuTokenActorType::API>;
+template class intfMultiDic<TAPI::enuTokenActorType::API>;
+template class intfTokenStats<TAPI::enuTokenActorType::API>;
+template class intfTranslatedPhrases<TAPI::enuTokenActorType::API>;
+template class intfTranslationLogs<TAPI::enuTokenActorType::API>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces

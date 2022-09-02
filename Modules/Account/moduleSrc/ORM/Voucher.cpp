@@ -62,14 +62,14 @@ ORMSelectQuery Voucher::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     return Query;
 }
 
-QVariant IMPL_ORMGET(Voucher) {
+QVariant IMPL_ORMGET_USER(Voucher) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(Voucher) {
+bool IMPL_ORMDELETE_USER(Voucher) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {

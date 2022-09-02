@@ -33,28 +33,36 @@ namespace Targoman::API::AAA {
 
 using namespace API;
 
+//class intfAccountingBasedModuleBase
+//{
+//public:
+//    virtual stuActiveCredit activeAccountObject(quint64 _usrID) = 0;
+//};
+
 class intfAccountingBasedModule : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
 
 protected:
     intfAccountingBasedModule(
-        const QString               &_module,
-        const QString               &_schema,
-        bool                        _isTokenBase,
-        AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
-        intfAccountUnits            *_units,
-        intfAccountProducts         *_products,
-        intfAccountSaleables        *_saleables,
-        intfAccountSaleablesFiles   *_saleablesFiles,
-        intfAccountUserAssets       *_userAssets,
-        intfAccountUserAssetsFiles  *_userAssetsFiles,
-        intfAccountAssetUsage       *_assetUsages,
-        intfAccountCoupons          *_discounts = nullptr,
-        intfAccountPrizes           *_prizes = nullptr
+        const QString              &_module,
+        const QString              &_schema,
+        bool                       _isTokenBase,
+        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
+        intfAccountUnits           *_units,
+        intfAccountProducts        *_products,
+        intfAccountSaleables       *_saleables,
+        intfAccountSaleablesFiles  *_saleablesFiles,
+        intfAccountUserAssets      *_userAssets,
+        intfAccountUserAssetsFiles *_userAssetsFiles,
+        intfAccountAssetUsage      *_assetUsages,
+        intfAccountCoupons         *_discounts = nullptr,
+        intfAccountPrizes          *_prizes = nullptr
     );
-
 //    virtual ~intfAccountingBasedModule();
+
+//    TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
+//    bool IsTokenBase() { return _tokenActorType == TAPI::enuTokenActorType::API; }
 
 public:
     virtual stuActiveCredit activeAccountObject(quint64 _usrID);
@@ -185,14 +193,15 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL               &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
             TAPI::SaleableCode_t                    _saleableCode,
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
             qreal                                   _qty = 1,
             TAPI::CouponCode_t                      _discountCode = {},
             QString                                 _referrer = {},
             TAPI::JSON_t                            _referrerParams = {},
-            NULLABLE_TYPE(quint64)                  _tokenID = NULLABLE_NULL_VALUE,
+//            NULLABLE_TYPE(quint64)                  _tokenID = NULLABLE_NULL_VALUE,
+            QString                                 _apiToken = {},
             Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
 //            TAPI::MD5_t                             _parentItemUUID = {}
         ),
@@ -202,7 +211,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID,
             qreal                               _newQty,
@@ -214,7 +223,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         removeBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID
         ),
@@ -252,6 +261,7 @@ protected slots:
 
 protected:
     QString ServiceName;
+
     bool IsTokenBase;
 
     QScopedPointer<intfAccountUnits>            AccountUnits;

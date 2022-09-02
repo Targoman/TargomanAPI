@@ -112,7 +112,7 @@ class IPBin : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, IPBin)
 
 private slots:
-    QVariant ORMGET("Get IPBin information")
+    QVariant ORMGET_USER("Get IPBin information")
 };
 
 } //namespace ORM

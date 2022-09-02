@@ -122,10 +122,10 @@ public:
     );
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Faq Questions")
-    quint32 ORMCREATE("Create a new Faq Question")
-    bool ORMUPDATE("Update Faq Question")
-    bool ORMDELETE("Delete a Faq Question")
+    QVariant ORMGET_ANONYMOUSE("Get Faq Questions")
+    quint32 ORMCREATE_USER("Create a new Faq Question")
+    bool ORMUPDATE_USER("Update Faq Question")
+    bool ORMDELETE_USER("Delete a Faq Question")
 };
 
 class intfFaqAnswers : public intfSQLBasedModule
@@ -139,10 +139,10 @@ public:
     );
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Faq Answers")
-    quint32 ORMCREATE("Create a new Faq Answer")
-    bool ORMUPDATE("Update Faq Answer")
-    bool ORMDELETE("Delete a Faq Answer")
+    QVariant ORMGET_ANONYMOUSE("Get Faq Answers")
+    quint32 ORMCREATE_USER("Create a new Faq Answer")
+    bool ORMUPDATE_USER("Update Faq Answer")
+    bool ORMDELETE_USER("Delete a Faq Answer")
 };
 
 } //namespace Targoman::API::ORM

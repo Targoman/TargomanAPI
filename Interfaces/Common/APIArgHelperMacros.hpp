@@ -378,7 +378,7 @@ typedef QMap<QString, QString> QStringMap;
             TAPI_HELPER_STRUCT_TOJSON(__VA_ARGS__); \
             return Obj; \
         } \
-        _name& fromJson(const QJsonObject& _obj) { \
+        _name& fromJson(const QJsonObject& _obj, bool _applyDefaultValues=true) { \
             this->_lastFromJsonSource = _obj; \
             TAPI_HELPER_STRUCT_FROMJSON(__VA_ARGS__); \
             return *this; \

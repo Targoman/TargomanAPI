@@ -42,7 +42,7 @@ Roles::Roles() :
         tblRoles::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(Roles) {
+QVariant IMPL_ORMGET_USER(Roles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -52,19 +52,19 @@ QVariant IMPL_ORMGET(Roles) {
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 IMPL_ORMCREATE(Roles) {
+quint32 IMPL_ORMCREATE_USER(Roles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(Roles) {
+bool IMPL_ORMUPDATE_USER(Roles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(Roles) {
+bool IMPL_ORMDELETE_USER(Roles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);

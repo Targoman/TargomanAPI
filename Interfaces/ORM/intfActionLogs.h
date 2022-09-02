@@ -91,7 +91,7 @@ public:
     );
 
 protected slots:
-    QVariant ORMGET("Get Action Logs.")
+    QVariant ORMGET_USER("Get Action Logs.")
 };
 
 } //namespace Targoman::API::ORM

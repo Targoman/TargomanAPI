@@ -39,7 +39,7 @@ ActiveAds::ActiveAds() :
         tblActiveAds::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(ActiveAds) {
+QVariant IMPL_ORMGET_USER(ActiveAds) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -49,7 +49,7 @@ QVariant IMPL_ORMGET(ActiveAds) {
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool IMPL_ORMDELETE(ActiveAds) {
+bool IMPL_ORMDELETE_USER(ActiveAds) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);

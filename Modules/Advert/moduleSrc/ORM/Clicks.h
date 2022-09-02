@@ -102,7 +102,7 @@ class Clicks : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, Clicks)
 
 private slots:
-    QVariant ORMGET("Get Clicks information")
+    QVariant ORMGET_USER("Get Clicks information")
 };
 
 } //namespace ORM

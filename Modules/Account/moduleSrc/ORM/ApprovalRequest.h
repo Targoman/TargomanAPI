@@ -130,8 +130,8 @@ public:
     static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
 
 private slots:
-    QVariant ORMGET("Get ApprovalRequest information.")
-    bool ORMDELETE("Delete an ApprovalRequest")
+    QVariant ORMGET_USER("Get ApprovalRequest information.")
+    bool ORMDELETE_USER("Delete an ApprovalRequest")
 
     QVariant REST_GET_OR_POST(
         timerInfo,

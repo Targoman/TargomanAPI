@@ -109,13 +109,13 @@ class AlertTemplates : public intfSQLBasedModule
 
 private slots:
 #ifdef QT_DEBUG
-    QVariant ANONYMOUSE_ORMGET("Get Alert Templates")
+    QVariant ORMGET_ANONYMOUSE("Get Alert Templates")
 #else
-    QVariant ORMGET("Get Alert Templates")
+    QVariant ORMGET_USER("Get Alert Templates")
 #endif
-    quint32 ORMCREATE("Create a new Alert Template")
-    bool ORMUPDATE("Update Alert Template")
-    bool ORMDELETE("Delete an Alert Template")
+    quint32 ORMCREATE_USER("Create a new Alert Template")
+    bool ORMUPDATE_USER("Update Alert Template")
+    bool ORMDELETE_USER("Delete an Alert Template")
 };
 
 } //namespace ORM
