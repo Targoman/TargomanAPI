@@ -213,12 +213,10 @@ void QJWT::verifyJWT(
     if (_jWTPayload.contains("typ"))
         TokenType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
 
-//    if (TokenType != enuTokenActorType::System) {
-        enuTokenActorType::Type AcceptableActorTypeName = enuTokenActorType::toEnum(enuTokenActorType::toStr(_acceptableActorType));
-
-        if (TokenType != AcceptableActorTypeName)
-            throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2").arg(TokenType).arg(AcceptableActorTypeName));
-//    }
+    if (TokenType != _acceptableActorType)
+        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2")
+                              .arg(enuTokenActorType::toStr(TokenType))
+                              .arg(enuTokenActorType::toStr(_acceptableActorType)));
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {

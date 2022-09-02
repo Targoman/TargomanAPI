@@ -340,7 +340,23 @@ private slots:
         }
     }
 
-    void translate() {
+    void get_changed_token() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "Account/APITokens/" + QString::number(this->TokenID)
+            );
+
+            QVERIFY(Result.isValid());
+
+            this->TokenJWT = Result.toMap()["aptToken"].toString();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void translate_en2fa_1() {
         QT_TRY {
             QVariant Result = this->callAPI(
                         this->TokenJWT,
@@ -348,8 +364,27 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "apple" },
+                            { "text", "This is a sample text for testing." },
                             { "dir", "en2fa" },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void translate_fa2en_1() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "MT/translate",
+                        {},
+                        {
+                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "dir", "fa2en" },
                         });
 
             QVERIFY(Result.isValid());

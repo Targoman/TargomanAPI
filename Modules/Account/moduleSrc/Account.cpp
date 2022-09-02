@@ -1989,6 +1989,8 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                    });
 
         //3: save token changes
+//        QMap<QString, QString> ChangedSignedTokens;
+
         if (ChangingTokens.isEmpty() == false) {
             foreach (auto TokenInfo, ChangingTokens) {
                 if (TokenInfo.NewServices.isEmpty())
@@ -2007,6 +2009,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                 PrivatePayload["svc"] = TokenInfo.AllServiceNames.join(",");
                 qint64 TTL = 1 * 365 * 24 * 3600; //1 year
 
+//                QString OldToken = Token;
                 Token = QJWT::createSigned(
                     JWTPayload,
                     enuTokenActorType::API,
@@ -2014,6 +2017,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                     TTL
             //        _activeAccount.Privs["ssnKey"].toString()
                 );
+//                ChangedSignedTokens.insert(OldToken, Token);
 
                 //save into tblAPITokens
                 APITokens::instance().makeUpdateQuery(APICALLBOOM_PARAM)

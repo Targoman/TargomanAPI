@@ -174,7 +174,7 @@ QVariantMap MTHelper::doTranslation(
     QTime CacheLookupTime;
     CacheLookupTime.start();
 
-    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(),QCryptographicHash::Md4).toHex();
+    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(), QCryptographicHash::Md4).toHex();
     QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
 
     if (CachedTranslation.isEmpty()) {
@@ -340,5 +340,44 @@ void MTHelper::addErrorLog(quint64 _aptID, const QString& _engine, const QString
 void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const QString& _dir, quint64 _wordCount, const QString& _text, int _trTime) {
     Q_UNUSED(_text); Q_UNUSED (_dir); Q_UNUSED (_wordCount);Q_UNUSED (_aptID);Q_UNUSED (_engine); Q_UNUSED (_trTime)
 }
+
+/***********************************************************************************/
+template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
+    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &DerivedHelperSubmodules,
+    QString _text,
+    const TranslationDir_t& _dir,
+    const QString& _engine,
+    bool _useSpecialClass,
+    bool _detailed, bool _detokenize,
+    int& _preprocessTime,
+    int& _translationTime
+);
+
+template QString MTHelper::preprocessText<TAPI::enuTokenActorType::USER>(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &DerivedHelperSubmodules,
+    const QString& _text,
+    const QString& _lang
+);
+
+template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
+    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &DerivedHelperSubmodules,
+    QString _text,
+    const TranslationDir_t& _dir,
+    const QString& _engine,
+    bool _useSpecialClass,
+    bool _detailed, bool _detokenize,
+    int& _preprocessTime,
+    int& _translationTime
+);
+
+template QString MTHelper::preprocessText<TAPI::enuTokenActorType::API>(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &DerivedHelperSubmodules,
+    const QString& _text,
+    const QString& _lang
+);
 
 } // namespace Targoman::API::ModuleHelpers::MT
