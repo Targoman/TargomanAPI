@@ -92,7 +92,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
 
     QObject::connect(&gHTTPServer, &QHttpServer::newConnection, [this](QHttpConnection* _con) {
 
-        TargomanLogInfo(7, QString(100, '*'));
+        TargomanLogInfo(7, "****************************************************************************************************");
 
         if (!this->validateConnection(_con->tcpSocket()->peerAddress(), _con->tcpSocket()->peerPort()))
             _con->killConnection();
@@ -122,7 +122,7 @@ void RESTServer::start(fnIsInBlackList_t _fnIPInBlackList) {
             if (Path == ServerCommonConfigs::BasePathWithVersion )
                 return RequestHandler->sendError(qhttp::ESTATUS_NOT_ACCEPTABLE, "No API call provided", {}, {}, true);
 
-            TargomanLogInfo(7, QString(100, '*'));
+            TargomanLogInfo(7, "****************************************************************************************************");
             TargomanLogInfo(7, "(" << RequestHandler->Index() << ") "
                             << "New API Call ["
                             << _req->connection()->tcpSocket()->peerAddress().toString()

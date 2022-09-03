@@ -2261,17 +2261,20 @@ tmplQueryWhereTrait<itmplDerived>::~tmplQueryWhereTrait() { ; }
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::where(const clsCondition& _condition) {
     if (_condition.isEmpty() == false)
-        this->WhereTraitData->WhereClauses = _condition;
+        this->WhereTraitData->WhereClauses.setCond(_condition);
 
     return (itmplDerived&)*this;
 }
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::andWhere(const clsCondition& _condition) {
+    if (this->WhereTraitData->WhereClauses.isEmpty())
+        return this->where(_condition);
+
     if (_condition.isEmpty() == false) {
-        if (this->WhereTraitData->WhereClauses.isEmpty())
-            this->WhereTraitData->WhereClauses = _condition;
-        else
+//        if (this->WhereTraitData->WhereClauses.isEmpty())
+//            this->WhereTraitData->WhereClauses = _condition;
+//        else
             this->WhereTraitData->WhereClauses.andCond(_condition);
     }
 
@@ -2280,10 +2283,13 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::andWhere(const clsCondition& _c
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::orWhere(const clsCondition& _condition) {
+    if (this->WhereTraitData->WhereClauses.isEmpty())
+        return this->where(_condition);
+
     if (_condition.isEmpty() == false) {
-        if (this->WhereTraitData->WhereClauses.isEmpty())
-            this->WhereTraitData->WhereClauses = _condition;
-        else
+//        if (this->WhereTraitData->WhereClauses.isEmpty())
+//            this->WhereTraitData->WhereClauses = _condition;
+//        else
             this->WhereTraitData->WhereClauses.orCond(_condition);
     }
 
@@ -2292,10 +2298,13 @@ itmplDerived& tmplQueryWhereTrait<itmplDerived>::orWhere(const clsCondition& _co
 
 template <class itmplDerived>
 itmplDerived& tmplQueryWhereTrait<itmplDerived>::xorWhere(const clsCondition& _condition) {
+    if (this->WhereTraitData->WhereClauses.isEmpty())
+        return this->where(_condition);
+
     if (_condition.isEmpty() == false) {
-        if (this->WhereTraitData->WhereClauses.isEmpty())
-            this->WhereTraitData->WhereClauses = _condition;
-        else
+//        if (this->WhereTraitData->WhereClauses.isEmpty())
+//            this->WhereTraitData->WhereClauses = _condition;
+//        else
             this->WhereTraitData->WhereClauses.xorCond(_condition);
     }
 
