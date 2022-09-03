@@ -84,10 +84,10 @@ class Departments : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Departments)
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get departments")
-    quint32 ORMCREATE("Create a new department")
-    bool ORMUPDATE("Update department")
-    bool ORMDELETE("Delete a department")
+    QVariant ORMGET_ANONYMOUSE("Get departments")
+    quint32 ORMCREATE_USER("Create a new department")
+    bool ORMUPDATE_USER("Update department")
+    bool ORMDELETE_USER("Delete a department")
 };
 
 } //namespace ORM

@@ -89,10 +89,10 @@ class Units : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Units)
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get units")
-    quint32 ORMCREATE("Create a new unit")
-    bool ORMUPDATE("Update unit")
-    bool ORMDELETE("Delete a unit")
+    QVariant ORMGET_ANONYMOUSE("Get units")
+    quint32 ORMCREATE_USER("Create a new unit")
+    bool ORMUPDATE_USER("Update unit")
+    bool ORMDELETE_USER("Delete a unit")
 };
 
 } //namespace ORM

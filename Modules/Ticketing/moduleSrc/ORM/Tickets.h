@@ -183,7 +183,7 @@ class Tickets : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Tickets)
 
 private slots:
-//    QVariant ORMGET("Get Tickets")
+//    QVariant ORMGET_USER("Get Tickets")
     QVariant REST_GET(
         ,
         (
