@@ -671,7 +671,6 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
 
     if (_response.isValid() == false)
         this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue(QJsonValue::Undefined) } }), _responseHeaders);
-
     else if (strcmp(_response.typeName(), "TAPI::RawData_t") == 0) {
         TAPI::RawData_t RawData = qvariant_cast<TAPI::RawData_t>(_response);
 
@@ -716,15 +715,12 @@ void clsRequestHandler::sendResponse(qhttp::TStatusCode _code,
         this->Response->end(RawData.data());
 
         this->deleteLater();
-
     } else if (strcmp(_response.typeName(), "TAPI::ResponseRedirect_t") == 0) {
         TAPI::ResponseRedirect_t ResponseRedirect = qvariant_cast<TAPI::ResponseRedirect_t>(_response);
         this->redirect(ResponseRedirect.url(), ResponseRedirect.appendBase(), ResponseRedirect.statusCode());
-
     } else if (strcmp(_response.typeName(), "TAPI::FileData_t") == 0) {
         TAPI::FileData_t FileData = qvariant_cast<TAPI::FileData_t>(_response);
         this->sendFile(FileData.fileName());
-
     } else
         this->sendResponseBase(_code, QJsonObject({ { "result", QJsonValue::fromVariant(_response) } }), _responseHeaders);
 }
@@ -836,7 +832,8 @@ void clsRequestHandler::slotSendFileData() {
         return;
     }
 
-    this->Response->write(this->FileHandler->read(ServerCommonConfigs::FileMaxChunk.value()));
+    auto FileData = this->FileHandler->read(ServerCommonConfigs::FileMaxChunk.value());
+    this->Response->write(FileData);
     QTimer::singleShot(10, this, &clsRequestHandler::slotSendFileData);
 }
 
