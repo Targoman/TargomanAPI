@@ -22,18 +22,27 @@
 
 #include "NGTv1.h"
 
-using namespace Targoman::DBManager;
-using namespace Targoman::API;
+//using namespace Targoman::DBManager;
+//using namespace Targoman::API;
 
-TARGOMAN_IMPL_API_MODULE(NGTv1)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(NGTv1, NGTv1Schema);
+namespace Targoman::API::NGTModule {
+
+TARGOMAN_API_MODULE_IMPLEMENT(NGTv1)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(NGTv1, NGTv1Schema);
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(NGTv1, NGTv1Schema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(NGTv1, NGTv1Schema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(NGTv1, NGTv1Schema)
 
 NGTv1::NGTv1() :
-    intfSQLBasedWithActionLogsModule(
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
         NGTv1Domain,
         NGTv1Schema
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(NGTv1Domain, NGTv1Schema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(NGTv1, NGTv1Schema)
-    TARGOMAN_API_IMPLEMENT_FAQ(NGTv1, NGTv1Schema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(NGTv1, NGTv1Schema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(NGTv1, NGTv1Schema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(NGTv1, NGTv1Schema)
 }
+
+} //namespace Targoman::API::NGTModule

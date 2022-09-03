@@ -32,6 +32,7 @@
 
 namespace Targoman::API::Server {
 
+using namespace TAPI;
 using namespace Common;
 using namespace Targoman::Common::Configuration;
 
@@ -107,6 +108,7 @@ static clsSimpleCrypt* simpleCryptInstance() {
 
 QString QJWT::createSigned(
     INOUT QJsonObject &_payload,
+    enuTokenActorType::Type _tokenType,
     QJsonObject _privatePayload,
     const qint64 _expiry,
     const QString &_sessionID,
@@ -114,8 +116,13 @@ QString QJWT::createSigned(
 ) {
     const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
 
+    _payload["typ"] = enuTokenActorType::toStr(_tokenType);
+
     if (_payload.contains("iat") == false)
         _payload["iat"] = static_cast<qint64>(QDateTime::currentDateTime().toTime_t());
+
+    if ((_tokenType == enuTokenActorType::API) && (_expiry <= 0 || _expiry == LLONG_MAX))
+        throw exHTTPExpectationFailed("Invalid expiry value");
 
 //    if (_expiry >= 0)
         _payload["exp"] = _payload["iat"].toInt() + ((_expiry < 0 || _expiry == LLONG_MAX) ? QJWT::TTL.value() : _expiry);
@@ -123,9 +130,12 @@ QString QJWT::createSigned(
 //        _payload.remove("exp");
 
     bool ssnRemember = true;
-    if (_payload.contains("ssnexp") == false)
-        _payload["ssnexp"] = _payload["iat"].toInt()
-                + (qint32)(ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value());
+    if (_tokenType == enuTokenActorType::USER) {
+        if (_payload.contains("ssnexp") == false)
+            _payload["ssnexp"] = _payload["iat"].toInt()
+                    + (qint32)(ssnRemember ? QJWT::RememberLoginTTL.value() : QJWT::NormalLoginTTL.value());
+    } else
+        _payload.remove("ssnexp");
 
     if (_sessionID.size())
         _payload["jti"] = _sessionID;
@@ -192,10 +202,21 @@ void QJWT::extractAndDecryptPayload(
 
 void QJWT::verifyJWT(
     const QString &_jwt,
-    const QString &_remoteIP,
+    Q_DECL_UNUSED const QString &_remoteIP,
+    const enuTokenActorType::Type &_acceptableActorType,
     TAPI::JWT_t &_jWTPayload
 ) {
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
+
+    //-- check actor type -----
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    if (_jWTPayload.contains("typ"))
+        TokenType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
+
+    if (TokenType != _acceptableActorType)
+        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2")
+                              .arg(enuTokenActorType::toStr(TokenType))
+                              .arg(enuTokenActorType::toStr(_acceptableActorType)));
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {
@@ -208,11 +229,13 @@ void QJWT::verifyJWT(
     uint currentDateTime = QDateTime::currentDateTime().toTime_t();
 
     //-- check large expiration -----
-    if (_jWTPayload.contains("ssnexp") == false)
-        throw exHTTPForbidden("Invalid ssnexp in JWT");
+    if (TokenType == enuTokenActorType::USER) {
+        if (_jWTPayload.contains("ssnexp") == false)
+            throw exHTTPForbidden("Invalid ssnexp in JWT");
 
-    if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= currentDateTime)
-        throw exHTTPUnauthorized("Session expired");
+        if (static_cast<quint64>(_jWTPayload.value("ssnexp").toInt()) <= currentDateTime)
+            throw exHTTPUnauthorized("Session expired");
+    }
 
     //-- check small expiration -----
     if (_jWTPayload.contains("exp") == false)

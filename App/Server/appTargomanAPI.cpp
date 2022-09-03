@@ -59,28 +59,33 @@ void appTargomanAPI::slotExecute() {
         ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(QSysInfo::machineHostName()));
         TargomanDebug(0) << "Instance-ID: " << ServerCommonConfigs::InstanceID.value();
 
-        QMap<QString, intfPureModule::stuDBInfo> RequiredDBs;
+        QMap<QString, stuModuleDBInfo> RequiredDBs;
 
-        auto RegisterModule = [&RequiredDBs](intfPureModule *_module) -> bool {
+        auto RegisterModule = [&RequiredDBs](intfPureModule *_module) {
             _module->setInstancePointer();
 
-            TargomanDebug(0) << "Loading module <" << _module->moduleFullName() << ">";
+            TargomanDebug(0) << "Registering module <" << _module->moduleFullName() << ">";
 
             foreach (auto ModuleMethod, _module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);
 
-            auto DBInfo = _module->requiredDB();
+            QMap<QString, stuModuleDBInfo> DBInfos = _module->requiredDBs();
 
-            if (DBInfo.Schema.size())
-                RequiredDBs.insert(_module->moduleBaseName(), DBInfo);
+            for (auto it = DBInfos.constBegin();
+                 it != DBInfos.constEnd();
+                 it++
+            ) {
+                if (it->Schema.size() && (RequiredDBs.contains(it.key()) == false))
+                    RequiredDBs.insert(/*_module->moduleBaseName()*/ it.key(), it.value());
+            }
 
-            return _module->init();
+            //_module->initializeModule();
         };
 
         //-- StaticModule --
         static StaticModule *StaticModuleInstance = new StaticModule();
-        if (RegisterModule(StaticModuleInstance) == false)
-            throw exAPIModuleInitiailization("Unable to init StaticModule");
+        RegisterModule(StaticModuleInstance);
+//            throw exAPIModuleInitiailization("Unable to init StaticModule");
 
         //-- Dynamic Modules --
 //#ifndef QT_DEBUG
@@ -94,8 +99,8 @@ void appTargomanAPI::slotExecute() {
             if (!Module)
                 throw exInvalidAPIModule(QString("Seems that this an incorrect module: %1").arg(Plugin.File));
 
-            if (RegisterModule(Module) == false)
-                throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
+            RegisterModule(Module);
+//                throw exAPIModuleInitiailization(QString("Unable to init module: %1").arg(Plugin.File));
         }
 //#endif
 
@@ -106,7 +111,7 @@ void appTargomanAPI::slotExecute() {
 
         if (ServerConfigs::MasterDB::Host.value().size()
                 && ServerConfigs::MasterDB::Schema.value().size()) {
-            intfPureModule::stuDBInfo MasterDBInfo = {
+            stuModuleDBInfo MasterDBInfo = {
                 ServerConfigs::MasterDB::Schema.value(),
                 ServerConfigs::MasterDB::Port.value(),
                 ServerConfigs::MasterDB::Host.value(),
@@ -140,6 +145,14 @@ void appTargomanAPI::slotExecute() {
                                 );
                 }
             }
+        }
+
+        //-- init modules
+        StaticModuleInstance->initializeModule();
+
+        foreach (auto Plugin, LoadedModules) {
+            intfPureModule* Module = qobject_cast<intfPureModule*>(Plugin.Instance);
+            Module->initializeModule();
         }
 
         RESTServer::instance().start();

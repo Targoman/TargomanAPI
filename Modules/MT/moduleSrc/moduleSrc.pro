@@ -9,21 +9,20 @@
 ModuleName=MT
 
 HEADERS += \
-    Classes/intfTranslatorBridge.hpp \
-    Classes/intfTranslatorEngine.hpp \
-    Classes/TranslationDispatcher.h \
-    Engines/clsNMT.h \
     MT.h \
-    MTDefs.hpp
+    MTDefs.hpp \
+    ORM/MTHelpers.h \
+    ORM/Accounting.h
 
 SOURCES += \
-    Classes/TranslationDispatcher.cpp \
-    Engines/clsNMT.cpp \
-    MT.cpp
+    MT.cpp \
+    ORM/MTHelpers.cpp \
+    ORM/Accounting.cpp
 
 OTHER_FILES += \
 
 LIBS += -lNLPHelper \
+    -lMTHelper \
 
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)

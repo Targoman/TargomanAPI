@@ -46,20 +46,20 @@ intfSQLBasedModule(
     tblFaqQuestions::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfFaqQuestions) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfFaqQuestions) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
-quint32 IMPL_ORMCREATE(intfFaqQuestions) {
+quint32 IMPL_ORMCREATE_USER(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfFaqQuestions) {
+bool IMPL_ORMUPDATE_USER(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfFaqQuestions) {
+bool IMPL_ORMDELETE_USER(intfFaqQuestions) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -80,20 +80,20 @@ intfSQLBasedModule(
     tblFaqAnswers::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfFaqAnswers) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfFaqAnswers) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
-quint32 IMPL_ORMCREATE(intfFaqAnswers) {
+quint32 IMPL_ORMCREATE_USER(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfFaqAnswers) {
+bool IMPL_ORMUPDATE_USER(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfFaqAnswers) {
+bool IMPL_ORMDELETE_USER(intfFaqAnswers) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }

@@ -48,7 +48,7 @@ constexpr quint16 TAPI_BASE_USER_DEFINED_TYPEID = QMetaType::User + 3;
 inline void registerUserDefinedType(const char* _typeName, Common::intfAPIArgManipulator* _argManipulator) {
     Q_ASSERT_X(QMetaType::type(_typeName), QString("registerUserDefinedType typeName(%1)").arg(_typeName).toStdString().c_str(), "Seems that registering syntax is erroneous");
 
-    TargomanDebug(5).noLabel() << "registerUserDefinedType" << _typeName;
+//    TargomanDebug(5).noLabel() << "registerUserDefinedType" << _typeName;
 
     gUserDefinedTypesInfo.insert(QMetaType::type(_typeName) - TAPI_BASE_USER_DEFINED_TYPEID, _argManipulator);
 }

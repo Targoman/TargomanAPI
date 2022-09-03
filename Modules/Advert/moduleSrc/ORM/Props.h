@@ -101,13 +101,13 @@ namespace tblProps {
 class Props : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,Props)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Props)
 
 private slots:
-    QVariant ORMGET("Get Props information")
-    bool ORMDELETE("Delete a Prop")
-    bool ORMUPDATE("Update Prop info by an authorized user")
-    quint64 ORMCREATE("Create a new Prop by an authorized user")
+    QVariant ORMGET_USER("Get Props information")
+    bool ORMDELETE_USER("Delete a Prop")
+    bool ORMUPDATE_USER("Update Prop info by an authorized user")
+    quint64 ORMCREATE_USER("Create a new Prop by an authorized user")
 };
 
 } //namespace ORM

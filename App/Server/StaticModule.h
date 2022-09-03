@@ -35,7 +35,9 @@ class StaticModule : public intfPureModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_DEFINE_API_MODULE(StaticModule);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(StaticModule); //, enuTokenActorType::USER);
+    //---------------------------------------------------------
 
 private slots:
     TAPI::RawData_t EXREST_GET_OR_POST(

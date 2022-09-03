@@ -25,8 +25,10 @@
 #include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
+
+#include "ORM/User.h"
 #include "ORM/APITokens.h"
-#include "ORM/APITokenValidIPs.h"
+//#include "ORM/APITokenValidIPs.h"
 #include "ORM/ActiveSessions.h"
 #include "ORM/ApprovalRequest.h"
 #include "ORM/BlockingRules.h"
@@ -36,7 +38,6 @@
 #include "ORM/IPStats.h"
 #include "ORM/Payments.h"
 #include "ORM/Service.h"
-#include "ORM/User.h"
 #include "ORM/UserWallets.h"
 #include "ORM/WalletTransactions.h"
 #include "ORM/Auth.h"
@@ -140,21 +141,28 @@ tmplConfigurable<FilePath_t> Account::InvalidPasswordsFile (
 /*****************************************************************/
 /*****************************************************************/
 /*****************************************************************/
-TARGOMAN_IMPL_API_MODULE(Account)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Account, AAASchema);
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT(Account)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Account, AAASchema)
 
 Account::Account() :
-    intfSQLBasedWithActionLogsModule(AccountDomain, AAASchema)
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
+                        AccountDomain,
+                        AAASchema
+                      )
 {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
-    TARGOMAN_API_IMPLEMENT_FAQ(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Account, AAASchema)
 
+    this->addSubModule(&User::instance());
     this->addSubModule(&ActiveSessions::instance());
-    this->addSubModule(&APITokens::instance());
-    this->addSubModule(&APITokenValidIPs::instance());
     this->addSubModule(&ApprovalRequest::instance());
     this->addSubModule(&BlockingRules::instance());
     this->addSubModule(&ForgotPassRequest::instance());
@@ -168,14 +176,18 @@ Account::Account() :
     this->addSubModule(&OnlinePayments::instance());
     this->addSubModule(&Roles::instance());
     this->addSubModule(&Service::instance());
-    this->addSubModule(&User::instance());
     this->addSubModule(&UserExtraInfo::instance());
     this->addSubModule(&UserWallets::instance());
     this->addSubModule(&WalletTransactions::instance());
     this->addSubModule(&WalletsBalanceHistory::instance());
     this->addSubModule(&Auth::instance());
     this->addSubModule(&Currency::instance());
+    this->addSubModule(&APITokens::instance());
+    this->addSubModule(&APITokenServices::instance());
+    this->addSubModule(&APITokenValidIPs::instance());
+}
 
+void Account::initializeModule() {
     if (Account::InvalidPasswordsFile.value().size()) {
         QFile InputFile(Account::InvalidPasswordsFile.value());
         if (InputFile.open(QIODevice::ReadOnly)) {
@@ -216,6 +228,7 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
 
     TAPI::EncodedJWT_t JWT = QJWT::createSigned(
         Payload,
+        enuTokenActorType::USER,
         QJsonObject({ { "svc", _services } }),
         _activeAccount.TTL,
         _activeAccount.Privs["ssnKey"].toString()
@@ -561,7 +574,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
 //}
 
 bool IMPL_REST_GET_OR_POST(Account, logout, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     clsJWT JWT(APICALLBOOM_PARAM.getJWT());
 
@@ -652,7 +665,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
 }
 
 bool IMPL_REST_GET_OR_POST(Account, changePass, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::MD5_t _oldPass,
     QString _oldPassSalt,
     TAPI::MD5_t _newPass
@@ -677,7 +690,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 |* Voucher & Payments ********************************************|
 \*****************************************************************/
 //Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, mergeBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
 //    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 //)) {
 //    ///@TODO: must be implemented
@@ -685,14 +698,14 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 //}
 
 //Targoman::API::AAA::stuPreVoucher IMPL_REST_POST(Account, getBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL   &APICALLBOOM_PARAM
+//    APICALLBOOM_TYPE_JWT_USER_IMPL   &APICALLBOOM_PARAM
 //)) {
 //    ///@TODO: must be implemented
 
 //}
 
 //bool IMPL_REST_POST(Account, deleteBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL           &APICALLBOOM_PARAM,
 //    Targoman::API::AAA::stuPreVoucher   _lastPreVoucher
 //)) {
 //    ///@TODO: must be implemented
@@ -731,7 +744,7 @@ bool IMPL_REST_GET(Account, checkBasketVoucherExpirity, (
 }
 
 bool IMPL_REST_POST(Account, cancelVoucher, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
     quint64 CurrentUserID = 0;
@@ -780,7 +793,7 @@ void migratePreVoucher(
  * call Account/PaymentGateways/availableGatewayTypes for list of gateway types
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher _preVoucher,
     QString _domain,
     enuPaymentGatewayType::Type _gatewayType,
@@ -1147,7 +1160,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 }
 
 //Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, payForBasket, (
-//    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //    QString _domain,
 //    quint64 _voucherID,
 //    NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType,
@@ -1168,7 +1181,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
 /*
 Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _domain,
     quint64 _voucherID,
     NULLABLE_TYPE(enuPaymentGatewayType::Type) _gatewayType,
@@ -1470,7 +1483,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
  *     owner
  */
 quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _bank,
     QString _receiptCode,
     TAPI::Date_t _receiptDate,
@@ -1548,7 +1561,7 @@ quint64 IMPL_REST_POST(Account, claimOfflinePayment, (
  *     owner
  */
 bool IMPL_REST_POST(Account, rejectOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentID
 )) {
     QJsonObject PaymentInfo = QJsonObject::fromVariantMap(OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
@@ -1591,7 +1604,7 @@ bool IMPL_REST_POST(Account, rejectOfflinePayment, (
  *     operator
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _offlinePaymentID
 )) {
     tblOfflinePayments::DTO OfflinePaymentDTO = OfflinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
@@ -1686,7 +1699,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment, (
 
 /*
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOfflinePayment_withBankInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _vchID,
     const QString& _bank,
     const QString& _receiptCode,
@@ -1815,11 +1828,11 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
             throw exHTTPInternalServerError(QString("Voucher with ID: %1 has not any items.").arg(_voucherID));
 
         QVariantList Services = Service::instance().makeSelectQuery(APICALLBOOM_PARAM)
-                .addCols({
-                             tblService::Fields::svcID,
-                             tblService::Fields::svcName,
-                             tblService::Fields::svcProcessVoucherItemEndPoint,
-                         })
+//                .addCols({
+//                             tblService::Fields::svcID,
+//                             tblService::Fields::svcName,
+//                             tblService::Fields::svcProcessVoucherItemEndPoint,
+//                         })
                 .all().Rows;
 
         if (Services.isEmpty())
@@ -1827,6 +1840,17 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         QVariantMap vchProcessResult = VoucherDTO.vchProcessResult.object().toVariantMap();
         quint8 ErrorCount = 0;
+
+        struct stuTokenInfo {
+//            quint64 TokenID;
+            tblAPITokens::DTO TokensDTO;
+
+            QList<quint32> OldServices;
+            QList<quint32> NewServices;
+            QList<QString> AllServiceNames;
+        };
+
+        QMap<quint64, stuTokenInfo> ChangingTokens;
 
         //1: process voucher items
         foreach (stuVoucherItem VoucherItem, PreVoucher.Items) {
@@ -1850,14 +1874,20 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             QVariantMap ServiceInfo = _service.toMap();
                             return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
                         })
-                        .runFirst([/*&APICALLBOOM_PARAM, */&VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
-                            QVariantMap ServiceInfo = _service.toMap();
+                        .runFirst([&APICALLBOOM_PARAM, &ChangingTokens, &VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
+//                            QVariantMap ServiceInfo = _service.toMap();
 
-                            NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
-                            TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
+                            tblService::DTO ServiceDTO;
+                            ServiceDTO.fromJson(QJsonObject::fromVariantMap(_service.toMap()));
+
+//                            NULLABLE_TYPE(QString) ProcessVoucherItemEndPoint;
+//                            TAPI::setFromVariant(ProcessVoucherItemEndPoint, ServiceInfo.value(tblService::Fields::svcProcessVoucherItemEndPoint));
+
+                            if (ServiceDTO.svcProcessVoucherItemEndPoint.isEmpty())
+                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
 
                             //bypass process by end point?
-                            if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
+//                            if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint)) {
                                 stuVoucherItemForTrustedAction VoucherItemForTrustedAction;
                                 VoucherItemForTrustedAction.UserID = VoucherDTO.vch_usrID; //APICALLBOOM_PARAM.getActorID();
                                 VoucherItemForTrustedAction.VoucherID = _voucherID;
@@ -1867,7 +1897,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
                                 QVariant Result = RESTClientHelper::callAPI(
                                     RESTClientHelper::POST,
-                                    NULLABLE_GET_OR_DEFAULT(ProcessVoucherItemEndPoint, ""),
+                                    ServiceDTO.svcProcessVoucherItemEndPoint,
                                     {},
                                     {
                                         { "data", VoucherItemForTrustedAction.toJson().toVariantMap() },
@@ -1882,10 +1912,54 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                     ItemResult.remove("error");
 
                                 vchProcessResult[VoucherItem.UUID] = ItemResult;
-                            } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
-                            else {
-                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
-                            }
+
+                                //check token changes
+                                if (NULLABLE_HAS_VALUE(VoucherItem.APITokenID)) {
+                                    if (ChangingTokens.contains(NULLABLE_VALUE(VoucherItem.APITokenID)) == false) {
+                                        tblAPITokens::DTO APITokensDTO = APITokens::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                                                .where({ tblAPITokens::Fields::aptID,
+                                                       enuConditionOperator::Equal,
+                                                       NULLABLE_VALUE(VoucherItem.APITokenID) })
+                                                .one<tblAPITokens::DTO>();
+
+                                        stuTokenInfo TokenInfo;
+//                                        TokenInfo.TokenID = APITokensDTO.aptID;
+                                        TokenInfo.TokensDTO = APITokensDTO;
+
+                                        auto IDParts = APITokensDTO.ServiceIDs.split(",", QString::SkipEmptyParts);
+                                        foreach (auto ID, IDParts)
+                                            TokenInfo.OldServices.append(ID.toUInt());
+
+                                        auto NameParts = APITokensDTO.ServiceNames.split(",", QString::SkipEmptyParts);
+                                        foreach (auto Name, NameParts)
+                                            TokenInfo.AllServiceNames.append(Name);
+
+//                                        TokenInfo.NewServices = TokenInfo.OldServices;
+
+                                        ChangingTokens.insert(APITokensDTO.aptID, TokenInfo);
+                                    } //if (ChangingTokens.contains(...
+
+                                    stuTokenInfo TokenInfo = ChangingTokens[NULLABLE_VALUE(VoucherItem.APITokenID)];
+
+//                                    quint32 ServiceID = ServiceInfo.value(tblService::Fields::svcID).toUInt();
+                                    if ((TokenInfo.OldServices.contains(ServiceDTO.svcID) == false)
+                                            && (TokenInfo.NewServices.contains(ServiceDTO.svcID) == false)
+                                    ) {
+                                        TokenInfo.NewServices.append(ServiceDTO.svcID);
+                                        TokenInfo.AllServiceNames.append(ServiceDTO.svcName);
+
+//                                        if (ServiceDTO.svcOppositeTokenTypeServiceName.isEmpty() == false)
+//                                            TokenInfo.AllServiceNames.append(ServiceDTO.svcOppositeTokenTypeServiceName);
+                                    }
+
+                                    ChangingTokens[NULLABLE_VALUE(VoucherItem.APITokenID)] = TokenInfo;
+
+                                } //if (NULLABLE_HAS_VALUE(VoucherItem.TokenID))
+
+//                            } //if (NULLABLE_HAS_VALUE(ProcessVoucherItemEndPoint))
+//                            else {
+//                                throw exHTTPInternalServerError("Item service has not ProcessVoucherItemEndPoint");
+//                            }
 
                             return true;
                         });
@@ -1913,6 +1987,61 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                    {
                                       { tblVoucher::Fields::vchID, _voucherID }
                                    });
+
+        //3: save token changes
+//        QMap<QString, QString> ChangedSignedTokens;
+
+        if (ChangingTokens.isEmpty() == false) {
+            foreach (auto TokenInfo, ChangingTokens) {
+                if (TokenInfo.NewServices.isEmpty())
+                    continue;
+
+                //create new Token
+                QString Token = TokenInfo.TokensDTO.aptToken;
+
+                TAPI::JWT_t JWTPayload;
+                QJWT::extractAndDecryptPayload(Token, JWTPayload);
+
+                QJsonObject PrivatePayload;
+                if (JWTPayload.contains("prv"))
+                    PrivatePayload = JWTPayload["prv"].toObject();
+
+                PrivatePayload["svc"] = TokenInfo.AllServiceNames.join(",");
+                qint64 TTL = 1 * 365 * 24 * 3600; //1 year
+
+//                QString OldToken = Token;
+                Token = QJWT::createSigned(
+                    JWTPayload,
+                    enuTokenActorType::API,
+                    PrivatePayload,
+                    TTL
+            //        _activeAccount.Privs["ssnKey"].toString()
+                );
+//                ChangedSignedTokens.insert(OldToken, Token);
+
+                //save into tblAPITokens
+                APITokens::instance().makeUpdateQuery(APICALLBOOM_PARAM)
+                        .set(tblAPITokens::Fields::aptToken, Token)
+                        .setPksByPath(TokenInfo.TokensDTO.aptID)
+                        .execute(VoucherDTO.vch_usrID) //APICALLBOOM_PARAM.getActorID())
+                        ;
+
+                //save into tblAPITokenServices
+                ORMCreateQuery CreateQueryServices = APITokenServices::instance().makeCreateQuery(APICALLBOOM_PARAM)
+                                                     .addCol(tblAPITokenServices::Fields::aptsvc_aptID)
+                                                     .addCol(tblAPITokenServices::Fields::aptsvc_svcID)
+                                                     ;
+
+                foreach (quint32 SvcID, TokenInfo.NewServices) {
+                    CreateQueryServices.values({
+                                                   { tblAPITokenServices::Fields::aptsvc_aptID, TokenInfo.TokensDTO.aptID },
+                                                   { tblAPITokenServices::Fields::aptsvc_svcID, SvcID },
+                                               });
+                }
+
+                CreateQueryServices.execute(VoucherDTO.vch_usrID); //APICALLBOOM_PARAM.getActorID());
+            }
+        }
 
         //--------------------------
         /*
@@ -2091,7 +2220,7 @@ void Account::tryCancelVoucher(
  *     operator
  */
 quint64 IMPL_REST_POST(Account, addPrizeTo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     QString _desc
@@ -2122,7 +2251,7 @@ quint64 IMPL_REST_POST(Account, addPrizeTo, (
  *     operator
  */
 quint64 IMPL_REST_POST(Account, addIncomeTo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _targetUsrID,
     quint64 _amount,
     QString _desc
@@ -2149,7 +2278,7 @@ quint64 IMPL_REST_POST(Account, addIncomeTo, (
 }
 
 bool IMPL_REST_POST(Account, checkVoucherTTL, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
 }
@@ -2200,9 +2329,13 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
             UserEmail
         });
 
+    quint64 UserID;
+
     if (UserDACResult.isValid()) {
+        UserID = UserDACResult.value("usrID").toULongLong();
+
         Result.insert("User", QVariantMap({
-                                              { "usrID", UserDACResult.value("usrID") },
+                                              { "usrID", UserID },
                                               { "email", UserEmail },
                                           }));
     } else {
@@ -2223,7 +2356,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
 
         Result.insert("User", SignupUserResult);
 
-        quint64 UserID = SignupUserResult["usrID"].toUInt();
+        UserID = SignupUserResult["usrID"].toUInt();
 
         //-- approve user email --------------------------------------
         QString Code = DAC.execQuery("",
@@ -2389,6 +2522,16 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
     }
 
     Result.insert("PaymentGateway", PaymentGatewayReport);
+
+    //-- apitoken --------------------------------------
+    Targoman::API::AccountModule::stuRequestTokenResult TokenInfo = APITokens::instance().create(
+                APICALLBOOM_PARAM,
+                UserID,
+                "token for me",
+                { "MT" }
+                );
+
+    Result.insert("APIToken", TokenInfo.toJson());
 
     //----------------------------------------
     return Result;

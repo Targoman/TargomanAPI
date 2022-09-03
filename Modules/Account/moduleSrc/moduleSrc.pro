@@ -12,7 +12,6 @@ HEADERS += \
     Account.h \
     ORM/ActiveSessions.h \
     ORM/APITokens.h \
-    ORM/APITokenValidIPs.h \
     ORM/ApprovalRequest.h \
     ORM/Auth.h \
     ORM/BlockingRules.h \
@@ -40,7 +39,6 @@ SOURCES += \
     Account.cpp \
     ORM/ActiveSessions.cpp \
     ORM/APITokens.cpp \
-    ORM/APITokenValidIPs.cpp \
     ORM/ApprovalRequest.cpp \
     ORM/Auth.cpp \
     ORM/BlockingRules.cpp \

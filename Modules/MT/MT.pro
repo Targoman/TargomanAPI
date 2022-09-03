@@ -12,9 +12,8 @@ addSubdirs(moduleSrc, Dependencies)
 addSubdirs(functionalTest, Dependencies)
 
 OTHER_FILES += \
+    migrations/.gitkeep \
     migrations/db/* \
     migrations/db/.dbdiff.dev_.cfg \
     migrations/local/* \
-    migrations/local/*.sh \
     migrations/local/.migrations
-

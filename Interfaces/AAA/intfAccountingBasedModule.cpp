@@ -109,13 +109,11 @@ intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
 intfAccountingBasedModule::intfAccountingBasedModule(
     const QString               &_module,
     const QString               &_schema,
+    bool                        _isTokenBase,
     AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
     intfAccountUnits            *_units,
-//    intfAccountUnitsI18N        *_unitsI18N,
     intfAccountProducts         *_products,
-//    intfAccountProductsI18N     *_productsI18N,
     intfAccountSaleables        *_saleables,
-//    intfAccountSaleablesI18N    *_saleablesI18N,
     intfAccountSaleablesFiles   *_saleablesFiles,
     intfAccountUserAssets       *_userAssets,
     intfAccountUserAssetsFiles  *_userAssetsFiles,
@@ -123,14 +121,12 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     intfAccountCoupons          *_discounts,
     intfAccountPrizes           *_prizes
 ) :
-    API::intfSQLBasedWithActionLogsModule(_module, _schema),
+    intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
+    IsTokenBase(_isTokenBase),
     AccountUnits(_units),
-//    AccountUnitsI18N(_unitsI18N),
     AccountProducts(_products),
-//    AccountProductsI18N(_productsI18N),
     AccountSaleables(_saleables),
-//    AccountSaleablesI18N(_saleablesI18N),
     AccountSaleablesFiles(_saleablesFiles),
     AccountUserAssets(_userAssets),
     AccountUserAssetsFiles(_userAssetsFiles),
@@ -155,8 +151,6 @@ intfAccountingBasedModule::intfAccountingBasedModule(
 
     ServiceRegistry.insert(this->ServiceName, this);
 }
-
-//intfAccountingBasedModule::~intfAccountingBasedModule() { ; }
 
 stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
     return this->findBestMatchedCredit(_usrID);
@@ -355,13 +349,15 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
-    APICALLBOOM_TYPE_JWT_IMPL               &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
     qreal                                   _qty,
     TAPI::CouponCode_t                      _discountCode,
     QString                                 _referrer,
     TAPI::JSON_t                            _referrerParams,
+//    NULLABLE_TYPE(quint64)                  _tokenID, // = NULLABLE_NULL_VALUE
+    QString                                 _apiToken,
     Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
     /**
@@ -378,7 +374,34 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     checkPreVoucherSanity(_lastPreVoucher);
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
 
+    stuAssetItem AssetItem;
+    AssetItem.AssetActorID = CurrentUserID;
+
+    //-- --------------------------------
+    _apiToken = _apiToken.trimmed();
+    if (this->IsTokenBase) {
+        if (_apiToken.isEmpty())
+            throw exHTTPInternalServerError("This product IS token base");
+
+        TAPI::JWT_t APITokenJWTPayload;
+        QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
+        AssetItem.APITokenPayload = APITokenJWTPayload;
+
+        clsJWT APITokenJWT(APITokenJWTPayload);
+
+        APITokenID =
+            AssetItem.AssetActorID = APITokenJWT.actorID();
+
+        if (APITokenJWT.ownerID() != CurrentUserID)
+            throw exAuthorization("API Token is not yours");
+    }
+
+    if ((this->IsTokenBase == false) && (_apiToken.isEmpty() == false))
+        throw exHTTPInternalServerError("This product IS NOT token base");
+
+    //-- --------------------------------
     if (_lastPreVoucher.Items.isEmpty())
         _lastPreVoucher.UserID = CurrentUserID;
     else if (_lastPreVoucher.UserID != CurrentUserID)
@@ -399,6 +422,9 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
             continue;
 
         if (it->Referrer != _referrer)
+            continue;
+
+        if (it->APITokenID != APITokenID)
             continue;
 
         /**
@@ -441,7 +467,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
         AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
         if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
-            || (AccountUserAssetsBaseDTO.uas_usrID != CurrentUserID)
+            || (AccountUserAssetsBaseDTO.uas_actorID != AssetItem.AssetActorID) //CurrentUserID)
             || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
@@ -474,8 +500,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 
     QJsonObject JsonSaleableInfo = QJsonObject::fromVariantMap(SaleableInfo);
 
-    stuAssetItem AssetItem;
-    AssetItem.fromJson(JsonSaleableInfo);
+    AssetItem.fromJson(JsonSaleableInfo, false);
     AssetItem.Product.fromJson(JsonSaleableInfo);
     AssetItem.Saleable.fromJson(JsonSaleableInfo);
 
@@ -514,33 +539,33 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     JSDPendingVouchers.setObject(AssetItem.Private.toJson());
     PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
-    PreVoucherItem.Service = this->ServiceName;
-    //PreVoucherItem.OrderID
-    PreVoucherItem.UUID = SecurityHelper::UUIDtoMD5();
-    PreVoucherItem.Desc = AssetItem.Saleable.slbName;
-    PreVoucherItem.Qty = AssetItem.Qty; //_qty;
-    PreVoucherItem.UnitPrice = AssetItem.UnitPrice;
-    PreVoucherItem.SubTotal = AssetItem.SubTotal;
+    PreVoucherItem.Service          = this->ServiceName;
+    PreVoucherItem.UUID             = SecurityHelper::UUIDtoMD5();
+    PreVoucherItem.Desc             = AssetItem.Saleable.slbName;
+    PreVoucherItem.Qty              = AssetItem.Qty; //_qty;
+    PreVoucherItem.UnitPrice        = AssetItem.UnitPrice;
+    PreVoucherItem.SubTotal         = AssetItem.SubTotal;
 
     //store multiple discounts (system (multi) + coupon (one))
-    PreVoucherItem.SystemDiscounts = AssetItem.SystemDiscounts;
-    PreVoucherItem.CouponDiscount = AssetItem.CouponDiscount;
+    PreVoucherItem.SystemDiscounts  = AssetItem.SystemDiscounts;
+    PreVoucherItem.CouponDiscount   = AssetItem.CouponDiscount;
 
-    PreVoucherItem.DisAmount = AssetItem.Discount;
-    PreVoucherItem.AfterDiscount = AssetItem.AfterDiscount;
+    PreVoucherItem.DisAmount        = AssetItem.Discount;
+    PreVoucherItem.AfterDiscount    = AssetItem.AfterDiscount;
 
-    PreVoucherItem.VATPercent = AssetItem.VATPercent;
-    PreVoucherItem.VATAmount = AssetItem.VAT;
+    PreVoucherItem.VATPercent       = AssetItem.VATPercent;
+    PreVoucherItem.VATAmount        = AssetItem.VAT;
 
-    PreVoucherItem.TotalPrice = AssetItem.TotalPrice;
+    PreVoucherItem.TotalPrice       = AssetItem.TotalPrice;
 
-    PreVoucherItem.Additives = AssetItem.OrderAdditives;
-    PreVoucherItem.Referrer = AssetItem.Referrer;
-    PreVoucherItem.ReferrerParams = AssetItem.ReferrerParams;
+    PreVoucherItem.Additives        = AssetItem.OrderAdditives;
+    PreVoucherItem.Referrer         = AssetItem.Referrer;
+    PreVoucherItem.ReferrerParams   = AssetItem.ReferrerParams;
+    PreVoucherItem.APITokenID       = APITokenID;
 
     ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(APICALLBOOM_PARAM)
         .addCols({
-                     tblAccountUserAssetsBase::Fields::uas_usrID,
+                     tblAccountUserAssetsBase::Fields::uas_actorID,
                      tblAccountUserAssetsBase::Fields::uas_slbID,
                      tblAccountUserAssetsBase::Fields::uasQty,
 //                     tblAccountUserAssetsBase::Fields::uas_vchID,
@@ -554,7 +579,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::Fields::uas_usrID, CurrentUserID },
+        { tblAccountUserAssetsBase::Fields::uas_actorID, AssetItem.AssetActorID }, //CurrentUserID },
         { tblAccountUserAssetsBase::Fields::uas_slbID, AssetItem.Saleable.slbID },
         { tblAccountUserAssetsBase::Fields::uasQty, _qty },
 //        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
@@ -564,6 +589,12 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 //        { tblAccountUserAssetsBase::Fields::uasOrderDateTime, DBExpression::NOW() },
 //            { tblAccountUserAssetsBase::Fields::uasStatus, },
     };
+
+//    if (NULLABLE_HAS_VALUE(_tokenID)) {
+//        qry.addCol(tblAccountUserAssetsBase::Fields::uasRelatedAPITokenID);
+
+//        values.insert(tblAccountUserAssetsBase::Fields::uasRelatedAPITokenID, NULLABLE_VALUE(_tokenID));
+//    }
 
     //-- discount
     if (AssetItem.CouponDiscount.ID > 0) {
@@ -644,7 +675,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID,
     qreal                               _newQty,
@@ -672,7 +703,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
-    APICALLBOOM_TYPE_JWT_IMPL           &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID
 )) {
@@ -780,6 +811,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     AssetItem.OrderAdditives    = _voucherItem.Additives;
     AssetItem.Referrer          = _voucherItem.Referrer;
     AssetItem.ReferrerParams    = _voucherItem.ReferrerParams;
+//    AssetItem.APIToken          = _voucherItem.APIToken;
 
     AssetItem.Qty               = _newQty;
     AssetItem.UnitPrice         = AssetItem.Saleable.slbBasePrice;
@@ -835,26 +867,27 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 
         _voucherItem.Service = this->ServiceName;
 //        _voucherItem.UUID = _voucherItem.UUID;
-        _voucherItem.Desc = AssetItem.Saleable.slbName;
-        _voucherItem.Qty = AssetItem.Qty;
-        _voucherItem.UnitPrice = AssetItem.UnitPrice;
-        _voucherItem.SubTotal = AssetItem.SubTotal;
+        _voucherItem.Desc               = AssetItem.Saleable.slbName;
+        _voucherItem.Qty                = AssetItem.Qty;
+        _voucherItem.UnitPrice          = AssetItem.UnitPrice;
+        _voucherItem.SubTotal           = AssetItem.SubTotal;
 
         //store multiple discounts (system (multi) + coupon (one))
-        _voucherItem.SystemDiscounts = AssetItem.SystemDiscounts;
-        _voucherItem.CouponDiscount = AssetItem.CouponDiscount;
+        _voucherItem.SystemDiscounts    = AssetItem.SystemDiscounts;
+        _voucherItem.CouponDiscount     = AssetItem.CouponDiscount;
 
-        _voucherItem.DisAmount = AssetItem.Discount;
-        _voucherItem.AfterDiscount = AssetItem.AfterDiscount;
+        _voucherItem.DisAmount          = AssetItem.Discount;
+        _voucherItem.AfterDiscount      = AssetItem.AfterDiscount;
 
-        _voucherItem.VATPercent = AssetItem.VATPercent;
-        _voucherItem.VATAmount = AssetItem.VAT;
+        _voucherItem.VATPercent         = AssetItem.VATPercent;
+        _voucherItem.VATAmount          = AssetItem.VAT;
 
-        _voucherItem.TotalPrice = AssetItem.TotalPrice;
+        _voucherItem.TotalPrice         = AssetItem.TotalPrice;
 
-        _voucherItem.Additives = AssetItem.OrderAdditives;
-        _voucherItem.Referrer = AssetItem.Referrer;
-        _voucherItem.ReferrerParams = AssetItem.ReferrerParams;
+        _voucherItem.Additives          = AssetItem.OrderAdditives;
+        _voucherItem.Referrer           = AssetItem.Referrer;
+        _voucherItem.ReferrerParams     = AssetItem.ReferrerParams;
+//        _voucherItem.APIToken           = AssetItem.APIToken;
 
         ORMUpdateQuery qry = this->AccountUserAssets->makeUpdateQuery(APICALLBOOM_PARAM)
                           .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
@@ -862,6 +895,8 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
                           .set(tblAccountUserAssetsBase::Fields::uasQty, _newQty)
                           .set(tblAccountUserAssetsBase::Fields::uasDiscountAmount, AssetItem.Discount)
                           ;
+
+        ///@TODO: change tblAccountUserAssetsBase::Fields::uasRelatedAPITokenID ?
 
         //-- discount
         if (AssetItem.CouponDiscount.ID > 0)
@@ -1177,7 +1212,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
                                tblAccountUserAssetsBase::Fields::uas_vchID,
                            })
                   .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::Fields::uasID, "_discountUsedCount")
-                  .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _assetItem.AssetActorID}) //CurrentUserID })
                   .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                               .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                   .andWhere(OmmitOldCondition)
@@ -1193,7 +1228,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
         .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
-                  .where({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
+                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _assetItem.AssetActorID}) //CurrentUserID })
                   .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                               .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                   .andWhere(OmmitOldCondition)

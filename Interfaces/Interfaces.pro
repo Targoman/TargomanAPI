@@ -35,13 +35,13 @@ DIST_HEADERS += \
     ORM/Alerts.h \
     API/intfPureModule.h \
     API/intfSQLBasedModule.h \
-    API/intfSQLBasedWithActionLogsModule.h \
     ObjectStorage/ORM/ObjectStorage.h \
     ObjectStorage/ObjectStorageManager.h
 
 PRIVATE_HEADERS += \
 
 HEADERS += \
+    API/intfModuleHelper.h \
     Helpers/IteratorHelper.hpp \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
@@ -78,6 +78,7 @@ HEADERS += \
     ObjectStorage/ObjectStorageManager.h
 
 SOURCES += \
+    API/intfModuleHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \
     Server/APICallBoom.cpp \
@@ -102,7 +103,6 @@ SOURCES += \
     DBM/QueryBuilders.cpp \
     API/intfPureModule.cpp \
     API/intfSQLBasedModule.cpp \
-    API/intfSQLBasedWithActionLogsModule.cpp \
     ORM/intfActionLogs.cpp \
     ORM/intfAlerts.cpp \
     ObjectStorage/ORM/ObjectStorage.cpp \
@@ -133,8 +133,8 @@ OTHER_FILES += \
     migrations/faq/local/.migrations
 
 INCLUDEPATH += \
-    $$BASE_PROJECT_PATH/App/ \
-    $$BASE_PROJECT_PATH/3rdParty/E4MT/
+#    $$BASE_PROJECT_PATH/App/ \
+#    $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)

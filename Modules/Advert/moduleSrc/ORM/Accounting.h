@@ -435,7 +435,7 @@ namespace tblAccountCoupons {
 class AccountUnits : public intfAccountUnits
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnits)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountUnits)
 
 protected:
     QScopedPointer<intfAccountUnitsI18N> AccountUnitsI18N;
@@ -445,7 +445,7 @@ protected:
 class AccountUnitsI18N : public intfAccountUnitsI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUnitsI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountUnitsI18N)
 
 public:
 };
@@ -456,7 +456,7 @@ public:
 class AccountProducts : public intfAccountProducts
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProducts)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountProducts)
 
 protected:
     QScopedPointer<intfAccountProductsI18N> AccountProductsI18N;
@@ -466,7 +466,7 @@ protected:
 class AccountProductsI18N : public intfAccountProductsI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountProductsI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountProductsI18N)
 
 public:
 };
@@ -477,7 +477,7 @@ public:
 class AccountSaleables : public intfAccountSaleables
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleables)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountSaleables)
 
 protected:
     QScopedPointer<intfAccountSaleablesI18N> AccountSaleablesI18N;
@@ -487,7 +487,7 @@ protected:
 class AccountSaleablesI18N : public intfAccountSaleablesI18N
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesI18N)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountSaleablesI18N)
 
 //public:
 };
@@ -496,7 +496,7 @@ class AccountSaleablesI18N : public intfAccountSaleablesI18N
 class AccountSaleablesFiles : public intfAccountSaleablesFiles
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountSaleablesFiles)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountSaleablesFiles)
 };
 
 /******************************************************/
@@ -505,7 +505,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFiles
 class AccountUserAssets : public intfAccountUserAssets
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssets)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountUserAssets)
 
 //public:
 };
@@ -514,7 +514,7 @@ class AccountUserAssets : public intfAccountUserAssets
 class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountUserAssetsFiles)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountUserAssetsFiles)
 
 //public:
 };
@@ -525,7 +525,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
 class AccountAssetUsage : public intfAccountAssetUsage
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountAssetUsage)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountAssetUsage)
 
 public:
 };
@@ -536,7 +536,7 @@ public:
 class AccountCoupons : public intfAccountCoupons
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, AccountCoupons)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountCoupons)
 
 public:
 };
@@ -548,7 +548,7 @@ public:
 /*class clsAccountPrizes: public Accounting::intfAccountPrizes
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert,clsAccountPrizes)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert,clsAccountPrizes)
 
 private slots:
 public:

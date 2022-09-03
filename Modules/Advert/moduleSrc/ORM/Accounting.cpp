@@ -22,6 +22,7 @@
  */
 
 #include "Accounting.h"
+#include "../Advert.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuProductType);
 
@@ -32,8 +33,11 @@ namespace Targoman::API::AdvertModule::ORM {
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUnits)
+
 AccountUnits::AccountUnits() :
     intfAccountUnits(
+        false,
         AdvertSchema,
         tblAccountUnits::Private::ExtraORMFields,
         tblAccountUnits::Private::ExtraRelations,
@@ -43,8 +47,11 @@ AccountUnits::AccountUnits() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUnitsI18N)
+
 AccountUnitsI18N::AccountUnitsI18N() :
     intfAccountUnitsI18N(
+        false,
         AdvertSchema,
         tblAccountUnitsI18N::Private::ExtraORMFields,
         tblAccountUnitsI18N::Private::ExtraRelations,
@@ -54,8 +61,11 @@ AccountUnitsI18N::AccountUnitsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountProducts)
+
 AccountProducts::AccountProducts() :
     intfAccountProducts(
+        false,
         AdvertSchema,
         tblAccountProducts::Private::ExtraORMFields,
         tblAccountProducts::Private::ExtraRelations,
@@ -65,8 +75,11 @@ AccountProducts::AccountProducts() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountProductsI18N)
+
 AccountProductsI18N::AccountProductsI18N() :
     intfAccountProductsI18N(
+        false,
         AdvertSchema,
         tblAccountProductsI18N::Private::ExtraORMFields,
         tblAccountProductsI18N::Private::ExtraRelations,
@@ -76,8 +89,11 @@ AccountProductsI18N::AccountProductsI18N() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleables)
+
 AccountSaleables::AccountSaleables() :
     intfAccountSaleables(
+        false,
         AdvertSchema,
         tblAccountSaleables::Private::ExtraORMFields,
         tblAccountSaleables::Private::ExtraRelations,
@@ -87,8 +103,11 @@ AccountSaleables::AccountSaleables() :
 }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleablesI18N)
+
 AccountSaleablesI18N::AccountSaleablesI18N() :
     intfAccountSaleablesI18N(
+        false,
         AdvertSchema,
         tblAccountSaleablesI18N::Private::ExtraORMFields,
         tblAccountSaleablesI18N::Private::ExtraRelations,
@@ -96,8 +115,11 @@ AccountSaleablesI18N::AccountSaleablesI18N() :
 ) { ; }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountSaleablesFiles)
+
 AccountSaleablesFiles::AccountSaleablesFiles() :
     intfAccountSaleablesFiles(
+        false,
         AdvertSchema,
         tblAccountSaleablesFiles::Private::ExtraORMFields,
         tblAccountSaleablesFiles::Private::ExtraRelations,
@@ -107,8 +129,11 @@ AccountSaleablesFiles::AccountSaleablesFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUserAssets)
+
 AccountUserAssets::AccountUserAssets() :
     intfAccountUserAssets(
+        false,
         AdvertSchema,
         tblAccountUserAssets::Private::ExtraORMFields,
         tblAccountUserAssets::Private::ExtraRelations,
@@ -116,8 +141,11 @@ AccountUserAssets::AccountUserAssets() :
 ) { ; }
 
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountUserAssetsFiles)
+
 AccountUserAssetsFiles::AccountUserAssetsFiles() :
     intfAccountUserAssetsFiles(
+        false,
         AdvertSchema,
         tblAccountUserAssetsFiles::Private::ExtraORMFields,
         tblAccountUserAssetsFiles::Private::ExtraRelations,
@@ -127,8 +155,11 @@ AccountUserAssetsFiles::AccountUserAssetsFiles() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountAssetUsage)
+
 AccountAssetUsage::AccountAssetUsage() :
     intfAccountAssetUsage(
+        false,
         AdvertSchema,
         tblAccountAssetUsage::Private::ExtraORMFields,
         tblAccountAssetUsage::Private::ExtraRelations,
@@ -138,8 +169,11 @@ AccountAssetUsage::AccountAssetUsage() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountCoupons)
+
 AccountCoupons::AccountCoupons() :
     intfAccountCoupons(
+        false,
         AdvertSchema,
         tblAccountCoupons::Private::ExtraORMFields,
         tblAccountCoupons::Private::ExtraRelations,

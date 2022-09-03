@@ -71,13 +71,22 @@ public:
         return (this->BaseMethod.name() + QJsonValue::fromVariant(_args).toString().toUtf8()).constData();
     }
 
-    inline bool requiresJWT() const {
-        return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
-    }
-
     inline bool isHidden() const {
         return this->BaseMethod.Hidden;
     }
+
+    intfPureModule* parentModule() {
+        return this->Parent;
+    }
+
+//    inline bool requiresJWT() const {
+//        return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
+//    }
+
+//    inline enuTokenActorType::Type moduleActorType() const {
+//        return this->Parent->actorType();
+//    }
+    enuTokenActorType::Type tokenActorType() { return this->TokenActorType; }
 
 //    inline bool requiresCookies() const {
 //        return this->ParamTypesName.contains(PARAM_COOKIES);
@@ -154,7 +163,8 @@ private:
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
     intfPureModule*             Parent;
-    bool                        RequiresJWT;
+//    bool                        RequiresJWT;
+    enuTokenActorType::Type     TokenActorType;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

@@ -22,6 +22,7 @@
  */
 
 #include "Bin.h"
+#include "../Advert.h"
 
 namespace Targoman::API::AdvertModule::ORM {
 
@@ -30,6 +31,8 @@ namespace Targoman::API::AdvertModule::ORM {
 /*****************************************************************\
 |* Banners *******************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, Banners)
+
 Banners::Banners() :
     intfSQLBasedModule(
         AdvertSchema,
@@ -42,6 +45,8 @@ Banners::Banners() :
 /*****************************************************************\
 |* Bin ***********************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, Bin)
+
 Bin::Bin() :
     intfSQLBasedModule(
         AdvertSchema,
@@ -51,7 +56,7 @@ Bin::Bin() :
         tblBin::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(Bin) {
+QVariant IMPL_ORMGET_USER(Bin) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);

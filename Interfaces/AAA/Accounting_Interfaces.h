@@ -32,30 +32,45 @@ using namespace Targoman::API::API;
 namespace Targoman::API::AAA {
 
 /******************************************************/
-/******************************************************/
-/******************************************************/
-class intfAccountUnitsI18N : public intfSQLBasedModule
+class intfAccountORMBase
 {
-    Q_OBJECT
+public:
+    intfAccountORMBase(bool _isTokenBase) :
+        IsTokenBase(_isTokenBase)
+    { ; }
 
 public:
-    intfAccountUnitsI18N(const QString& _schema,
-                              const QList<DBM::clsORMField>& _exclusiveCols = {},
-                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-protected:
-    static intfAccountUnitsI18N* myInstance;
-    friend class intfAccountUnits;
+    bool IsTokenBase;
 };
 
 /******************************************************/
-class intfAccountUnits : public intfSQLBasedModule
+/******************************************************/
+/******************************************************/
+class intfAccountUnitsI18N : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUnits(const QString& _schema,
+    intfAccountUnitsI18N(bool _isTokenBase,
+                         const QString& _schema,
+                         const QList<DBM::clsORMField>& _exclusiveCols = {},
+                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+public:
+    //key: schema
+    static QMap<QString, intfAccountUnitsI18N*> myInstance;
+//    friend class intfAccountUnits;
+};
+
+/******************************************************/
+class intfAccountUnits : public intfSQLBasedModule, public intfAccountORMBase
+{
+    Q_OBJECT
+
+public:
+    intfAccountUnits(bool _isTokenBase,
+                     const QString& _schema,
                      const QList<DBM::clsORMField>& _exclusiveCols = {},
                      const QList<DBM::stuRelation>& _exclusiveRelations = {},
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -64,37 +79,40 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Available Units")
-    quint32 ORMCREATE("Create a new Unit by an authorized user")
-    bool ORMUPDATE("Update a Unit info by an authorized user")
-    bool ORMDELETE("Delete a Unit")
+    QVariant ORMGET_ANONYMOUSE("Get Available Units")
+    quint32 ORMCREATE_USER("Create a new Unit by an authorized user")
+    bool ORMUPDATE_USER("Update a Unit info by an authorized user")
+    bool ORMDELETE_USER("Delete a Unit")
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountProductsI18N : public intfSQLBasedModule
+class intfAccountProductsI18N : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsI18N(const QString& _schema,
-                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+    intfAccountProductsI18N(bool _isTokenBase,
+                            const QString& _schema,
+                            const QList<DBM::clsORMField>& _exclusiveCols = {},
+                            const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                            const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
-protected:
-    static intfAccountProductsI18N* myInstance;
-    friend class intfAccountProducts;
+public:
+    //key: schema
+    static QMap<QString, intfAccountProductsI18N*> myInstance;
+//    friend class intfAccountProducts;
 };
 
 /******************************************************/
-class intfAccountProducts : public intfSQLBasedModule
+class intfAccountProducts : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountProducts(const QString& _schema,
+    intfAccountProducts(bool _isTokenBase,
+                        const QString& _schema,
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -103,37 +121,40 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Available Products")
-    quint32 ORMCREATE("Create a new Product by an authorized user")
-    bool ORMUPDATE("Update a Product info by an authorized user")
-    bool ORMDELETE("Delete a Product")
+    QVariant ORMGET_ANONYMOUSE("Get Available Products")
+    quint32 ORMCREATE_USER("Create a new Product by an authorized user")
+    bool ORMUPDATE_USER("Update a Product info by an authorized user")
+    bool ORMDELETE_USER("Delete a Product")
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountSaleablesI18N : public intfSQLBasedModule
+class intfAccountSaleablesI18N : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesI18N(const QString& _schema,
-                                  const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+    intfAccountSaleablesI18N(bool _isTokenBase,
+                             const QString& _schema,
+                             const QList<DBM::clsORMField>& _exclusiveCols = {},
+                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                             const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
-protected:
-    static intfAccountSaleablesI18N* myInstance;
-    friend class intfAccountSaleables;
+public:
+    //key: schema
+    static QMap<QString, intfAccountSaleablesI18N*> myInstance;
+//    friend class intfAccountSaleables;
 };
 
 /******************************************************/
-class intfAccountSaleables : public intfSQLBasedModule
+class intfAccountSaleables : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleables(const QString& _schema,
+    intfAccountSaleables(bool _isTokenBase,
+                         const QString& _schema,
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -142,19 +163,20 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Available Saleables")
-    quint32 ORMCREATE("Create a new Saleable by an authorized user")
-    bool ORMUPDATE("Update a Saleable info by an authorized user")
-    bool ORMDELETE("Delete a Saleable")
+    QVariant ORMGET_ANONYMOUSE("Get Available Saleables")
+    quint32 ORMCREATE_USER("Create a new Saleable by an authorized user")
+    bool ORMUPDATE_USER("Update a Saleable info by an authorized user")
+    bool ORMDELETE_USER("Delete a Saleable")
 };
 
 /******************************************************/
-class intfAccountSaleablesFiles : public intfSQLBasedModule
+class intfAccountSaleablesFiles : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesFiles(const QString& _schema,
+    intfAccountSaleablesFiles(bool _isTokenBase,
+                              const QString& _schema,
                               const QList<DBM::clsORMField>& _exclusiveCols = {},
                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -162,26 +184,28 @@ public:
 //public:
 //    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
-protected:
-    static intfAccountSaleablesFiles* myInstance;
-    friend class intfAccountUserAssets;
+public:
+    //key: schema
+    static QMap<QString, intfAccountSaleablesFiles*> myInstance;
+//    friend class intfAccountUserAssets;
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Available Saleables Files")
-    quint32 ORMCREATE("Create a new Saleables File by an authorized user")
-    bool ORMUPDATE("Update a Saleables File info by an authorized user")
-    bool ORMDELETE("Delete a Saleables File")
+    QVariant ORMGET_ANONYMOUSE("Get Available Saleables Files")
+    quint32 ORMCREATE_USER("Create a new Saleables File by an authorized user")
+    bool ORMUPDATE_USER("Update a Saleables File info by an authorized user")
+    bool ORMDELETE_USER("Delete a Saleables File")
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUserAssets : public intfSQLBasedModule
+class intfAccountUserAssets : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssets(const QString& _schema,
+    intfAccountUserAssets(bool _isTokenBase,
+                          const QString& _schema,
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -190,12 +214,12 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ORMGET("Get User Assets")
+    QVariant ORMGET_USER("Get User Assets")
 
     bool REST_UPDATE(
         disablePackage,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset banned by an authorized user"
@@ -204,7 +228,7 @@ private slots:
     bool REST_UPDATE(
         setAsPrefered,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset as prefered"
@@ -212,22 +236,24 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUserAssetsFiles : public intfSQLBasedModule
+class intfAccountUserAssetsFiles : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssetsFiles(const QString& _schema,
+    intfAccountUserAssetsFiles(bool _isTokenBase,
+                               const QString& _schema,
                                const QList<DBM::clsORMField>& _exclusiveCols = {},
                                const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
-protected:
-    static intfAccountUserAssetsFiles* myInstance;
-    friend class intfAccountUserAssets;
+public:
+    //key: schema
+    static QMap<QString, intfAccountUserAssetsFiles*> myInstance;
+//    friend class intfAccountUserAssets;
 
 private slots:
-    QVariant ORMGET("Get User Assets Files")
+    QVariant ORMGET_USER("Get User Assets Files")
 
     ///@TODO: complete other orm actions
 };
@@ -235,56 +261,60 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountAssetUsage : public intfSQLBasedModule
+class intfAccountAssetUsage : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountAssetUsage(const QString& _schema,
+    intfAccountAssetUsage(bool _isTokenBase,
+                          const QString& _schema,
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 private slots:
-    QVariant ORMGET("Get user Usage on each Asset")
+    QVariant ORMGET_USER("Get user Usage on each Asset")
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountCoupons : public intfSQLBasedModule
+class intfAccountCoupons : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountCoupons(const QString& _schema,
+    intfAccountCoupons(bool _isTokenBase,
+                       const QString& _schema,
                        const QList<DBM::clsORMField>& _exclusiveCols = {},
                        const QList<DBM::stuRelation>& _exclusiveRelations = {},
                        const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 private slots:
-    QVariant ORMGET("Get Active Discounts")
-    quint32 ORMCREATE("Create a new Discount by an authorized user")
-    bool ORMUPDATE("Update a Discount info by an authorized user")
-    bool ORMDELETE("Delete a Discount")
+    QVariant ORMGET_USER("Get Active Discounts")
+    quint32 ORMCREATE_USER("Create a new Discount by an authorized user")
+    bool ORMUPDATE_USER("Update a Discount info by an authorized user")
+    bool ORMDELETE_USER("Delete a Discount")
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountPrizes : public intfSQLBasedModule
+class intfAccountPrizes : public intfSQLBasedModule, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountPrizes(const QString& _schema,
+    intfAccountPrizes(bool _isTokenBase,
+                      const QString& _schema,
                       const QList<DBM::clsORMField>& _exclusiveCols = {},
                       const QList<DBM::stuRelation>& _exclusiveRelations = {},
                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
 private slots:
-    QVariant ORMGET("Get Active Prizes")
-    quint32 ORMCREATE("Create a new Prizes by an authorized user")
-    bool ORMUPDATE("Update a Prizes info by an authorized user")
-    bool ORMDELETE("Delete a Prizes")
+    QVariant ORMGET_USER("Get Active Prizes")
+    quint32 ORMCREATE_USER("Create a new Prizes by an authorized user")
+    bool ORMUPDATE_USER("Update a Prizes info by an authorized user")
+    bool ORMDELETE_USER("Delete a Prizes")
 };
 
 } //namespace Targoman::API::AAA

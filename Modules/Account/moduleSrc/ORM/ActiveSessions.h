@@ -122,11 +122,11 @@ namespace tblActiveSessions {
 class ActiveSessions : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ActiveSessions)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, ActiveSessions)
 
 private slots:
-    QVariant ORMGET("Get ActiveSessions information.")
-    bool ORMDELETE("Delete an active session. Destroying current session is not allowed.")
+    QVariant ORMGET_USER("Get ActiveSessions information.")
+    bool ORMDELETE_USER("Delete an active session. Destroying current session is not allowed.")
 };
 
 } //namespace ORM

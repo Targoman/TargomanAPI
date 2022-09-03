@@ -166,8 +166,8 @@ void clsORMField::validate(const QVariant _value) {
 }
 
 const intfAPIArgManipulator& clsORMField::argSpecs() {
-    if (this->Data->ParameterType == QMetaType::UnknownType)
-        qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
+//    if (this->Data->ParameterType == QMetaType::UnknownType)
+//        qDebug() << "clsORMField::argSpecs()" << this->Data->Name << this->Data->ParamTypeName << this->Data->ParameterType;
 
     if (Q_UNLIKELY(this->Data->ParameterType == QMetaType::UnknownType))
         this->Data->ParameterType = static_cast<QMetaType::Type>(QMetaType::type(this->Data->ParamTypeName.toUtf8()));
@@ -179,7 +179,7 @@ const intfAPIArgManipulator& clsORMField::argSpecs() {
         : *gUserDefinedTypesInfo.at(this->Data->ParameterType - TAPI_BASE_USER_DEFINED_TYPEID);
 }
 
-QString  clsORMField::toString(const QVariant& _value) {
+QString clsORMField::toString(const QVariant& _value) {
     return this->argSpecs().toString(_value);
 }
 
@@ -188,12 +188,30 @@ QVariant clsORMField::toDB(const QVariant& _value) {
 //             << (this->argSpecs().fromORMValueConverter() ? "has fromORMValueConverter" : "return _value")
 //             << QMetaType::QChar << _value.toString();
 
-    return this->argSpecs().fromORMValueConverter()
-            ? this->argSpecs().fromORMValueConverter()(_value)
-            : (this->parameterType() == QMetaType::QChar
-              ? QVariant(_value.value<QChar>())
-              : _value)
-    ;
+    if (this->argSpecs().fromORMValueConverter())
+        return this->argSpecs().fromORMValueConverter()(_value);
+
+    if (this->parameterType() == QMetaType::QChar)
+        return QVariant(_value.value<QChar>());
+
+    if (this->parameterType() == QMetaType::Bool)
+        return ((_value == 1) || (_value == "1") || (_value == true));
+
+//    if (this->parameterType() == QMetaType::Int)       return _value.toInt();
+//    if (this->parameterType() == QMetaType::UInt)      return _value.toUInt();
+//    if (this->parameterType() == QMetaType::LongLong)  return _value.toLongLong();
+//    if (this->parameterType() == QMetaType::ULongLong) return _value.toULongLong();
+//    if (this->parameterType() == QMetaType::Double)    return _value.toDouble();
+//    if (this->parameterType() == QMetaType::Long)      return _value.toLongLong();
+//    if (this->parameterType() == QMetaType::Short)     return _value.toInt(); //Short();
+//    if (this->parameterType() == QMetaType::Char)      return _value.toChar();
+//    if (this->parameterType() == QMetaType::ULong)     return _value.toULongLong();
+//    if (this->parameterType() == QMetaType::UShort)    return _value.toUInt(); //Short();
+//    if (this->parameterType() == QMetaType::UChar)     return _value.toUInt(); //Char();
+//    if (this->parameterType() == QMetaType::Float)     return _value.toFloat();
+//    if (this->parameterType() == QMetaType::SChar)     return _value.toChar();
+
+    return _value;
 }
 
 QVariant clsORMField::fromDB(const QString& _value) {

@@ -36,13 +36,13 @@ namespace ORM {
 class Auth : public intfPureModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Auth)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, Auth)
 
 private slots:
     bool REST_GET_OR_POST(
         validateJWT,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
         ),
         "Check JWT"
     )

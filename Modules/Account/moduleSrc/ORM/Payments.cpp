@@ -22,6 +22,7 @@
  */
 
 #include "Payments.h"
+#include "../Account.h"
 #include "Payment/PaymentLogic.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/URLHelper.h"
@@ -49,6 +50,8 @@ namespace ORM {
 /*****************************************************************\
 |* OnlinePayments ************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, OnlinePayments)
+
 OnlinePayments::OnlinePayments() :
     intfSQLBasedModule(
         AAASchema,
@@ -58,7 +61,7 @@ OnlinePayments::OnlinePayments() :
         tblOnlinePayments::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(OnlinePayments) {
+QVariant IMPL_ORMGET_USER(OnlinePayments) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({
                                  { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID() }
@@ -258,7 +261,7 @@ OfflinePaymentClaims::OfflinePaymentClaims() :
         tblOfflinePaymentClaims::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(OfflinePaymentClaims) {
+QVariant IMPL_ORMGET_USER(OfflinePaymentClaims) {
 //    UploadFiles::instance().prepareFiltersList();
 //    UploadGateways::instance().prepareFiltersList();
     UploadQueue::instance().prepareFiltersList();
@@ -289,18 +292,18 @@ QVariant IMPL_ORMGET(OfflinePaymentClaims) {
 
 */
 
-//quint32 IMPL_ORMCREATE(OfflinePaymentClaims) {
+//quint32 IMPL_ORMCREATE_USER(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 //}
 
-//bool IMPL_ORMUPDATE(OfflinePaymentClaims) {
+//bool IMPL_ORMUPDATE_USER(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 //    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 //}
 
-//bool IMPL_ORMDELETE(OfflinePaymentClaims) {
+//bool IMPL_ORMDELETE_USER(OfflinePaymentClaims) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
 //    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -317,7 +320,7 @@ OfflinePaymentClaimsAttachments::OfflinePaymentClaimsAttachments() :
         tblOfflinePaymentClaimsAttachments::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
+QVariant IMPL_ORMGET_USER(OfflinePaymentClaimsAttachments) {
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
@@ -353,6 +356,8 @@ QVariant IMPL_ORMGET(OfflinePaymentClaimsAttachments) {
 /*****************************************************************\
 |* OfflinePayments ***********************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, OfflinePayments)
+
 OfflinePayments::OfflinePayments() :
     intfSQLBasedModule(
         AAASchema,
@@ -362,7 +367,7 @@ OfflinePayments::OfflinePayments() :
         tblOfflinePayments::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(OfflinePayments) {
+QVariant IMPL_ORMGET_USER(OfflinePayments) {
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
@@ -396,7 +401,7 @@ QVariant IMPL_ORMGET(OfflinePayments) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, ExtraFilters, 0, fnTouchQuery);
 }
 
-bool IMPL_ORMUPDATE(OfflinePayments) {
+bool IMPL_ORMUPDATE_USER(OfflinePayments) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }

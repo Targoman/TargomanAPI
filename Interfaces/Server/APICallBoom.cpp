@@ -23,9 +23,17 @@
 
 #include "APICallBoom.h"
 #include "ServerCommon.h"
-#include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/AAA/clsJWT.hpp"
 //#include "App/Server/clsRequestHandler.h"
+#include "Interfaces/Common/GenericTypes.h"
+//#include "Interfaces/Common/tmplAPIArg.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
+
+//using namespace TAPI;
+//using namespace Targoman::API;
+using namespace Targoman::API::Common;
+
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTokenActorType::Type);
 
 namespace Targoman::API::Server {
 
@@ -243,6 +251,7 @@ void intfAPICallBoom::addToTimings(const QString &_name, const QString &_desc, q
 }
 
 template class APICALLBOOM_TYPE_NO_JWT_DECL;
-template class APICALLBOOM_TYPE_JWT_DECL;
+template class APICALLBOOM_TYPE_JWT_USER_DECL;
+template class APICALLBOOM_TYPE_JWT_API_DECL;
 
 } //namespace Targoman::API::Server

@@ -180,7 +180,7 @@ namespace tblTicketRead {
 class Tickets : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Tickets)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Tickets)
 
 private slots:
 //    QVariant ORMGET("Get Tickets")
@@ -188,7 +188,7 @@ private slots:
         ,
         (
 //            GET_METHOD_ARGS_DECL_APICALL,
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath = {},
             quint64 _pageIndex = 0,
             quint16 _pageSize = 20,
@@ -208,7 +208,7 @@ private slots:
     QVariant REST_UPDATE(
         setAsRead,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a ticket as readed by current user"
@@ -219,7 +219,7 @@ private slots:
 class TicketRead : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketRead)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, TicketRead)
 };
 
 } //namespace ORM

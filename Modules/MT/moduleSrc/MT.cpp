@@ -22,29 +22,216 @@
  */
 
 #include "MT.h"
-#include "Classes/TranslationDispatcher.h"
+
+#include "libQFieldValidator/QFieldValidator.h"
+#include "Interfaces/AAA/PrivHelpers.h"
+#include "Interfaces/Common/GenericEnums.hpp"
+#include "Interfaces/Common/HTTPExceptions.hpp"
+#include "Interfaces/Helpers/SecurityHelper.h"
+using namespace Targoman::API::Helpers;
+
+#include "ModuleHelpers/MT/MTHelper.h"
+using namespace Targoman::API::ModuleHelpers::MT;
+
 #include "MTDefs.hpp"
+#include "ORM/MTHelpers.h"
+#include "ORM/Accounting.h"
+
+#include "Interfaces/Helpers/RESTClientHelper.h"
+#include "Interfaces/Helpers/FixtureHelper.h"
+using namespace Targoman::API::Helpers;
+
+using namespace Targoman::API::AAA;
 
 namespace Targoman::API::MTModule {
 
-using namespace Classes;
+using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(MT)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(MT, MTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT(MT)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MT, MTSchema)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MT, MTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MT, MTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(MT, MTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MT, MTSchema);
 
 MT::MT() :
-    intfSQLBasedWithActionLogsModule(
+    intfAccountingBasedModule(
         MTDomain,
-        MTSchema
+        MTSchema,
+        true,
+        {
+            //           day                week   month                total
+//            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
+//            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+        },
+        &AccountUnits::instance(),
+        &AccountProducts::instance(),
+        &AccountSaleables::instance(),
+        &AccountSaleablesFiles::instance(),
+        &AccountUserAssets::instance(),
+        &AccountUserAssetsFiles::instance(),
+        &AccountAssetUsage::instance(),
+        &AccountCoupons::instance()
+    ),
+    DerivedHelperSubmodules(
+        &CorrectionRules::instance(),
+        &DigestedTranslationLogs::instance(),
+        &MultiDic::instance(),
+        &TokenStats::instance(),
+        &TranslatedPhrases::instance(),
+        &TranslationLogs::instance()
 ) {
-    // Register translation engines
-    TranslationDispatcher::instance().registerEngines();
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(MT, MTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MT, MTSchema);
+
+    this->addSubModule(&CorrectionRules::instance());
+    this->addSubModule(&DigestedTranslationLogs::instance());
+    this->addSubModule(&MultiDic::instance());
+    this->addSubModule(&TokenStats::instance());
+    this->addSubModule(&TranslatedPhrases::instance());
+    this->addSubModule(&TranslationLogs::instance());
+
+    this->addSubModule(AccountUnits.data());
+    this->addSubModule(AccountProducts.data());
+    this->addSubModule(AccountSaleables.data());
+    this->addSubModule(AccountSaleablesFiles.data());
+    this->addSubModule(AccountUserAssets.data());
+    this->addSubModule(AccountUserAssetsFiles.data());
+    this->addSubModule(AccountAssetUsages.data());
+    this->addSubModule(AccountCoupons.data());
+    //this->addSubModule(AccountPrizes); // There is no prize in MTisement module
 }
 
-/*
+QMap<QString, stuModuleDBInfo> MT::requiredDBs() const {
+    QMap<QString, stuModuleDBInfo> RequiredDBs = intfSQLBasedModule::requiredDBs();
+
+//    RequiredDBs.insert("MTHelper", MTHelper::instance().requiredDB());
+
+    return RequiredDBs;
+}
+
+void MT::initializeModule() {
+    MTHelper::instance().initialize();
+}
+
+stuServiceCreditsInfo MT::retrieveServiceCreditsInfo(quint64 _usrID) {
+    ///@TODO: complete this
+    return stuServiceCreditsInfo(
+                {},
+                NULLABLE_NULL_VALUE,
+                NULLABLE_NULL_VALUE,
+                {},
+                {}
+                );
+}
+
+void MT::breakCredit(quint64 _slbID) {
+}
+
+bool MT::isUnlimited(const UsageLimits_t& _limits) const {
+}
+
+bool MT::isEmpty(const UsageLimits_t& _limits) const {
+}
+
+void MT::computeAdditives(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    ///@TODO: [very important] complete this
+//    qDebug() << "----------" << "_orderAdditives:" << _orderAdditives;
+//    AssetItem.UnitPrice *= 1.1;
+};
+
+void MT::computeReferrer(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    ///@TODO: [very important] complete this
+
+#if 0 //def QT_DEBUG
+    ///::: SAMPLE CODE :::
+
+    //1: add, modify or remove credit voucher for fp.com
+    if (_oldVoucherItem != nullptr) {
+        if (_oldVoucherItem->Qty != _assetItem.Qty) {
+            //remove old
+            QList<stuPendingVoucher>::iterator it = _assetItem.Private.PendingVouchers.begin();
+            while (it != _assetItem.Private.PendingVouchers.end()) {
+                if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
+                    && (it->Info.contains("referrer"))
+                ) {
+                    it = _assetItem.Private.PendingVouchers.erase(it);
+                    continue;
+                }
+
+                ++it;
+            }
+        }
+    }
+
+    if (_assetItem.Qty > 0) {
+        _assetItem.Private.PendingVouchers.append({
+            /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
+            /* Type     */ enuVoucherType::Prize, //Credit,
+            /* Amount   */ 2000 * _assetItem.Qty,
+            /* Info     */ {
+                               { "referrer", _assetItem.Referrer },
+                           },
+        });
+    }
+
+    //2: add, modify or remove system discount
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {
+                                  QString("referrer_%1").arg("fp.com"),
+                                  "5% off by fp.com",
+                                  5,
+                                  enuDiscountType::Percent,
+                                  10'000
+                              }, _oldVoucherItem);
+
+    //3: inc translate words max limit (30'000 -> 35'000)
+//    int IncAmount = 5'000;
+//    if (_assetItem.AdditionalInfo.contains("plus-max-words"))
+//        _assetItem.AdditionalInfo["plus-max-words"] = IncAmount + _assetItem.AdditionalInfo["plus-max-words"].toInt();
+//    else
+//        _assetItem.AdditionalInfo.insert("plus-max-words", IncAmount);
+
+    //4: inc days (30 -> 40)
+    int IncDays = 10;
+    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
+    else
+        _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
+#endif
+};
+
+QVariantMap MT::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuAssetItem      &_assetItem,
+    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    ///@TODO: [very important] complete this
+
+    QVariantMap Result;
+
+//    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+//        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+
+    return Result;
+}
+
+/****************************************************************\
+|** API Methods *************************************************|
+\****************************************************************/
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
-    const TAPI::RemoteIP_t& _REMOTE_IP,
-    const QString& _token,
+    APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM,
     QString _text,
     QString _dir,
     const QString& _engine,
@@ -54,54 +241,56 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     bool _dicFull
 )) {
     QTime Timer, OverallTime;
+    Timer.start();
+    OverallTime.start();
 
     int PreprocessTime = 0;
-    Timer.start();OverallTime.start();
 
     _text = _text.trimmed();
     if (_text.isEmpty())
         throw exHTTPBadRequest("Input text must not be empty");
+
     _dir = _dir.replace('_', '2');
 
-    TranslationDir_t Dir = TranslationDispatcher::dirLangs(_dir);
+    TranslationDir_t Dir = MTHelper::dirLangs(_dir);
     if (Dir.first.isNull())
         throw exHTTPBadRequest("Invalid translation direction format");
 
-    if (!TranslationDispatcher::instance().isValidEngine(_engine, Dir) == false)
+    if (!MTHelper::instance().isValidEngine(_engine, Dir) == false)
         throw exHTTPBadRequest("Invalid engine/direction combination");
 
-    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
-                                                             _REMOTE_IP, {
-                                                                 TARGOMAN_PRIV_PREFIX + _engine,
-                                                                 TARGOMAN_PRIV_PREFIX + _dir,
-                                                                 _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
-                                                                 _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
-                                                             });
+//    QJsonObject TokenInfo = Authorization::retrieveTokenInfo(_token,
+//                                                             _REMOTE_IP, {
+//                                                                 TARGOMAN_PRIV_PREFIX + _engine,
+//                                                                 TARGOMAN_PRIV_PREFIX + _dir,
+//                                                                 _dic ? (TARGOMAN_PRIV_PREFIX + "Dic") : QString(),
+//                                                                 _dicFull ? (TARGOMAN_PRIV_PREFIX + "DicFull") : QString()
+//                                                             });
 
 
-    QJsonObject Stats = this->execQuery(
-            "SELECT * FROM tblTokenStats "
-            "WHERE tks_tokID = ? "
-            "  AND tksEngine=? "
-            "  AND tksDir=? ",
-    {
-        {TokenInfo[TOKENItems::tokID]},
-        {_engine},
-        {_dir},
-    }
-    ).toJson(true).object ();
+//    QJsonObject Stats = this->execQuery(
+//            "SELECT * FROM tblTokenStats "
+//            "WHERE tks_tokID = ? "
+//            "  AND tksEngine=? "
+//            "  AND tksDir=? ",
+//    {
+//        {TokenInfo[TOKENItems::tokID]},
+//        {_engine},
+//        {_dir},
+//    }
+//    ).toJson(true).object ();
 
-    if (Stats.isEmpty())
-        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
-        {TokenInfo[TOKENItems::tokID]},
-        {_engine},
-        {_dir},
-    });
+//    if (Stats.isEmpty())
+//        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+//        {TokenInfo[TOKENItems::tokID]},
+//        {_engine},
+//        {_dir},
+//    });
 
-    _text = TranslationDispatcher::instance().tokenize(_text, Dir.first);
+    _text = MTHelper::instance().tokenize(_text, Dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
 
-    QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
+//    QJsonObject Privs = Authorization::privObjectFromInfo(TokenInfo);
 
     //@TODO: fix
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+_engine+"MaxPerDay", Stats["tksTodayWords"].toDouble()+ SourceWordCount);
@@ -115,22 +304,25 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
     if (_dic) {
-        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "Dic"})) {
-            if (_dicFull && Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "DicFull"}))
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
+            if (_dicFull && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
                 throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
-            PreprocessTime = Timer.elapsed();Timer.restart();
-            QVariantMap DicResponse =  TranslationDispatcher::instance().retrieveDicResponse(_text, Dir.first);
+            PreprocessTime = Timer.elapsed();
+            Timer.restart();
+
+            QVariantMap DicResponse = MTHelper::instance().retrieveDicResponse(_text, Dir.first);
             if (DicResponse.size()) {
                 if (_detailed) {
-                    DicResponse[RESULTItems::TIMES]= QVariantMap({
-                                                                     {RESULTItems::TIMESItems::PRE, PreprocessTime},
-                                                                     {RESULTItems::TIMESItems::TR, Timer.elapsed()},
-                                                                     {RESULTItems::TIMESItems::POST, 0},
-                                                                     {RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed()}
-                                                                 });
+                    DicResponse[RESULTItems::TIMES] = QVariantMap({
+                                                                      { RESULTItems::TIMESItems::PRE, PreprocessTime },
+                                                                      { RESULTItems::TIMESItems::TR, Timer.elapsed() },
+                                                                      { RESULTItems::TIMESItems::POST, 0} ,
+                                                                      { RESULTItems::TIMESItems::ALL, PreprocessTime+Timer.elapsed() },
+                                                                  });
                 }
-                TranslationDispatcher::instance().addDicLog(Dir.first, SourceWordCount, _text);
+
+                MTHelper::instance().addDicLog(Dir.first, SourceWordCount, _text);
                 return DicResponse;
             }
         } else
@@ -141,39 +333,54 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 
     try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
-        QVariantMap Translation = TranslationDispatcher::instance().doTranslation(Privs,
-                                                                                  _text,
-                                                                                  Dir,
-                                                                                  _engine,
-                                                                                  true,
-                                                                                  _detailed,
-                                                                                  _detok,
-                                                                                  InternalPreprocessTime,
-                                                                                  InternalTranslationTime
-                                                                                  );
+
+        QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::API>(
+                                      APICALLBOOM_PARAM,
+//                                      Privs,
+                                      this->DerivedHelperSubmodules,
+                                      _text,
+                                      Dir,
+                                      _engine,
+                                      true,
+                                      _detailed,
+                                      _detok,
+                                      InternalPreprocessTime,
+                                      InternalTranslationTime
+                                      );
         Timer.restart();
+
         if (_detailed) {
-            Translation[RESULTItems::TIMES]= QVariantMap({
-                                                             {RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime},
-                                                             {RESULTItems::TIMESItems::TR, InternalTranslationTime},
-                                                             {RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed()},
-                                                             {RESULTItems::TIMESItems::ALL, OverallTime.elapsed()}
-                                                         });
+            Translation[RESULTItems::TIMES] = QVariantMap({
+                                                              { RESULTItems::TIMESItems::PRE, InternalPreprocessTime + PreprocessTime },
+                                                              { RESULTItems::TIMESItems::TR, InternalTranslationTime },
+                                                              { RESULTItems::TIMESItems::POST, InternalPostprocessTime + Timer.elapsed() },
+                                                              { RESULTItems::TIMESItems::ALL, OverallTime.elapsed() },
+                                                          });
         } else
-            Translation[RESULTItems::TIME]= OverallTime.elapsed();
+            Translation[RESULTItems::TIME] = OverallTime.elapsed();
 
-        TranslationDispatcher::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
+//        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
-        if (Authorization::hasPriv(Privs, {TARGOMAN_PRIV_PREFIX + "ReportServer"}) == false)
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
-    } catch (Common::exTargomanBase& ex) {
-        TranslationDispatcher::instance().addErrorLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, ex.code());
+
+    } catch (exTargomanBase &_exp) {
+        MTHelper::instance().addErrorLog(
+                    //static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()),
+                    APICALLBOOM_PARAM.getActorID(),
+                    _engine,
+                    _dir,
+                    SourceWordCount,
+                    _text,
+                    _exp.code());
+
         throw;
     }
 }
 
+/*
 QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
     const TAPI::RemoteIP_t& _REMOTE_IP,
     const QString& _token,
@@ -185,5 +392,283 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
     };
 }
 */
+
+/****************************************************************\
+|** fixture *****************************************************|
+\****************************************************************/
+#ifdef QT_DEBUG
+/*
+QVariant IMPL_REST_POST(MT, fixtureSetup, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _random
+)) {
+    QVariantMap Result;
+
+    if (_random == "1")
+        _random = QString::number(QRandomGenerator::global()->generate());
+
+    if (_random.isEmpty() == false)
+        Result.insert("Random", _random);
+
+    //-- location --------------------------------------
+    QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com"); //.arg(SecurityHelper::UUIDtoMD5());
+
+    QVariantMap LocationValues = {
+        { tblLocations::Fields::locURL,        LocationUrl },
+        { tblLocations::Fields::locPlaceCode,  "FIX" },
+    };
+
+    quint32 LocationID = Locations::instance().makeCreateQuery(APICALLBOOM_PARAM)
+                         .addCols({
+                                      tblLocations::Fields::locURL,
+                                      tblLocations::Fields::locPlaceCode,
+//                                      tblLocations::Fields::locStatus,
+                                  })
+                         .values(LocationValues)
+                         .execute(1);
+
+    LocationValues.insert(tblLocations::Fields::locID, LocationID);
+    Result.insert("Location", LocationValues);
+
+    //-- product --------------------------------------
+    QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
+
+    TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
+        { tblAccountProductsBase::Fields::prdCode,              ProductCode },
+        { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
+        { tblAccountProductsBase::Fields::prdNameI18N,          QVariantMap({
+              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+        }) },
+        { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
+        { tblAccountProductsBase::Fields::prd_untID,            1 },
+        { tblAccountProducts::ExtraFields::prdType,           Targoman::API::MTModule::enuProductType::toStr(Targoman::API::MTModule::enuProductType::MTise) },
+        { tblAccountProducts::ExtraFields::prd_locID,         LocationID },
+    });
+
+    quint32 ProductID = this->AccountProducts->Create(APICALLBOOM_PARAM, ProductValues);
+
+    ProductValues.insert(tblAccountProductsBase::Fields::prdID, ProductID);
+    Result.insert("Product", ProductValues);
+
+    //-- saleable --------------------------------------
+    QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
+
+    TAPI::ORMFields_t SaleableValues = TAPI::ORMFields_t({
+        { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
+        { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
+        { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
+        { tblAccountSaleablesBase::Fields::slbNameI18N,         QVariantMap({
+              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+        }) },
+        { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
+        { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+        { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
+//        { tblAccountSaleablesBase::Fields::slbProductCount,     900 },
+//        { tblAccountSaleablesBase::Fields::slbMaxSaleCountPerUser,  },
+        { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
+        { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
+    });
+
+    quint32 SaleableID = this->AccountSaleables->Create(APICALLBOOM_PARAM, SaleableValues);
+
+    SaleableValues.insert(tblAccountSaleablesBase::Fields::slbID, SaleableID);
+    Result.insert("Saleable", SaleableValues);
+
+    //-- coupon --------------------------------------
+    QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
+
+    QVariantMap CouponValues = {
+        { tblAccountCouponsBase::Fields::cpnCode, CouponCode },
+        { tblAccountCouponsBase::Fields::cpnPrimaryCount, 100 },
+        { tblAccountCouponsBase::Fields::cpnTotalMaxAmount, 100'000'000 },
+        { tblAccountCouponsBase::Fields::cpnPerUserMaxCount, 2 },
+        { tblAccountCouponsBase::Fields::cpnPerUserMaxAmount, 10'000'000 },
+        { tblAccountCouponsBase::Fields::cpnValidFrom, "2020/1/1 1:2:3" },
+//        { tblAccountCouponsBase::Fields::cpnExpiryTime,  },
+        { tblAccountCouponsBase::Fields::cpnAmount, 10 },
+        { tblAccountCouponsBase::Fields::cpnAmountType, Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
+//        { tblAccountCouponsBase::Fields::cpnMaxAmount,  },
+        { tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
+          QVariantList({
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.5 }, { "minQty", 0 } }),
+              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.8 }, { "minQty", 5 } }),
+              QVariantMap({ { "saleableCode", "other" },      { "multiplier", 2.0 }                  }),
+          })
+        },
+//        { tblAccountCouponsBase::Fields::cpnTotalUsedCount,  },
+//        { tblAccountCouponsBase::Fields::cpnTotalUsedAmount,  },
+//        { tblAccountCouponsBase::Fields::cpnStatus,  },
+    };
+
+    quint32 CouponID = this->AccountCoupons->makeCreateQuery(APICALLBOOM_PARAM)
+                       .addCols({
+//                                    tblAccountCouponsBase::Fields::cpnID,
+                                    tblAccountCouponsBase::Fields::cpnCode,
+                                    tblAccountCouponsBase::Fields::cpnPrimaryCount,
+                                    tblAccountCouponsBase::Fields::cpnTotalMaxAmount,
+                                    tblAccountCouponsBase::Fields::cpnPerUserMaxCount,
+                                    tblAccountCouponsBase::Fields::cpnPerUserMaxAmount,
+                                    tblAccountCouponsBase::Fields::cpnValidFrom,
+//                                    tblAccountCouponsBase::Fields::cpnExpiryTime,
+                                    tblAccountCouponsBase::Fields::cpnAmount,
+                                    tblAccountCouponsBase::Fields::cpnAmountType,
+//                                    tblAccountCouponsBase::Fields::cpnMaxAmount,
+                                    tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
+//                                    tblAccountCouponsBase::Fields::cpnTotalUsedCount,
+//                                    tblAccountCouponsBase::Fields::cpnTotalUsedAmount,
+//                                    tblAccountCouponsBase::Fields::cpnStatus,
+                                })
+                       .values(CouponValues)
+                       .execute(1);
+
+    CouponValues.insert(tblAccountCouponsBase::Fields::cpnID, CouponID);
+    Result.insert("Coupon", CouponValues);
+
+    //----------------------------------------
+    stuPreVoucher LastPreVoucher;
+    stuVoucher Voucher;
+    stuVoucher ApproveOnlinePaymentVoucher;
+
+    //-- add to basket --------------------------------------
+    stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
+        APICALLBOOM_PARAM,
+        /* saleableCode     * / SaleableCode,
+        /* orderAdditives   * / { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
+        /* qty              * / 1,
+        /* discountCode     * / CouponCode,
+        /* referrer         * / "",
+        /* referrerParams   * / {},
+        /* lastPreVoucher   * / LastPreVoucher
+    );
+    LastPreVoucher = BasketActionResult.PreVoucher;
+    Result.insert("LastPreVoucher", LastPreVoucher.toJson());
+
+    //-- finalize basket --------------------------------------
+    QVariant res = RESTClientHelper::callAPI(
+        APICALLBOOM_PARAM,
+        RESTClientHelper::POST,
+        "Account/finalizeBasket",
+        {},
+        {
+            { "preVoucher",             LastPreVoucher.toJson().toVariantMap() },
+            { "gatewayType",            "_DeveloperTest" },
+            { "domain",                 "dev.test" },
+//            { "walID",               9988 },
+            { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
+        }
+    );
+    Voucher.fromJson(res.toJsonObject());
+    Result.insert("Voucher", Voucher.toJson());
+
+    //-- approve online payment --------------------------------------
+    if (Voucher.PaymentKey.isEmpty() == false) {
+        QVariant res = RESTClientHelper::callAPI(
+            APICALLBOOM_PARAM,
+            RESTClientHelper::POST,
+            "Account/approveOnlinePayment",
+            {},
+            {
+                { "paymentKey",     Voucher.PaymentKey },
+//                { "domain",         "dev.test" },
+                { "pgResponse",     QVariantMap({
+                    { "result",     "ok" },
+                }) },
+            }
+        );
+        ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());
+        Result.insert("ApproveOnlinePaymentVoucher", ApproveOnlinePaymentVoucher.toJson());
+    }
+
+    //----------------------------------------
+    return Result;
+}
+
+//bool IMPL_REST_POST(MT, fixtureSetupVoucher, (
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+//    ))
+//{
+//}
+
+QVariant IMPL_REST_POST(MT, fixtureCleanup, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _random
+)) {
+    QVariantMap Result;
+
+    //online payment
+    //voucher
+
+    try {
+        QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
+        QString QueryString = R"(
+            DELETE c
+              FROM tblAccountCoupons c
+             WHERE c.cpnCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountCoupons->execQuery(APICALLBOOM_PARAM,
+                                                                 QueryString, {
+                                                                     CouponCode
+                                                                 });
+        Result.insert("tblCoupon", QVariantMap({
+                                                   { "items", CouponCode },
+                                                   { "numRowsAffected", DACResult.numRowsAffected() },
+                                               }));
+    } catch (...) { ; }
+
+    try {
+        QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
+        QString QueryString = R"(
+            DELETE s
+              FROM tblAccountSaleables s
+             WHERE s.slbCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountSaleables->execQuery(APICALLBOOM_PARAM,
+                                                                   QueryString, {
+                                                                       SaleableCode
+                                                                   });
+        Result.insert("tblSaleable", QVariantMap({
+                                                  { "items", SaleableCode },
+                                                  { "numRowsAffected", DACResult.numRowsAffected() },
+                                              }));
+    } catch (...) { ; }
+
+    try {
+        QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
+        QString QueryString = R"(
+            DELETE p
+              FROM tblAccountProducts p
+             WHERE p.prdCode=?
+        ;)";
+        clsDACResult DACResult = this->AccountProducts->execQuery(APICALLBOOM_PARAM,
+                                                                  QueryString, {
+                                                                      ProductCode
+                                                                  });
+        Result.insert("tblProduct", QVariantMap({
+                                                 { "items", ProductCode },
+                                                 { "numRowsAffected", DACResult.numRowsAffected() },
+                                             }));
+    } catch (...) { ; }
+
+    try {
+        QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com");
+        QString QueryString = R"(
+            DELETE l
+              FROM tblLocations l
+             WHERE l.locURL=?
+        ;)";
+        clsDACResult DACResult = Locations::instance().execQuery(APICALLBOOM_PARAM,
+                                                                 QueryString, {
+                                                                     LocationUrl
+                                                                 });
+        Result.insert("tblLocation", QVariantMap({
+                                                  { "items", LocationUrl },
+                                                  { "numRowsAffected", DACResult.numRowsAffected() },
+                                              }));
+    } catch (...) { ; }
+
+    return Result;
+}
+*/
+#endif
 
 } //namespace Targoman::API::MTModule

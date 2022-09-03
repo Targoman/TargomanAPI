@@ -163,6 +163,10 @@ CREATE TABLE IF NOT EXISTS `tblAccountUnits_translate` (
   CONSTRAINT `FK_tblAccountUnits_translate_tblAccountUnits` FOREIGN KEY (`pid`) REFERENCES `tblAccountUnits` (`untID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT IGNORE INTO tblAccountUnits(untID, untName)
+    VALUES(1, 'Piece')
+;
+
 CREATE TABLE IF NOT EXISTS `tblAccountUserAssets` (
   `uasID` bigint unsigned NOT NULL AUTO_INCREMENT,
   `uas_usrID` bigint unsigned NOT NULL,

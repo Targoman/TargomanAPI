@@ -24,14 +24,10 @@
 #include "intfAccountingBasedModule.h"
 #include "PrivHelpers.h"
 #include "Accounting_Interfaces.h"
-#include "Server/ServerConfigs.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Interfaces/Common/QtTypes.hpp"
 
 using namespace Targoman::API;
-
-//#include "Interfaces/ORM/APIQueryBuilders.h"
-
 using namespace Targoman::API::AAA;
 
 //TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuPreVoucherType);
@@ -100,9 +96,11 @@ namespace Targoman::API::AAA {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountUnitsI18N* intfAccountUnitsI18N::myInstance;
+//key: schema
+QMap<QString, intfAccountUnitsI18N*> intfAccountUnitsI18N::myInstance;
 
 intfAccountUnitsI18N::intfAccountUnitsI18N(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -114,12 +112,15 @@ intfAccountUnitsI18N::intfAccountUnitsI18N(
         tblAccountUnitsI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountUnitsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUnitsI18NBase::Private::Indexes + _exclusiveIndexes
-) {
-    intfAccountUnitsI18N::myInstance = this;
+    ),
+    intfAccountORMBase(_isTokenBase)
+{
+    intfAccountUnitsI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountUnits::intfAccountUnits(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -131,11 +132,13 @@ intfAccountUnits::intfAccountUnits(
         tblAccountUnitsBase::Private::ORMFields + _exclusiveCols,
         tblAccountUnitsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUnitsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
 ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
-    intfAccountUnitsI18N::myInstance->prepareFiltersList();
+    intfAccountUnitsI18N::myInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -146,7 +149,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountUnitsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountUnits"
                       , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
@@ -163,7 +166,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountUnitsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountUnitsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountUnitsI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountUnitsI18NBase::Fields::untNameI18N)),
@@ -182,24 +185,24 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
     return Query;
 }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountUnits) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountUnits) {
     constexpr quint16 CACHE_TIME = 15 * 60;
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, CACHE_TIME);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountUnits) {
+quint32 IMPL_ORMCREATE_USER(intfAccountUnits) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountUnits) {
+bool IMPL_ORMUPDATE_USER(intfAccountUnits) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountUnits) {
+bool IMPL_ORMDELETE_USER(intfAccountUnits) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -208,9 +211,11 @@ bool IMPL_ORMDELETE(intfAccountUnits) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountProductsI18N* intfAccountProductsI18N::myInstance;
+//key: schema
+QMap<QString, intfAccountProductsI18N*> intfAccountProductsI18N::myInstance;
 
 intfAccountProductsI18N::intfAccountProductsI18N(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -222,12 +227,15 @@ intfAccountProductsI18N::intfAccountProductsI18N(
         tblAccountProductsI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountProductsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountProductsI18NBase::Private::Indexes + _exclusiveIndexes
-) {
-    intfAccountProductsI18N::myInstance = this;
+    ),
+    intfAccountORMBase(_isTokenBase)
+{
+    intfAccountProductsI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountProducts::intfAccountProducts(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -239,10 +247,12 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
         tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
 ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountProductsI18N::myInstance->prepareFiltersList();
+    intfAccountProductsI18N::myInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -263,7 +273,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountProductsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountProducts"
                       , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
@@ -286,7 +296,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountProductsI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountProductsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountProductsI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountProductsI18NBase::Fields::prdNameI18N)),
@@ -309,7 +319,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
     return Query;
 }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountProducts) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountProducts) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 15 * 60;
@@ -317,19 +327,19 @@ QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountProducts) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, CACHE_TIME);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountProducts) {
+quint32 IMPL_ORMCREATE_USER(intfAccountProducts) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountProducts) {
+bool IMPL_ORMUPDATE_USER(intfAccountProducts) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountProducts) {
+bool IMPL_ORMDELETE_USER(intfAccountProducts) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -338,9 +348,11 @@ bool IMPL_ORMDELETE(intfAccountProducts) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountSaleablesI18N* intfAccountSaleablesI18N::myInstance;
+//key: schema
+QMap<QString, intfAccountSaleablesI18N*> intfAccountSaleablesI18N::myInstance;
 
 intfAccountSaleablesI18N::intfAccountSaleablesI18N(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -352,12 +364,15 @@ intfAccountSaleablesI18N::intfAccountSaleablesI18N(
         tblAccountSaleablesI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesI18NBase::Private::Indexes + _exclusiveIndexes
-) {
-    intfAccountSaleablesI18N::myInstance = this;
+    ),
+    intfAccountORMBase(_isTokenBase)
+{
+    intfAccountSaleablesI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountSaleables::intfAccountSaleables(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -369,10 +384,12 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
 ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountSaleablesI18N::myInstance->prepareFiltersList();
+    intfAccountSaleablesI18N::myInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -384,7 +401,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountSaleables"
                       , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
@@ -407,7 +424,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountSaleablesI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
@@ -430,7 +447,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
     return Query;
 }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleables) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleables) {
     clsCondition ExtraFilters = {};
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters
@@ -471,28 +488,30 @@ QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleables) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, ExtraFilters, CACHE_TIME, fnTouchQuery);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountSaleables) {
+quint32 IMPL_ORMCREATE_USER(intfAccountSaleables) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountSaleables) {
+bool IMPL_ORMUPDATE_USER(intfAccountSaleables) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountSaleables) {
+bool IMPL_ORMDELETE_USER(intfAccountSaleables) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 /******************************************************************/
-intfAccountSaleablesFiles* intfAccountSaleablesFiles::myInstance;
+//key: schema
+QMap<QString, intfAccountSaleablesFiles*> intfAccountSaleablesFiles::myInstance;
 
 intfAccountSaleablesFiles::intfAccountSaleablesFiles(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -504,28 +523,30 @@ intfAccountSaleablesFiles::intfAccountSaleablesFiles(
         tblAccountSaleablesFilesBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesFilesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesFilesBase::Private::Indexes + _exclusiveIndexes
-) {
-    intfAccountSaleablesFiles::myInstance = this;
+    ),
+    intfAccountORMBase(_isTokenBase)
+{
+    intfAccountSaleablesFiles::myInstance[_schema] = this;
 }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfAccountSaleablesFiles) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleablesFiles) {
     constexpr quint16 CACHE_TIME = 15 * 60;
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, CACHE_TIME);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountSaleablesFiles) {
+quint32 IMPL_ORMCREATE_USER(intfAccountSaleablesFiles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountSaleablesFiles) {
+bool IMPL_ORMUPDATE_USER(intfAccountSaleablesFiles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountSaleablesFiles) {
+bool IMPL_ORMDELETE_USER(intfAccountSaleablesFiles) {
       Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
       return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -535,6 +556,7 @@ bool IMPL_ORMDELETE(intfAccountSaleablesFiles) {
 /******************************************************************/
 /******************************************************************/
 intfAccountUserAssets::intfAccountUserAssets(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -546,7 +568,9 @@ intfAccountUserAssets::intfAccountUserAssets(
         tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
         tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
 /*
 SELECT
@@ -588,6 +612,7 @@ GROUP BY uasufl_uasID
 ) tmpProvidedFiles
 ON tmpProvidedFiles.uasufl_uasID = uas.uasID
 */
+
 ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
@@ -603,7 +628,7 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
 //                      ) tmpNeededFiles
 //                   ON tmpNeededFiles.slf_slbID = tblAccountUserAssets.uas_slbID
 
-             .nestedLeftJoin(intfAccountSaleablesFiles::myInstance->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+             .nestedLeftJoin(intfAccountSaleablesFiles::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                              .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID, tblAccountSaleablesFilesBase::Fields::slf_slbID)
                              .addCol(enuAggregation::SUM, tblAccountSaleablesFilesBase::Fields::slfMinCount, "MandatoryFilesCount")
                              .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount, enuConditionOperator::Greater, 0 })
@@ -638,7 +663,7 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
 //                   ON tmpProvidedFiles.uasufl_uasID = tblAccountUserAssets.uasID
 
             .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
-                                           intfAccountUserAssetsFiles::myInstance->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+                                           intfAccountUserAssetsFiles::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_slfID)
                                            .addCol(tblAccountSaleablesFilesBase::Fields::slfMinCount)
@@ -668,15 +693,15 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
     return Query;
 }
 
-QVariant IMPL_ORMGET(intfAccountUserAssets) {
+QVariant IMPL_ORMGET_USER(intfAccountUserAssets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
     bool Ok;
@@ -693,7 +718,7 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
     bool Ok;
@@ -712,9 +737,11 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
 }
 
 /******************************************************************/
-intfAccountUserAssetsFiles* intfAccountUserAssetsFiles::myInstance;
+//key: schema
+QMap<QString, intfAccountUserAssetsFiles*> intfAccountUserAssetsFiles::myInstance;
 
 intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -726,11 +753,13 @@ intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
         tblAccountUserAssetsFilesBase::Private::ORMFields + _exclusiveCols,
         tblAccountUserAssetsFilesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUserAssetsFilesBase::Private::Indexes + _exclusiveIndexes
-) {
-    intfAccountUserAssetsFiles::myInstance = this;
+    ),
+    intfAccountORMBase(_isTokenBase)
+{
+    intfAccountUserAssetsFiles::myInstance[_schema] = this;
 }
 
-QVariant IMPL_ORMGET(intfAccountUserAssetsFiles) {
+QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -740,6 +769,7 @@ QVariant IMPL_ORMGET(intfAccountUserAssetsFiles) {
 /******************************************************************/
 /******************************************************************/
 intfAccountAssetUsage::intfAccountAssetUsage(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -751,11 +781,13 @@ intfAccountAssetUsage::intfAccountAssetUsage(
         tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
         tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
-QVariant IMPL_ORMGET(intfAccountAssetUsage) {
+QVariant IMPL_ORMGET_USER(intfAccountAssetUsage) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -764,6 +796,7 @@ QVariant IMPL_ORMGET(intfAccountAssetUsage) {
 /******************************************************************/
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -775,9 +808,11 @@ intfAccountCoupons::intfAccountCoupons(
         tblAccountCouponsBase::Private::ORMFields + _exclusiveCols,
         tblAccountCouponsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountCouponsBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
-QVariant IMPL_ORMGET(intfAccountCoupons) {
+QVariant IMPL_ORMGET_USER(intfAccountCoupons) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -787,19 +822,19 @@ QVariant IMPL_ORMGET(intfAccountCoupons) {
 //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountCoupons) {
+quint32 IMPL_ORMCREATE_USER(intfAccountCoupons) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountCoupons) {
+bool IMPL_ORMUPDATE_USER(intfAccountCoupons) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountCoupons) {
+bool IMPL_ORMDELETE_USER(intfAccountCoupons) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -809,6 +844,7 @@ bool IMPL_ORMDELETE(intfAccountCoupons) {
 /******************************************************************/
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
+    bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -820,9 +856,11 @@ intfAccountPrizes::intfAccountPrizes(
         tblAccountPrizesBase::Private::ORMFields + _exclusiveCols,
         tblAccountPrizesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountPrizesBase::Private::Indexes + _exclusiveIndexes
-) { ; }
+    ),
+    intfAccountORMBase(_isTokenBase)
+{ ; }
 
-QVariant IMPL_ORMGET(intfAccountPrizes) {
+QVariant IMPL_ORMGET_USER(intfAccountPrizes) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -832,19 +870,19 @@ QVariant IMPL_ORMGET(intfAccountPrizes) {
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint32 IMPL_ORMCREATE(intfAccountPrizes) {
+quint32 IMPL_ORMCREATE_USER(intfAccountPrizes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(intfAccountPrizes) {
+bool IMPL_ORMUPDATE_USER(intfAccountPrizes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(intfAccountPrizes) {
+bool IMPL_ORMDELETE_USER(intfAccountPrizes) {
   Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -892,16 +930,17 @@ bool IMPL_ORMDELETE(intfAccountPrizes) {
 
 /******************************************************************/
 stuServiceCreditsInfo::stuServiceCreditsInfo(
-        ActiveCredits_t       _activeCredits,
+        ActiveCredits_t             _activeCredits,
         NULLABLE_TYPE(stuAssetItem) _preferedCredit,
         NULLABLE_TYPE(quint32)      _parentID,
-        UsageLimits_t          _myLimitsOnParent,
-        QDateTime              _dbCurrentDateTime) :
+        UsageLimits_t               _myLimitsOnParent,
+        QDateTime                   _dbCurrentDateTime) :
     ActiveCredits(_activeCredits),
     PreferedCredit(_preferedCredit),
     ParentID(_parentID),
     MyLimitsOnParent(_myLimitsOnParent),
-    DBCurrentDateTime(_dbCurrentDateTime) { ; }
+    DBCurrentDateTime(_dbCurrentDateTime)
+{ ; }
 
 //QJsonObject stuAssetItem::toJson(bool _full) {
 //    ///@TODO: very important: Complete this
@@ -967,4 +1006,4 @@ stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const 
     return  *this;
 }*/
 
-}
+} //namespace Targoman::API::AAA

@@ -22,6 +22,7 @@
  */
 
 #include "UserWallets.h"
+#include "../Account.h"
 #include "User.h"
 #include "Voucher.h"
 #include "Payment/PaymentLogic.h"
@@ -33,6 +34,8 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserWalletStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, UserWallets)
+
 UserWallets::UserWallets() :
     intfSQLBasedModule(
         AAASchema,
@@ -42,14 +45,14 @@ UserWallets::UserWallets() :
         tblUserWallets::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(UserWallets) {
+QVariant IMPL_ORMGET_USER(UserWallets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID() } }, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-quint64 IMPL_ORMCREATE(UserWallets) {
+quint64 IMPL_ORMCREATE_USER(UserWallets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
@@ -60,13 +63,13 @@ quint64 IMPL_ORMCREATE(UserWallets) {
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(UserWallets) {
+bool IMPL_ORMUPDATE_USER(UserWallets) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(UserWallets) {
+bool IMPL_ORMDELETE_USER(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
@@ -83,22 +86,23 @@ bool IMPL_ORMDELETE(UserWallets) {
  *     owner
  */
 bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
-    TAPI::PKsByPath_t _pksByPath
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+//    TAPI::PKsByPath_t _pksByPath
+    quint64 _walID
 )) {
     bool IsPrivileged = Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWallet_SetAsDefault", {
                      { "iUserID", (IsPrivileged ? 0 : APICALLBOOM_PARAM.getActorID()) },
-                     { "iWalID", _pksByPath },
+                     { "iWalID", _walID }, //_pksByPath },
                  });
 
     return true;
 }
 
 bool IMPL_REST_CREATE(UserWallets, transfer, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _destEmailOrMobile,
     quint32 _amount,
     TAPI::MD5_t _pass,
@@ -124,7 +128,7 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 }
 
 Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint32 _amount,
     Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
@@ -192,7 +196,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
 }
 
 quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _amount,
     quint64 _walID,
     const QString &_desc
@@ -212,7 +216,7 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
  *     operator
  */
 quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _amount,
     quint64 _targetUsrID,
     const QString &_desc
@@ -234,7 +238,7 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
  *     operator
  */
 bool IMPL_REST_POST(UserWallets, acceptWithdrawal, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _voucherID
 )) {
     Authorization::checkPriv(APICALLBOOM_PARAM, { "AAA:acceptWithdrawal" });

@@ -99,13 +99,13 @@ namespace tblBlockingRules {
 class BlockingRules : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, BlockingRules)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, BlockingRules)
 
 private slots:
-    QVariant ORMGET("Get BlockingRules information")
-    quint64 ORMCREATE("Create a new BlockingRule by an authorized user")
-    bool ORMUPDATE("Update blocking rule info by an authorized user")
-    bool ORMDELETE("Delete a BlockingRules")
+    QVariant ORMGET_USER("Get BlockingRules information")
+    quint64 ORMCREATE_USER("Create a new BlockingRule by an authorized user")
+    bool ORMUPDATE_USER("Update blocking rule info by an authorized user")
+    bool ORMDELETE_USER("Delete a BlockingRules")
 };
 
 } //namespace ORM

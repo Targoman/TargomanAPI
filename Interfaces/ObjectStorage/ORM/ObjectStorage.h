@@ -362,7 +362,7 @@ public:
     virtual stuObjectStorageConfigs getObjectStorageConfigs() const = 0;
 
 private slots:
-    QVariant ORMGET("Get uploaded files")
+    QVariant ORMGET_USER("Get uploaded files")
 };
 
 class intfUploadGateways : public intfSQLBasedModule
@@ -376,10 +376,10 @@ public:
     );
 
 private slots:
-    QVariant ORMGET("Get object storage gateway information")
-    quint32 ORMCREATE("Create a new object storage gateway by an authorized user")
-    bool ORMUPDATE("Update object storage gateway info by an authorized user")
-    bool ORMDELETE("Delete an object storage gateway")
+    QVariant ORMGET_USER("Get object storage gateway information")
+    quint32 ORMCREATE_USER("Create a new object storage gateway by an authorized user")
+    bool ORMUPDATE_USER("Update object storage gateway info by an authorized user")
+    bool ORMDELETE_USER("Delete an object storage gateway")
 };
 
 class intfUploadQueue : public intfSQLBasedModule
@@ -393,7 +393,7 @@ public:
     );
 
 private slots:
-    QVariant ORMGET("Get upload queue")
+    QVariant ORMGET_USER("Get upload queue")
 };
 
 } //namespace Targoman::API::ObjectStorage::ORM
@@ -410,7 +410,7 @@ private slots:
 class UploadFiles : public Targoman::API::ObjectStorage::ORM::intfUploadFiles \
 { \
     Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadFiles) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadFiles) \
 public: \
     UploadFiles() : \
         intfUploadFiles( \
@@ -427,7 +427,7 @@ public: \
 class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
 { \
     Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadGateways) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadGateways) \
 public: \
     UploadGateways() : \
         intfUploadGateways( \
@@ -439,7 +439,7 @@ public: \
 class UploadQueue : public Targoman::API::ObjectStorage::ORM::intfUploadQueue \
 { \
     Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, UploadQueue) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadQueue) \
 public: \
     UploadQueue() : \
         intfUploadQueue( \
@@ -449,8 +449,8 @@ public: \
     { ; } \
 };
 
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_OBJECTSTORAGE(_module, _schema) \
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(_module, _schema) \
 protected: \
     QScopedPointer<UploadFiles>     _UploadFiles;    \
     QScopedPointer<UploadGateways>  _UploadGateways; \
@@ -462,7 +462,10 @@ public: \
     };
 
 //put this macro before module class constructor (.cpp)
-#define TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(_module, _schema)                                \
+#define TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(_module, _schema) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, UploadFiles) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, UploadGateways) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, UploadQueue) \
     using namespace Targoman::Common::Configuration;                                            \
     tmplConfigurable<QString> _module::ObjectStorage::TempLocalStoragePath(                     \
         _module::ObjectStorage::makeConfig("TempLocalStoragePath"),                             \
@@ -477,7 +480,7 @@ public: \
 //    QString("/var/spool/tapi/%1/objectstorage").arg(TARGOMAN_M2STR(_module))
 
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(_module, _schema)  \
+#define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(_module, _schema)  \
     this->_UploadFiles   .reset(&UploadFiles   ::instance());   \
     this->_UploadGateways.reset(&UploadGateways::instance());   \
     this->_UploadQueue   .reset(&UploadQueue   ::instance());   \

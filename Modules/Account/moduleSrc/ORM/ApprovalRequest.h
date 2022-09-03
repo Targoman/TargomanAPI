@@ -123,15 +123,15 @@ namespace tblApprovalRequest {
 class ApprovalRequest : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, ApprovalRequest)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, ApprovalRequest)
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;
     static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
 
 private slots:
-    QVariant ORMGET("Get ApprovalRequest information.")
-    bool ORMDELETE("Delete an ApprovalRequest")
+    QVariant ORMGET_USER("Get ApprovalRequest information.")
+    bool ORMDELETE_USER("Delete an ApprovalRequest")
 
     QVariant REST_GET_OR_POST(
         timerInfo,

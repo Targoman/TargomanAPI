@@ -40,22 +40,22 @@ namespace ORM {
 class User : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, User)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, User)
 
     ORMSelectQuery getPhotoQuery(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _usrID);
     
 private slots:
-    QVariant ORMGET("Get user information")
-    quint64 ORMCREATE("Create a new user by an authorized user. Email or Mobile is required")
-    bool ORMUPDATE("Update User info by an authorized user")
-    bool ORMDELETE("Delete a User by an authorized user")
+    QVariant ORMGET_USER("Get user information")
+    quint64 ORMCREATE_USER("Create a new user by an authorized user. Email or Mobile is required")
+    bool ORMUPDATE_USER("Update User info by an authorized user")
+    bool ORMDELETE_USER("Delete a User by an authorized user")
 
     TAPI::Base64Image_t REST_GET(
         photo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _usrID
         ),
         "Get user photo as base64"
@@ -63,7 +63,7 @@ private slots:
     bool REST_UPDATE(
         photo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Base64Image_t _image
         ),
         "Updates user image based using a base64 encoded image"
@@ -71,7 +71,7 @@ private slots:
     bool REST_POST(
         deletePhoto,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
         ),
         "Delete user image"
     )
@@ -79,7 +79,7 @@ private slots:
     bool REST_UPDATE(
         email,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Email_t   _email,
             TAPI::MD5_t     _psw,
             QString         _salt
@@ -90,7 +90,7 @@ private slots:
     bool REST_UPDATE(
         mobile,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t  _mobile,
             TAPI::MD5_t     _pass,
             QString         _salt
@@ -101,7 +101,7 @@ private slots:
     bool REST_UPDATE(
         personalInfo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
@@ -115,7 +115,7 @@ private slots:
     bool REST_UPDATE(
         financialInfo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Sheba_t   _iban = {},
             TAPI::Ether_t   _ether = {}
         ),
@@ -125,7 +125,7 @@ private slots:
     bool REST_UPDATE(
         extraInfo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             NULLABLE_TYPE(TAPI::Date_t)    _birthDate = NULLABLE_NULL_VALUE,
             QString         _job = {},
             QString         _education = {},
@@ -218,13 +218,13 @@ namespace tblUserExtraInfo {
 class UserExtraInfo : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, UserExtraInfo)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, UserExtraInfo)
 
 private slots:
 //    bool REST_UPDATE(
 //        birthDate,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            QString _birthDate
 //        ),
 //        "Updates users birth date"
@@ -233,7 +233,7 @@ private slots:
 //    bool REST_UPDATE(
 //        photo,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            TAPI::Base64Image_t _image
 //        ),
 //        "Updates user image based using a base64 encoded image"
@@ -242,7 +242,7 @@ private slots:
 //    bool REST_UPDATE(
 //        sheba,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            TAPI::Sheba_t _sheba
 //        ),
 //        "Updates user Sheba address"
@@ -251,7 +251,7 @@ private slots:
 //    bool REST_UPDATE(
 //        etherAddress,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            TAPI::Ether_t _etherAddress
 //        ),
 //        "Updates user ethercoin address"

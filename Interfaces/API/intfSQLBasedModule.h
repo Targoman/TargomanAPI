@@ -38,7 +38,7 @@ public:
     intfSQLBasedModule(
         const QString& _module,
         const QString& _schema,
-        const QString& _name,
+        const QString& _name = "",
         const QList<clsORMField>& _cols = {},
         const QList<stuRelation>& _relations = {},
         const QList<stuDBIndex>& _indexes = {},
@@ -47,7 +47,7 @@ public:
     intfSQLBasedModule(
         const QString& _schema,
         const QString& _name,
-        const QList<clsORMField>& _cols = {},
+        const QList<clsORMField>& _cols, // = {},
         const QList<stuRelation>& _relations = {},
         const QList<stuDBIndex>& _indexes = {},
         const QVariantMap& _dbProperties = {}

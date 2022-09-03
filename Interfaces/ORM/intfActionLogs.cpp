@@ -42,7 +42,7 @@ intfSQLBasedModule(
     tblActionLogs::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(intfActionLogs) {
+QVariant IMPL_ORMGET_USER(intfActionLogs) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":ActionLogs:CRUD~0100" });
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 

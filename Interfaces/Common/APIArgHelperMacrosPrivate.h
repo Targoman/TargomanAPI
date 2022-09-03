@@ -343,8 +343,12 @@ inline QString toCammel(const QString& _name) {
 #define TAPI_HELPER_STRUCT_TOJSON_48(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELPER_STRUCT_TOJSON_47(__VA_ARGS__)
 #define TAPI_HELPER_STRUCT_TOJSON_49(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELPER_STRUCT_TOJSON_48(__VA_ARGS__)
 
+//n = _obj.contains(toCammel(#n)) ? [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(toCammel(#n))) : d
 #define TAPI_HELPER_STRUCT_FROMJSON_METHOD(n, t, d, fr) \
-    n = _obj.contains(toCammel(#n)) ? [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(toCammel(#n))) : d
+    if (_obj.contains(toCammel(#n))) \
+        n = [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(toCammel(#n))); \
+    else if (_applyDefaultValues) \
+        n = d
 #define TAPI_HELPER_STRUCT_FROMJSON_00(n, t, d, i, to, fr)      TAPI_HELPER_STRUCT_FROMJSON_METHOD(n, t, d, fr);
 #define TAPI_HELPER_STRUCT_FROMJSON_01(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_FROMJSON_METHOD(n, t, d, fr); TAPI_HELPER_STRUCT_FROMJSON_00(__VA_ARGS__)
 #define TAPI_HELPER_STRUCT_FROMJSON_02(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_FROMJSON_METHOD(n, t, d, fr); TAPI_HELPER_STRUCT_FROMJSON_01(__VA_ARGS__)
@@ -562,9 +566,10 @@ inline QString toCammel(const QString& _name) {
 #define INTERNAL_V2DBL(v) v.toDouble()
 //#define INTERNAL_V2double(v) INTERNAL_V2DBL(v)
 
-#define INTERNAL_C2bool(v)      static_cast<bool>(v)
-#define INTERNAL_V2bool(v)      static_cast<bool>(v.toDouble())
-#define INTERNAL_N2bool(_value) INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(bool, _value)
+#define INTERNAL_C2bool(v)          static_cast<bool>(v)
+//static_cast<bool>(v.toDouble())
+#define INTERNAL_V2bool(v)          [](auto v) -> bool { return ((v == true) || (v == 1) || (v == "1")); }(v)
+#define INTERNAL_N2bool(_value)     INTERNAL_NULLABLE_FROM_JSONVALUE_TO_BOOL(_value)
 
 #define INTERNAL_V2U8(v) static_cast<quint8>(v.toDouble())
 #define INTERNAL_V2uint8(v) INTERNAL_V2U8(v)
@@ -620,7 +625,7 @@ inline QString toCammel(const QString& _name) {
 #define INTERNAL_SF_INTEGRAL_0()                 INTERNAL_SF_INTEGRAL_1(0)
 
 #define INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, _validator) _def, _validator
-#define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v==v)
+#define INTERNAL_SF_NULLABLE_INTEGRAL_1(_def)             INTERNAL_SF_NULLABLE_INTEGRAL_2(_def, v!=NULLABLE_NULL_VALUE)
 #define INTERNAL_SF_NULLABLE_INTEGRAL_0()                 INTERNAL_SF_NULLABLE_INTEGRAL_1(NULLABLE_NULL_VALUE)
 
 /************************************************************/
@@ -634,6 +639,15 @@ inline QString toCammel(const QString& _name) {
 /************************************************************/
 /************************************************************/
 /************************************************************/
+#define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_BOOL(_value) \
+    [](auto v) -> NULLABLE_TYPE(bool) { \
+        if (v.isNull()) \
+            return NULLABLE_NULL_VALUE; \
+        auto Storage = NULLABLE_TYPE(bool)(); \
+        Storage = INTERNAL_V2bool(v); \
+        return Storage; \
+    } (_value)
+
 #define INTERNAL_NULLABLE_FROM_JSONVALUE_TO_TYPE(_type, _value) \
     [](auto v)->NULLABLE_TYPE(_type) { \
         if (v.isNull()) \

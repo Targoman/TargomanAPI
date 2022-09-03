@@ -122,10 +122,10 @@ public:
     );
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Faq Questions")
-    quint32 ORMCREATE("Create a new Faq Question")
-    bool ORMUPDATE("Update Faq Question")
-    bool ORMDELETE("Delete a Faq Question")
+    QVariant ORMGET_ANONYMOUSE("Get Faq Questions")
+    quint32 ORMCREATE_USER("Create a new Faq Question")
+    bool ORMUPDATE_USER("Update Faq Question")
+    bool ORMDELETE_USER("Delete a Faq Question")
 };
 
 class intfFaqAnswers : public intfSQLBasedModule
@@ -139,10 +139,10 @@ public:
     );
 
 private slots:
-    QVariant ANONYMOUSE_ORMGET("Get Faq Answers")
-    quint32 ORMCREATE("Create a new Faq Answer")
-    bool ORMUPDATE("Update Faq Answer")
-    bool ORMDELETE("Delete a Faq Answer")
+    QVariant ORMGET_ANONYMOUSE("Get Faq Answers")
+    quint32 ORMCREATE_USER("Create a new Faq Answer")
+    bool ORMUPDATE_USER("Update Faq Answer")
+    bool ORMDELETE_USER("Delete a Faq Answer")
 };
 
 } //namespace Targoman::API::ORM
@@ -158,7 +158,7 @@ private slots:
     class FaqQuestions : public Targoman::API::ORM::intfFaqQuestions \
     { \
         Q_OBJECT \
-        TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, FaqQuestions) \
+        TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqQuestions) \
     public: \
         FaqQuestions() : \
             intfFaqQuestions( \
@@ -170,7 +170,7 @@ private slots:
     class FaqAnswers : public Targoman::API::ORM::intfFaqAnswers \
     { \
         Q_OBJECT \
-        TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, FaqAnswers) \
+        TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqAnswers) \
     public: \
         FaqAnswers() : \
             intfFaqAnswers( \
@@ -180,14 +180,19 @@ private slots:
         { ; } \
     };
 
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_FAQ(_module, _schema) \
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_FAQ(_module, _schema) \
     protected: \
     QScopedPointer<FaqQuestions>  _FaqQuestions; \
     QScopedPointer<FaqAnswers>    _FaqAnswers;
 
+//put this macro before module class constructor (.cpp)
+#define TARGOMAN_API_MODULE_IMPLEMENT_FAQ(_module, _schema) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, FaqQuestions) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, FaqAnswers)
+
 //put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_FAQ(_module, _schema) \
+#define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(_module, _schema) \
     this->_FaqQuestions.reset(&FaqQuestions::instance()); \
     this->_FaqAnswers.reset(&FaqAnswers::instance()); \
     this->addSubModule(this->_FaqQuestions.data()); \

@@ -246,30 +246,30 @@ namespace tblPaymentGateways {
 class PaymentGatewayTypes : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGatewayTypes)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypes)
 
 private slots:
-    QVariant ORMGET("Get payment gateway type information")
-    quint32 ORMCREATE("Create a new payment gateway type by an authorized user")
-    bool ORMUPDATE("Update payment gateway type info by an authorized user")
-    bool ORMDELETE("Delete a payment gateway type")
+    QVariant ORMGET_USER("Get payment gateway type information")
+    quint32 ORMCREATE_USER("Create a new payment gateway type by an authorized user")
+    bool ORMUPDATE_USER("Update payment gateway type info by an authorized user")
+    bool ORMDELETE_USER("Delete a payment gateway type")
 };
 
 class PaymentGateways : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, PaymentGateways)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGateways)
 
 private slots:
-    QVariant ORMGET("Get payment gateway information")
-    quint32 ORMCREATE("Create a new payment gateway by an authorized user")
-    bool ORMUPDATE("Update payment gateway info by an authorized user")
-    bool ORMDELETE("Delete a payment gateway")
+    QVariant ORMGET_USER("Get payment gateway information")
+    quint32 ORMCREATE_USER("Create a new payment gateway by an authorized user")
+    bool ORMUPDATE_USER("Update payment gateway info by an authorized user")
+    bool ORMDELETE_USER("Delete a payment gateway")
 
     QVariantList REST_GET_OR_POST(
         availableGatewayTypes,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint32 _amount,
             QString _domain
         ),

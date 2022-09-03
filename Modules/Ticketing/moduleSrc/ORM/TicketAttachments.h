@@ -90,7 +90,7 @@ namespace tblTicketAttachments {
 class TicketAttachments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, TicketAttachments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, TicketAttachments)
 
 private slots:
     QVariant ORMGET("Get Ticket Attachments")

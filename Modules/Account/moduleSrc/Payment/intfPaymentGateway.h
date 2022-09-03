@@ -86,6 +86,7 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 
 namespace Payment {
 
+///@TODO: move this to common
 #define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
     struct _##_className##_static_constructor { \
         _##_className##_static_constructor() {
@@ -95,6 +96,7 @@ namespace Payment {
     }; \
     static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
 
+///@TODO: move this to common
 #define instanceGetterPtr(_class) static _class* instancePtr() { \
     static _class* Instance = nullptr; return (Q_LIKELY(Instance) ? Instance : (Instance = new _class)); \
 }
@@ -123,11 +125,11 @@ private: \
     _gatewayClassName(); \
     TAPI_DISABLE_COPY(_gatewayClassName); \
     TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::AccountModule::Payment::PaymentLogic::registerDriver(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
+        Targoman::API::AccountModule::Payment::PaymentLogic::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
 
-//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
-//PaymentLogic::registerDriver<_gatewayClassName>(_gatewayClassName::Name);
+//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
+//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name);
 
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
     _gatewayClassName::_gatewayClassName() { ; }
@@ -141,7 +143,7 @@ class intfPaymentGateway
 
 protected:
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() = 0;
-//    virtual TAPI::enuPaymentGatewayDriver::Type getDriver() = 0;
+//    virtual TAPI::enuPaymentGatewayDriver::Type getGateway() = 0;
 
     /*[Response, TrackID, PaymentLink]*/
     virtual std::tuple<QString, QString, QString> prepareAndRequest(

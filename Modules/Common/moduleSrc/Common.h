@@ -38,9 +38,12 @@ class Common : public intfSQLBasedModule
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Common);
-    TARGOMAN_DEFINE_API_MODULE(Common);
-    TARGOMAN_API_DEFINE_MIGRATIONS(Common, CommonSchema);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(Common); //, enuTokenActorType::USER);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Common);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Common, CommonSchema);
 
 protected slots:
 };

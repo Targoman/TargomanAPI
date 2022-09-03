@@ -22,6 +22,7 @@
  */
 
 #include "User.h"
+#include "../Account.h"
 #include "Roles.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
@@ -37,6 +38,9 @@ namespace Targoman::API::AccountModule::ORM {
 |* User **********************************************************|
 \*****************************************************************/
 ///@TODO: BAD Gender causes assert
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, User)
+
 User::User() :
     intfSQLBasedModule(
         AAASchema,
@@ -60,7 +64,7 @@ User::User() :
     ;
 }
 
-QVariant IMPL_ORMGET(User) {
+QVariant IMPL_ORMGET_USER(User) {
     if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
         Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
 
@@ -109,7 +113,7 @@ QVariant IMPL_ORMGET(User) {
     //    return this->selectFromTable({},{}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-quint64 IMPL_ORMCREATE(User) {
+quint64 IMPL_ORMCREATE_USER(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
@@ -120,13 +124,13 @@ quint64 IMPL_ORMCREATE(User) {
 /*
  * this method only can call by admin user
  */
-bool IMPL_ORMUPDATE(User) {
+bool IMPL_ORMUPDATE_USER(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(User) {
+bool IMPL_ORMDELETE_USER(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -146,7 +150,7 @@ ORMSelectQuery User::getPhotoQuery(
 }
 
 TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _usrID
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -164,7 +168,7 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
 }
 
 bool IMPL_REST_UPDATE(User, photo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Base64Image_t _image
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -196,7 +200,7 @@ bool IMPL_REST_UPDATE(User, photo, (
 }
 
 bool IMPL_REST_POST(User, deletePhoto, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
@@ -223,7 +227,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
 }
 
 bool IMPL_REST_UPDATE(User, email, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -256,7 +260,7 @@ bool IMPL_REST_UPDATE(User, email, (
 }
 
 bool IMPL_REST_UPDATE(User, mobile, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _psw,
     QString         _salt
@@ -289,7 +293,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
 }
 
 bool IMPL_REST_UPDATE(User, personalInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
@@ -318,7 +322,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, financialInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 )) {
@@ -361,7 +365,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, extraInfo, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
     QString         _education,
@@ -488,6 +492,8 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 /*****************************************************************\
 |* UserExtraInfo *************************************************|
 \*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, UserExtraInfo)
+
 UserExtraInfo::UserExtraInfo() :
     intfSQLBasedModule (
         AAASchema,
@@ -497,7 +503,7 @@ UserExtraInfo::UserExtraInfo() :
         tblUserExtraInfo::Private::Indexes
 ) { ; }
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
+//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -511,7 +517,7 @@ UserExtraInfo::UserExtraInfo() :
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
+//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name

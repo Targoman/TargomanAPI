@@ -21,41 +21,18 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_MTDEFS_HPP
-#define TARGOMAN_API_MODULES_MT_MTDEFS_HPP
+#ifndef TARGOMAN_API_MODULES_MT_DEFS_HPP
+#define TARGOMAN_API_MODULES_MT_DEFS_HPP
+
+#include "ModuleHelpers/MT/MTDefs.hpp"
+#include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
 constexpr char MTDomain[] = "MT";
 constexpr char MTSchema[] = "MT";
 
 namespace Targoman::API::MTModule {
 
-namespace RESULTItems {
-    constexpr char ERRNO[]= "errno";
-    constexpr char MESSAGE[]= "message";
-    constexpr char CLASS[]= "class";
-    constexpr char CACHE[]= "byCache";
-
-    constexpr char SIMPLE[]= "simple";
-    constexpr char SERVERID[]= "serverID";
-    constexpr char TRANSLATION[]= "tr";
-    constexpr char TIMES[]= "times";
-    constexpr char TIME[]= "time";
-
-    namespace TRANSLATIONItems {
-        constexpr char PHRASES[]= "phrases";
-        constexpr char ALIGNMENTS[]= "alignments";
-        constexpr char BASE[]= "base";
-
-    }
-
-    namespace TIMESItems {
-        constexpr char PRE[]= "pre";
-        constexpr char TR[]= "tr";
-        constexpr char POST[]= "post";
-        constexpr char ALL[]= "all";
-    }
-}
-
 } //namespace Targoman::API::MTModule
 
-#endif // TARGOMAN_API_MODULES_MT_MTDEFS_HPP
+#endif // TARGOMAN_API_MODULES_MT_DEFS_HPP

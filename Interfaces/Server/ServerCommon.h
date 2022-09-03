@@ -33,6 +33,17 @@ namespace Targoman::API::Server {
 TARGOMAN_ADD_EXCEPTION_HANDLER(exRESTRegistry, Targoman::Common::exTargomanBase);
 #pragma clang diagnostic pop
 
+struct stuModuleDBInfo {
+    QString Host;
+    quint16 Port;
+    QString User;
+    QString Pass;
+    QString Schema;
+
+    stuModuleDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "");
+    QString toConnStr(const QString &_dbPrefix="", bool _noSchema=false);
+};
+
 struct ServerCommonConfigs
 {
     static inline QString makeConfig(const QString& _name) { return "/Server/" + _name; }

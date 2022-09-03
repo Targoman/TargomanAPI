@@ -43,9 +43,11 @@ namespace tblService {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(svcID);
         TARGOMAN_CREATE_CONSTEXPR(svcName);
+//        TARGOMAN_CREATE_CONSTEXPR(svcOppositeTokenTypeServiceName);
         TARGOMAN_CREATE_CONSTEXPR(svc_rolID);
         TARGOMAN_CREATE_CONSTEXPR(svcProcessVoucherItemEndPoint);
         TARGOMAN_CREATE_CONSTEXPR(svcCancelVoucherItemEndPoint);
+//        TARGOMAN_CREATE_CONSTEXPR(svcAcceptableTokenType);
         TARGOMAN_CREATE_CONSTEXPR(svcStatus);
         TARGOMAN_CREATE_CONSTEXPR(svcCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(svcCreatedBy_usrID);
@@ -58,18 +60,20 @@ namespace tblService {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                                       Type                        Validation                       Default    UpBy   Sort  Filter Self  Virt   PK
-                { Fields::svcID,                            ORM_PRIMARYKEY_32 },
-                { Fields::svcName,                          S(QString),                 QFV,                             QRequired, UPAdmin },
-                { Fields::svc_rolID,                        S(quint32),                 QFV,                             QRequired, UPAdmin },
-                { Fields::svcProcessVoucherItemEndPoint,    S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
-                { Fields::svcCancelVoucherItemEndPoint,     S(NULLABLE_TYPE(QString)),  QFV,                             QNull,     UPAdmin },
-                { Fields::svcStatus,                        ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
-                { ORM_INVALIDATED_AT_FIELD },
-                { Fields::svcCreationDateTime,              ORM_CREATED_ON },
-                { Fields::svcCreatedBy_usrID,               ORM_CREATED_BY },
-                { Fields::svcUpdatedBy_usrID,               ORM_UPDATED_BY },
-            };
+            //ColName                                   Type                            Validation      Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::svcID,                            ORM_PRIMARYKEY_32 },
+            { Fields::svcName,                          S(QString),                     QFV,            QRequired,  UPAdmin },
+//            { Fields::svcOppositeTokenTypeServiceName,  S(QString),                     QFV,            QNull,      UPAdmin },
+            { Fields::svc_rolID,                        S(quint32),                     QFV,            QRequired,  UPAdmin },
+            { Fields::svcProcessVoucherItemEndPoint,    S(NULLABLE_TYPE(QString)),      QFV,            QNull,      UPAdmin },
+            { Fields::svcCancelVoucherItemEndPoint,     S(NULLABLE_TYPE(QString)),      QFV,            QNull,      UPAdmin },
+//            { Fields::svcAcceptableTokenType,           S(TAPI::enuTokenActorType::Type), QFV, TAPI::enuTokenActorType::USER, UPAdmin },
+            { Fields::svcStatus,                        ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
+            { ORM_INVALIDATED_AT_FIELD },
+            { Fields::svcCreationDateTime,              ORM_CREATED_ON },
+            { Fields::svcCreatedBy_usrID,               ORM_CREATED_BY },
+            { Fields::svcUpdatedBy_usrID,               ORM_UPDATED_BY },
+        };
 
         const QList<stuRelation> Relations = {
             ///Col                    Reference Table              ForeignCol      Rename     LeftJoin
@@ -90,9 +94,11 @@ namespace tblService {
     TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_32        (svcID),
         SF_QString                  (svcName),
+//        SF_QString                  (svcOppositeTokenTypeServiceName),
         SF_quint32                  (svc_rolID),
         SF_QString                  (svcProcessVoucherItemEndPoint),
         SF_QString                  (svcCancelVoucherItemEndPoint),
+//        SF_Enum                     (svcAcceptableTokenType, TAPI::enuTokenActorType::Type, TAPI::enuTokenActorType::USER),
         SF_ORM_STATUS_FIELD         (svcStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active),
         SF_ORM_CREATED_ON           (svcCreationDateTime),
         SF_ORM_CREATED_BY           (svcCreatedBy_usrID),
@@ -104,13 +110,13 @@ namespace tblService {
 class Service : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, Service)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, Service)
 
 private slots:
-    QVariant ORMGET("Get Service information")
-    quint64 ORMCREATE("Create a new Service by an authorized user")
-    bool ORMUPDATE("Update Service info by an authorized user")
-    bool ORMDELETE("Delete a Service")
+    QVariant ORMGET_USER("Get Service information")
+    quint64 ORMCREATE_USER("Create a new Service by an authorized user")
+    bool ORMUPDATE_USER("Update Service info by an authorized user")
+    bool ORMDELETE_USER("Delete a Service")
 };
 
 } //namespace ORM

@@ -84,11 +84,11 @@ namespace tblActiveAds {
 class ActiveAds : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, ActiveAds)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, ActiveAds)
 
 private slots:
-    QVariant ORMGET("Get Active Adveritsements")
-    bool ORMDELETE("Delete an Active Advertisement")
+    QVariant ORMGET_USER("Get Active Adveritsements")
+    bool ORMDELETE_USER("Delete an Active Advertisement")
 };
 
 } //namespace ORM

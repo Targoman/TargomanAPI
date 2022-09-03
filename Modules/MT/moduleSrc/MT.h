@@ -24,64 +24,117 @@
 #ifndef TARGOMAN_API_MODULES_MT_MT_H
 #define TARGOMAN_API_MODULES_MT_MT_H
 
-#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
+#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 #include "MTDefs.hpp"
+#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
+
+using namespace Targoman::API::ModuleHelpers::MT::Classes;
 
 namespace Targoman::API::MTModule {
 
+constexpr char ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS[] = "plus-max-days";
+
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
+TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfSQLBasedWithActionLogsModule
+class MT : public intfAccountingBasedModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(MT);
-    TARGOMAN_DEFINE_API_MODULE(MT);
-    TARGOMAN_API_DEFINE_MIGRATIONS(MT, MTSchema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(MT, MTSchema);
-    TARGOMAN_API_DEFINE_FAQ(MT, MTSchema);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(MT); //, enuTokenActorType::API);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(MT);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(MT, MTSchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(MT, MTSchema);
+    TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(MT, MTSchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(MT, MTSchema);
+
+public:
+    virtual QMap<QString, stuModuleDBInfo> requiredDBs() const;
+    virtual void initializeModule();
+
+protected:
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
+
+    virtual void breakCredit(quint64 _slbID);
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const;
+
+    virtual void computeAdditives(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual void computeReferrer(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
+
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuAssetItem      &_assetItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
 
 private slots:
-//    QVariantMap REST_GET_OR_POST(
-//        Translate,
+    QVariantMap REST_GET_OR_POST(
+        Translate,
+        (
+            APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM,
+            QString _text,
+            QString _dir,
+            const QString& _engine = "NMT",
+            bool _detailed = false,
+            bool _detok = true,
+            bool _dic = false,
+            bool _dicFull = false
+        ),
+        "Translates input text if specified engine and language are found."
+    )
+
+#ifdef QT_DEBUG
+//    QVariant REST_POST(
+//        fixtureSetup,
 //        (
-//            const TAPI::RemoteIP_t& _REMOTE_IP,
-//            const QString& _token,
-//            QString _text,
-//            QString _dir,
-//            const QString& _engine = "NMT",
-//            bool _detailed = false,
-//            bool _detok = true,
-//            bool _dic = false,
-//            bool _dicFull = false
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            QString _random = {}
 //        ),
-//        "Translates input text if specified engine and language are found."
+//        "Create sample data. give random=1 to auto generate random number"
 //    )
 
-//    QVariantMap REST_GET_OR_POST(
-//        Test,
+//    QVariant REST_POST(
+//        fixtureCleanup,
 //        (
-//            const TAPI::RemoteIP_t& _REMOTE_IP,
-//            const QString& _token,
-//            const QString& _arg
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            QString _random = {}
 //        ),
-//        "Test"
+//        "Cleanup sample data"
 //    )
+#endif
+
+private:
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(MT, MTSchema);
+TARGOMAN_OBJECTSTORAGE_POSTPARENT(MT, MTSchema);
 TARGOMAN_FAQ_POSTPARENT(MT, MTSchema);
 
 } //namespace Targoman::API::MTModule

@@ -22,8 +22,11 @@
  */
 
 #include "Props.h"
+#include "../Advert.h"
 
 namespace Targoman::API::AdvertModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, Props)
 
 Props::Props() :
     intfSQLBasedModule(
@@ -34,7 +37,7 @@ Props::Props() :
         tblProps::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(Props) {
+QVariant IMPL_ORMGET_USER(Props) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
@@ -45,7 +48,7 @@ QVariant IMPL_ORMGET(Props) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
-quint64 IMPL_ORMCREATE(Props) {
+quint64 IMPL_ORMCREATE_USER(Props) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         _createInfo.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
 //    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _createInfo);
@@ -53,7 +56,7 @@ quint64 IMPL_ORMCREATE(Props) {
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(Props) {
+bool IMPL_ORMUPDATE_USER(Props) {
     QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
@@ -63,7 +66,7 @@ bool IMPL_ORMUPDATE(Props) {
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
 
-bool IMPL_ORMDELETE(Props) {
+bool IMPL_ORMDELETE_USER(Props) {
     QVariantMap ExtraFilters;
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
         ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());

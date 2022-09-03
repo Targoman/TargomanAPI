@@ -21,18 +21,10 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
-#define TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
+#include "gtwMarianTransBPE.v1.7.h"
 
-#include "intfTranslatorEngine.hpp"
+namespace Targoman::API::ModuleHelpers::MT::Gateways {
 
-namespace Targoman::API::MTModule::Classes {
+TARGOMAN_API_MT_GATEWAY_IMPL(gtwMarianTransBPE_v1_7)
 
-class intfTranslatorBridge : public intfTranslatorEngine{
-public:
-
-};
-
-} //namespace Targoman::API::MTModule::Classes
-
-#endif // TARGOMAN_API_MODULES_MT_CLASSES_INTFTRANSLATORBRIDGE_HPP
+} // namespace Targoman::API::ModuleHelpers::MT::Gateways

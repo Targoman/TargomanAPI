@@ -99,10 +99,10 @@ namespace tblClicks {
 class Clicks : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Advert, Clicks)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, Clicks)
 
 private slots:
-    QVariant ORMGET("Get Clicks information")
+    QVariant ORMGET_USER("Get Clicks information")
 };
 
 } //namespace ORM

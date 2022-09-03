@@ -46,19 +46,24 @@ namespace Targoman::API::TicketingModule {
 
 using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(Ticketing)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Ticketing, TicketingSchema);
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT(Ticketing)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Ticketing, TicketingSchema);
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
 
 Ticketing::Ticketing() :
-    intfSQLBasedWithActionLogsModule(
+    intfSQLBasedModule( //intfSQLBasedWithActionLogsModule(
         TicketingDomain,
         TicketingSchema
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Ticketing, TicketingSchema)
-    TARGOMAN_API_IMPLEMENT_FAQ(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Ticketing, TicketingSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Ticketing, TicketingSchema)
 
     this->addSubModule(&Departments::instance());
     this->addSubModule(&Units::instance());
@@ -136,7 +141,7 @@ quint64 Ticketing::insertTicket(
 }
 
 QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
     quint32 _serviceID,
@@ -173,7 +178,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
 }
 
 QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_title,
     const QString &_body,
     Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -220,7 +225,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;
@@ -351,7 +356,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 }
 
 QVariant IMPL_REST_POST(Ticketing, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;

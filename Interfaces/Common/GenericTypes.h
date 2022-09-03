@@ -188,6 +188,11 @@ private:
 };
 
 /**********************************************************************/
+//TARGOMAN_DEFINE_ENHANCED_ENUM(enuTokenActorType::Type,
+//                              User   = 'U',
+//                              API    = 'A'
+//                              );
+
 TARGOMAN_DEFINE_ENUM(enuGenericStatus,
                      Active = 'A',
                      Removed = 'R'
@@ -371,6 +376,7 @@ TAPI_DECLARE_METATYPE(TAPI::DBMediumText_t)
 TAPI_DECLARE_METATYPE(TAPI::DBLongText_t)
 TAPI_DECLARE_METATYPE(TAPI::String_t)
 
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuTokenActorType::Type);
 TAPI_DECLARE_METATYPE_ENUM(TAPI, enuGenericStatus);
 
 #endif // TAPI_GENERICTYPES_H

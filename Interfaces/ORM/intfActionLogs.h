@@ -61,7 +61,7 @@ namespace tblActionLogs {
         };
 
         const QList<stuRelation> Relations = {
-            { Fields::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
+//            { Fields::atlBy_usrID,           R(AAA::AAASchema,  "tblUser"),  "usrID",    "By_" },
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -91,9 +91,44 @@ public:
     );
 
 protected slots:
-    QVariant ORMGET("Get Action Logs.")
+    QVariant ORMGET_USER("Get Action Logs.")
 };
 
 } //namespace Targoman::API::ORM
+
+/****************************************************/
+//put this macro before module class definition (.h)
+#define TARGOMAN_ACTIONLOG_PREPARENT class ActionLogs;
+
+//put this macro after module class definition (.h)
+#define TARGOMAN_ACTIONLOG_POSTPARENT(_module, _schema) \
+class ActionLogs : public Targoman::API::ORM::intfActionLogs \
+{ \
+    Q_OBJECT \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, ActionLogs) \
+public: \
+    ActionLogs() : \
+        intfActionLogs( \
+            Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
+            _schema \
+        ) \
+    { ; } \
+};
+
+//put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
+#define TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(_module, _schema) \
+protected: \
+    QScopedPointer<ActionLogs> _ActionLogs;
+
+//put this macro before module class constructor (.cpp)
+#define TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(_module, _schema) \
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, ActionLogs)
+
+//put this macro into module class constructor (.cpp)
+#define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(_module, _schema) \
+    this->_ActionLogs.reset(&ActionLogs::instance()); \
+    this->addSubModule(this->_ActionLogs.data());
+
+/****************************************************/
 
 #endif // TARGOMAN_API_ACTIONLOGS_H

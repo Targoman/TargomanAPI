@@ -28,7 +28,7 @@
 #include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Payments.h"
 #include "ORM/Voucher.h"
@@ -48,20 +48,24 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class Account : public intfSQLBasedWithActionLogsModule
+class Account : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(Account);
-    TARGOMAN_DEFINE_API_MODULE(Account);
-    TARGOMAN_API_DEFINE_MIGRATIONS(Account, AAASchema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(Account, AAASchema);
-    TARGOMAN_API_DEFINE_OBJECTSTORAGE(Account, AAASchema);
-    TARGOMAN_API_DEFINE_FAQ(Account, AAASchema);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(Account); //, enuTokenActorType::USER);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Account);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(Account, AAASchema);
 
 public:
     static Targoman::Common::Configuration::tmplConfigurable<FilePath_t> InvalidPasswordsFile;
+    void initializeModule();
 
     virtual QJsonObject todayPrivs(quint64 _usrID) final { Q_UNUSED(_usrID) return {}; }
 
@@ -232,7 +236,7 @@ private slots:
     bool REST_GET_OR_POST(
         logout,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
         ),
         "Logout logged in user"
     )
@@ -271,7 +275,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePass,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::MD5_t _oldPass,
             QString     _oldPassSalt,
             TAPI::MD5_t _newPass
@@ -297,7 +301,7 @@ private:
     );
 
 //    Targoman::API::AAA::stuVoucher payAndProcessBasket(
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //        QString _domain,
 //        quint64 _voucherID,
 //        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
@@ -310,7 +314,7 @@ private slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        mergeBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
 //        ),
 //        "Merge given pre-Voucher and user's new asset items by service"
@@ -319,7 +323,7 @@ private slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        getBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
 //        ),
 //        "Fetch and make current user's pre-Voucher"
 //    )
@@ -327,7 +331,7 @@ private slots:
 //    bool REST_POST(
 //        deleteBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
 //        ),
 //        "Remove all items from pre-Voucher"
@@ -348,7 +352,7 @@ private slots:
     bool REST_POST(
         cancelVoucher,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _voucherID
         ),
         "Cancel Voucher"
@@ -357,7 +361,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             QString _domain,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
@@ -376,7 +380,7 @@ private slots:
 //    Targoman::API::AAA::stuVoucher REST_POST(
 //        payForBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            QString _domain,
 //            quint64 _voucherID,
 //            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
@@ -404,7 +408,7 @@ private slots:
     quint64 REST_POST(
         claimOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _bank,
             QString _receiptCode,
             TAPI::Date_t _receiptDate,
@@ -421,7 +425,7 @@ private slots:
     bool REST_POST(
         rejectOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _offlinePaymentID
         ),
         "reject offline payment claim"
@@ -430,7 +434,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _offlinePaymentID
         ),
         "approve Voucher by offline payment"
@@ -439,7 +443,7 @@ private slots:
 //    Targoman::API::AAA::stuVoucher EXREST_POST(
 //        approveOfflinePayment_withBankInfo,
 //        (
-//            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
 //            quint64 _vchID,
 //            const QString& _bank,
 //            const QString& _receiptCode,
@@ -460,7 +464,7 @@ private slots:
     quint64 REST_POST(
         addPrizeTo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
             QString _desc
@@ -471,7 +475,7 @@ private slots:
     quint64 REST_POST(
         addIncomeTo,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _targetUsrID,
             quint64 _amount,
             QString _desc
@@ -482,7 +486,7 @@ private slots:
     bool REST_POST(
         checkVoucherTTL,
         (
-            APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             quint64 _voucherID
         ),
         "Check voucher and items for ttl"

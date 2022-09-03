@@ -215,9 +215,25 @@ namespace TAPI { \
             throw Targoman::API::exHTTPBadRequest(QString("Invalid value (%1) specified for %2:NULLABLE<%3>").arg(_val.toString()).arg(_paramName).arg(#_numericType)); \
     } \
     inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val) { \
-        qDebug() << "toJsonValue(?)" << NULLABLE_GET_OR_DEFAULT(_val, 99999999); \
-        QJsonValue JsonVal; JsonVal = NULLABLE_IS_NULL(_val) ? QJsonValue() : static_cast<double>(*_val); return JsonVal; \
+        if (NULLABLE_IS_NULL(_val)) \
+            return QJsonValue(); \
+        QJsonValue JsonVal = static_cast<double>(*_val); \
+        return JsonVal; \
     } \
+}
+
+//qDebug() << "toJsonValue(" << #_numericType << "?)" << NULLABLE_GET_OR_DEFAULT(_val, 99999999);
+
+//bool? :
+namespace TAPI {
+    inline QJsonValue toJsonValue(const NULLABLE_TYPE(bool)& _val) {
+//        qDebug() << "toJsonValue(bool?)" << NULLABLE_GET_OR_DEFAULT(_val, 99999999);
+        if (NULLABLE_IS_NULL(_val))
+            return QJsonValue();
+        QJsonValue JsonVal = ((NULLABLE_VALUE(_val) == true) || (NULLABLE_VALUE(_val) == 1));
+        //[](auto v) -> bool { return ((v == true) || (v == 1) /*|| (v == "1")*/); }(NULLABLE_VALUE(_val));
+        return JsonVal;
+    }
 }
 
 TAPI_SPECIAL_MAKE_GENERIC_ON_NUMERIC_TYPE(quint8,  toUInt)

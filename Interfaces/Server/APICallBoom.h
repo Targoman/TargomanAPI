@@ -29,32 +29,62 @@
 #include "QElapsedTimer"
 #include "QHttp/qhttpfwd.hpp"
 #include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/APIArgHelperMacros.hpp"
 
-#define APICALLBOOM_TYPE_BASE_STR           "APICallBoom<"
+namespace TAPI {
 
+TARGOMAN_DEFINE_ENUM(enuTokenActorType,
+                     ANONYMOUSE,
+                     USER, //   = 'U',
+                     API, //    = 'A'
+                     );
+
+//enum struct enuTokenActorType {
+//    ANONYMOUSE,
+//    USER,
+//    API
+//};
+
+}
+
+//TAPI_DECLARE_METATYPE_ENUM(TAPI, enuTokenActorType::Type);
+
+#define APICALLBOOM_TYPE_BASE_STR               "APICallBoom<"
+
+//-- NO JWT
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_NO_JWT_DECL        APICallBoom<false>
-#define APICALLBOOM_TYPE_NO_JWT_DECL_STR    TARGOMAN_M2STR(APICALLBOOM_TYPE_NO_JWT_DECL)
+#define APICALLBOOM_TYPE_NO_JWT_DECL            APICallBoom<TAPI::enuTokenActorType::ANONYMOUSE> //false>
+#define APICALLBOOM_TYPE_NO_JWT_DECL_STR        TARGOMAN_M2STR(APICALLBOOM_TYPE_NO_JWT_DECL)
 
 //just for use in api methods (.cpp)
-#define APICALLBOOM_TYPE_NO_JWT_IMPL        Q_DECL_UNUSED APICALLBOOM_TYPE_NO_JWT_DECL
+#define APICALLBOOM_TYPE_NO_JWT_IMPL            Q_DECL_UNUSED APICALLBOOM_TYPE_NO_JWT_DECL
 
+//-- JWT : USER
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_DECL           APICallBoom<true>
-#define APICALLBOOM_TYPE_JWT_DECL_STR       TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_DECL)
+#define APICALLBOOM_TYPE_JWT_USER_DECL          APICallBoom<TAPI::enuTokenActorType::USER> //true>
+#define APICALLBOOM_TYPE_JWT_USER_DECL_STR      TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_USER_DECL)
 
 //just for use in api methods (.cpp)
-#define APICALLBOOM_TYPE_JWT_IMPL           Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_DECL
+#define APICALLBOOM_TYPE_JWT_USER_IMPL          Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_USER_DECL
 
-#define INTFAPICALLBOOM                     intfAPICallBoom
+//-- JWT : API
+//just for use in api methods (.h)
+#define APICALLBOOM_TYPE_JWT_API_DECL           APICallBoom<TAPI::enuTokenActorType::API> //true>
+#define APICALLBOOM_TYPE_JWT_API_DECL_STR       TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_API_DECL)
+
+//just for use in api methods (.cpp)
+#define APICALLBOOM_TYPE_JWT_API_IMPL           Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_API_DECL
+
+//--
+#define INTFAPICALLBOOM                         intfAPICallBoom
 //just for use in NON-api methods (.h)
-#define INTFAPICALLBOOM_DECL                intfAPICallBoom
+#define INTFAPICALLBOOM_DECL                    intfAPICallBoom
 //just for use in NON-api methods (.cpp)
-#define INTFAPICALLBOOM_IMPL                Q_DECL_UNUSED intfAPICallBoom
+#define INTFAPICALLBOOM_IMPL                    Q_DECL_UNUSED intfAPICallBoom
 
 //#define APICALLBOOM_PARAM                   _APICALLBOOM
 //#define APICALLBOOM_PARAM_STR               TARGOMAN_M2STR(APICALLBOOM_PARAM)
-#define APICALLBOOM_PARAM_STR               "APICALLBOOM_PARAM"
+#define APICALLBOOM_PARAM_STR                   "APICALLBOOM_PARAM"
 
 namespace Targoman::API::Server {
 
@@ -78,7 +108,9 @@ public:
         const QList<QPair<QString, QString>> &_requestBodyParams
     );
 
-    virtual bool needJWT() = 0;
+//    virtual bool needJWT() = 0;
+    virtual TAPI::enuTokenActorType::Type tokenActorType() = 0;
+
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
     quint64 getActorID(quint64 _default=0);
@@ -154,7 +186,7 @@ protected:
     QExplicitlySharedDataPointer<APICallBoomData> Data;
 };
 
-template <bool _needJWT>
+template <TAPI::enuTokenActorType::Type _tokenActorType> //bool _needJWT>
 class APICallBoom : public intfAPICallBoom
 {
 public:
@@ -162,7 +194,8 @@ public:
         intfAPICallBoom(_fnTiming)
     { ; }
 
-    virtual bool needJWT() { return _needJWT; }
+//    virtual bool needJWT() { return _needJWT; }
+    virtual TAPI::enuTokenActorType::Type tokenActorType() final { return _tokenActorType; }
 };
 
 } //namespace Targoman::API::Server

@@ -41,6 +41,7 @@ TARGOMAN_DEFINE_ENHANCED_ENUM(enuJWTHashAlgs,
                               HS256,
                               HS384,
                               HS512)
+
 class QJWT
 {
 public:
@@ -54,6 +55,7 @@ public:
 
     static QString createSigned(
         INOUT QJsonObject &_payload,
+        TAPI::enuTokenActorType::Type _tokenType = TAPI::enuTokenActorType::USER,
         QJsonObject _privatePayload = QJsonObject(),
         const qint64 _expiry = -1,
         const QString &_sessionID = {},
@@ -68,6 +70,7 @@ public:
     static void verifyJWT(
         const QString &_jwt,
         const QString &_remoteIP,
+        const TAPI::enuTokenActorType::Type &_acceptableActorType,
         TAPI::JWT_t &_jWTPayload
     );
 

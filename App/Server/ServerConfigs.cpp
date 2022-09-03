@@ -339,8 +339,8 @@ gConfigs::Server::stuStatistics::stuStatistics(const QString& _basePath) :
                      enuConfigSource::ReadOnly
                      ) { ; }
 
-tmplConfigurableMultiMap<gConfigs::Server> gConfigs::TranslationServers(
-        clsConfigPath("TranslationServers"),
+tmplConfigurableMultiMap<gConfigs::Server> gConfigs::Engines(
+        clsConfigPath("Engines"),
         "List of valid translation servers to connect to them separated by their translation engine");
 */
 

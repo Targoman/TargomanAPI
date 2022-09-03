@@ -23,6 +23,7 @@
 
 #include "ForgotPassRequest.h"
 #include "User.h"
+#include "../Account.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
@@ -30,6 +31,8 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuFPRStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuForgotPassLinkVia);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, ForgotPassRequest)
 
 ForgotPassRequest::ForgotPassRequest() :
     intfSQLBasedModule(
@@ -40,7 +43,7 @@ ForgotPassRequest::ForgotPassRequest() :
         tblForgotPassRequest::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(ForgotPassRequest) {
+QVariant IMPL_ORMGET_USER(ForgotPassRequest) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -50,7 +53,7 @@ QVariant IMPL_ORMGET(ForgotPassRequest) {
     //    return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool IMPL_ORMDELETE(ForgotPassRequest) {
+bool IMPL_ORMDELETE_USER(ForgotPassRequest) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, {}, true);

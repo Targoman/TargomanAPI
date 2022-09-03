@@ -164,16 +164,16 @@ namespace tblWalletsBalanceHistory {
 class WalletTransactions : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletTransactions)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, WalletTransactions)
 
 private slots:
-    QVariant ORMGET("Get WalletTransactions information.")
+    QVariant ORMGET_USER("Get WalletTransactions information.")
 };
 
 class WalletsBalanceHistory : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, WalletsBalanceHistory)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, WalletsBalanceHistory)
 
 private:
 };

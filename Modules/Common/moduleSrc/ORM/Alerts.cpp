@@ -22,6 +22,7 @@
  */
 
 #include "Alerts.h"
+#include "../Common.h"
 #include "Interfaces/AAA/Authorization.h"
 //#include "Interfaces/AAA/AAADefs.hpp"
 //#include "Interfaces/AAA/clsJWT.hpp"
@@ -31,6 +32,8 @@ using namespace Targoman::API::AAA;
 
 namespace Targoman::API::CommonModule::ORM {
 
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Common, Alerts)
+
 Alerts::Alerts() :
     intfPureModule(
         "Common"
@@ -39,7 +42,7 @@ Alerts::Alerts() :
     ),
     intfAlerts() { ; }
 
-QVariant IMPL_ORMGET(Alerts) {
+QVariant IMPL_ORMGET_USER(Alerts) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
 //    return this->Select(GET_METHOD_ARGS_CALL_VALUES);

@@ -130,10 +130,10 @@ namespace tblOnlinePayments {
 class OnlinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OnlinePayments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OnlinePayments)
 
 private slots:
-    QVariant ORMGET("Get OnlinePayment information.")
+    QVariant ORMGET_USER("Get OnlinePayment information.")
 
     QVariant EXREST_GET_OR_POST(
         paymentCallback,
@@ -256,13 +256,13 @@ namespace tblOfflinePaymentClaims {
 class OfflinePaymentClaims : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaims)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePaymentClaims)
 
 private slots:
-    QVariant ORMGET("Get OfflinePaymentClaim(s) information.")
-//    quint32 ORMCREATE("Create a new OfflinePaymentClaim")
-//    bool ORMUPDATE("Update OfflinePaymentClaim info")
-//    bool ORMDELETE("Delete an OfflinePaymentClaim")
+    QVariant ORMGET_USER("Get OfflinePaymentClaim(s) information.")
+//    quint32 ORMCREATE_USER("Create a new OfflinePaymentClaim")
+//    bool ORMUPDATE_USER("Update OfflinePaymentClaim info")
+//    bool ORMDELETE_USER("Delete an OfflinePaymentClaim")
 };
 
 */
@@ -339,10 +339,10 @@ namespace tblOfflinePaymentClaimsAttachments {
 class OfflinePaymentClaimsAttachments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePaymentClaimsAttachments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePaymentClaimsAttachments)
 
 private slots:
-    QVariant ORMGET("Get OfflinePaymentClaims Attachments")
+    QVariant ORMGET_USER("Get OfflinePaymentClaims Attachments")
 };
 */
 
@@ -429,11 +429,11 @@ namespace tblOfflinePayments {
 class OfflinePayments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Account, OfflinePayments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, OfflinePayments)
 
 private slots:
-    QVariant ORMGET("Get OfflinePayment information.")
-    bool ORMUPDATE("Update OfflinePayment info by an authorized user")
+    QVariant ORMGET_USER("Get OfflinePayment information.")
+    bool ORMUPDATE_USER("Update OfflinePayment info by an authorized user")
 };
 
 /*****************************************************************/

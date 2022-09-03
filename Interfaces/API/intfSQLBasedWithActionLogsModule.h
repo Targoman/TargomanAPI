@@ -27,34 +27,6 @@
 #include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/ORM/intfActionLogs.h"
 
-//put this macro before module class definition (.h)
-#define TARGOMAN_ACTIONLOG_PREPARENT class ActionLogs;
-
-//put this macro after module class definition (.h)
-#define TARGOMAN_ACTIONLOG_POSTPARENT(_module, _schema) \
-class ActionLogs : public Targoman::API::ORM::intfActionLogs \
-{ \
-    Q_OBJECT \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, ActionLogs) \
-public: \
-    ActionLogs() : \
-        intfActionLogs( \
-            Targoman::Common::demangle(typeid(_module).name()).split("::").last(), \
-            _schema \
-        ) \
-    { ; } \
-};
-
-//put this macro inside module class definition (.h) after TARGOMAN_DEFINE_API_MODULE
-#define TARGOMAN_API_DEFINE_ACTIONLOG(_module, _schema) \
-protected: \
-    QScopedPointer<ActionLogs> _ActionLogs;
-
-//put this macro into module class constructor (.cpp)
-#define TARGOMAN_API_IMPLEMENT_ACTIONLOG(_module, _schema) \
-    this->_ActionLogs.reset(&ActionLogs::instance()); \
-    this->addSubModule(this->_ActionLogs.data());
-
 namespace Targoman::API::API {
 
 class intfSQLBasedWithActionLogsModule : public intfSQLBasedModule

@@ -23,13 +23,17 @@
 
 #include "Common.h"
 #include "ORM/Alerts.h"
+#include "ORM/AlertTemplates.h"
 
 namespace Targoman::API::CommonModule {
 
 using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(Common)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Common, CommonSchema);
+TARGOMAN_API_MODULE_IMPLEMENT(Common)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Common, CommonSchema);
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
 
 Common::Common() :
     intfSQLBasedModule(
@@ -37,9 +41,10 @@ Common::Common() :
         CommonSchema,
         ""
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Common, CommonSchema)
 
     this->addSubModule(&Alerts::instance());
+    this->addSubModule(&AlertTemplates::instance());
 }
 
 } //namespace Targoman::API::CommonModule

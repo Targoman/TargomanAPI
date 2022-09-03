@@ -9,3 +9,4 @@
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
 addSubdirs(NLP, Dependencies)
+addSubdirs(MT, Dependencies)

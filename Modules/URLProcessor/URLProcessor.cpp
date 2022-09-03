@@ -28,7 +28,7 @@ using namespace Targoman::Common;
 namespace Targoman {
 namespace API {
 
-TARGOMAN_IMPL_API_MODULE(URLProcessor)
+TARGOMAN_API_MODULE_IMPLEMENT(URLProcessor)
 
 URLProcessor::URLProcessor() :
     intfPureModule("URLProcessor") { ; }

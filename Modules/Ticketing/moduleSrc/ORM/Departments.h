@@ -81,7 +81,7 @@ namespace tblDepartments {
 class Departments : public intfSQLBasedModule
 {
     Q_OBJECT
-    TARGOMAN_DEFINE_API_SUBMODULE(Ticketing, Departments)
+    TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, Departments)
 
 private slots:
     QVariant ANONYMOUSE_ORMGET("Get departments")

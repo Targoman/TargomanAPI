@@ -385,6 +385,7 @@ TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBMediumText_t,     
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, DBLongText_t,               optional(QFV.matches(QRegularExpression("(?s).*")).maxLenght(4294967295)), _value, [](const QList<clsORMField>&) { return "A valid long text"; });
 TAPI_VALIDATION_REQUIRED_TYPE_IMPL(COMPLEXITY_String, TAPI, String_t,                   optional(QFV.matches(QRegularExpression("(?s).*"))),                       _value, [](const QList<clsORMField>&) { return "A valid String"; });
 
+//TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuTokenActorType::Type);
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuGenericStatus);
 
 /**********************************************************************************/

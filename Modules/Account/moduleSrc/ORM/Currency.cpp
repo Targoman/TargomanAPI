@@ -23,10 +23,13 @@
 
 #include "Currency.h"
 //#include "User.h"
+#include "../Account.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuCurrencyStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, Currency)
 
 Currency::Currency() :
     intfSQLBasedModule(
@@ -37,23 +40,23 @@ Currency::Currency() :
         tblCurrency::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(Currency) {
+QVariant IMPL_ORMGET_ANONYMOUSE(Currency) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-quint64 IMPL_ORMCREATE(Currency) {
+quint64 IMPL_ORMCREATE_USER(Currency) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMUPDATE(Currency) {
+bool IMPL_ORMUPDATE_USER(Currency) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE(Currency) {
+bool IMPL_ORMDELETE_USER(Currency) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
@@ -65,7 +68,7 @@ bool IMPL_ORMDELETE(Currency) {
  *     owner
  */
 bool IMPL_REST_UPDATE(Currency, setAsDefault, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::PKsByPath_t _pksByPath
 )) {
     Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canChangeDefault" });

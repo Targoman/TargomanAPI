@@ -26,7 +26,7 @@
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "ORM/Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
@@ -38,22 +38,25 @@ struct stuNGTPriceInfo{
 };
 }
 
-namespace Targoman::API {
+namespace Targoman::API::NGTModule {
 
 TARGOMAN_MIGRATIONS_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class NGTv1 : public intfSQLBasedWithActionLogsModule
+class NGTv1 : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_API_MODULE_DB_CONFIGS(NGTv1);
-    TARGOMAN_DEFINE_API_MODULE(NGTv1)
-    TARGOMAN_API_DEFINE_MIGRATIONS(NGTv1, NGTv1Schema);
-    TARGOMAN_API_DEFINE_ACTIONLOG(NGTv1, NGTv1Schema);
-    TARGOMAN_API_DEFINE_FAQ(NGTv1, NGTv1Schema);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(NGTv1); //, enuTokenActorType::User);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(NGTv1);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(NGTv1, NGTv1Schema);
+    TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(NGTv1, NGTv1Schema);
+    TARGOMAN_API_MODULE_DEFINE_FAQ(NGTv1, NGTv1Schema);
 
 private slots:
     //stuNGTPriceInfo API(POST, RetrievePriceInfo, ())
@@ -63,7 +66,7 @@ TARGOMAN_MIGRATIONS_POSTPARENT(NGTv1, NGTv1Schema);
 TARGOMAN_ACTIONLOG_POSTPARENT(NGTv1, NGTv1Schema);
 TARGOMAN_FAQ_POSTPARENT(NGTv1, NGTv1Schema);
 
-} //namespace Targoman::API
+} //namespace Targoman::API::NGTModule
 
 Q_DECLARE_METATYPE(TAPI::stuNGTPriceInfo);
 

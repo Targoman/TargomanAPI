@@ -43,7 +43,7 @@ intfSQLBasedModule(
     tblMigrations::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ANONYMOUSE_ORMGET(intfMigrations) {
+QVariant IMPL_ORMGET_ANONYMOUSE(intfMigrations) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":Migrations:CRUD~0100" });
 //    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 

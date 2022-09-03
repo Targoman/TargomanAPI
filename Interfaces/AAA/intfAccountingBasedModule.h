@@ -25,36 +25,44 @@
 #define TARGOMAN_API_AAA_ACCOUNTING_H
 
 #include "Interfaces/AAA/Accounting_Interfaces.h"
-#include "Interfaces/API/intfSQLBasedWithActionLogsModule.h"
+#include "Interfaces/API/intfSQLBasedModule.h"
 
 using namespace TAPI;
 
 namespace Targoman::API::AAA {
 
-class intfAccountingBasedModule : public API::intfSQLBasedWithActionLogsModule
+using namespace API;
+
+//class intfAccountingBasedModuleBase
+//{
+//public:
+//    virtual stuActiveCredit activeAccountObject(quint64 _usrID) = 0;
+//};
+
+class intfAccountingBasedModule : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
 {
     Q_OBJECT
 
 protected:
     intfAccountingBasedModule(
-        const QString               &_module,
-        const QString               &_schema,
-        AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
-        intfAccountUnits            *_units,
-    //    intfAccountUnitsI18N        *_unitsI18N,
-        intfAccountProducts         *_products,
-    //    intfAccountProductsI18N     *_productsI18N,
-        intfAccountSaleables        *_saleables,
-    //    intfAccountSaleablesI18N    *_saleablesI18N,
-        intfAccountSaleablesFiles   *_saleablesFiles,
-        intfAccountUserAssets       *_userAssets,
-        intfAccountUserAssetsFiles  *_userAssetsFiles,
-        intfAccountAssetUsage       *_assetUsages,
-        intfAccountCoupons          *_discounts = nullptr,
-        intfAccountPrizes           *_prizes = nullptr
+        const QString              &_module,
+        const QString              &_schema,
+        bool                       _isTokenBase,
+        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
+        intfAccountUnits           *_units,
+        intfAccountProducts        *_products,
+        intfAccountSaleables       *_saleables,
+        intfAccountSaleablesFiles  *_saleablesFiles,
+        intfAccountUserAssets      *_userAssets,
+        intfAccountUserAssetsFiles *_userAssetsFiles,
+        intfAccountAssetUsage      *_assetUsages,
+        intfAccountCoupons         *_discounts = nullptr,
+        intfAccountPrizes          *_prizes = nullptr
     );
-
 //    virtual ~intfAccountingBasedModule();
+
+//    TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
+//    bool IsTokenBase() { return _tokenActorType == TAPI::enuTokenActorType::API; }
 
 public:
     virtual stuActiveCredit activeAccountObject(quint64 _usrID);
@@ -185,13 +193,15 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_DECL               &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
             TAPI::SaleableCode_t                    _saleableCode,
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
             qreal                                   _qty = 1,
             TAPI::CouponCode_t                      _discountCode = {},
             QString                                 _referrer = {},
             TAPI::JSON_t                            _referrerParams = {},
+//            NULLABLE_TYPE(quint64)                  _tokenID = NULLABLE_NULL_VALUE,
+            QString                                 _apiToken = {},
             Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
 //            TAPI::MD5_t                             _parentItemUUID = {}
         ),
@@ -201,7 +211,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID,
             qreal                               _newQty,
@@ -213,7 +223,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         removeBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_DECL           &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID
         ),
@@ -252,12 +262,11 @@ protected slots:
 protected:
     QString ServiceName;
 
+    bool IsTokenBase;
+
     QScopedPointer<intfAccountUnits>            AccountUnits;
-//    QScopedPointer<intfAccountUnitsI18N> AccountUnitsI18N;
     QScopedPointer<intfAccountProducts>         AccountProducts;
-//    QScopedPointer<intfAccountProductsI18N> AccountProductsI18N;
     QScopedPointer<intfAccountSaleables>        AccountSaleables;
-//    QScopedPointer<intfAccountSaleablesI18N> AccountSaleablesI18N;
     QScopedPointer<intfAccountSaleablesFiles>   AccountSaleablesFiles;
     QScopedPointer<intfAccountUserAssets>       AccountUserAssets;
     QScopedPointer<intfAccountUserAssetsFiles>  AccountUserAssetsFiles;

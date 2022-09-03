@@ -36,9 +36,10 @@
 #include "Interfaces/Common/APIArgHelperMacros.hpp"
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
-
+#include "Interfaces/Server/ServerCommon.h"
 #include "Interfaces/Server/APICallBoom.h"
 using namespace Targoman::API::Server;
+using namespace TAPI;
 
 //#define RESPONSE_HEADER_X_PAGINATION_TOTAL_COUNT    "x-pagination-total-count"
 //#define RESPONSE_HEADER_X_PAGINATION_PAGE_COUNT     "x-pagination-page-count"
@@ -76,28 +77,31 @@ using namespace Targoman::API::Server;
     bool                _reportCount, \
     bool                _translate
 
-#define            GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_DECL)
 #define ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_NO_JWT_DECL)
-#define            GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_IMPL)
+#define       USER_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_DECL)
+#define        API_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_API_DECL)
 #define ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_NO_JWT_IMPL)
+#define       USER_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_IMPL)
+#define        API_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_API_IMPL)
 
-#define ANONYMOUSE_ORMGET(_doc, ...)                apiGET(ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_DECL_APICALL)); } \
+#define ORMGET_ANONYMOUSE(_doc, ...)                apiGET(ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
                                                     QString docOfGET() { return _doc; }
 
-#define ANONYMOUSE_ORMGET_HIDDEN(_doc, ...)         ANONYMOUSE_ORMGET(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
+#define ORMGET_ANONYMOUSE_HIDDEN(_doc, ...)         ORMGET_ANONYMOUSE(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
-#define ORMGET(_doc, ...)                           apiGET(GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_DECL_APICALL)); } \
+#define ORMGET_USER(_doc, ...)                      apiGET(USER_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
                                                     QString docOfGET() { return _doc; }
 
-#define IMPL_ORMGET(_module)                        _module::apiGET(GET_METHOD_ARGS_IMPL_APICALL)
-#define IMPL_ANONYMOUSE_ORMGET(_module)             _module::apiGET(ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMGET_ANONYMOUSE(_module)             _module::apiGET(ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMGET_USER(_module)                   _module::apiGET(USER_GET_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMGET_API(_module)                    _module::apiGET(API_GET_METHOD_ARGS_IMPL_APICALL)
 
-#define ORMGET_HIDDEN(_doc, ...)                    ORMGET(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
+#define ORMGET_USER_HIDDEN(_doc, ...)               ORMGET_USER(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
-#define ORMGETByName(_name, _doc, ...)              apiGET##_name(GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET##_name() { return TARGOMAN_M2STR((GET_METHOD_ARGS_DECL_APICALL)); } \
+#define ORMGET_USER_ByName(_name, _doc, ...)        apiGET##_name(USER_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET##_name() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
                                                     QString docOfGET##_name() { return _doc; }
 
 //used by intfSQLBasedModule
@@ -120,58 +124,91 @@ using namespace Targoman::API::Server;
 |** CREATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define CREATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+//USER
+#define USER_CREATE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
+#define USER_CREATE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
 
-#define ORMCREATE(_doc, ...)                        apiCREATE(CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-    QString signOfCREATE() { return TARGOMAN_M2STR((CREATE_METHOD_ARGS_DECL_APICALL)); } \
-    QString docOfCREATE() { return _doc; }
+#define ORMCREATE_USER(_doc, ...)               apiCREATE(USER_CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfCREATE() { return TARGOMAN_M2STR((USER_CREATE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfCREATE() { return _doc; }
 
-#define IMPL_ORMCREATE(_module)                     _module::apiCREATE(CREATE_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMCREATE_USER(_module)            _module::apiCREATE(USER_CREATE_METHOD_ARGS_IMPL_APICALL)
+
+//API
+#define API_CREATE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
+#define API_CREATE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+
+#define ORMCREATE_API(_doc, ...)                apiCREATE(API_CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfCREATE() { return TARGOMAN_M2STR((API_CREATE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfCREATE() { return _doc; }
+
+#define IMPL_ORMCREATE_API(_module)             _module::apiCREATE(API_CREATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define CREATE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
 
-#define CREATE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _createInfo
+#define CREATE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define UPDATE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+//USER
+#define USER_UPDATE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define USER_UPDATE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
-#define ORMUPDATE(_doc, ...)                        apiUPDATE(UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-    QString signOfUPDATE() { return TARGOMAN_M2STR((UPDATE_METHOD_ARGS_DECL_APICALL)); } \
-    QString docOfUPDATE() { return _doc; }
+#define ORMUPDATE_USER(_doc, ...)               apiUPDATE(USER_UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfUPDATE() { return TARGOMAN_M2STR((USER_UPDATE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfUPDATE() { return _doc; }
 
-#define IMPL_ORMUPDATE(_module)                     _module::apiUPDATE(UPDATE_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMUPDATE_USER(_module)            _module::apiUPDATE(USER_UPDATE_METHOD_ARGS_IMPL_APICALL)
+
+//API
+#define API_UPDATE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define API_UPDATE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+
+#define ORMUPDATE_API(_doc, ...)                apiUPDATE(API_UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfUPDATE() { return TARGOMAN_M2STR((API_UPDATE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfUPDATE() { return _doc; }
+
+#define IMPL_ORMUPDATE_API(_module)             _module::apiUPDATE(API_UPDATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define UPDATE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+#define UPDATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
-#define UPDATE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _pksByPath, _updateInfo
+#define UPDATE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _pksByPath, _updateInfo
 
 /**********************************************************************\
 |** DELETE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define DELETE_METHOD_ARGS_DECL_APICALL             APICALLBOOM_TYPE_JWT_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_APICALL             APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+//USER
+#define USER_DELETE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
+#define USER_DELETE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
 
-#define ORMDELETE(_doc, ...)                        apiDELETE(DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-    QString signOfDELETE() { return TARGOMAN_M2STR((DELETE_METHOD_ARGS_DECL_APICALL)); } \
-    QString docOfDELETE() { return _doc; }
+#define ORMDELETE_USER(_doc, ...)               apiDELETE(USER_DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfDELETE() { return TARGOMAN_M2STR((USER_DELETE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfDELETE() { return _doc; }
 
-#define IMPL_ORMDELETE(_module)                     _module::apiDELETE(DELETE_METHOD_ARGS_IMPL_APICALL)
+#define IMPL_ORMDELETE_USER(_module)            _module::apiDELETE(USER_DELETE_METHOD_ARGS_IMPL_APICALL)
+
+//API
+#define API_DELETE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
+#define API_DELETE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+
+#define ORMDELETE_API(_doc, ...)                apiDELETE(API_DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
+                                                QString signOfDELETE() { return TARGOMAN_M2STR((API_DELETE_METHOD_ARGS_DECL_APICALL)); } \
+                                                QString docOfDELETE() { return _doc; }
+
+#define IMPL_ORMDELETE_API(_module)             _module::apiDELETE(API_DELETE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define DELETE_METHOD_ARGS_DECL_INTERNAL            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL            INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
 
-#define DELETE_METHOD_ARGS_CALL_VALUES              APICALLBOOM_PARAM, _pksByPath
+#define DELETE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _pksByPath
 
 /**********************************************************************/
 namespace TAPI {
@@ -342,17 +379,6 @@ class intfPureModule : public Targoman::Common::Configuration::intfModule
     Q_OBJECT
 
 public:
-    struct stuDBInfo {
-        QString Host;
-        quint16 Port;
-        QString User;
-        QString Pass;
-        QString Schema;
-
-        stuDBInfo(QString _schema = "", quint16 _port = 0, QString _host = "", QString _user = "", QString _pass = "");
-        QString toConnStr(const QString &_dbPrefix="", bool _noSchema=false);
-    };
-
     struct stuModuleMethod {
         intfPureModule* Module;
         QMetaMethod Method;
@@ -373,10 +399,22 @@ public:
 //    virtual ~intfPureModule(); //= default;
 
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
-    virtual stuDBInfo requiredDB() const { return {}; }
 
-    virtual bool init() { return true; }
-    virtual void setInstancePointer() { ; };
+protected:
+    virtual stuModuleDBInfo requiredDB() const { return {}; }
+public:
+    virtual QMap<QString, stuModuleDBInfo> requiredDBs() const {
+        QMap<QString, stuModuleDBInfo> RequiredDBs;
+        RequiredDBs.insert(this->ModuleName, this->requiredDB());
+        return RequiredDBs;
+    }
+
+    /**
+     * @brief initializeModule called after module loaded and db config is registered
+     */
+    virtual void initializeModule() { ; }
+
+    virtual void setInstancePointer() { ; }
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {
         Targoman::API::DBM::clsTable* PTHIS = dynamic_cast<Targoman::API::DBM::clsTable*>(this);
@@ -396,6 +434,7 @@ public:
     }
 
     virtual ModuleMethods_t listOfMethods() = 0;
+//    virtual enuTokenActorType::Type actorType() const = 0;
 
 //    void addResponseHeaderNameToExpose(const QString &_header);
 //signals:
@@ -412,7 +451,11 @@ Q_DECLARE_INTERFACE(Targoman::API::API::intfPureModule, INTFPUREMODULE_IID)
 
 //QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(_name)); }
 
-#define TARGOMAN_DEFINE_API_MODULE(_name) \
+//-------------------------------------------------------------------------------------------
+//, _actorType)
+//enuTokenActorType::Type actorType() const final { return _actorType; }
+
+#define TARGOMAN_API_MODULE_DEFINE(_name) \
 public: \
     QString parentModuleName() const final { return QString(); } \
     QString moduleBaseName() { return this->ModuleName; }  \
@@ -429,7 +472,7 @@ public: \
             throw Targoman::Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
         for (int i=0; i<_submodule->metaObject()->methodCount(); ++i) \
             this->Methods.append({ _submodule, _submodule->metaObject()->method(i) }); \
-        _submodule->init(); \
+        _submodule->initializeModule(); \
     } \
 private: \
     TAPI_DISABLE_COPY(_name); \
@@ -440,10 +483,13 @@ public: \
 protected: \
     static _name* InstancePointer;
 
-#define TARGOMAN_IMPL_API_MODULE(_name) \
+#define TARGOMAN_API_MODULE_IMPLEMENT(_name) \
     _name* _name::InstancePointer;
 
-#define TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
+//-------------------------------------------------------------------------------------------
+//enuTokenActorType::Type actorType() const final;
+
+#define TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
 public: \
     QString parentModuleName() const final { return TARGOMAN_M2STR(_module); } \
     QString moduleBaseName() { return QStringLiteral(TARGOMAN_M2STR(TARGOMAN_CAT_BY_COLON(_module, _name))); } \
@@ -455,13 +501,19 @@ public: \
 private: \
     TAPI_DISABLE_COPY(_name)
 
-#define TARGOMAN_DEFINE_API_SUBMODULE(_module, _name) \
-    TARGOMAN_DEFINE_API_SUBMODULE_WO_CTOR(_module, _name) \
+#define TARGOMAN_API_SUBMODULE_DEFINE(_module, _name) \
+    TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
 private: \
     _name();
 
+//put this macro before module class constructor (.cpp)
+#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name)
+
+//enuTokenActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
+
+//-------------------------------------------------------------------------------------------
 //static inline QString makeConfig(const QString& _name) { return QString("zModule_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); }
-#define TARGOMAN_API_MODULE_DB_CONFIGS(_module) \
+#define TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(_module) \
     struct DB { \
         static inline QString makeConfig(const QString& _name) { return QString("/Module_%1/DB/%2").arg(TARGOMAN_M2STR(_module), _name); } \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Host;   \
@@ -470,9 +522,9 @@ private: \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Pass;   \
         static Targoman::Common::Configuration::tmplConfigurable<QString>       Schema; \
     }; \
-public: \
-    stuDBInfo requiredDB() const { \
-        return stuDBInfo( \
+protected: \
+    virtual stuModuleDBInfo requiredDB() const { \
+        return stuModuleDBInfo( \
             DB::Schema.value(), \
             DB::Port.value(), \
             DB::Host.value(), \
@@ -484,7 +536,7 @@ public: \
 /**
   * Host must be no default, because requiredDB() uses this
   */
-#define TARGOMAN_API_MODULE_DB_CONFIG_IMPL(_module, _schema)\
+#define TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(_module, _schema)\
     using namespace Targoman::Common::Configuration;        \
     tmplConfigurable<QString> _module::DB::Host(            \
         _module::DB::makeConfig("Host"),                    \

@@ -362,6 +362,9 @@ typedef QMap<QString, QString> QStringMap;
 #define SF_qreal(_name, ...)            INTERNAL_SF(_name,  qreal,                  INTEGRAL,           INTERNAL_C2DBL(v),  INTERNAL_V2DBL(v),      __VA_ARGS__)
 #define SF_NULLABLE_qreal(_name, ...)   INTERNAL_SF(_name,  NULLABLE_TYPE(qreal),   NULLABLE_INTEGRAL,  INTERNAL_N2J(v),    INTERNAL_N2DBL(v),      __VA_ARGS__)
 
+#define SF_double           SF_qreal
+#define SF_NULLABLE_double  SF_NULLABLE_qreal
+
 /************************************************************/
 #define TAPI_DEFINE_STRUCT(_name, ...) \
     struct _name { \
@@ -375,7 +378,7 @@ typedef QMap<QString, QString> QStringMap;
             TAPI_HELPER_STRUCT_TOJSON(__VA_ARGS__); \
             return Obj; \
         } \
-        _name& fromJson(const QJsonObject& _obj) { \
+        _name& fromJson(const QJsonObject& _obj, bool _applyDefaultValues=true) { \
             this->_lastFromJsonSource = _obj; \
             TAPI_HELPER_STRUCT_FROMJSON(__VA_ARGS__); \
             return *this; \

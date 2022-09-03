@@ -47,7 +47,7 @@ using namespace Targoman::API::AAA;
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuBannerSize);
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
+//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAccountOrdersStatus);
 
 //    COMPLEXITY_Complex,
 TAPI_REGISTER_METATYPE_TYPE_STRUCT(
@@ -62,14 +62,20 @@ namespace Targoman::API::AdvertModule {
 
 using namespace ORM;
 
-TARGOMAN_IMPL_API_MODULE(Advert)
-TARGOMAN_API_MODULE_DB_CONFIG_IMPL(Advert, AdvertSchema)
-TARGOMAN_API_OBJECTSTORAGE_CONFIG_IMPL(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT(Advert)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Advert, AdvertSchema)
+//---------------------------------------------------------
+TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Advert, AdvertSchema)
 
 Advert::Advert() :
     intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
+        false,
         {
             //           day                week   month                total
             { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
@@ -87,10 +93,10 @@ Advert::Advert() :
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance()
 ) {
-    TARGOMAN_API_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
-    TARGOMAN_API_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
-    TARGOMAN_API_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
-    TARGOMAN_API_IMPLEMENT_FAQ(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Advert, AdvertSchema)
 
     this->addSubModule(AccountUnits.data());
 //    this->addSubModule(AccountUnitsI18N.data());
@@ -224,7 +230,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 
 /***************************************************************************************************/
 //bool IMPL_REST_POST(Advert, processVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -238,7 +244,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 //}
 
 //bool IMPL_REST_POST(Advert, cancelVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -279,7 +285,7 @@ QString IMPL_REST_GET(Advert, retrieveURL, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Advert, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;
@@ -418,6 +424,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         /* discountCode     */ CouponCode,
         /* referrer         */ "",
         /* referrerParams   */ {},
+        /* apiToken         */ {},
         /* lastPreVoucher   */ LastPreVoucher
     );
     LastPreVoucher = BasketActionResult.PreVoucher;
@@ -464,13 +471,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 }
 
 //bool IMPL_REST_POST(Advert, fixtureSetupVoucher, (
-//        APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM
+//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 //    ))
 //{
 //}
 
 QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;

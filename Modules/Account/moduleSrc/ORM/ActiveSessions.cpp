@@ -23,12 +23,15 @@
 
 #include "ActiveSessions.h"
 #include "User.h"
+#include "../Account.h"
 
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuSessionStatus);
 
 namespace Targoman::API::AccountModule::ORM {
+
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, ActiveSessions)
 
 ActiveSessions::ActiveSessions() :
     intfSQLBasedModule(
@@ -39,7 +42,7 @@ ActiveSessions::ActiveSessions() :
         tblActiveSessions::Private::Indexes
     ) { ; }
 
-QVariant IMPL_ORMGET(ActiveSessions) {
+QVariant IMPL_ORMGET_USER(ActiveSessions) {
 //  QVariantMap ExtraFilters;
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
@@ -52,7 +55,7 @@ QVariant IMPL_ORMGET(ActiveSessions) {
   //  return this->selectFromTable({}, {}, GET_METHOD_CALL_ARGS_APICALL);
 }
 
-bool IMPL_ORMDELETE(ActiveSessions) {
+bool IMPL_ORMDELETE_USER(ActiveSessions) {
   TAPI::ORMFields_t ExtraFilters;
 
   if (_pksByPath.trimmed() == clsJWT(APICALLBOOM_PARAM.getJWT()).session())

@@ -18,6 +18,7 @@
  ******************************************************************************/
 /**
  * @author S. Mehran M. Ziabary <ziabary@targoman.com>
+ * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
 #ifndef TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
@@ -25,18 +26,19 @@
 
 #include "Interfaces/API/intfPureModule.h"
 
-namespace Targoman {
-namespace API {
+namespace Targoman::API::TextProcessorModule {
 
 class TextProcessor : public intfPureModule
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
     Q_INTERFACES(Targoman::API::API::intfPureModule)
-    TARGOMAN_DEFINE_API_MODULE(TextProcessor);
+    //---------------------------------------------------------
+    TARGOMAN_API_MODULE_DEFINE(TextProcessor); //, enuTokenActorType::USER);
+    //---------------------------------------------------------
 
 public:
-    bool init();
+    virtual void initializeModule();
 
 private slots:
     QString REST_GET_OR_POST(
@@ -88,7 +90,6 @@ private slots:
     )
 };
 
-}
-}
+} //namespace Targoman::API::TextProcessorModule
 
 #endif // TARGOMAN_API_MODULES_TEXTPROCESSOR_TEXTPROCESSOR_H
