@@ -87,14 +87,15 @@ bool IMPL_ORMDELETE_USER(UserWallets) {
  */
 bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    TAPI::PKsByPath_t _pksByPath
+//    TAPI::PKsByPath_t _pksByPath
+    quint64 _walID
 )) {
     bool IsPrivileged = Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     this->callSP(APICALLBOOM_PARAM,
                  "spWallet_SetAsDefault", {
                      { "iUserID", (IsPrivileged ? 0 : APICALLBOOM_PARAM.getActorID()) },
-                     { "iWalID", _pksByPath },
+                     { "iWalID", _walID }, //_pksByPath },
                  });
 
     return true;

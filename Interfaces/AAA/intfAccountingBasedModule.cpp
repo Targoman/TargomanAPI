@@ -454,7 +454,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
             .addCols(this->AccountUserAssets->selectableColumnNames())
             .addCols(this->AccountSaleables->selectableColumnNames())
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
-            .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->AssetID })
+            .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->OrderID })
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, AssetItem.Saleable.slbID })
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, it->UUID })
@@ -539,8 +539,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     JSDPendingVouchers.setObject(AssetItem.Private.toJson());
     PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
-    PreVoucherItem.Service = this->ServiceName;
-    //PreVoucherItem.AssetID
+    PreVoucherItem.Service          = this->ServiceName;
     PreVoucherItem.UUID             = SecurityHelper::UUIDtoMD5();
     PreVoucherItem.Desc             = AssetItem.Saleable.slbName;
     PreVoucherItem.Qty              = AssetItem.Qty; //_qty;
@@ -623,7 +622,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     qry.values(values);
 
     //-- --------------------------------
-    PreVoucherItem.AssetID = qry.execute(CurrentUserID);
+    PreVoucherItem.OrderID = qry.execute(CurrentUserID);
 
     //-- --------------------------------
     PreVoucherItem.Sign = QString(sign(PreVoucherItem));
@@ -646,7 +645,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     if (FinalPrice < 0) {
         this->AccountUserAssets->DeleteByPks(
             APICALLBOOM_PARAM,
-            /*PK*/ QString::number(PreVoucherItem.AssetID),
+            /*PK*/ QString::number(PreVoucherItem.OrderID),
             {
                 //this is just for make condition safe and strong:
                 { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
@@ -784,7 +783,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 
         .innerJoinWith(tblAccountSaleablesBase::Relation::UserAsset)
         .addCols(this->AccountUserAssets->selectableColumnNames())
-        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.AssetID })
+        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 
         .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
         .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
@@ -842,7 +841,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     if (_newQty == 0) { //remove
         this->AccountUserAssets->DeleteByPks(
             APICALLBOOM_PARAM,
-            /*PK*/ QString::number(_voucherItem.AssetID),
+            /*PK*/ QString::number(_voucherItem.OrderID),
             {
                 //this is just for make condition safe and strong:
                 { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID },
@@ -891,7 +890,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 //        _voucherItem.APIToken           = AssetItem.APIToken;
 
         ORMUpdateQuery qry = this->AccountUserAssets->makeUpdateQuery(APICALLBOOM_PARAM)
-                          .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.AssetID })
+                          .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                           .set(tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, _voucherItem.toJson().toVariantMap())
                           .set(tblAccountUserAssetsBase::Fields::uasQty, _newQty)
                           .set(tblAccountUserAssetsBase::Fields::uasDiscountAmount, AssetItem.Discount)
@@ -1201,7 +1200,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     ) {
         OmmitOldCondition.setCond({ tblAccountUserAssetsBase::Fields::uasID,
                                     enuConditionOperator::NotEqual,
-                                    _oldVoucherItem->AssetID });
+                                    _oldVoucherItem->OrderID });
     }
 
     QVariantMap DiscountInfo = this->AccountCoupons->makeSelectQuery(APICALLBOOM_PARAM)
@@ -1425,13 +1424,13 @@ bool intfAccountingBasedModule::activateUserAsset(
 ) {
     return this->AccountUserAssets->Update(
                         APICALLBOOM_PARAM,
-                        /*PK*/ QString::number(_voucherItem.AssetID),
+                        /*PK*/ QString::number(_voucherItem.OrderID),
                         TAPI::ORMFields_t({
                             { tblAccountUserAssetsBase::Fields::uas_vchID, _voucherID },
                             { tblAccountUserAssetsBase::Fields::uasStatus, TAPI::enuAuditableStatus::Active },
                         }),
                         {
-                            { tblAccountUserAssetsBase::Fields::uasID, _voucherItem.AssetID },
+                            { tblAccountUserAssetsBase::Fields::uasID, _voucherItem.OrderID },
                             { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID }, //this is just for make condition strong
                         });
 }
@@ -1442,7 +1441,7 @@ bool intfAccountingBasedModule::removeFromUserAssets(
 ) {
     return this->AccountUserAssets->DeleteByPks(
         APICALLBOOM_PARAM,
-        /*PK*/ QString::number(_voucherItem.AssetID),
+        /*PK*/ QString::number(_voucherItem.OrderID),
         {
             //this is just for make condition safe and strong:
             { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, _voucherItem.UUID },
@@ -1489,7 +1488,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
                                              tblAccountUserAssetsBase::Fields::uas_slbID,
                                              tblAccountUserAssetsBase::Fields::uasStatus,
                                          })
-                                .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.AssetID })
+                                .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                                 .one();
 
     if ((_fnCheckUserAsset != nullptr) && (_fnCheckUserAsset(UserAssetInfo) == false))
@@ -1518,7 +1517,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 //    UpdateQuery(*this->AccountSaleables)
 //        .innerJoinWith("userAsset") //tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Fields::slbID })
 //        .increament(tblAccountSaleablesBase::Fields::slbReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.AssetID })
+//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 //        .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
 
@@ -1527,7 +1526,7 @@ bool intfAccountingBasedModule::cancelVoucherItem(
 //        .innerJoinWith("saleable") //tblAccountSaleablesBase::Name, { tblAccountSaleablesBase::Fields::slb_prdID, enuConditionOperator::Equal, tblAccountProductsBase::Fields::prdID })
 //        .innerJoin(tblAccountUserAssetsBase::Name, { tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID })
 //        .increament(tblAccountProductsBase::Fields::prdReturnedQty, _voucherItem.Qty)
-//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.AssetID })
+//        .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 //        .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, _voucherItem.UUID }) //this is just for make condition strong
 //        .execute(_userID);
 

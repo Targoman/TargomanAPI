@@ -1135,7 +1135,7 @@ TAPI_DEFINE_STRUCT(stuActiveCredit,
 //Caution: Do not rename fields. Field names are used in vchDesc (as json)
 TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_QString              (Service),
-    SF_quint64              (AssetID), //AssetID per Service
+    SF_quint64              (OrderID), //AssetID per Service
     SF_MD5_t                (UUID),
     SF_QString              (Desc),
     SF_qreal                (Qty),

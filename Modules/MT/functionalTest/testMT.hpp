@@ -170,7 +170,6 @@ private slots:
         QT_TRY {
             this->MTProductID = callAdminAPI(
                 RESTClientHelper::PUT,
-//                "MTShop/AccountProducts",
                 "MT/AccountProducts",
                 {},
                 {
@@ -203,7 +202,6 @@ private slots:
         QT_TRY {
             this->MTSaleableID = callAdminAPI(
                 RESTClientHelper::PUT,
-//                "MTShop/AccountSaleables",
                 "MT/AccountSaleables",
                 {},
                 {
@@ -260,7 +258,6 @@ private slots:
 
             QVariant Result = callUserAPI(
                 RESTClientHelper::POST,
-//                "MTShop/addToBasket",
                 "MT/addToBasket",
                 {},
                 {

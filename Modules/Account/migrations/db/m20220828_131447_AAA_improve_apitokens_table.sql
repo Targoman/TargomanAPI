@@ -59,11 +59,3 @@ CREATE TRIGGER `trg_tblAPIToken_after_update` AFTER UPDATE ON `tblAPITokens` FOR
     END IF;
 END;;
 DELIMITER ;
-
-/*
-ALTER TABLE `tblService`
-    ADD COLUMN `svcAcceptableTokenType` CHAR(1) NOT NULL DEFAULT 'U' COMMENT 'U:User, A:API' AFTER `svcCancelVoucherItemEndPoint`;
-
-ALTER TABLE `tblService`
-    ADD COLUMN `svcOppositeTokenTypeServiceName` VARCHAR(50) NULL AFTER `svcName`;
-*/
