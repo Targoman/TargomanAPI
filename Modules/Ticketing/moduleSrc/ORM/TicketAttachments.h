@@ -93,7 +93,7 @@ class TicketAttachments : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, TicketAttachments)
 
 private slots:
-    QVariant ORMGET("Get Ticket Attachments")
+    QVariant ORMGET_USER("Get Ticket Attachments")
 };
 
 } //namespace ORM

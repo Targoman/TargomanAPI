@@ -41,7 +41,7 @@ TicketAttachments::TicketAttachments() :
         tblTicketAttachments::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET(TicketAttachments) {
+QVariant IMPL_ORMGET_USER(TicketAttachments) {
 //    QString ExtraFilters;
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
