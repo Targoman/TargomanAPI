@@ -41,12 +41,12 @@ bool gtwAWSS3::storeFile(
     const QString &_path,
     const QString &_fileName
 ) {
-    TargomanDebug(5) << "before gtwAWSS3::storeFile"
+    TargomanLogDebug(5, "before gtwAWSS3::storeFile"
                      << endl
                      << "_fullFileName: " << _fullFileName
                      << "_path: " << _path
                      << "_fileName: " << _fileName
-                     ;
+                     );
 
 //    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
 //    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
@@ -69,6 +69,7 @@ bool gtwAWSS3::storeFile(
 //    S3ClientConfig.enableHostPrefixInjection = false;
 //    S3ClientConfig.enableEndpointDiscovery = false;
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     S3::S3Client S3Client(
                 AWSCredentials,
                 S3ClientConfig,
@@ -79,28 +80,34 @@ bool gtwAWSS3::storeFile(
     //----------------------------------------
     ///@TODO: use MultipartUploader for files larger than 400 MB
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     S3::Model::PutObjectRequest Request;
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Request
             .WithBucket(_uploadGateway.ugwBucket.toStdString())
             .WithKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString())
             .WithACL(S3::Model::ObjectCannedACL::public_read)
     ;
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
                 QString("SampleAllocationTag_%1").arg(_path).toStdString().c_str(),
                 _fullFileName.toStdString().c_str(),
                 std::ios_base::in | std::ios_base::binary);
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Request.SetBody(InputData);
 
     //----------------------------------------
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     if (Outcome.IsSuccess() == false)
         throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
 
-    TargomanDebug(5) << "after gtwAWSS3::storeFile";
+    TargomanLogDebug(5, "after gtwAWSS3::storeFile");
 
     return true;
 }
