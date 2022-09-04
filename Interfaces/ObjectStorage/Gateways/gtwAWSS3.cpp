@@ -41,6 +41,13 @@ bool gtwAWSS3::storeFile(
     const QString &_path,
     const QString &_fileName
 ) {
+    TargomanDebug(5) << "before gtwAWSS3::storeFile"
+                     << endl
+                     << "_fullFileName: " << _fullFileName
+                     << "_path: " << _path
+                     << "_fileName: " << _fileName
+                     ;
+
 //    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
 //    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
 
@@ -92,6 +99,8 @@ bool gtwAWSS3::storeFile(
 
     if (Outcome.IsSuccess() == false)
         throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
+
+    TargomanDebug(5) << "after gtwAWSS3::storeFile";
 
     return true;
 }
