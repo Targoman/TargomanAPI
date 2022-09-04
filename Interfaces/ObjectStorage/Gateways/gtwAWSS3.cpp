@@ -74,8 +74,11 @@ bool gtwAWSS3::storeFile(
 
     S3::Model::PutObjectRequest Request;
 
-    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
-    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
+    Request
+            .WithBucket(_uploadGateway.ugwBucket.toStdString())
+            .WithKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString())
+            .WithACL(S3::Model::ObjectCannedACL::public_read)
+    ;
 
     std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
                 QString("SampleAllocationTag_%1").arg(_path).toStdString().c_str(),
