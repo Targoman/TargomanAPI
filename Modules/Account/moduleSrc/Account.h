@@ -262,6 +262,18 @@ private slots:
 #endif
 
     bool REST_GET_OR_POST(
+        changePass,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            TAPI::MD5_t _newPass,
+            TAPI::MD5_t _oldPass = {},
+            QString     _oldPassSalt = {}
+        ),
+        "Changes password of the logged-in user. "
+        "Do not set oldPass to set a new password when the current password is empty."
+    )
+
+    bool REST_GET_OR_POST(
         changePassByUUID,
         (
             APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
@@ -270,17 +282,6 @@ private slots:
             TAPI::MD5_t _newPass
         ),
         "Changes password based on a Code provided by createForgotPasswordLink"
-    )
-
-    bool REST_GET_OR_POST(
-        changePass,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            TAPI::MD5_t _oldPass,
-            QString     _oldPassSalt,
-            TAPI::MD5_t _newPass
-        ),
-        "Changes password of the logged-in user"
     )
 
     /*****************************************************************\

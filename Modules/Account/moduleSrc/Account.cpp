@@ -643,6 +643,29 @@ QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
 }
 #endif
 
+bool IMPL_REST_GET_OR_POST(Account, changePass, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    TAPI::MD5_t _newPass,
+    TAPI::MD5_t _oldPass,
+    QString _oldPassSalt
+)) {
+    if (_oldPass.isEmpty() == false)
+        QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
+
+    clsJWT JWT(APICALLBOOM_PARAM.getJWT());
+
+    this->callSP(APICALLBOOM_PARAM,
+                 "spPassword_Change", {
+                     { "iUserID", JWT.actorID() },
+                     { "iSessionGUID", JWT.session() },
+                     { "iOldPass", _oldPass },
+                     { "iOldPassSalt", _oldPassSalt },
+                     { "iNewPass", _newPass },
+                 });
+
+    return true;
+}
+
 bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
     APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
@@ -658,28 +681,6 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
                      { "iBy", Type },
                      { "iLogin", _emailOrMobile },
                      { "iCode", _uuid },
-                     { "iNewPass", _newPass },
-                 });
-
-    return true;
-}
-
-bool IMPL_REST_GET_OR_POST(Account, changePass, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    TAPI::MD5_t _oldPass,
-    QString _oldPassSalt,
-    TAPI::MD5_t _newPass
-)) {
-    QFV.asciiAlNum().maxLenght(20).validate(_oldPassSalt, "salt");
-
-    clsJWT JWT(APICALLBOOM_PARAM.getJWT());
-
-    this->callSP(APICALLBOOM_PARAM,
-                 "spPassword_Change", {
-                     { "iUserID", JWT.actorID() },
-                     { "iSessionGUID", JWT.session() },
-                     { "iOldPass", _oldPass },
-                     { "iOldPassSalt", _oldPassSalt },
                      { "iNewPass", _newPass },
                  });
 
