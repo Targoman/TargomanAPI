@@ -122,6 +122,7 @@ namespace tblUser {
             { Fields::usrGender,               S(TAPI::enuGender::Type),       QFV,                                    TAPI::enuGender::NotExpressed, UPOwner },
             { Fields::usrMobile,               S(TAPI::Mobile_t),              QFV,                                    QNull,      UPOwner },
             { Fields::usrApprovalState,        S(TAPI::enuUserApproval::Type), QFV,                                    TAPI::enuUserApproval::None },
+            //usrPass : not define here
             { Fields::usr_rolID,               S(quint32),                     QFV.integer().minValue(1),              QRequired,  UPAdmin },
             { Fields::usrSpecialPrivs,         S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPAdmin, false, false },
             { Fields::usrLanguage,             S(QString),                     QFV.languageCode(),                     "fa",       UPOwner },

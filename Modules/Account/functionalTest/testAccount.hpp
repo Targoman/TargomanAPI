@@ -332,7 +332,7 @@ private slots:
 
         QVERIFY(Result.toBool());
     }
-//private:
+
     void ApproveMobile_And_Login_0999_888_1010() {
         clsDAC DAC;
         QJsonObject AprInfo = DAC.execQuery("",
@@ -392,6 +392,23 @@ private slots:
 
         QVERIFY(clsJWT(gJWT).actorID() == UserID);
         QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+    }
+
+    void setPassForMobileOnly_1() {
+        QVERIFY(callUserAPI(RESTClientHelper::POST,
+                        "Account/changePass", {}, {
+                            { "newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0" }
+                        }).toBool());
+    }
+
+    void setPassForMobileOnly_2() {
+        QVERIFY_EXCEPTION_THROWN(callUserAPI(
+                                     RESTClientHelper::POST,
+                                     "Account/changePass", {}, {
+                                         { "newPass", "df6d2338b2b8fce1ec2f6dda0a630eb0" }
+                                     }),
+                                 exTargomanBase
+                                 );
     }
 
     void Logout__0999_888_1010() {
