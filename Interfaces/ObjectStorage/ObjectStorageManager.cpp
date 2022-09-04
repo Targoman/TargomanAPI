@@ -165,6 +165,10 @@ quint64 ObjectStorageManager::saveFile(
         QString oStoredFileName = SpOutVars.value("oStoredFileName").toString();
         FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName);
         QFile::rename(_file.TempName, FullFileName);
+
+        //read and write by all
+        QFile::setPermissions(FullFileName, (QFile::Permission)0x6666);
+
     } catch (std::exception &exp) {
         TargomanDebug(5, "ERROR: spUploadedFile_Create:" << exp.what());
 

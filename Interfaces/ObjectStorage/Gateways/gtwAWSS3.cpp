@@ -105,7 +105,7 @@ bool gtwAWSS3::storeFile(
     Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-//    Request.SetACL(S3::Model::ObjectCannedACL::public_read);
+    Request.SetACL(S3::Model::ObjectCannedACL::public_read);
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
