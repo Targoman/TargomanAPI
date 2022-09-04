@@ -41,8 +41,8 @@ bool gtwAWSS3::storeFile(
     const QString &_path,
     const QString &_fileName
 ) {
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     TargomanLogDebug(5, "before gtwAWSS3::storeFile"
-                     << endl
                      << "_fullFileName: " << _fullFileName
                      << "_path: " << _path
                      << "_fileName: " << _fileName
@@ -51,20 +51,27 @@ bool gtwAWSS3::storeFile(
 //    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
 //    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     QString AccessKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
+
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     QString SecretKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Aws::Auth::AWSCredentials AWSCredentials(AccessKey.toStdString(), SecretKey.toStdString());
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Aws::Client::ClientConfiguration S3ClientConfig;
 
 //    if (_region.isEmpty() == false)
 //        S3ClientConfig.region = _region.toStdString();
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     S3ClientConfig.httpRequestTimeoutMs = 1000;
     S3ClientConfig.requestTimeoutMs = 1000;
     S3ClientConfig.connectTimeoutMs = 1000;
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     S3ClientConfig.endpointOverride = _uploadGateway.ugwEndpointUrl.toStdString();
 //    S3ClientConfig.enableHostPrefixInjection = false;
 //    S3ClientConfig.enableEndpointDiscovery = false;
