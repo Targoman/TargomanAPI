@@ -361,13 +361,14 @@ bool ObjectStorageManager::processQueue(
             /************************************************************************/
             /************************************************************************/
             /************************************************************************/
-            TargomanDebug(5) << "before ObjectStorageManager::storeFileToGateway"
-                             << endl
+            TargomanLogDebug(5, "before ObjectStorageManager::storeFileToGateway"
                              << "fileID: " << QueueInfo.UploadFiles.uflID
                              << "queueID: " << QueueInfo.UploadQueue.uquID
-                             ;
+                             );
+
             Stored = ObjectStorageManager::storeFileToGateway(_processQueueParams.APICALLBOOM_PARAM, QueueInfo);
-            TargomanDebug(5) << "after ObjectStorageManager::storeFileToGateway";
+
+            TargomanLogDebug(5, "after ObjectStorageManager::storeFileToGateway");
             /************************************************************************/
             /************************************************************************/
             /************************************************************************/
