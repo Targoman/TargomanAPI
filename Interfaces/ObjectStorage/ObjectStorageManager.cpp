@@ -358,7 +358,19 @@ bool ObjectStorageManager::processQueue(
                     .where({ tblUploadQueue::Fields::uquID, enuConditionOperator::Equal, QueueInfo.UploadQueue.uquID })
                     .execute(_processQueueParams.CurrentUserID);
 
+            /************************************************************************/
+            /************************************************************************/
+            /************************************************************************/
+            TargomanDebug(5) << "before ObjectStorageManager::storeFileToGateway"
+                             << endl
+                             << "fileID: " << QueueInfo.UploadFiles.uflID
+                             << "queueID: " << QueueInfo.UploadQueue.uquID
+                             ;
             Stored = ObjectStorageManager::storeFileToGateway(_processQueueParams.APICALLBOOM_PARAM, QueueInfo);
+            TargomanDebug(5) << "after ObjectStorageManager::storeFileToGateway";
+            /************************************************************************/
+            /************************************************************************/
+            /************************************************************************/
 
             if (Stored)
                 _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
