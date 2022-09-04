@@ -2,4 +2,4 @@
 
 export LD_LIBRARY_PATH=/targoman/lib64:/targoman/lib
 cd /targoman
-./bin/targomanAPI -c ./conf/api.conf --plugins ./modules
+AWS_EC2_METADATA_DISABLED=true ./bin/targomanAPI -c ./conf/api.conf --plugins ./modules
