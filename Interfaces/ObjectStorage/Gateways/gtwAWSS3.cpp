@@ -41,21 +41,29 @@ bool gtwAWSS3::storeFile(
     const QString &_path,
     const QString &_fileName
 ) {
-    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    TargomanLogDebug(5, "before gtwAWSS3::storeFile"
-                     << "_fullFileName: " << _fullFileName
-                     << "_path: " << _path
-                     << "_fileName: " << _fileName
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: BEGIN");
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: ["
+                     << "_fullFileName:" << _fullFileName
+                     << ",_path:" << _path
+                     << ",_fileName:" << _fileName
+                     << "]"
                      );
 
 //    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
 //    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    QString AccessKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
+    QVariantMap MetaInfo = _uploadGateway.ugwMetaInfo.object().toVariantMap();
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    QString SecretKey = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
+    if (MetaInfo.contains(AWSS3MetaInfoJsonKey::AccessKey) == false)
+        throw exTargomanBase(QString("%1 not defined in gateway information").arg(AWSS3MetaInfoJsonKey::AccessKey));
+    QString AccessKey = MetaInfo[AWSS3MetaInfoJsonKey::AccessKey].toString();
+
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
+    if (MetaInfo.contains(AWSS3MetaInfoJsonKey::SecretKey) == false)
+        throw exTargomanBase(QString("%1 not defined in gateway information").arg(AWSS3MetaInfoJsonKey::SecretKey));
+    QString SecretKey = MetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Aws::Auth::AWSCredentials AWSCredentials(AccessKey.toStdString(), SecretKey.toStdString());
@@ -91,11 +99,13 @@ bool gtwAWSS3::storeFile(
     S3::Model::PutObjectRequest Request;
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    Request
-            .WithBucket(_uploadGateway.ugwBucket.toStdString())
-            .WithKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString())
-            .WithACL(S3::Model::ObjectCannedACL::public_read)
-    ;
+    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
+
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
+    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
+
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
+//    Request.SetACL(S3::Model::ObjectCannedACL::public_read);
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     std::shared_ptr<Aws::IOStream> InputData = Aws::MakeShared<Aws::FStream>(
@@ -114,7 +124,7 @@ bool gtwAWSS3::storeFile(
     if (Outcome.IsSuccess() == false)
         throw exTargomanBase(QString("Could not save file to the s3 server: %1").arg(Outcome.GetError().GetMessage().c_str()), ESTATUS_REQUEST_TIMEOUT);
 
-    TargomanLogDebug(5, "after gtwAWSS3::storeFile");
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: END");
 
     return true;
 }
