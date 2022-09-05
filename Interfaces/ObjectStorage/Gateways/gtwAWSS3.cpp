@@ -49,6 +49,10 @@ bool gtwAWSS3::storeFile(
                      << "]"
                      );
 
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__ << "QFile::exists");
+    if (QFile::exists(_fullFileName) == false)
+        throw exTargomanBase(QString("File %1 not found").arg(_fullFileName));
+
 //    QString Bucket = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::Bucket].toString();
 //    QString EndpointUrl = _uploadGateway.ugwMetaInfo[AWSS3MetaInfoJsonKey::EndpointUrl].toString();
 
@@ -101,8 +105,9 @@ bool gtwAWSS3::storeFile(
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
 
-    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    Request.SetKey(QString("%1/%2").arg(_path).arg(_fileName).toStdString());
+    QString Key = QString("%1/%2").arg(_path).arg(_fileName);
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__ << Key);
+    Request.SetKey(Key.toStdString());
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Request.SetACL(S3::Model::ObjectCannedACL::public_read);
@@ -117,7 +122,7 @@ bool gtwAWSS3::storeFile(
     Request.SetBody(InputData);
 
     //----------------------------------------
-    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
+    TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__ << "S3Client.PutObject");
     S3::Model::PutObjectOutcome Outcome = S3Client.PutObject(Request);
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
