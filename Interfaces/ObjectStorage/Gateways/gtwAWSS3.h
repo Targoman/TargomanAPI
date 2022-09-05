@@ -47,14 +47,18 @@ using namespace Aws;
 15.2) zypper ar -no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/openSUSE_Leap_15.2/home:targoman.repo
 15.3) zypper ar -no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
 
-zypper in aws-sdk-cpp-s3-devel
+- zypper in aws-sdk-cpp-s3-devel
+- OR
+- zypper in aws-sdk-cpp-s3
 */
 
 /** installing AmazonAWS S3 from source ************************************************************
 git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
 mkdir aws-build.s3
 cd aws-build.s3
-cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
+- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
+- OR
+- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
 make
 sudo make install
 */
@@ -75,7 +79,7 @@ struct __static_s3_initializer__ {
         //An instance of Aws::SDKOptions is passed to the Aws::InitAPI and
         //Aws::ShutdownAPI methods. The same instance should be sent to both methods.
 #ifdef QT_DEBUG
-        options.loggingOptions.logLevel = Utils::Logging::LogLevel::Debug;
+        options.loggingOptions.logLevel = Utils::Logging::LogLevel::Trace;
 #else
         options.loggingOptions.logLevel = Utils::Logging::LogLevel::Off;
 #endif
