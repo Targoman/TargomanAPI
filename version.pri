@@ -46,7 +46,7 @@ defined(QJsonRPC, var) equals(QJsonRPC, 1) {
 }
 
 !defined(NoAwsS3, var) | equals(NoAwsS3, 1) {
-    LIBS += -laws-cpp-sdk-s3
+    LIBS += -laws-cpp-sdk-core -laws-cpp-sdk-s3
     DEFINES += TARGOMAN_API_ENABLE_AWS_S3
 }
 
@@ -55,7 +55,7 @@ defined(JWTDastreshte, var) equals(JWTDastreshte, 1) {
 }
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
-QT+= core sql network
+QT += core sql network
 QT -= gui
 QMAKE_CXXFLAGS += -Wno-unknown-pragmas -Wno-padded
 

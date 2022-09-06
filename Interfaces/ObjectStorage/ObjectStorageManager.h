@@ -111,6 +111,16 @@ private:
         quint64 UploadedFileID = 0;
         quint16 MaxItemsCount = 100;
 
+        stuProcessQueueParams(const stuProcessQueueParams &_other) :
+            APICALLBOOM_PARAM(_other.APICALLBOOM_PARAM),
+            CurrentUserID(_other.CurrentUserID),
+            UploadFiles(_other.UploadFiles),
+            UploadQueue(_other.UploadQueue),
+            UploadGateways(_other.UploadGateways),
+            UploadedFileID(_other.UploadedFileID),
+            MaxItemsCount(_other.MaxItemsCount)
+        { ; }
+
         stuProcessQueueParams(
             INTFAPICALLBOOM_DECL &_APICALLBOOM_PARAM,
             quint64 _currentUserID,
