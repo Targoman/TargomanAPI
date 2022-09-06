@@ -184,7 +184,8 @@ quint64 ObjectStorageManager::saveFile(
     //trigger async upload to storage(s)
     try {
         if (QueueRowsCount > 0) {
-            TargomanDebug(5, "before queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
+            TargomanLogDebug(5, "before queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
+
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
@@ -196,7 +197,8 @@ quint64 ObjectStorageManager::saveFile(
                                         UploadedFileID,
                                         QueueRowsCount
                                     ));
-            TargomanDebug(5, "after queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
+
+            TargomanLogDebug(5, "after queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
 
 #ifdef QT_DEBUG
 //            bool rrr = ret.result();
@@ -365,14 +367,14 @@ bool ObjectStorageManager::processQueue(
             /************************************************************************/
             /************************************************************************/
             /************************************************************************/
-            TargomanLogDebug(5, "before ObjectStorageManager::storeFileToGateway"
-                             << "fileID: " << QueueInfo.UploadFiles.uflID
-                             << "queueID: " << QueueInfo.UploadQueue.uquID
-                             );
+//            TargomanLogDebug(5, "before ObjectStorageManager::storeFileToGateway"
+//                             << "fileID: " << QueueInfo.UploadFiles.uflID
+//                             << "queueID: " << QueueInfo.UploadQueue.uquID
+//                             );
 
             Stored = ObjectStorageManager::storeFileToGateway(_processQueueParams.APICALLBOOM_PARAM, QueueInfo);
 
-            TargomanLogDebug(5, "after ObjectStorageManager::storeFileToGateway");
+//            TargomanLogDebug(5, "after ObjectStorageManager::storeFileToGateway");
             /************************************************************************/
             /************************************************************************/
             /************************************************************************/
