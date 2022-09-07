@@ -70,7 +70,7 @@ bool gtwAWSS3::storeFile(
     QString SecretKey = MetaInfo[AWSS3MetaInfoJsonKey::SecretKey].toString();
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    Aws::Auth::AWSCredentials AWSCredentials(AccessKey.toStdString(), SecretKey.toStdString());
+    Aws::Auth::AWSCredentials AWSCredentials(AccessKey.toStdString().c_str(), SecretKey.toStdString().c_str());
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Aws::Client::ClientConfiguration S3ClientConfig;
@@ -84,7 +84,7 @@ bool gtwAWSS3::storeFile(
     S3ClientConfig.connectTimeoutMs = 1000;
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    S3ClientConfig.endpointOverride = _uploadGateway.ugwEndpointUrl.toStdString();
+    S3ClientConfig.endpointOverride = _uploadGateway.ugwEndpointUrl.toStdString().c_str();
 //    S3ClientConfig.enableHostPrefixInjection = false;
 //    S3ClientConfig.enableEndpointDiscovery = false;
 
@@ -103,11 +103,12 @@ bool gtwAWSS3::storeFile(
     S3::Model::PutObjectRequest Request;
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
-    Request.SetBucket(_uploadGateway.ugwBucket.toStdString());
+    if (_uploadGateway.ugwBucket.isEmpty() == false)
+        Request.SetBucket(_uploadGateway.ugwBucket.toStdString().c_str());
 
     QString Key = QString("%1/%2").arg(_path).arg(_fileName);
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__ << Key);
-    Request.SetKey(Key.toStdString());
+    Request.SetKey(Key.toStdString().c_str());
 
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: #" << __LINE__);
     Request.SetACL(S3::Model::ObjectCannedACL::public_read);
