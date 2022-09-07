@@ -78,6 +78,8 @@ QVariant IMPL_ORMGET_USER(User) {
             tblUser::Fields::usrApprovalState,
             tblUser::Fields::usr_rolID,
 //            tblUser::Fields::usrSpecialPrivs,
+            tblUser::Fields::usrSSID,
+            tblUser::Fields::usrAddress,
             tblUser::Fields::usrLanguage,
             tblUser::Fields::usrEnableEmailAlerts,
             tblUser::Fields::usrEnableSMSAlerts,
@@ -299,7 +301,9 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     TAPI::ISO639_2_t    _language,
     NULLABLE_TYPE(TAPI::enuGender::Type) _gender,
     NULLABLE_TYPE(bool) _enableEmailAlerts,
-    NULLABLE_TYPE(bool) _enableSMSAlerts
+    NULLABLE_TYPE(bool) _enableSMSAlerts,
+    QString             _ssid,
+    QString             _address
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
@@ -311,6 +315,8 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     if (NULLABLE_HAS_VALUE(_gender))                ToUpdate.insert(tblUser::Fields::usrGender, *_gender);
     if (NULLABLE_HAS_VALUE(_enableEmailAlerts))     ToUpdate.insert(tblUser::Fields::usrEnableEmailAlerts, *_enableEmailAlerts ? 1 : 0);
     if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::Fields::usrEnableSMSAlerts, *_enableSMSAlerts ? 1 : 0);
+    if (_ssid.isNull() == false)                    ToUpdate.insert(tblUser::Fields::usrSSID, _ssid);
+    if (_address.isNull() == false)                 ToUpdate.insert(tblUser::Fields::usrAddress, _address);
 
     if (ToUpdate.size())
         this->Update(APICALLBOOM_PARAM,

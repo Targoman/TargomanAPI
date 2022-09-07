@@ -95,6 +95,8 @@ namespace tblUser {
         TARGOMAN_CREATE_CONSTEXPR(usrPass);
         TARGOMAN_CREATE_CONSTEXPR(usr_rolID);
         TARGOMAN_CREATE_CONSTEXPR(usrSpecialPrivs);
+        TARGOMAN_CREATE_CONSTEXPR(usrSSID);
+        TARGOMAN_CREATE_CONSTEXPR(usrAddress);
         TARGOMAN_CREATE_CONSTEXPR(usrLanguage);
         TARGOMAN_CREATE_CONSTEXPR(usrEnableEmailAlerts);
         TARGOMAN_CREATE_CONSTEXPR(usrEnableSMSAlerts);
@@ -113,29 +115,31 @@ namespace tblUser {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///ColName                           Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
+            //ColName                       Type                            Validation                              Default     UpBy    Sort  Filter Self  Virt  PK
             //ORM_PRIMARYKEY_64 with self:true
-            { Fields::usrID,                   S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
-            { Fields::usrEmail,                S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
-            { Fields::usrName,                 S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
-            { Fields::usrFamily,               S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
-            { Fields::usrGender,               S(TAPI::enuGender::Type),       QFV,                                    TAPI::enuGender::NotExpressed, UPOwner },
-            { Fields::usrMobile,               S(TAPI::Mobile_t),              QFV,                                    QNull,      UPOwner },
-            { Fields::usrApprovalState,        S(TAPI::enuUserApproval::Type), QFV,                                    TAPI::enuUserApproval::None },
+            { Fields::usrID,                S(quint64),                     QFV.integer().minValue(1),              QAuto,      UPNone, true, true,  true, false, true },
+            { Fields::usrEmail,             S(TAPI::Email_t),               QFV.emailNotFake(),                     QNull,      UPOwner },
+            { Fields::usrName,              S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { Fields::usrFamily,            S(QString),                     QFV.unicodeAlNum().maxLenght(128),      QNull,      UPOwner },
+            { Fields::usrGender,            S(TAPI::enuGender::Type),       QFV,                                    TAPI::enuGender::NotExpressed, UPOwner },
+            { Fields::usrMobile,            S(TAPI::Mobile_t),              QFV,                                    QNull,      UPOwner },
+            { Fields::usrApprovalState,     S(TAPI::enuUserApproval::Type), QFV,                                    TAPI::enuUserApproval::None },
             //usrPass : not define here
-            { Fields::usr_rolID,               S(quint32),                     QFV.integer().minValue(1),              QRequired,  UPAdmin },
-            { Fields::usrSpecialPrivs,         S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPAdmin, false, false },
-            { Fields::usrLanguage,             S(QString),                     QFV.languageCode(),                     "fa",       UPOwner },
-            { Fields::usrEnableEmailAlerts,    S(bool),                        QFV,                                    true,       UPOwner },
-            { Fields::usrEnableSMSAlerts,      S(bool),                        QFV,                                    true,       UPOwner },
-            { Fields::usrMaxSessions,          S(qint32),                      QFV.integer().betweenValues(-1, 100),   -1,         UPAdmin },
-            { Fields::usrActiveSessions,       S(qint32),                      QFV.integer().betweenValues(-1, 1000),  QInvalid,   UPNone },
-            { Fields::usrLastLogin,            S(TAPI::DateTime_t),            QFV,                                    QInvalid,   UPNone },
-            { Fields::usrStatus,               ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
+            { Fields::usr_rolID,            S(quint32),                     QFV.integer().minValue(1),              QRequired,  UPAdmin },
+            { Fields::usrSpecialPrivs,      S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPAdmin, false, false },
+            { Fields::usrSSID,              S(QString),                     QFV.unicodeAlNum().maxLenght(10),       QNull,      UPOwner },
+            { Fields::usrAddress,           S(QString),                     QFV.unicodeAlNum().maxLenght(1024),     QNull,      UPOwner },
+            { Fields::usrLanguage,          S(QString),                     QFV.languageCode(),                     "fa",       UPOwner },
+            { Fields::usrEnableEmailAlerts, S(bool),                        QFV,                                    true,       UPOwner },
+            { Fields::usrEnableSMSAlerts,   S(bool),                        QFV,                                    true,       UPOwner },
+            { Fields::usrMaxSessions,       S(qint32),                      QFV.integer().betweenValues(-1, 100),   -1,         UPAdmin },
+            { Fields::usrActiveSessions,    S(qint32),                      QFV.integer().betweenValues(-1, 1000),  QInvalid,   UPNone },
+            { Fields::usrLastLogin,         S(TAPI::DateTime_t),            QFV,                                    QInvalid,   UPNone },
+            { Fields::usrStatus,            ORM_STATUS_FIELD(TAPI::enuUserStatus, TAPI::enuUserStatus::MustValidate) },
             { ORM_INVALIDATED_AT_FIELD },
-            { Fields::usrCreationDateTime,     ORM_CREATED_ON },
-            { Fields::usrCreatedBy_usrID,      ORM_CREATED_BY_NULLABLE },
-            { Fields::usrUpdatedBy_usrID,      ORM_UPDATED_BY },
+            { Fields::usrCreationDateTime,  ORM_CREATED_ON },
+            { Fields::usrCreatedBy_usrID,   ORM_CREATED_BY_NULLABLE },
+            { Fields::usrUpdatedBy_usrID,   ORM_UPDATED_BY },
         };
 
 ///Col                               Reference Table                                     ForeignCol                      Rename  LeftJoin
@@ -170,6 +174,8 @@ namespace tblUser {
         SF_Enum                     (usrApprovalState, TAPI::enuUserApproval, TAPI::enuUserApproval::None),
         SF_quint32                  (usr_rolID),
         SF_JSON_t                   (usrSpecialPrivs),
+        SF_QString                  (usrSSID),
+        SF_QString                  (usrAddress),
         SF_QString                  (usrLanguage),
         SF_bool                     (usrEnableEmailAlerts),
         SF_bool                     (usrEnableSMSAlerts),
