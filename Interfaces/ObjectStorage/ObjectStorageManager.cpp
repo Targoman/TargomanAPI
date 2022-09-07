@@ -186,6 +186,7 @@ quint64 ObjectStorageManager::saveFile(
         if (QueueRowsCount > 0) {
             TargomanLogDebug(5, "before queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
 
+#if 0
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
@@ -197,7 +198,19 @@ quint64 ObjectStorageManager::saveFile(
                                         UploadedFileID,
                                         QueueRowsCount
                                     ));
+#else
+            ObjectStorageManager::processQueue(
+                        stuProcessQueueParams(
+                            APICALLBOOM_PARAM,
+                            APICALLBOOM_PARAM.getActorID(),
+                            _uploadFiles,
+                            _uploadQueue,
+                            _uploadGateways,
+                            UploadedFileID,
+                            QueueRowsCount
+                            ));
 
+#endif
             TargomanLogDebug(5, "after queue ObjectStorageManager::processQueue(fileID: " << UploadedFileID << ")");
 
 #ifdef QT_DEBUG
