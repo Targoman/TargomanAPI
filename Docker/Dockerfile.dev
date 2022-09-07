@@ -39,8 +39,8 @@ RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j 4            
 FROM  targoman/api-devel:1 as builder-mt
 COPY ./MT/ .
 RUN qmake-qt5 QJsonRPC=0 CONFIG+=debug GIT_VERSION=$TAG && make -j 4 && rm -rf out/build out/submodules/ out/unitTest out/test
-#FROM targoman/api-devel:1-build
-FROM targoman/api-devel:1
+FROM targoman/api-devel:1-build
+#FROM targoman/api-devel:1
 
 
 ###RUN zypper ar --no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/15.3/home:targoman.repo
