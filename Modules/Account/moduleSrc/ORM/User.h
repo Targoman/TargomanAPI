@@ -107,7 +107,9 @@ private slots:
             TAPI::ISO639_2_t    _language = {},
             NULLABLE_TYPE(TAPI::enuGender::Type) _gender = NULLABLE_NULL_VALUE,
             NULLABLE_TYPE(bool) _enableEmailAlerts = NULLABLE_NULL_VALUE,
-            NULLABLE_TYPE(bool) _enableSMSAlerts = NULLABLE_NULL_VALUE
+            NULLABLE_TYPE(bool) _enableSMSAlerts = NULLABLE_NULL_VALUE,
+            QString             _ssid = {},
+            QString             _address = {}
         ),
         "Update User personal info"
     )
