@@ -96,40 +96,19 @@ private slots:
     QVariantMap REST_GET_OR_POST(
         Translate,
         (
-            APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _text,
             QString _dir,
-            const QString& _engine = "NMT",
             bool _detailed = false,
             bool _detok = true,
             bool _dic = false,
             bool _dicFull = false
         ),
-        "Translates input text if specified engine and language are found."
+        "Translates input text"
     )
 
-#ifdef QT_DEBUG
-//    QVariant REST_POST(
-//        fixtureSetup,
-//        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-//            QString _random = {}
-//        ),
-//        "Create sample data. give random=1 to auto generate random number"
-//    )
-
-//    QVariant REST_POST(
-//        fixtureCleanup,
-//        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-//            QString _random = {}
-//        ),
-//        "Cleanup sample data"
-//    )
-#endif
-
 private:
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
+    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(TargomanMT, TargomanMTSchema);

@@ -56,11 +56,11 @@ TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(TargomanMT, TargomanMTSchema);
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(TargomanMT, TargomanMTSchema);
 
-Targoman::TargomanMT() :
+TargomanMT::TargomanMT() :
     intfAccountingBasedModule(
         TargomanMTDomain,
         TargomanMTSchema,
-        true,
+        false,
         {
             //           day                week   month                total
 //            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
@@ -231,15 +231,16 @@ QVariantMap TargomanMT::getCustomUserAssetFieldsForQuery(
 |** API Methods *************************************************|
 \****************************************************************/
 QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
-    APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _text,
     QString _dir,
-    const QString& _engine,
     bool _detailed,
     bool _detok,
     bool _dic,
     bool _dicFull
 )) {
+    QString _engine = "NMT";
+
     QTime Timer, OverallTime;
     Timer.start();
     OverallTime.start();
@@ -334,7 +335,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
     try {
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
 
-        QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::API>(
+        QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::USER>(
                                       APICALLBOOM_PARAM,
 //                                      Privs,
                                       this->DerivedHelperSubmodules,
@@ -379,296 +380,5 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
         throw;
     }
 }
-
-/*
-QVariantMap IMPL_REST_GET_OR_POST(Targoman, Test, (
-    const TAPI::RemoteIP_t& _REMOTE_IP,
-    const QString& _token,
-    const QString& _arg
-)) {
-    return {
-        {"inputArg", _arg},
-        {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
-    };
-}
-*/
-
-/****************************************************************\
-|** fixture *****************************************************|
-\****************************************************************/
-#ifdef QT_DEBUG
-/*
-QVariant IMPL_REST_POST(Targoman, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    QString _random
-)) {
-    QVariantMap Result;
-
-    if (_random == "1")
-        _random = QString::number(QRandomGenerator::global()->generate());
-
-    if (_random.isEmpty() == false)
-        Result.insert("Random", _random);
-
-    //-- location --------------------------------------
-    QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com"); //.arg(SecurityHelper::UUIDtoMD5());
-
-    QVariantMap LocationValues = {
-        { tblLocations::Fields::locURL,        LocationUrl },
-        { tblLocations::Fields::locPlaceCode,  "FIX" },
-    };
-
-    quint32 LocationID = Locations::instance().makeCreateQuery(APICALLBOOM_PARAM)
-                         .addCols({
-                                      tblLocations::Fields::locURL,
-                                      tblLocations::Fields::locPlaceCode,
-//                                      tblLocations::Fields::locStatus,
-                                  })
-                         .values(LocationValues)
-                         .execute(1);
-
-    LocationValues.insert(tblLocations::Fields::locID, LocationID);
-    Result.insert("Location", LocationValues);
-
-    //-- product --------------------------------------
-    QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
-
-    TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
-        { tblAccountProductsBase::Fields::prdCode,              ProductCode },
-        { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
-        { tblAccountProductsBase::Fields::prdNameI18N,          QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
-        }) },
-        { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
-        { tblAccountProductsBase::Fields::prd_untID,            1 },
-        { tblAccountProducts::ExtraFields::prdType,           Targoman::API::TargomanMTModule::enuProductType::toStr(Targoman::API::TargomanMTModule::enuProductType::Targomanise) },
-        { tblAccountProducts::ExtraFields::prd_locID,         LocationID },
-    });
-
-    quint32 ProductID = this->AccountProducts->Create(APICALLBOOM_PARAM, ProductValues);
-
-    ProductValues.insert(tblAccountProductsBase::Fields::prdID, ProductID);
-    Result.insert("Product", ProductValues);
-
-    //-- saleable --------------------------------------
-    QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
-
-    TAPI::ORMFields_t SaleableValues = TAPI::ORMFields_t({
-        { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
-        { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
-        { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
-        { tblAccountSaleablesBase::Fields::slbNameI18N,         QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
-        }) },
-        { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
-        { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
-        { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
-//        { tblAccountSaleablesBase::Fields::slbProductCount,     900 },
-//        { tblAccountSaleablesBase::Fields::slbMaxSaleCountPerUser,  },
-        { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
-        { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
-    });
-
-    quint32 SaleableID = this->AccountSaleables->Create(APICALLBOOM_PARAM, SaleableValues);
-
-    SaleableValues.insert(tblAccountSaleablesBase::Fields::slbID, SaleableID);
-    Result.insert("Saleable", SaleableValues);
-
-    //-- coupon --------------------------------------
-    QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
-
-    QVariantMap CouponValues = {
-        { tblAccountCouponsBase::Fields::cpnCode, CouponCode },
-        { tblAccountCouponsBase::Fields::cpnPrimaryCount, 100 },
-        { tblAccountCouponsBase::Fields::cpnTotalMaxAmount, 100'000'000 },
-        { tblAccountCouponsBase::Fields::cpnPerUserMaxCount, 2 },
-        { tblAccountCouponsBase::Fields::cpnPerUserMaxAmount, 10'000'000 },
-        { tblAccountCouponsBase::Fields::cpnValidFrom, "2020/1/1 1:2:3" },
-//        { tblAccountCouponsBase::Fields::cpnExpiryTime,  },
-        { tblAccountCouponsBase::Fields::cpnAmount, 10 },
-        { tblAccountCouponsBase::Fields::cpnAmountType, Targoman::API::AAA::enuDiscountType::toStr(Targoman::API::AAA::enuDiscountType::Percent) },
-//        { tblAccountCouponsBase::Fields::cpnMaxAmount,  },
-        { tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
-          QVariantList({
-              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.5 }, { "minQty", 0 } }),
-              QVariantMap({ { "saleableCode", SaleableCode }, { "multiplier", 1.8 }, { "minQty", 5 } }),
-              QVariantMap({ { "saleableCode", "other" },      { "multiplier", 2.0 }                  }),
-          })
-        },
-//        { tblAccountCouponsBase::Fields::cpnTotalUsedCount,  },
-//        { tblAccountCouponsBase::Fields::cpnTotalUsedAmount,  },
-//        { tblAccountCouponsBase::Fields::cpnStatus,  },
-    };
-
-    quint32 CouponID = this->AccountCoupons->makeCreateQuery(APICALLBOOM_PARAM)
-                       .addCols({
-//                                    tblAccountCouponsBase::Fields::cpnID,
-                                    tblAccountCouponsBase::Fields::cpnCode,
-                                    tblAccountCouponsBase::Fields::cpnPrimaryCount,
-                                    tblAccountCouponsBase::Fields::cpnTotalMaxAmount,
-                                    tblAccountCouponsBase::Fields::cpnPerUserMaxCount,
-                                    tblAccountCouponsBase::Fields::cpnPerUserMaxAmount,
-                                    tblAccountCouponsBase::Fields::cpnValidFrom,
-//                                    tblAccountCouponsBase::Fields::cpnExpiryTime,
-                                    tblAccountCouponsBase::Fields::cpnAmount,
-                                    tblAccountCouponsBase::Fields::cpnAmountType,
-//                                    tblAccountCouponsBase::Fields::cpnMaxAmount,
-                                    tblAccountCouponsBase::Fields::cpnSaleableBasedMultiplier,
-//                                    tblAccountCouponsBase::Fields::cpnTotalUsedCount,
-//                                    tblAccountCouponsBase::Fields::cpnTotalUsedAmount,
-//                                    tblAccountCouponsBase::Fields::cpnStatus,
-                                })
-                       .values(CouponValues)
-                       .execute(1);
-
-    CouponValues.insert(tblAccountCouponsBase::Fields::cpnID, CouponID);
-    Result.insert("Coupon", CouponValues);
-
-    //----------------------------------------
-    stuPreVoucher LastPreVoucher;
-    stuVoucher Voucher;
-    stuVoucher ApproveOnlinePaymentVoucher;
-
-    //-- add to basket --------------------------------------
-    stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
-        APICALLBOOM_PARAM,
-        /* saleableCode     * / SaleableCode,
-        /* orderAdditives   * / { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
-        /* qty              * / 1,
-        /* discountCode     * / CouponCode,
-        /* referrer         * / "",
-        /* referrerParams   * / {},
-        /* lastPreVoucher   * / LastPreVoucher
-    );
-    LastPreVoucher = BasketActionResult.PreVoucher;
-    Result.insert("LastPreVoucher", LastPreVoucher.toJson());
-
-    //-- finalize basket --------------------------------------
-    QVariant res = RESTClientHelper::callAPI(
-        APICALLBOOM_PARAM,
-        RESTClientHelper::POST,
-        "Account/finalizeBasket",
-        {},
-        {
-            { "preVoucher",             LastPreVoucher.toJson().toVariantMap() },
-            { "gatewayType",            "_DeveloperTest" },
-            { "domain",                 "dev.test" },
-//            { "walID",               9988 },
-            { "paymentVerifyCallback",  "http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestCallbackPage" },
-        }
-    );
-    Voucher.fromJson(res.toJsonObject());
-    Result.insert("Voucher", Voucher.toJson());
-
-    //-- approve online payment --------------------------------------
-    if (Voucher.PaymentKey.isEmpty() == false) {
-        QVariant res = RESTClientHelper::callAPI(
-            APICALLBOOM_PARAM,
-            RESTClientHelper::POST,
-            "Account/approveOnlinePayment",
-            {},
-            {
-                { "paymentKey",     Voucher.PaymentKey },
-//                { "domain",         "dev.test" },
-                { "pgResponse",     QVariantMap({
-                    { "result",     "ok" },
-                }) },
-            }
-        );
-        ApproveOnlinePaymentVoucher.fromJson(res.toJsonObject());
-        Result.insert("ApproveOnlinePaymentVoucher", ApproveOnlinePaymentVoucher.toJson());
-    }
-
-    //----------------------------------------
-    return Result;
-}
-
-//bool IMPL_REST_POST(Targoman, fixtureSetupVoucher, (
-//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
-//    ))
-//{
-//}
-
-QVariant IMPL_REST_POST(Targoman, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    QString _random
-)) {
-    QVariantMap Result;
-
-    //online payment
-    //voucher
-
-    try {
-        QString CouponCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "cpn");
-        QString QueryString = R"(
-            DELETE c
-              FROM tblAccountCoupons c
-             WHERE c.cpnCode=?
-        ;)";
-        clsDACResult DACResult = this->AccountCoupons->execQuery(APICALLBOOM_PARAM,
-                                                                 QueryString, {
-                                                                     CouponCode
-                                                                 });
-        Result.insert("tblCoupon", QVariantMap({
-                                                   { "items", CouponCode },
-                                                   { "numRowsAffected", DACResult.numRowsAffected() },
-                                               }));
-    } catch (...) { ; }
-
-    try {
-        QString SaleableCode = (_random.isEmpty() ? "0-0" : QString("%1-%1").arg(_random));
-        QString QueryString = R"(
-            DELETE s
-              FROM tblAccountSaleables s
-             WHERE s.slbCode=?
-        ;)";
-        clsDACResult DACResult = this->AccountSaleables->execQuery(APICALLBOOM_PARAM,
-                                                                   QueryString, {
-                                                                       SaleableCode
-                                                                   });
-        Result.insert("tblSaleable", QVariantMap({
-                                                  { "items", SaleableCode },
-                                                  { "numRowsAffected", DACResult.numRowsAffected() },
-                                              }));
-    } catch (...) { ; }
-
-    try {
-        QString ProductCode = FixtureHelper::MakeRandomizeName(_random, ".", "fixture", "product");
-        QString QueryString = R"(
-            DELETE p
-              FROM tblAccountProducts p
-             WHERE p.prdCode=?
-        ;)";
-        clsDACResult DACResult = this->AccountProducts->execQuery(APICALLBOOM_PARAM,
-                                                                  QueryString, {
-                                                                      ProductCode
-                                                                  });
-        Result.insert("tblProduct", QVariantMap({
-                                                 { "items", ProductCode },
-                                                 { "numRowsAffected", DACResult.numRowsAffected() },
-                                             }));
-    } catch (...) { ; }
-
-    try {
-        QString LocationUrl = FixtureHelper::MakeRandomizeName(_random, ".", "http://fixture", "com");
-        QString QueryString = R"(
-            DELETE l
-              FROM tblLocations l
-             WHERE l.locURL=?
-        ;)";
-        clsDACResult DACResult = Locations::instance().execQuery(APICALLBOOM_PARAM,
-                                                                 QueryString, {
-                                                                     LocationUrl
-                                                                 });
-        Result.insert("tblLocation", QVariantMap({
-                                                  { "items", LocationUrl },
-                                                  { "numRowsAffected", DACResult.numRowsAffected() },
-                                              }));
-    } catch (...) { ; }
-
-    return Result;
-}
-*/
-#endif
 
 } //namespace Targoman::API::TargomanMTModule

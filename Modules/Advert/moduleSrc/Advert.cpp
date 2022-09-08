@@ -258,14 +258,14 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 //}
 
 Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newBanner, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order
 )) {
 }
 
 Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
     const QString _keywords
@@ -273,7 +273,7 @@ Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
 }
 
 QString IMPL_REST_GET(Advert, retrieveURL, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     quint64 _id,
     TAPI::IPv4_t _clientIP,
     QString _agent

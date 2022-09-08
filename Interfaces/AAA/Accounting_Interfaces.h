@@ -32,6 +32,7 @@ using namespace Targoman::API::API;
 namespace Targoman::API::AAA {
 
 /******************************************************/
+/*
 class intfAccountORMBase
 {
 public:
@@ -42,16 +43,16 @@ public:
 public:
     bool IsTokenBase;
 };
-
+*/
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUnitsI18N : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountUnitsI18N : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUnitsI18N(bool _isTokenBase,
+    intfAccountUnitsI18N(//bool _isTokenBase,
                          const QString& _schema,
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -64,12 +65,12 @@ public:
 };
 
 /******************************************************/
-class intfAccountUnits : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountUnits : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUnits(bool _isTokenBase,
+    intfAccountUnits(//bool _isTokenBase,
                      const QString& _schema,
                      const QList<DBM::clsORMField>& _exclusiveCols = {},
                      const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -88,12 +89,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountProductsI18N : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountProductsI18N : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsI18N(bool _isTokenBase,
+    intfAccountProductsI18N(//bool _isTokenBase,
                             const QString& _schema,
                             const QList<DBM::clsORMField>& _exclusiveCols = {},
                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -106,12 +107,12 @@ public:
 };
 
 /******************************************************/
-class intfAccountProducts : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountProducts : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountProducts(bool _isTokenBase,
+    intfAccountProducts(//bool _isTokenBase,
                         const QString& _schema,
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -130,12 +131,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountSaleablesI18N : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountSaleablesI18N : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesI18N(bool _isTokenBase,
+    intfAccountSaleablesI18N(//bool _isTokenBase,
                              const QString& _schema,
                              const QList<DBM::clsORMField>& _exclusiveCols = {},
                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -148,12 +149,12 @@ public:
 };
 
 /******************************************************/
-class intfAccountSaleables : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountSaleables : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleables(bool _isTokenBase,
+    intfAccountSaleables(//bool _isTokenBase,
                          const QString& _schema,
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -170,12 +171,12 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountSaleablesFiles : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountSaleablesFiles : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesFiles(bool _isTokenBase,
+    intfAccountSaleablesFiles(//bool _isTokenBase,
                               const QString& _schema,
                               const QList<DBM::clsORMField>& _exclusiveCols = {},
                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -199,12 +200,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUserAssets : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountUserAssets : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssets(bool _isTokenBase,
+    intfAccountUserAssets(//bool _isTokenBase,
                           const QString& _schema,
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -236,12 +237,12 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUserAssetsFiles : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountUserAssetsFiles : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssetsFiles(bool _isTokenBase,
+    intfAccountUserAssetsFiles(//bool _isTokenBase,
                                const QString& _schema,
                                const QList<DBM::clsORMField>& _exclusiveCols = {},
                                const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -261,12 +262,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountAssetUsage : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountAssetUsage : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountAssetUsage(bool _isTokenBase,
+    intfAccountAssetUsage(//bool _isTokenBase,
                           const QString& _schema,
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -278,12 +279,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountCoupons : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountCoupons : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountCoupons(bool _isTokenBase,
+    intfAccountCoupons(//bool _isTokenBase,
                        const QString& _schema,
                        const QList<DBM::clsORMField>& _exclusiveCols = {},
                        const QList<DBM::stuRelation>& _exclusiveRelations = {},
@@ -299,12 +300,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountPrizes : public intfSQLBasedModule, public intfAccountORMBase
+class intfAccountPrizes : public intfSQLBasedModule//, public intfAccountORMBase
 {
     Q_OBJECT
 
 public:
-    intfAccountPrizes(bool _isTokenBase,
+    intfAccountPrizes(//bool _isTokenBase,
                       const QString& _schema,
                       const QList<DBM::clsORMField>& _exclusiveCols = {},
                       const QList<DBM::stuRelation>& _exclusiveRelations = {},

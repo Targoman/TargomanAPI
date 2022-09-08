@@ -100,7 +100,7 @@ namespace Targoman::API::AAA {
 QMap<QString, intfAccountUnitsI18N*> intfAccountUnitsI18N::myInstance;
 
 intfAccountUnitsI18N::intfAccountUnitsI18N(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -112,15 +112,15 @@ intfAccountUnitsI18N::intfAccountUnitsI18N(
         tblAccountUnitsI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountUnitsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUnitsI18NBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 {
     intfAccountUnitsI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountUnits::intfAccountUnits(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -132,8 +132,8 @@ intfAccountUnits::intfAccountUnits(
         tblAccountUnitsBase::Private::ORMFields + _exclusiveCols,
         tblAccountUnitsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUnitsBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
@@ -215,7 +215,7 @@ bool IMPL_ORMDELETE_USER(intfAccountUnits) {
 QMap<QString, intfAccountProductsI18N*> intfAccountProductsI18N::myInstance;
 
 intfAccountProductsI18N::intfAccountProductsI18N(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -227,15 +227,15 @@ intfAccountProductsI18N::intfAccountProductsI18N(
         tblAccountProductsI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountProductsI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountProductsI18NBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 {
     intfAccountProductsI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountProducts::intfAccountProducts(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -247,8 +247,8 @@ intfAccountProducts::intfAccountProducts(
         tblAccountProductsBase::Private::ORMFields + _exclusiveCols,
         tblAccountProductsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountProductsBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
@@ -352,7 +352,7 @@ bool IMPL_ORMDELETE_USER(intfAccountProducts) {
 QMap<QString, intfAccountSaleablesI18N*> intfAccountSaleablesI18N::myInstance;
 
 intfAccountSaleablesI18N::intfAccountSaleablesI18N(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -364,15 +364,15 @@ intfAccountSaleablesI18N::intfAccountSaleablesI18N(
         tblAccountSaleablesI18NBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesI18NBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesI18NBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 {
     intfAccountSaleablesI18N::myInstance[_schema] = this;
 }
 
 /******************************************************************/
 intfAccountSaleables::intfAccountSaleables(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -384,8 +384,8 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
@@ -511,7 +511,7 @@ bool IMPL_ORMDELETE_USER(intfAccountSaleables) {
 QMap<QString, intfAccountSaleablesFiles*> intfAccountSaleablesFiles::myInstance;
 
 intfAccountSaleablesFiles::intfAccountSaleablesFiles(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -523,8 +523,8 @@ intfAccountSaleablesFiles::intfAccountSaleablesFiles(
         tblAccountSaleablesFilesBase::Private::ORMFields + _exclusiveCols,
         tblAccountSaleablesFilesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountSaleablesFilesBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 {
     intfAccountSaleablesFiles::myInstance[_schema] = this;
 }
@@ -556,7 +556,7 @@ bool IMPL_ORMDELETE_USER(intfAccountSaleablesFiles) {
 /******************************************************************/
 /******************************************************************/
 intfAccountUserAssets::intfAccountUserAssets(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -568,8 +568,8 @@ intfAccountUserAssets::intfAccountUserAssets(
         tblAccountUserAssetsBase::Private::ORMFields + _exclusiveCols,
         tblAccountUserAssetsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUserAssetsBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 /*
@@ -741,7 +741,7 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
 QMap<QString, intfAccountUserAssetsFiles*> intfAccountUserAssetsFiles::myInstance;
 
 intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -753,8 +753,8 @@ intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
         tblAccountUserAssetsFilesBase::Private::ORMFields + _exclusiveCols,
         tblAccountUserAssetsFilesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountUserAssetsFilesBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 {
     intfAccountUserAssetsFiles::myInstance[_schema] = this;
 }
@@ -769,7 +769,7 @@ QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {
 /******************************************************************/
 /******************************************************************/
 intfAccountAssetUsage::intfAccountAssetUsage(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -781,8 +781,8 @@ intfAccountAssetUsage::intfAccountAssetUsage(
         tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
         tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 QVariant IMPL_ORMGET_USER(intfAccountAssetUsage) {
@@ -796,7 +796,7 @@ QVariant IMPL_ORMGET_USER(intfAccountAssetUsage) {
 /******************************************************************/
 /******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -808,8 +808,8 @@ intfAccountCoupons::intfAccountCoupons(
         tblAccountCouponsBase::Private::ORMFields + _exclusiveCols,
         tblAccountCouponsBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountCouponsBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 QVariant IMPL_ORMGET_USER(intfAccountCoupons) {
@@ -844,7 +844,7 @@ bool IMPL_ORMDELETE_USER(intfAccountCoupons) {
 /******************************************************************/
 /******************************************************************/
 intfAccountPrizes::intfAccountPrizes(
-    bool _isTokenBase,
+    // bool _isTokenBase,
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
@@ -856,8 +856,8 @@ intfAccountPrizes::intfAccountPrizes(
         tblAccountPrizesBase::Private::ORMFields + _exclusiveCols,
         tblAccountPrizesBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountPrizesBase::Private::Indexes + _exclusiveIndexes
-    ),
-    intfAccountORMBase(_isTokenBase)
+    )
+    // intfAccountORMBase(_isTokenBase)
 { ; }
 
 QVariant IMPL_ORMGET_USER(intfAccountPrizes) {

@@ -34,7 +34,7 @@ URLProcessor::URLProcessor() :
     intfPureModule("URLProcessor") { ; }
 
 QString IMPL_REST_GET(URLProcessor, canonicalize, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _removeWWW
 )) {
@@ -44,7 +44,7 @@ QString IMPL_REST_GET(URLProcessor, canonicalize, (
 }
 
 QString IMPL_REST_GET(URLProcessor, convertHexCodes, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString _url,
     bool _convertAll
 )) {

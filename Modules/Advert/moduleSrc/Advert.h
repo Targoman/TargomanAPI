@@ -118,7 +118,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
@@ -128,7 +128,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
@@ -139,7 +139,7 @@ protected slots:
     QString REST_GET(
         retrieveURL,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             quint64 _id,
             TAPI::IPv4_t _clientIP,
             QString _agent

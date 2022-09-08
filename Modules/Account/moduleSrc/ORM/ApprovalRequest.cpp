@@ -85,7 +85,7 @@ bool IMPL_ORMDELETE_USER(ApprovalRequest) {
 }
 
 QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
     Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());

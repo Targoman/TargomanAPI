@@ -250,7 +250,7 @@ void intfAPICallBoom::addToTimings(const QString &_name, const QString &_desc, q
     this->Data->FNTiming(_name, _desc, _nanoSecs);
 }
 
-template class APICALLBOOM_TYPE_NO_JWT_DECL;
+template class APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL;
 template class APICALLBOOM_TYPE_JWT_USER_DECL;
 template class APICALLBOOM_TYPE_JWT_API_DECL;
 

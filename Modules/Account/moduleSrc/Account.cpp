@@ -251,7 +251,7 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
 |* User **********************************************************|
 \*****************************************************************/
 QString IMPL_REST_GET_OR_POST(Account, normalizePhoneNumber, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _phone,
     QString _country
 )) {
@@ -259,7 +259,7 @@ QString IMPL_REST_GET_OR_POST(Account, normalizePhoneNumber, (
 }
 
 QVariantMap IMPL_REST_PUT(Account, signup, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
     QString _role,
@@ -311,7 +311,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 }
 
 TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _email,
     TAPI::MD5_t _code,
     bool _autoLogin,
@@ -355,7 +355,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
 }
 
 TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     quint32 _code,
     bool _autoLogin,
@@ -399,7 +399,7 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
 }
 
 TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
     QString _salt,
@@ -431,7 +431,7 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
 }
 
 bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     bool _signupIfNotExists,
     QString _signupRole,
@@ -466,7 +466,7 @@ bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
 }
 
 bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
     Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
@@ -500,7 +500,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 ///@TODO: update cache for each module
 ///@TODO: JWT lifetime dynamic based on current hour
 TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::enuOAuthType::Type _type,
     QString _oAuthToken,
     TAPI::CommaSeparatedStringList_t _services,
@@ -588,7 +588,7 @@ bool IMPL_REST_GET_OR_POST(Account, logout, (
 }
 
 QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
     Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
@@ -606,7 +606,7 @@ QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
 
 #ifdef QT_DEBUG
 QString IMPL_REST_POST(Account, fixtureGetLastForgotPasswordUUIDAndMakeAsSent, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
@@ -667,7 +667,7 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
 }
 
 bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     QString _uuid,
     TAPI::MD5_t _newPass
@@ -732,7 +732,7 @@ void Account::internalCheckBasketVoucherExpirity(
 }
 
 bool IMPL_REST_GET(Account, checkBasketVoucherExpirity, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     ///@TODO: must be implemented
 
@@ -1282,7 +1282,7 @@ Targoman::API::AAA::stuVoucher Account::payAndProcessBasket(
  * @return
  */
 Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, approveOnlinePayment, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey,
 //    QString _domain,
     TAPI::JSON_t _pgResponse
@@ -2289,7 +2289,7 @@ bool IMPL_REST_POST(Account, checkVoucherTTL, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Account, fixtureSetup, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;
@@ -2539,7 +2539,7 @@ QVariant IMPL_REST_POST(Account, fixtureSetup, (
 }
 
 QVariant IMPL_REST_POST(Account, fixtureCleanup, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _random
 )) {
     QVariantMap Result;
@@ -2754,7 +2754,7 @@ QVariant IMPL_REST_POST(Account, fixtureCleanup, (
 
 ///@TODO: not tested
 bool IMPL_REST_POST(Account, fixtureApproveEmail, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _email
 )) {
     clsDAC DAC;
@@ -2794,7 +2794,7 @@ bool IMPL_REST_POST(Account, fixtureApproveEmail, (
 
 ///@TODO: not tested
 bool IMPL_REST_POST(Account, fixtureApproveMobile, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile
 )) {
     clsDAC DAC;

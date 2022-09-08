@@ -342,13 +342,19 @@ clsRequestHandler::stuResult clsRequestHandler::run(
     };
 
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
-//    if (_apiObject->requiresJWT())
-    if (_apiObject->tokenActorType() == enuTokenActorType::USER)
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
-    else if (_apiObject->tokenActorType() == enuTokenActorType::API)
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
-    else //enuTokenActorType::ANONYMOUSE
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_NO_JWT_DECL(fnTiming));
+
+    if (_apiObject->tokenActorType() == enuTokenActorType::USER) {
+        if (_apiObject->tokenIsOptional())
+            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL(fnTiming));
+        else
+            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
+    } else if (_apiObject->tokenActorType() == enuTokenActorType::API) {
+        if (_apiObject->tokenIsOptional())
+            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL(fnTiming));
+        else
+            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
+    } else //enuTokenActorType::ANONYMOUSE
+        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(fnTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -426,7 +432,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                 }
 
                 JWT["encodedJWT"] = BearerToken;
-            } else
+            } else if (_apiObject->tokenIsOptional() == false)
                 throw exHTTPForbidden("No valid authentication header is present");
 
 //            APICALLBOOM->setJWT(JWT);

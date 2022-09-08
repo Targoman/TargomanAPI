@@ -136,7 +136,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         timerInfo,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile
         ),
         "Returns TTL remained for Approval Request based on email or mobile"

@@ -1559,7 +1559,7 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 }
 
 bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
     checkVoucherItemForTrustedActionSanity(_data);
@@ -1568,7 +1568,7 @@ bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
 }
 
 bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
     checkVoucherItemForTrustedActionSanity(_data);

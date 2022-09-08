@@ -206,45 +206,45 @@ namespace tblTranslationLogs {
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class CorrectionRules : public intfCorrectionRules<TAPI::enuTokenActorType::API>
+class CorrectionRules : public intfCorrectionRules<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, CorrectionRules)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, CorrectionRules)
 };
 
 /******************************************************/
-class DigestedTranslationLogs : public intfDigestedTranslationLogs<TAPI::enuTokenActorType::API>
+class DigestedTranslationLogs : public intfDigestedTranslationLogs<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, DigestedTranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, DigestedTranslationLogs)
 };
 
 /******************************************************/
-class MultiDic : public intfMultiDic<TAPI::enuTokenActorType::API>
+class MultiDic : public intfMultiDic<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, MultiDic)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, MultiDic)
 };
 
 /******************************************************/
-class TokenStats : public intfTokenStats<TAPI::enuTokenActorType::API>
+class TokenStats : public intfTokenStats<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, TokenStats)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, TokenStats)
 };
 
 /******************************************************/
-class TranslatedPhrases : public intfTranslatedPhrases<TAPI::enuTokenActorType::API>
+class TranslatedPhrases : public intfTranslatedPhrases<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, TranslatedPhrases)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, TranslatedPhrases)
 };
 
 /******************************************************/
-class TranslationLogs : public intfTranslationLogs<TAPI::enuTokenActorType::API>
+class TranslationLogs : public intfTranslationLogs<TAPI::enuTokenActorType::USER>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Targoman, TranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, TranslationLogs)
 };
 
 /******************************************************/

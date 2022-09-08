@@ -61,9 +61,6 @@ protected:
     );
 //    virtual ~intfAccountingBasedModule();
 
-//    TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
-//    bool IsTokenBase() { return _tokenActorType == TAPI::enuTokenActorType::API; }
-
 public:
     virtual stuActiveCredit activeAccountObject(quint64 _usrID);
 
@@ -244,7 +241,7 @@ protected slots:
     bool REST_POST(
         processVoucherItem,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Process voucher item"
@@ -253,7 +250,7 @@ protected slots:
     bool REST_POST(
         cancelVoucherItem,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Cancel voucher item"

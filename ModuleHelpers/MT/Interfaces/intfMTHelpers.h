@@ -420,12 +420,12 @@ public:
     typedef typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
                              APICALLBOOM_TYPE_JWT_USER_DECL,
                              APICALLBOOM_TYPE_JWT_API_DECL>::type
-    ACCOUNTING_JWT_TYPE_DECL;
+    MT_JWT_TYPE_DECL;
 
     typedef Q_DECL_UNUSED typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
                              APICALLBOOM_TYPE_JWT_USER_DECL,
                              APICALLBOOM_TYPE_JWT_API_DECL>::type
-    ACCOUNTING_JWT_TYPE_IMPL;
+    MT_JWT_TYPE_IMPL;
 
 public:
     TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
