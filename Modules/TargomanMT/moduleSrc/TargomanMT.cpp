@@ -33,7 +33,7 @@ using namespace Targoman::API::Helpers;
 #include "ModuleHelpers/MT/MTHelper.h"
 using namespace Targoman::API::ModuleHelpers::MT;
 
-#include "TargomanDefs.hpp"
+#include "TargomanMTDefs.hpp"
 #include "ORM/MTHelpers.h"
 #include "ORM/Accounting.h"
 

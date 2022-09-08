@@ -34,7 +34,7 @@
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
-#include "TargomanDefs.hpp"
+#include "TargomanMTDefs.hpp"
 #include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
 
 using namespace Targoman::API::ModuleHelpers::MT::Classes;

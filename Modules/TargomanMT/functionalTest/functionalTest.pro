@@ -9,7 +9,7 @@
 TEST_NAME = targomanFunctionalTest
 
 HEADERS += \
-    testTargoman.hpp
+    testTargomanMT.hpp
 
 SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \

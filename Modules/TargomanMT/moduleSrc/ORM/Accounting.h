@@ -26,7 +26,7 @@
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/AAA/AAA.hpp"
-#include "../TargomanDefs.hpp"
+#include "../TargomanMTDefs.hpp"
 
 namespace Targoman::API::TargomanMTModule {
 

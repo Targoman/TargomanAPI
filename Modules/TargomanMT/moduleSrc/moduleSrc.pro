@@ -9,7 +9,7 @@
 ModuleName=Targoman
 
 HEADERS += \
-    TargomanDefs.hpp \
+    TargomanMTDefs.hpp \
     ORM/MTHelpers.h \
     ORM/Accounting.h \
     TargomanMT.h

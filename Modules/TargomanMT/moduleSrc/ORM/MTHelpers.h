@@ -25,7 +25,7 @@
 #define TARGOMAN_API_MODULES_TARGOMANMT_ORM_MTHELPERS_H
 
 #include "ModuleHelpers/MT/Interfaces/intfMTHelpers.h"
-#include "../TargomanDefs.hpp"
+#include "../TargomanMTDefs.hpp"
 
 using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
 

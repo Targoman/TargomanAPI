@@ -42,12 +42,12 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
-class testTargoman : public clsBaseTest
+class testTargomanMT : public clsBaseTest
 {
     Q_OBJECT
 
 public:
-    testTargoman(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
+    testTargomanMT(const QString &_dbPrefix) : clsBaseTest(_dbPrefix) { ; }
 
     QString LastRandomNumber; // = "998877998877";
     QString CreatedUserEmail;
