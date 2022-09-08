@@ -8,15 +8,12 @@
 ################################################################################
 include($$QBUILD_PATH/templates/projectConfigs.pri)
 
-addSubdirs(Common, Dependencies)
-addSubdirs(Account, Dependencies)
-addSubdirs(Advert, Dependencies)
-addSubdirs(Ticketing, Dependencies)
-addSubdirs(MT, Dependencies)
-addSubdirs(Targoman, Dependencies)
-#addSubdirs(NGT, Dependencies)
-addSubdirs(TextProcessor, Dependencies)
-addSubdirs(FormalityChecker, Dependencies)
-addSubdirs(URLProcessor, Dependencies)
+addSubdirs(moduleSrc, Dependencies)
+addSubdirs(functionalTest, Dependencies)
 
-#addSubdirs(DM, Dependencies)
+OTHER_FILES += \
+    migrations/.gitkeep \
+    migrations/db/* \
+    migrations/db/.dbdiff.dev_.cfg \
+    migrations/local/* \
+    migrations/local/.migrations
