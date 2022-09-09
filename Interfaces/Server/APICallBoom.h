@@ -126,6 +126,7 @@ public:
 
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
+    bool isAnonymouse();
     quint64 getActorID(quint64 _default=0);
     QJsonObject getJWTPrivsObject();
 

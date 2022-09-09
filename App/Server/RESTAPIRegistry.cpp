@@ -222,10 +222,20 @@ void RESTAPIRegistry::registerRESTAPI(
         if (!FoundDoc)
             throw exRESTRegistry("Seems that you have not use API macro to define your API: " + MethodName);
 
+#ifdef QT_DEBUG
+        QString __MethodKey = "/" + _module->moduleBaseName().replace(":", "/") + '/' + _method.name();
+        __MethodKey = __MethodKey.replace(QRegularExpression("//+"), "/");
+        if (__MethodKey == "/Account/User/apiUPDATEextraInfo") {
+            int ii; ii = 0;
+        }
+#endif
+
         constexpr char COMMA_SIGN[] = "$_COMMA_$";
 
         MethodSignature = MethodSignature.trimmed().replace("','", QString("'%1'").arg(COMMA_SIGN));
-        bool DQuoteStarted = false, BackslashFound = false;
+        bool DQuoteStarted = false,
+                BackslashFound = false,
+                InTemplateParameters = false;
         QString CommaReplacedMethodSignature;
 
         for (int i=0; i< MethodSignature.size(); ++i) {
@@ -235,16 +245,29 @@ void RESTAPIRegistry::registerRESTAPI(
                 else if (MethodSignature.at(i).toLatin1() == '\\') {
                     BackslashFound = true;
                 } else if (MethodSignature.at(i).toLatin1() == '"') {
-                    CommaReplacedMethodSignature += '"';
+                    CommaReplacedMethodSignature += MethodSignature.at(i);
                     if (BackslashFound)
                         BackslashFound = false;
                     else
                         DQuoteStarted = false;
                 } else
                     CommaReplacedMethodSignature += MethodSignature.at(i);
+
+            } else if (InTemplateParameters) {
+                if (MethodSignature.at(i).toLatin1() == ',')
+                    CommaReplacedMethodSignature += COMMA_SIGN;
+                else if (MethodSignature.at(i).toLatin1() == '>') {
+                    CommaReplacedMethodSignature += MethodSignature.at(i);
+                    InTemplateParameters = false;
+                } else
+                    CommaReplacedMethodSignature += MethodSignature.at(i);
+
             } else if (MethodSignature.at(i).toLatin1() == '"') {
-                CommaReplacedMethodSignature += '"';
+                CommaReplacedMethodSignature += MethodSignature.at(i);
                 DQuoteStarted = true;
+            } else if (MethodSignature.at(i).toLatin1() == '<') {
+                CommaReplacedMethodSignature += MethodSignature.at(i);
+                InTemplateParameters = true;
             } else
                 CommaReplacedMethodSignature += MethodSignature.at(i);
         }
@@ -253,14 +276,6 @@ void RESTAPIRegistry::registerRESTAPI(
         bool ContainsFileInput = false;
         QList<QByteArray> parameterTypes = _method.parameterTypes();
         auto ParamsParts = CommaReplacedMethodSignature.split(',');
-
-#ifdef QT_DEBUG
-        QString MethodKey = "/" + _module->moduleBaseName().replace(":", "/") + '/' + _method.name();
-        MethodKey = MethodKey.replace(QRegularExpression("//+"), "/");
-        if (MethodKey == "/Account/OfflinePayments/apiGET") {
-            int ii; ii = 0;
-        }
-#endif
 
         for (quint8 ParamIndex=0; ParamIndex<ParamsParts.length(); ParamIndex++) {
             QString Param = ParamsParts[ParamIndex];
@@ -306,7 +321,9 @@ void RESTAPIRegistry::registerRESTAPI(
                 else
                     DefaultValues.append(Value);
             } else if (ArgSpecs->isNullable())
-                throw exRESTRegistry("Nullable parameter: <"+_method.parameterNames().value(ParamIndex)+"> on method: <" + MethodName + "> must have default value" );
+                throw exRESTRegistry(QString("Nullable parameter: <%1> on method: <%2> must have default value" )
+                                     .arg(*_method.parameterNames().value(ParamIndex))
+                                     .arg(MethodName));
             else
                 DefaultValues.append(QVariant());
         }
@@ -689,7 +706,10 @@ void RESTAPIRegistry::dumpAPIs()
             QString JWTType = "";
 //            if (API.APIObject->requiresJWT())
             if (API.APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE)
-                JWTType = QString(" (JWT:%1)").arg(enuTokenActorType::toStr(API.APIObject->tokenActorType()));
+                JWTType = QString(" (JWT:%1%2)")
+                          .arg(enuTokenActorType::toStr(API.APIObject->tokenActorType()))
+                          .arg(API.APIObject->tokenIsOptional() ? "/OPTIONAL" : "")
+                          ;
 
             TargomanDebug(5).noLabel().noquote().nospace()
                     << (IsLastAPI ? " " : "│") << "   "

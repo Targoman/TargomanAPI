@@ -241,6 +241,12 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 )) {
     QString _engine = "NMT";
 
+    if (APICALLBOOM_PARAM.isAnonymouse()) {
+
+    } else {
+
+    }
+
     QTime Timer, OverallTime;
     Timer.start();
     OverallTime.start();
