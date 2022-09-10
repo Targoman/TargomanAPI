@@ -59,6 +59,7 @@ public:
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
         QString _aPIURL = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     );
 
@@ -70,6 +71,7 @@ public:
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
         QString _aPIURL = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     );
 
@@ -81,6 +83,7 @@ public:
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
         QString _aPIURL = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     );
 
@@ -92,6 +95,7 @@ public:
         const QVariantMap &_postOrFormFields = {},
         const QVariantMap &_formFiles = {},
         QString _aPIURL = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     );
 

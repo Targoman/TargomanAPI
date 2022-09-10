@@ -453,6 +453,10 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
         QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM)
             .addCols(this->AccountUserAssets->selectableColumnNames())
             .addCols(this->AccountSaleables->selectableColumnNames())
+            .removeCols({
+                            tblAccountSaleablesBase::Fields::slbName,
+                            tblAccountSaleablesBase::Fields::slbDesc,
+                        })
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
             .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->OrderID })
 //            .andWhere({ tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, AssetItem.Saleable.slbID })
@@ -482,7 +486,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 
     //-- fetch SLB & PRD --------------------------------
     QVariantMap SaleableInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
-        .addCols(this->AccountSaleables->selectableColumnNames())
+//        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
@@ -774,7 +778,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 
     //-- fetch SLB & PRD --------------------------------
     QVariantMap UserAssetInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
-        .addCols(this->AccountSaleables->selectableColumnNames())
+//        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
         .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
@@ -1147,7 +1151,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+//    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     /**
       * discount code:

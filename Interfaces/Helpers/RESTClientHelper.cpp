@@ -62,6 +62,7 @@ QVariant RESTClientHelper::callAPI(
     const QVariantMap &_postOrFormFields,
     const QVariantMap &_formFiles,
     QString _aPIURL,
+    const QStringList &_requestHeaders,
     QVariantMap *_outResponseHeaders
 ) {
     QString temp;
@@ -74,6 +75,7 @@ QVariant RESTClientHelper::callAPI(
         _postOrFormFields,
         _formFiles,
         _aPIURL,
+        _requestHeaders,
         _outResponseHeaders
     );
 
@@ -88,6 +90,7 @@ QVariant RESTClientHelper::callAPI(
     const QVariantMap &_postOrFormFields,
     const QVariantMap &_formFiles,
     QString _aPIURL,
+    const QStringList &_requestHeaders,
     QVariantMap *_outResponseHeaders
 ) {
     TAPI::JWT_t JWT = APICALLBOOM_PARAM.getJWT();
@@ -103,6 +106,7 @@ QVariant RESTClientHelper::callAPI(
         _postOrFormFields,
         _formFiles,
         _aPIURL,
+        _requestHeaders,
         &ResponseHeaders
     );
 
@@ -128,6 +132,7 @@ QVariant RESTClientHelper::callAPI(
     const QVariantMap &_postOrFormFields,
     const QVariantMap &_formFiles,
     QString _aPIURL,
+    const QStringList &_requestHeaders,
     QVariantMap *_outResponseHeaders
 ) {
     QString EncodedJWT = _JWT["encodedJWT"].toString();
@@ -142,6 +147,7 @@ QVariant RESTClientHelper::callAPI(
         _postOrFormFields,
         _formFiles,
         _aPIURL,
+        _requestHeaders,
         &ResponseHeaders
     );
 
@@ -166,6 +172,7 @@ QVariant RESTClientHelper::callAPI(
     const QVariantMap &_postOrFormFields,
     const QVariantMap &_formFiles,
     QString _aPIURL,
+    const QStringList &_requestHeaders,
     QVariantMap *_outResponseHeaders
 ) {
     if (_aPIURL.isEmpty())
@@ -200,7 +207,8 @@ QVariant RESTClientHelper::callAPI(
     Opt[CURLOPT_URL] = makeURL();
     Opt[CURLOPT_TIMEOUT] = 10000;
     Opt[CURLOPT_FAILONERROR] = false;
-    QStringList Headers;
+
+    QStringList Headers = _requestHeaders;
 
     if (HasForm) {
         if (_postOrFormFields.isEmpty() == false) {
