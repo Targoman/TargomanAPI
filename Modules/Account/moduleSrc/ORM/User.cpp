@@ -231,7 +231,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
 bool IMPL_REST_UPDATE(User, email, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Email_t   _email,
-    TAPI::MD5_t     _psw,
+    TAPI::MD5_t     _pass,
     QString         _salt
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -244,17 +244,20 @@ bool IMPL_REST_UPDATE(User, email, (
     if ((QFV.email().isValid(_email) == false) || (QFV.emailNotFake().isValid(_email) == false))
         throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
 
-    if (_psw.isEmpty() || _salt.isEmpty())
-        throw exHTTPBadRequest("Password and salt are required to change email");
+    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+    if (cJWT.canChangePass()) { //hasPass
+        if (_pass.isEmpty() || _salt.isEmpty())
+            throw exHTTPBadRequest("Password and salt are required to change email");
 
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+    }
 
     this->callSP(APICALLBOOM_PARAM,
                  "spApproval_Request", {
                      { "iBy", "E" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _email },
-                     { "iPass", _psw },
+                     { "iPass", _pass },
                      { "iSalt", _salt },
                  });
 
@@ -264,7 +267,7 @@ bool IMPL_REST_UPDATE(User, email, (
 bool IMPL_REST_UPDATE(User, mobile, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t  _mobile,
-    TAPI::MD5_t     _psw,
+    TAPI::MD5_t     _pass,
     QString         _salt
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -277,17 +280,20 @@ bool IMPL_REST_UPDATE(User, mobile, (
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Invalid mobile.");
 
-    if (_psw.isEmpty() || _salt.isEmpty())
-        throw exHTTPBadRequest("Password and salt are required to change email");
+    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+    if (cJWT.canChangePass()) { //hasPass
+        if (_pass.isEmpty() || _salt.isEmpty())
+            throw exHTTPBadRequest("Password and salt are required to change email");
 
-    QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+    }
 
     this->callSP(APICALLBOOM_PARAM,
                  "spApproval_Request", {
                      { "iBy", "M" },
                      { "iUserID", CurrentUserID },
                      { "iKey", _mobile },
-                     { "iPass", _psw },
+                     { "iPass", _pass },
                      { "iSalt", _salt },
                  });
 
