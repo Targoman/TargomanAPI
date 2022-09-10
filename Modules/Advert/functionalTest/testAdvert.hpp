@@ -412,6 +412,13 @@ private slots:
 //                    { tblAccountSaleablesBase::Fields::slbProductCount,     900 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test Saleable 456 vt" },
+                    { tblAccountSaleablesI18NBase::Fields::slbNameI18N,     QVariantMap({
+                          { "fa", "عنوان فارسی 123456" },
+                          { "ar", "عنوان عربی 123456" },
+                    }) },
+                    { tblAccountSaleablesI18NBase::Fields::slbDescI18N,     QVariantMap({
+                          { "fa", "شرح فارسی 123456" },
+                    }) },
                 }
             );
 
@@ -421,6 +428,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
+
 /*
     void createPaymentGateway_devtest() {
         auto ret = callAdminAPI(
@@ -491,14 +499,16 @@ private slots:
                 "Advert/addToBasket",
                 {},
                 {
-                    { "saleableCode", "p123-s456 zzzzzzzzz" },
+                        { "saleableCode", "p123-s456 zzzzzzzzz" },
 //                    { "orderAdditives", {} },
 //                    { "qty", 12 },
 //                    { "discountCode", "abcd11" },
                     { "referrer", "freepaper.com" },
 //                    { "referrerParams",      {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             QVERIFY(Result.isValid() == false);
@@ -524,7 +534,9 @@ private slots:
                     { "referrer", "freepaper.com" },
                     { "referrerParams",      {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             QVERIFY(Result.isValid() == false);
@@ -550,7 +562,9 @@ private slots:
                     { "referrer", "freepaper.com" },
                     { "referrerParams",      {} },
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             QVERIFY(Result.isValid() == false);
@@ -619,7 +633,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -682,7 +698,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -784,7 +802,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -820,7 +840,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -1164,7 +1186,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -1199,7 +1223,9 @@ private slots:
                     { "referrer",               "freepaper.com" },
                     { "referrerParams",         {} },
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
-                }
+                },
+                {},
+                { "accept-language: fa" }
             );
 
             stuBasketActionResult BasketActionResult;

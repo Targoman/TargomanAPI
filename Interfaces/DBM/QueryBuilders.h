@@ -516,10 +516,7 @@ public:
     ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias /*= {}*/);
     virtual ~ORMSelectQuery();
 
-    virtual ORMSelectQuery& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs) {
-        this->addCols(_colsSpecs);
-        return *this;
-    }
+    virtual ORMSelectQuery& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs);
 
     ORMSelectQuery& addCol(const clsColSpecs& _colSpecs);
     ORMSelectQuery& addCols(const QList<clsColSpecs>& _colsSpecs);

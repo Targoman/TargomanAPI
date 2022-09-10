@@ -190,6 +190,7 @@ protected:
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         QVariantMap ResponseHeaders;
@@ -202,6 +203,7 @@ protected:
                               _postOrFormFields,
                               _formFiles,
                               APIURL,
+                              _requestHeaders,
                               &ResponseHeaders
                               );
 
@@ -235,6 +237,7 @@ protected:
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         QString GuestJWT = "";
@@ -248,6 +251,7 @@ protected:
                       _urlArgs,
                       _postOrFormFields,
                       _formFiles,
+                      _requestHeaders,
                       _outResponseHeaders
                       );
     }
@@ -258,6 +262,7 @@ protected:
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         return callAPI(
@@ -267,6 +272,7 @@ protected:
                     _urlArgs,
                     _postOrFormFields,
                     _formFiles,
+                    _requestHeaders,
                     _outResponseHeaders
                     );
     }
@@ -277,6 +283,7 @@ protected:
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         return callAPI(
@@ -286,6 +293,7 @@ protected:
                     _urlArgs,
                     _postOrFormFields,
                     _formFiles,
+                    _requestHeaders,
                     _outResponseHeaders
                     );
     }
@@ -296,6 +304,7 @@ protected:
         const QVariantMap& _urlArgs = {},
         const QVariantMap& _postOrFormFields = {},
         const QVariantMap& _formFiles = {},
+        const QStringList &_requestHeaders = {},
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         return callAPI(
@@ -305,6 +314,7 @@ protected:
                     _urlArgs,
                     _postOrFormFields,
                     _formFiles,
+                    _requestHeaders,
                     _outResponseHeaders
                     );
     }

@@ -2530,6 +2530,11 @@ ORMSelectQuery::~ORMSelectQuery() { ; }
 /***********************\
 |* Columns             *|
 \***********************/
+ORMSelectQuery& ORMSelectQuery::addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs) {
+    this->addCols(_colsSpecs);
+    return *this;
+}
+
 ORMSelectQuery& ORMSelectQuery::addCol(const clsColSpecs& _colSpecs) {
 
     //check duplicates
