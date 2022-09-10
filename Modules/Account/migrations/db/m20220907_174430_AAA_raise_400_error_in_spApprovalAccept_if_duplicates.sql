@@ -109,13 +109,14 @@ BEGIN
     IF vByType = 'E' THEN
         IF (EXISTS(SELECT * FROM tblUser
                 WHERE usrEmail = vNewKey
-                AND _InvalidatedAt = 0)) THEN
-
+                AND _InvalidatedAt = 0
+                AND usrID != vUserID
+        )) THEN
             SIGNAL SQLSTATE '45000'
                SET MESSAGE_TEXT = '400:The email address is already assigned';
         END IF;
 
-    UPDATE tblUser
+        UPDATE tblUser
            SET usrEmail = vNewKey,
                usrApprovalState = IF(usrApprovalState IN ('N','E'), 'E', 'A'),
                usrStatus = IF(usrStatus IN('A','V'), 'A', usrStatus),
@@ -125,8 +126,9 @@ BEGIN
     ELSE
         IF (EXISTS(SELECT * FROM tblUser
                 WHERE usrMobile = vNewKey
-                AND _InvalidatedAt = 0)) THEN
-
+                AND _InvalidatedAt = 0
+                AND usrID != vUserID
+        )) THEN
             SIGNAL SQLSTATE '45000'
                SET MESSAGE_TEXT = '400:The mobile is already assigned';
         END IF;
@@ -141,7 +143,7 @@ BEGIN
     END IF;
 
     IF iLogin = 1 THEN
-        SET vSessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
+        SET vSessionGUID = SUBSTRING(dev_CommonFuncs.guid(NULL), 1, 32);
 
         INSERT
           INTO tblActiveSessions

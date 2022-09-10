@@ -138,7 +138,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         paymentCallback,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _paymentKey
         ),
         "Payment callback proxy",
@@ -151,7 +151,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         devTestPayPage,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _paymentKey,
             QString _trackID,
             QString _callback = {}
@@ -162,7 +162,7 @@ private slots:
     QVariant REST_GET_OR_POST(
         devTestCallbackPage,
         (
-            APICALLBOOM_TYPE_NO_JWT_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _paymentKey,
             QString _result
         ),

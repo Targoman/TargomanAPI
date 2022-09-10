@@ -44,7 +44,7 @@ void TextProcessor::initializeModule() {
 }
 
 QString IMPL_REST_GET_OR_POST(TextProcessor, normalize, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
@@ -53,7 +53,7 @@ QString IMPL_REST_GET_OR_POST(TextProcessor, normalize, (
 }
 
 QString IMPL_REST_GET_OR_POST(TextProcessor, text2IXML, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector
@@ -76,7 +76,7 @@ QString IMPL_REST_GET_OR_POST(TextProcessor, text2IXML, (
 }
 
 QString IMPL_REST_GET_OR_POST(TextProcessor, ixml2Text, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString& _ixml,
     bool _detokenize,
     bool _hinidiDigits,
@@ -87,7 +87,7 @@ QString IMPL_REST_GET_OR_POST(TextProcessor, ixml2Text, (
 }
 
 QString IMPL_REST_GET_OR_POST(TextProcessor, tokenize, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const QString& _text,
     const TAPI::ISO639_2_t& _lang,
     bool _useSpellCorrector,

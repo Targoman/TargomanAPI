@@ -56,7 +56,8 @@ clsAPIObject::clsAPIObject(
     HasExtraMethodName(_hasExtraMethodName),
     Parent(_module),
 //    RequiresJWT(false)
-    TokenActorType(enuTokenActorType::ANONYMOUSE)
+    TokenActorType(enuTokenActorType::ANONYMOUSE),
+    TokenIsOptional(true)
 {
     QList<QByteArray> parameterTypes = _method.parameterTypes();
     quint8 i = 0;
@@ -69,14 +70,24 @@ clsAPIObject::clsAPIObject(
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
             this->BaseMethod.DefaultValues[0] = {};
-        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) { //APICALLBOOM_TYPE_NO_JWT_DECL)) {
+        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) { //APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)) {
             --this->RequiredParamsCount;
             this->BaseMethod.DefaultValues.removeAt(0);
-//            this->RequiresJWT = true;
-            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL_STR))
+
+            if        (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL_STR)) {
                 this->TokenActorType = enuTokenActorType::USER;
-            else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_DECL_STR))
+                this->TokenIsOptional = false;
+            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL_STR)) {
+                this->TokenActorType = enuTokenActorType::USER;
+                this->TokenIsOptional = true;
+            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_DECL_STR)) {
                 this->TokenActorType = enuTokenActorType::API;
+                this->TokenIsOptional = false;
+            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL_STR)) {
+                this->TokenActorType = enuTokenActorType::API;
+                this->TokenIsOptional = true;
+            }
+
         } else {
             QByteArray ParamNameNoUnderScore = (ParamName.startsWith('_') ? ParamName.mid(1) : ParamName);
             this->ParamNames.append(ParamNameNoUnderScore);

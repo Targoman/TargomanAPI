@@ -35,7 +35,7 @@ StaticModule::StaticModule() :
 { ; }
 
 TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     gServerStats.Success.inc();
 
@@ -49,7 +49,7 @@ TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 }
@@ -57,7 +57,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
 //TAPI::ResponseRedirect_t
 //TAPI::FileData_t
 QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     if (ServerCommonConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
@@ -76,7 +76,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     bool _full
 )) {
     gServerStats.Success.inc();
@@ -85,7 +85,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     gServerStats.Success.inc();
 
@@ -101,7 +101,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
 )) {
     gServerStats.Success.inc();
 

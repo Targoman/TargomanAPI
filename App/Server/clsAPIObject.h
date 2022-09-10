@@ -87,6 +87,7 @@ public:
 //        return this->Parent->actorType();
 //    }
     enuTokenActorType::Type tokenActorType() { return this->TokenActorType; }
+    bool tokenIsOptional() { return this->TokenIsOptional; }
 
 //    inline bool requiresCookies() const {
 //        return this->ParamTypesName.contains(PARAM_COOKIES);
@@ -165,6 +166,7 @@ private:
     intfPureModule*             Parent;
 //    bool                        RequiresJWT;
     enuTokenActorType::Type     TokenActorType;
+    bool                        TokenIsOptional;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

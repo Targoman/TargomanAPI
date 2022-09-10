@@ -21,29 +21,18 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "FormalityChecker.h"
-#include "ModuleHelpers/NLP/FormalityChecker.h"
+#ifndef TARGOMAN_API_MODULES_TARGOMANMT_DEFS_HPP
+#define TARGOMAN_API_MODULES_TARGOMANMT_DEFS_HPP
 
-namespace Targoman::API::FormalityCheckerModule {
+#include "ModuleHelpers/MT/MTDefs.hpp"
+#include "libTargomanCommon/Macros.h"
+#include "Interfaces/Common/intfAPIArgManipulator.h"
 
-using namespace Targoman::API::ModuleHelpers;
+constexpr char TargomanMTDomain[] = "TargomanMT";
+constexpr char TargomanMTSchema[] = "TargomanMT";
 
-TARGOMAN_API_MODULE_IMPLEMENT(FormalityChecker)
+namespace Targoman::API::TargomanMTModule {
 
-FormalityChecker::FormalityChecker() :
-    intfPureModule("FormalityChecker")
-{ ; }
+} //namespace Targoman::API::TargomanMTModule
 
-void FormalityChecker::initializeModule() {
-    NLP::FormalityChecker::instance();
-}
-
-QString IMPL_REST_GET_OR_POST(FormalityChecker, check, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
-    const QString _text,
-    const TAPI::ISO639_2_t& _lang
-)) {
-    return NLP::FormalityChecker::instance().check(_lang, _text);
-}
-
-} //namespace Targoman::API::FormalityCheckerModule
+#endif // TARGOMAN_API_MODULES_TARGOMANMT_DEFS_HPP

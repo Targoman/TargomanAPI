@@ -129,9 +129,15 @@ void intfAPICallBoom::initialize(
 void intfAPICallBoom::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
     this->Data->JWT = _JWT;
 }
+
 /*TAPI::JWT_t*/QJsonObject &intfAPICallBoom::getJWT() {
     return this->Data->JWT;
 }
+
+bool intfAPICallBoom::isAnonymouse() {
+    return this->Data->JWT.isEmpty();
+}
+
 quint64 intfAPICallBoom::getActorID(quint64 _default) {
     quint64 ActorID = Targoman::API::AAA::clsJWT(this->Data->JWT).actorID();
     if (ActorID == 0)
@@ -250,7 +256,7 @@ void intfAPICallBoom::addToTimings(const QString &_name, const QString &_desc, q
     this->Data->FNTiming(_name, _desc, _nanoSecs);
 }
 
-template class APICALLBOOM_TYPE_NO_JWT_DECL;
+template class APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL;
 template class APICALLBOOM_TYPE_JWT_USER_DECL;
 template class APICALLBOOM_TYPE_JWT_API_DECL;
 

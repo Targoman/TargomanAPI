@@ -334,44 +334,25 @@ private slots:
     }
 
     void ApproveMobile_And_Login_0999_888_1010() {
-        clsDAC DAC;
-        QJsonObject AprInfo = DAC.execQuery("",
-                                            "SELECT aprID"
-                                            "     , apr_usrID"
-                                            "     , aprApprovalCode"
-                                            "  FROM tblApprovalRequest"
-                                            " WHERE aprApprovalKey = '+989998881010'"
-                                            " ORDER BY aprID DESC"
-                                            )
-                              .toJson(true)
-                              .object()
-                              ;
+        QVariant Result = callGuestAPI(
+                              RESTClientHelper::POST,
+                              "Account/fixtureGetLastApprovalRequestCodeAndMakeAsSent",
+                              {},
+                              {
+                                  { "emailOrMobile", "0999-888-1010" },
+                               })
+                          ;
 
-        quint64 AprID = AprInfo
-                       .value("aprID")
-                       .toDouble();
-        QVERIFY(AprID > 0);
+        QVERIFY(Result.isValid());
 
-        quint64 UserID = AprInfo
-                       .value("apr_usrID")
-                       .toDouble();
-        QVERIFY(AprID > 0);
-
-        QString Code = AprInfo
-                       .value("aprApprovalCode")
-                       .toString();
+        QString Code = Result.toMap().value("aprApprovalCode").toString();
         QVERIFY(Code.isEmpty() == false);
 
-        DAC.execQuery("",
-                      "UPDATE tblApprovalRequest"
-                      "   SET aprStatus = 'S'"
-                      "     , aprSentDate = NOW()"
-                      " WHERE aprID=?",
-                      {
-                          AprID
-                      });
+        quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
+        QVERIFY(UserID > 0);
 
-        QVariant Result = callUserAPI(
+        //------------------
+        Result = callUserAPI(
             RESTClientHelper::POST,
             "Account/approveMobile",
             {},
@@ -421,7 +402,7 @@ private slots:
     //-------------------------------------------------------
     void Signup() {
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-        QVERIFY((gUserID = callUserAPI(RESTClientHelper::PUT,
+        QVERIFY((gUserID = callGuestAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             { "emailOrMobile", UT_UserEmail },
                                             { "name", "unit" },
@@ -437,7 +418,7 @@ private slots:
                 ;
 
         //df6d2338b2b8fce1ec2f6dda0a630eb0 # 987
-        QVERIFY((gAdminUserID = callUserAPI(RESTClientHelper::PUT,
+        QVERIFY((gAdminUserID = callGuestAPI(RESTClientHelper::PUT,
                                         "Account/signup", {}, {
                                             { "emailOrMobile", UT_AdminUserEmail },
                                             { "name", "admin unit" },
@@ -453,7 +434,7 @@ private slots:
                 ;
 
         clsDAC DAC;
-        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", {UT_AdminRoleID, gAdminUserID});
+        DAC.execQuery("", "UPDATE tblUser SET tblUser.usr_rolID=? WHERE tblUser.usrID=?", { UT_AdminRoleID, gAdminUserID });
     }
 
     void ResendEmailApproveCode() {
@@ -507,24 +488,42 @@ private slots:
     }
 
     void ApproveEmail() {
-        clsDAC DAC;
-        QString Code = DAC.execQuery("",
-                                     "SELECT aprApprovalCode"
-                                     "  FROM tblApprovalRequest"
-                                     " WHERE apr_usrID=?",
-                                     {
-                                         gUserID
-                                     })
-                       .toJson(true)
-                       .object()
-                       .value("aprApprovalCode")
-                       .toString()
-                       ;
+//        clsDAC DAC;
+//        QString Code = DAC.execQuery("",
+//                                     "SELECT aprApprovalCode"
+//                                     "  FROM tblApprovalRequest"
+//                                     " WHERE apr_usrID=?",
+//                                     {
+//                                         gUserID
+//                                     })
+//                       .toJson(true)
+//                       .object()
+//                       .value("aprApprovalCode")
+//                       .toString()
+//                       ;
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
-        {gUserID});
+//        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
+//        {gUserID});
 
-        QVariant Result = callUserAPI(RESTClientHelper::POST,
+        QVariant Result = callGuestAPI(
+                              RESTClientHelper::POST,
+                              "Account/fixtureGetLastApprovalRequestCodeAndMakeAsSent",
+                              {},
+                              {
+                                  { "emailOrMobile", UT_UserEmail },
+                               })
+                          ;
+
+        QVERIFY(Result.isValid());
+
+        QString Code = Result.toMap().value("aprApprovalCode").toString();
+        QVERIFY(Code.isEmpty() == false);
+
+        quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
+        QVERIFY(UserID > 0);
+
+        //------------------
+        Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/approveEmail",
                                   {},
                                   {
@@ -537,14 +536,32 @@ private slots:
     }
 
     void ApproveAdminEmail() {
-        clsDAC DAC;
-        QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
-        {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
+//        clsDAC DAC;
+//        QString Code = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=?",
+//        {gAdminUserID}).toJson(true).object().value("aprApprovalCode").toString();
 
-        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
-        {gAdminUserID});
+//        DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
+//        {gAdminUserID});
 
-        QVariant Result = callUserAPI(RESTClientHelper::POST,
+        QVariant Result = callGuestAPI(
+                              RESTClientHelper::POST,
+                              "Account/fixtureGetLastApprovalRequestCodeAndMakeAsSent",
+                              {},
+                              {
+                                  { "emailOrMobile", UT_AdminUserEmail },
+                               })
+                          ;
+
+        QVERIFY(Result.isValid());
+
+        QString Code = Result.toMap().value("aprApprovalCode").toString();
+        QVERIFY(Code.isEmpty() == false);
+
+        quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
+        QVERIFY(UserID > 0);
+
+        //------------------
+        Result = callUserAPI(RESTClientHelper::POST,
                                   "Account/approveEmail",
                                   {},
                                   {
@@ -552,16 +569,19 @@ private slots:
                                       { "code", Code },
                                       { "autoLogin", false },
                                   });
+
         QVERIFY(Result.isValid());
     }
 
     void Login() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                "Account/login",{}, {
-                                    {"emailOrMobile", UT_UserEmail},
-                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
-                                    {"salt", 1234},
+                                "Account/login",
+                                {},
+                                {
+                                    { "emailOrMobile", UT_UserEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", 1234} ,
                                 });
 
         QVERIFY(Result.isValid());
@@ -589,11 +609,13 @@ private slots:
 
     void LoginAgain() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                "Account/login",{}, {
-                                    {"emailOrMobile", UT_UserEmail},
-                                    {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
-                                    {"salt", 1234},
+        QVariant Result = callGuestAPI(RESTClientHelper::POST,
+                                "Account/login",
+                                {},
+                                {
+                                    { "emailOrMobile", UT_UserEmail },
+                                    { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                                    { "salt", 1234 },
                                 });
         QVERIFY(Result.isValid());
 
@@ -601,7 +623,7 @@ private slots:
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-        Result = callUserAPI(RESTClientHelper::POST,
+        Result = callGuestAPI(RESTClientHelper::POST,
                                 "Account/login",{}, {
                                     {"emailOrMobile", UT_AdminUserEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
@@ -621,20 +643,38 @@ private slots:
 //    }
 
     void CreateForgotPasswordLink() {
-        QVERIFY(callUserAPI(RESTClientHelper::POST,
+        QVERIFY(callGuestAPI(RESTClientHelper::POST,
                         "Account/createForgotPasswordLink", {}, {
                             { "emailOrMobile", UT_UserEmail },
                         }).toBool());
     }
 
     void ChangePassByUUID() {
-        clsDAC DAC;
-        QString Code = DAC.execQuery("", "SELECT fprCode FROM tblForgotPassRequest WHERE fpr_usrID=?",
-        {gUserID}).toJson(true).object().value("fprCode").toString();
+//        clsDAC DAC;
+//        QString Code = DAC.execQuery("", "SELECT fprCode FROM tblForgotPassRequest WHERE fpr_usrID=?",
+//        {gUserID}).toJson(true).object().value("fprCode").toString();
 
-        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprCode=?",
-        {Code});
+//        DAC.execQuery("", "UPDATE tblForgotPassRequest SET fprStatus = 'S' WHERE fprCode=?",
+//        {Code});
 
+        QVariant Result = callUserAPI(
+                              RESTClientHelper::POST,
+                              "Account/fixtureGetLastForgotPasswordUUIDAndMakeAsSent",
+                              {},
+                              {
+                                  { "emailOrMobile", UT_UserEmail },
+                               })
+                          ;
+
+        QVERIFY(Result.isValid());
+
+        QString Code = Result.toMap().value("fprCode").toString();
+        QVERIFY(Code.isEmpty() == false);
+
+        quint64 UserID = Result.toMap().value("fpr_usrID").toULongLong();
+        QVERIFY(UserID > 0);
+
+        //------------------
         //827ccb0eea8a706c4c34a16891f84e7b # 12345
         QVERIFY(callUserAPI(RESTClientHelper::POST,
                         "Account/changePassByUUID", {}, {

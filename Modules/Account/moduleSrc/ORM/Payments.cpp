@@ -78,7 +78,7 @@ QVariant IMPL_ORMGET_USER(OnlinePayments) {
   * this proxy received GET and POST and make GET call to the clients callback
   */
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey
 )) {
 //curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
@@ -121,7 +121,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 
 #ifdef QT_DEBUG
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey,
     Q_DECL_UNUSED QString _trackID,
     QString _callback
@@ -220,7 +220,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 }
 
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
-    APICALLBOOM_TYPE_NO_JWT_IMPL &APICALLBOOM_PARAM,
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _paymentKey,
     QString _result
 )) {
