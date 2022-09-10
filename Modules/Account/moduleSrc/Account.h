@@ -250,17 +250,6 @@ private slots:
         "Create a forgot password request returning a UUID for the requiest"
     )
 
-#ifdef QT_DEBUG
-    QString REST_POST(
-        fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
-        (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
-            QString _emailOrMobile
-        ),
-        "fixture: Get Last Forgot Password UUID And Make As Sent"
-    )
-#endif
-
     bool REST_GET_OR_POST(
         changePass,
         (
@@ -494,6 +483,24 @@ private slots:
     )
 
 #ifdef QT_DEBUG
+    QVariant REST_POST(
+        fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
+        (
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            QString _emailOrMobile
+        ),
+        "fixture: Get Last Forgot Password UUID And Make As Sent"
+    )
+
+    QVariant REST_POST(
+        fixtureGetLastApprovalRequestCodeAndMakeAsSent,
+        (
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            QString _emailOrMobile
+        ),
+        "fixture: Get Last Approval Request Code And Make As Sent"
+    )
+
     QVariant REST_POST(
         fixtureSetup,
         (
