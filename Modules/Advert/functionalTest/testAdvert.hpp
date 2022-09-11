@@ -895,6 +895,10 @@ private slots:
                 {
                     { "amount", this->LastPreVoucher.ToPay },
                     { "domain", "dev.test" },
+                },
+                {},
+                {
+                    { "accept-language: fa" },
                 }
             );
 

@@ -41,6 +41,20 @@ namespace Targoman::API::AccountModule {
 namespace ORM {
 
 /*****************************************************************\
+|* PaymentGatewayTypesI18N ***************************************|
+\*****************************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, PaymentGatewayTypesI18N)
+
+PaymentGatewayTypesI18N::PaymentGatewayTypesI18N() :
+    intfSQLBasedModule(
+        AAASchema,
+        tblPaymentGatewayTypesI18N::Name,
+        tblPaymentGatewayTypesI18N::Private::ORMFields,
+        tblPaymentGatewayTypesI18N::Private::Relations,
+        tblPaymentGatewayTypesI18N::Private::Indexes
+) { ; }
+
+/*****************************************************************\
 |* PaymentGatewayTypes *******************************************|
 \*****************************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, PaymentGatewayTypes)
@@ -52,7 +66,53 @@ PaymentGatewayTypes::PaymentGatewayTypes() :
         tblPaymentGatewayTypes::Private::ORMFields,
         tblPaymentGatewayTypes::Private::Relations,
         tblPaymentGatewayTypes::Private::Indexes
-) { ; }
+) {
+    PaymentGatewayTypesI18N::instance();
+}
+
+ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+    PaymentGatewayTypesI18N::instance().prepareFiltersList();
+
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
+
+    if (_translate) {
+        Query
+            .removeCol(tblPaymentGatewayTypes::Fields::pgtName)
+            .nestedLeftJoin(PaymentGatewayTypesI18N::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                      .where({ tblPaymentGatewayTypesI18N::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
+                      , "lng_tblPaymentGatewayTypes"
+                      , { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pid,
+                          enuConditionOperator::Equal,
+                          tblPaymentGatewayTypes::Name, tblPaymentGatewayTypes::Fields::pgtID
+                      }
+                     )
+            .addCol(enuConditionalAggregation::IF,
+                    { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N, enuConditionOperator::Null },
+                    DBExpression::VALUE(R(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias, tblPaymentGatewayTypes::Fields::pgtName)),
+                    DBExpression::VALUE(R("lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)),
+                    tblPaymentGatewayTypes::Fields::pgtName
+                   )
+        ;
+    } else {
+        Query
+            .nestedLeftJoin(PaymentGatewayTypesI18N::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                            .addCol(tblPaymentGatewayTypesI18N::Fields::pid)
+                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
+                                                        .arg(tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)),
+                                    tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)
+                            .groupBy(tblPaymentGatewayTypesI18N::Fields::pid)
+                            , "lng_tblPaymentGatewayTypes"
+                            , { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pid,
+                                enuConditionOperator::Equal,
+                                tblPaymentGatewayTypes::Name, tblPaymentGatewayTypes::Fields::pgtID
+                            }
+                           )
+            .addCol(R("lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N), tblPaymentGatewayTypes::Fields::pgtNameI18N)
+        ;
+    }
+
+    return Query;
+}
 
 QVariant IMPL_ORMGET_USER(PaymentGatewayTypes) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
