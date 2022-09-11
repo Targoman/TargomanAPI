@@ -146,6 +146,10 @@ std::tuple<QString, QString> gtwTarjomyarPay::verifyAndSettle(
         else
             throw exPayment("The response has no status field");
 
+//        if (RespStatus == "A")
+//            throw exPayment("This payment verified before");
+
+        //
         QString RespAmount;
         if (Response.contains("amount"))
             RespAmount = Response.value("amount").toString();
