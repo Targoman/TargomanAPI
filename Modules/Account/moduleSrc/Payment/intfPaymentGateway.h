@@ -180,6 +180,10 @@ protected:
         Opt[CURLOPT_FOLLOWLOCATION] = true;
         Opt[CURLOPT_FAILONERROR] = true;
         Opt[CURLOPT_TIMEOUT] = 60;
+
+        Opt[CURLOPT_SSL_VERIFYPEER] = 0;
+        Opt[CURLOPT_SSL_VERIFYHOST] = 0;
+
         Opt[CURLOPT_POSTFIELDS] = _json.toJson(QJsonDocument::Compact);
 
         QString CUrlResult = CUrl.exec(Opt);
