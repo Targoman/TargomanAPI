@@ -37,8 +37,9 @@ namespace Targoman::API::AccountModule::Payment::Gateways {
 class gtwZibal : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        Targoman::API::AccountModule::enuPaymentGatewayType::IranIntermediateGateway,
-        gtwZibal)
+            gtwZibal,
+            Targoman::API::AccountModule::enuPaymentGatewayType::IranIntermediateGateway
+            );
 
 public:
     constexpr static char Name[] = "Zibal";

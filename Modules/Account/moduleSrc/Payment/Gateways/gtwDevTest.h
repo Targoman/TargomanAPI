@@ -40,8 +40,9 @@ namespace Targoman::API::AccountModule::Payment::Gateways {
 class gtwDevTest : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-        Targoman::API::AccountModule::enuPaymentGatewayType::_DeveloperTest,
-        gtwDevTest)
+            gtwDevTest,
+            Targoman::API::AccountModule::enuPaymentGatewayType::_DeveloperTest
+            );
 
 public:
     constexpr static char Name[] = "DevTest";

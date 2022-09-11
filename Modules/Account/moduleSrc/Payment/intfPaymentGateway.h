@@ -101,11 +101,11 @@ namespace Payment {
     static _class* Instance = nullptr; return (Q_LIKELY(Instance) ? Instance : (Instance = new _class)); \
 }
 
-#define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_gtwType, _gatewayClassName) \
+#define TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(_name, _type) \
 public: \
-    instanceGetterPtr(_gatewayClassName); \
+    instanceGetterPtr(_name); \
 protected: \
-    virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _gtwType; }; \
+    virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _type; }; \
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
@@ -122,17 +122,17 @@ protected: \
             ); \
     friend Targoman::API::AccountModule::Payment::PaymentLogic; \
 private: \
-    _gatewayClassName(); \
-    TAPI_DISABLE_COPY(_gatewayClassName); \
-    TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::AccountModule::Payment::PaymentLogic::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
-    TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
+    _name(); \
+    TAPI_DISABLE_COPY(_name); \
+    TARGOMAN_BEGIN_STATIC_CTOR(_name) \
+        Targoman::API::AccountModule::Payment::PaymentLogic::registerGateway(_name::Name, _name::instancePtr()); \
+    TARGOMAN_END_STATIC_CTOR(_name)
 
-//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name, _gatewayClassName::instancePtr());
-//PaymentLogic::registerGateway<_gatewayClassName>(_gatewayClassName::Name);
+//PaymentLogic::registerGateway<_name>(_name::Name, _name::instancePtr());
+//PaymentLogic::registerGateway<_name>(_name::Name);
 
-#define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_gatewayClassName) \
-    _gatewayClassName::_gatewayClassName() { ; }
+#define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_name) \
+    _name::_name() { ; }
 
 /**
  * @brief The intfPaymentGateway class is base class of gateway drivers
