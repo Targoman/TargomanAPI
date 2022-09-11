@@ -190,7 +190,8 @@ QByteArray PrivHelpers::getURL(const QString& _url) {
 
     QtCUrl::Options Opt;
     Opt[CURLOPT_URL] = _url;
-    Opt[CURLOPT_TIMEOUT] = 30;
+    Opt[CURLOPT_TIMEOUT] = 5;
+    Opt[CURLOPT_CONNECTTIMEOUT] = 5;
     Opt[CURLOPT_FAILONERROR] = true;
     QString CUrlResult = CUrl.exec(Opt);
 

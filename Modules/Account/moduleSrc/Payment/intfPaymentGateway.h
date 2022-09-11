@@ -179,7 +179,8 @@ protected:
         Opt[CURLOPT_POST] = true;
         Opt[CURLOPT_FOLLOWLOCATION] = true;
         Opt[CURLOPT_FAILONERROR] = true;
-        Opt[CURLOPT_TIMEOUT] = 60;
+        Opt[CURLOPT_TIMEOUT] = 5;
+        Opt[CURLOPT_CONNECTTIMEOUT] = 5;
 
         Opt[CURLOPT_SSL_VERIFYPEER] = 0;
         Opt[CURLOPT_SSL_VERIFYHOST] = 0;

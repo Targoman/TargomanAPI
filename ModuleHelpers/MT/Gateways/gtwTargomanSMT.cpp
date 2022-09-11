@@ -100,7 +100,8 @@ QVariantMap gtwTargomanSMT::doTranslation(
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $CurrServers[$LastServer]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
 
