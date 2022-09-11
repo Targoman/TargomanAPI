@@ -206,7 +206,8 @@ QVariant RESTClientHelper::callAPI(
     QtCUrl::Options Opt;
     Opt[CURLOPT_URL] = makeURL();
     Opt[CURLOPT_FAILONERROR] = false;
-    Opt[CURLOPT_TIMEOUT] = 10000;
+    Opt[CURLOPT_TIMEOUT] = 5;
+    Opt[CURLOPT_CONNECTTIMEOUT] = 5;
 
     Opt[CURLOPT_SSL_VERIFYPEER] = 0;
     Opt[CURLOPT_SSL_VERIFYHOST] = 0;
