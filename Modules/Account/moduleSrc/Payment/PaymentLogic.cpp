@@ -107,7 +107,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 
     ORMSelectQuery qry = PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
                       .addCol(tblPaymentGatewayTypes::Fields::pgtType)
-                      .addCol(tblPaymentGatewayTypes::Fields::pgtName)
+//                      .addCol(tblPaymentGatewayTypes::Fields::pgtName)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMinRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMinRequestAmount)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMaxRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount)
                       .nestedInnerJoin(PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)

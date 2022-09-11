@@ -84,6 +84,30 @@ namespace ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+namespace tblPaymentGatewayTypes {
+    constexpr char Name[] = "tblPaymentGatewayTypes";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(pgtID);
+        TARGOMAN_CREATE_CONSTEXPR(pgtType);
+        TARGOMAN_CREATE_CONSTEXPR(pgtName);
+        TARGOMAN_CREATE_CONSTEXPR(pgtNameI18N);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
+        TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
+    }
+}
+
+namespace tblPaymentGatewayTypesI18N {
+    constexpr char Name[] = "tblPaymentGatewayTypesI18N";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(pid);
+        TARGOMAN_CREATE_CONSTEXPR(language);
+        TARGOMAN_CREATE_CONSTEXPR(pgtNameI18N);
+    }
+}
+
 namespace tblPaymentGateways {
     constexpr char Name[] = "tblPaymentGateways";
 
@@ -119,16 +143,8 @@ namespace tblPaymentGateways {
     }
 }
 
+//-- tbl inside
 namespace tblPaymentGatewayTypes {
-    constexpr char Name[] = "tblPaymentGatewayTypes";
-
-    namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pgtType);
-        TARGOMAN_CREATE_CONSTEXPR(pgtName);
-        TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
-        TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
-        TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
-    }
 
     namespace Relation {
         // constexpr char AAA[] = "aaa";
@@ -137,16 +153,18 @@ namespace tblPaymentGatewayTypes {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName                           Type                        Validation                              Default     UpBy     Sort   Filter Self  Virt   PK
+            { Fields::pgtID,                    ORM_PRIMARYKEY_16 },
             { Fields::pgtType,                  S(Targoman::API::AccountModule::enuPaymentGatewayType::Type), QFV,  QRequired,  UPAdmin },
-            { Fields::pgtName,                  S(QString),                 QFV.unicodeAlNum().maxLenght(64),       QRequired,  UPAdmin },
+            ORM_MULTILANGUAGE(Fields::pgtName, QRequired, UPAdmin),
             { Fields::pgtMinRequestAmount,      S(qreal),                   QFV.minValue(1),                        1,          UPAdmin },
             { Fields::pgtMaxRequestAmount,      S(NULLABLE_TYPE(double)),   QFV,                                    QNull,      UPAdmin },
             { Fields::pgtStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active) },
         };
 
         const QList<stuRelation> Relations = {
-            //Col                        Reference Table              ForeignCol       Rename     LeftJoin
-            { Fields::pgtType, R(AAASchema, tblPaymentGateways::Name), tblPaymentGateways::Fields::pgwType },
+            //Col                           Reference Table              ForeignCol       Rename     LeftJoin
+            { Fields::pgtType,              R(AAASchema, tblPaymentGateways::Name), tblPaymentGateways::Fields::pgwType },
+            { Fields::pgtID,                R(AAASchema, tblPaymentGatewayTypesI18N::Name), tblPaymentGatewayTypesI18N::Fields::pid },
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -155,11 +173,39 @@ namespace tblPaymentGatewayTypes {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
+        SF_ORM_PRIMARYKEY_16        (pgtID),
         SF_Enum                     (pgtType, Targoman::API::AccountModule::enuPaymentGatewayType, Targoman::API::AccountModule::enuPaymentGatewayType::COD),
         SF_QString                  (pgtName),
         SF_qreal                    (pgtMinRequestAmount),
         SF_NULLABLE_qreal           (pgtMaxRequestAmount),
         SF_ORM_STATUS_FIELD         (pgtStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active)
+    );
+}
+
+namespace tblPaymentGatewayTypesI18N {
+    namespace Relation {
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
+            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::pgtNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
+        };
+
+        const QList<stuRelation> Relations = {
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_quint16                  (pid),
+        SF_QString                  (language),
+        SF_QString                  (pgtNameI18N)
     );
 }
 
@@ -243,10 +289,21 @@ namespace tblPaymentGateways {
 
 #pragma GCC diagnostic pop
 
+/******************************************************/
+class PaymentGatewayTypesI18N : public intfSQLBasedModule
+{
+    Q_OBJECT
+    TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypesI18N)
+};
+
+/******************************************************/
 class PaymentGatewayTypes : public intfSQLBasedModule
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypes)
+
+public:
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET_USER("Get payment gateway type information")
@@ -255,6 +312,7 @@ private slots:
     bool ORMDELETE_USER("Delete a payment gateway type")
 };
 
+/******************************************************/
 class PaymentGateways : public intfSQLBasedModule
 {
     Q_OBJECT
@@ -277,6 +335,7 @@ private slots:
     )
 };
 
+/******************************************************/
 } //namespace ORM
 } //namespace Targoman::API::AccountModule
 
