@@ -799,7 +799,17 @@ private slots:
 
     ///@TODO: test [DELETE]  Account/User/photo
     ///@TODO: test [PATCH]   Account/User/email
-    ///@TODO: test [PATCH]   Account/User/mobile
+
+    void UpdateMobile_exists() {
+        QVERIFY_EXCEPTION_THROWN(callUserAPI(RESTClientHelper::PATCH,
+                                    "Account/User/mobile",
+                                    {},
+                                    {
+                                        { "mobile", "09998881010" },
+                                    }),
+                                 exTargomanBase
+                                 );
+    }
 
     void UpdateUserPersonalInfo() {
         QVERIFY(callUserAPI(RESTClientHelper::PATCH,
