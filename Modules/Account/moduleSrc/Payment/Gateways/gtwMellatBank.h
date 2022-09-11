@@ -39,9 +39,10 @@ class gtwMellatBank : public intfPaymentGateway
 public:
     constexpr static char Name[] = "MellatBank";
 
-TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-    Targoman::API::AccountModule::enuPaymentGatewayType::IranBank,
-    gtwMellatBank)
+    TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
+            gtwMellatBank,
+            Targoman::API::AccountModule::enuPaymentGatewayType::IranBank
+            );
 
 private:
     virtual QString errorString(int _errCode);

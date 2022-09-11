@@ -76,15 +76,11 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const ORM::tblPaymentGateways::DTO &_paymentGateway,
-    const ORM::tblOnlinePayments::DTO &_onlinePayment,
-    const TAPI::JSON_t &_pgResponse
+    Q_DECL_UNUSED const ORM::tblPaymentGateways::DTO &_paymentGateway,
+    Q_DECL_UNUSED const ORM::tblOnlinePayments::DTO &_onlinePaymentDTO,
+    Q_DECL_UNUSED const TAPI::JSON_t &_pgResponse
 //    const QString &_domain
 ) {
-    Q_UNUSED(_paymentGateway);
-    Q_UNUSED(_onlinePayment);
-    Q_UNUSED(_pgResponse);
-
 #ifdef QT_DEBUG
     if (_pgResponse.isObject() == false)
         throw exPayment("Invalid response from gateway.");
@@ -103,7 +99,7 @@ std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
 
     return {
         "",
-        "ref_" + _onlinePayment.onpMD5
+        "ref_" + _onlinePaymentDTO.onpMD5
     };
 
 #else

@@ -21,39 +21,39 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
-#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
+#ifndef TARGOMAN_API_MODULES_ACCOUNT_PGTW_TARJOMYARPAY_H
+#define TARGOMAN_API_MODULES_ACCOUNT_PGTW_TARJOMYARPAY_H
 
 #include "../intfPaymentGateway.h"
 #include "../PaymentLogic.h"
 
 /**
  * CAUTION:
- * place #include "gtwZibal.h" in ActivePayments.h for proper driver registration
+ * place #include "gtwTarjomyarPay.h" in ActivePayments.h for proper driver registration
  */
 
 namespace Targoman::API::AccountModule::Payment::Gateways {
 
-class gtwZibal : public intfPaymentGateway
+class gtwTarjomyarPay : public intfPaymentGateway
 {
     TARGOMAN_DEFINE_API_PAYMENT_GATEWAY(
-            gtwZibal,
+            gtwTarjomyarPay,
             Targoman::API::AccountModule::enuPaymentGatewayType::IranIntermediateGateway
             );
 
 public:
-    constexpr static char Name[] = "Zibal";
+    constexpr static char Name[] = "TarjomyarPay";
 
 private:
-    constexpr static char URL_GTW_REQUEST[] = "https://gateway.zibal.ir/v1/request";
-    constexpr static char URL_GTW_VERIFY[]  = "https://gateway.zibal.ir/v1/verify";
-    constexpr static char URL_GTW_PAY[]     = "https://gateway.zibal.ir/start/{{track_id}}/direct";
-    constexpr static char METAINFO_KEY_MERCHANT_ID[] = "merchantid";
+    constexpr static char METAINFO_KEY_TOKEN[] = "token";
 
-    virtual QString errorString(int _errCode);
-    QString statusString(int _statusCode);
+    //($token, $amount, $cb, $desc)
+    constexpr static char URL_GTW_REQUEST[] = "https://api.targoman.ir/svn/Branch/NGT/rest/Affiliates/requestPayment";
+
+    //($token, $ordID)
+    constexpr static char URL_GTW_VERIFY[]  = "https://api.targoman.ir/svn/Branch/NGT/rest/Affiliates/approvePayment";
 };
 
 } //namespace Targoman::API::AccountModule::Payment::Gateways
 
-#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_ZIBAL_H
+#endif // TARGOMAN_API_MODULES_ACCOUNT_PGTW_TARJOMYARPAY_H
