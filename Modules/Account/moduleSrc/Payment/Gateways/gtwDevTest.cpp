@@ -77,7 +77,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
-    const ORM::tblOnlinePayments::DTO &_onlinePayment,
+    Q_DECL_UNUSED const ORM::tblOnlinePayments::DTO &_onlinePaymentDTO,
     const TAPI::JSON_t &_pgResponse
 //    const QString &_domain
 ) {

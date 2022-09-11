@@ -159,7 +159,7 @@ protected:
     virtual std::tuple<QString, QString> verifyAndSettle(
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
-            const ORM::tblOnlinePayments::DTO &_onlinePayment,
+            Q_DECL_UNUSED const ORM::tblOnlinePayments::DTO &_onlinePaymentDTO,
             const TAPI::JSON_t &_pgResponse
 //            const QString &_domain
             ) = 0;

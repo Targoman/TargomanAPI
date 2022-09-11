@@ -25,7 +25,8 @@
 #define TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_GATEWAYS_ACTIVEGATEWAYS_H
 
 #include "gtwDevTest.h"
-#include "gtwMellatBank.h"
 #include "gtwZibal.h"
+#include "gtwTarjomyarPay.h"
+#include "gtwMellatBank.h"
 
 #endif // TARGOMAN_API_MODULES_ACCOUNT_PAYMENT_GATEWAYS_ACTIVEGATEWAYS_H

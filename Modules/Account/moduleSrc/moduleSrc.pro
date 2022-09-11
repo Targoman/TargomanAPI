@@ -32,8 +32,9 @@ HEADERS += \
     Payment/PaymentLogic.h \
     Payment/intfPaymentGateway.h \
     Payment/Gateways/gtwDevTest.h \
-    Payment/Gateways/gtwMellatBank.h \
-    Payment/Gateways/gtwZibal.h
+    Payment/Gateways/gtwZibal.h \
+    Payment/Gateways/gtwTarjomyarPay.h \
+    Payment/Gateways/gtwMellatBank.h
 
 SOURCES += \
     Account.cpp \
@@ -57,8 +58,9 @@ SOURCES += \
     Payment/PaymentLogic.cpp \
     Payment/intfPaymentGateway.cpp \
     Payment/Gateways/gtwDevTest.cpp \
-    Payment/Gateways/gtwMellatBank.cpp \
-    Payment/Gateways/gtwZibal.cpp
+    Payment/Gateways/gtwZibal.cpp \
+    Payment/Gateways/gtwTarjomyarPay.cpp \
+    Payment/Gateways/gtwMellatBank.cpp
 
 OTHER_FILES +=
 
