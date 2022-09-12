@@ -100,7 +100,7 @@ class TokenBin : public intfSQLBasedModule
 private slots:
     QVariant ORMGET_USER("Get TokenBin information")
 
-    TAPI::stuTable REST_POST(
+    /*TAPI::stuTable*/ QVariant REST_POST(
         removeExpiredAndFetchNew,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,

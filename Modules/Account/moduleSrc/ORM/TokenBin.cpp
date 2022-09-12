@@ -46,7 +46,7 @@ QVariant IMPL_ORMGET_USER(TokenBin) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-TAPI::stuTable IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
+/*TAPI::stuTable*/ QVariant IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const quint64 _lastFetchedID
 )) {
@@ -63,7 +63,8 @@ TAPI::stuTable IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
     if (_lastFetchedID > 0)
         Query.where({ tblTokenBin::Fields::tkbID, enuConditionOperator::Greater, _lastFetchedID });
 
-    return Query.all();
+    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+    return Query.all().toVariant(CompactList);
 
 }
 
