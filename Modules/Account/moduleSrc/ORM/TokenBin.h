@@ -30,9 +30,14 @@
 namespace Targoman::API::AccountModule {
 //structures and enumes goes here
 
+TARGOMAN_DEFINE_ENUM(enuTokenBinType,
+                     Block = 'B',
+                     Pause = 'P',
+                     )
+
 } //namespace Targoman::API::AccountModule
 
-//TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enu...);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AccountModule, enuTokenBinType);
 
 namespace Targoman::API::AccountModule {
 namespace ORM {
@@ -45,9 +50,10 @@ namespace tblTokenBin {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tkbID);
         TARGOMAN_CREATE_CONSTEXPR(tkbTokenMD5);
-        TARGOMAN_CREATE_CONSTEXPR(tkbTokenExpiredAt);
-        TARGOMAN_CREATE_CONSTEXPR(tkbBlockedAt);
-        TARGOMAN_CREATE_CONSTEXPR(tkbBlockedBy_usrID);
+        TARGOMAN_CREATE_CONSTEXPR(tkbDueDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(tkbType);
+        TARGOMAN_CREATE_CONSTEXPR(tkbCreationDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(tkbCreatedBy_usrID);
     }
 
     namespace Relation {
@@ -56,17 +62,18 @@ namespace tblTokenBin {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName                       Type                    Validation  Default     UpBy   Sort  Filter Self  Virt   PK
+            //ColName                       Type                                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::tkbID,                ORM_PRIMARYKEY_64 },
-            { Fields::tkbTokenMD5,          S(TAPI::MD5_t),         QFV,        QRequired,  UPNone },
-            { Fields::tkbTokenExpiredAt,    S(TAPI::DateTime_t),    QFV,        QRequired,  UPNone },
-            { Fields::tkbBlockedAt,         ORM_CREATED_ON },
-            { Fields::tkbBlockedBy_usrID,   ORM_CREATED_BY },
+            { Fields::tkbTokenMD5,          S(TAPI::MD5_t),                     QFV,        QRequired,  UPNone },
+            { Fields::tkbDueDateTime,       S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,        QRequired,  UPNone },
+            { Fields::tkbType,              S(Targoman::API::AccountModule::enuTokenBinType::Type), QFV, Targoman::API::AccountModule::enuTokenBinType::Block,  UPNone },
+            { Fields::tkbCreationDateTime,  ORM_CREATED_ON },
+            { Fields::tkbCreatedBy_usrID,   ORM_CREATED_BY },
         };
 
         const QList<stuRelation> Relations = {
             //Col                           Reference Table                 ForeignCol              Rename      LeftJoin
-            { Fields::tkbBlockedBy_usrID,   R(AAASchema, tblUser::Name),    tblUser::Fields::usrID, "Blocker_", true },
+            { Fields::tkbCreatedBy_usrID,   R(AAASchema, tblUser::Name),    tblUser::Fields::usrID, "Blocker_", true },
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -77,9 +84,10 @@ namespace tblTokenBin {
     TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tkbID),
         SF_MD5_t                    (tkbTokenMD5),
-        SF_DateTime_t               (tkbTokenExpiredAt),
-        SF_ORM_CREATED_ON           (tkbBlockedAt),
-        SF_ORM_CREATED_BY           (tkbBlockedBy_usrID)
+        SF_DateTime_t               (tkbDueDateTime),
+        SF_Enum                     (tkbType, Targoman::API::AccountModule::enuTokenBinType, Targoman::API::AccountModule::enuTokenBinType::Block),
+        SF_ORM_CREATED_ON           (tkbCreationDateTime),
+        SF_ORM_CREATED_BY           (tkbCreatedBy_usrID)
     );
 }
 #pragma GCC diagnostic pop
@@ -91,6 +99,15 @@ class TokenBin : public intfSQLBasedModule
 
 private slots:
     QVariant ORMGET_USER("Get TokenBin information")
+
+    TAPI::stuTable REST_POST(
+        removeExpiredAndFetchNew,
+        (
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            const quint64 _lastFetchedID = 0
+        ),
+        "removes expired ban items from database and fetch newly items greater than lastID"
+    );
 };
 
 } //namespace ORM

@@ -22,13 +22,13 @@
  */
 
 #include "APITokens.h"
-#include "User.h"
+#include "TokenBin.h"
+//#include "User.h"
 #include "../Account.h"
 #include "Service.h"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "Interfaces/Helpers/SecurityHelper.h"
-using namespace Targoman::API::AAA;
-using namespace Targoman::API::Helpers;
+#include "Interfaces/Server/QJWT.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
@@ -38,6 +38,10 @@ TAPI_REGISTER_METATYPE_TYPE_STRUCT(
 );
 
 namespace Targoman::API::AccountModule::ORM {
+
+using namespace AAA;
+using namespace Helpers;
+using namespace Server;
 
 /******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokens);
@@ -75,6 +79,11 @@ ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARA
 
     return Query;
 }
+
+//void APITokens::initializeModule()
+//{
+//    APITokenServices::instance().prepareFiltersList();
+//}
 
 QVariant IMPL_ORMGET_USER(APITokens) {
     APITokenServices::instance().prepareFiltersList();
@@ -219,7 +228,7 @@ stuRequestTokenResult APITokens::create(
     return stuRequestTokenResult(APITokenID, JWT);
 }
 
-Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_GET_OR_POST(APITokens, request, (
+Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, request, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_name,
     const QStringList &_services
@@ -232,40 +241,93 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_GET_OR_POST(APITok
                 );
 }
 
-QString IMPL_REST_GET_OR_POST(APITokens, revoke, (
+QString IMPL_REST_POST(APITokens, revoke, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
-    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+//    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
 
-    //TokenBin::instance().
-//    return this->create(
-//                APICALLBOOM_PARAM,
-//                APICALLBOOM_PARAM.getActorID(),
-//                _name,
-//                _services
-//                );
+    TAPI::JWT_t TokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
+
+    //----------------------------------------
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    if (TokenJWTPayload.contains("typ"))
+        TokenType = enuTokenActorType::toEnum(TokenJWTPayload["typ"].toString());
+    if (TokenType != enuTokenActorType::API)
+        throw exHTTPForbidden("Only API Token allowed");
+
+    //----------------------------------------
+    QDateTime ExpireDateTime = QDateTime::fromSecsSinceEpoch(TokenJWTPayload["exp"].toDouble());
+
+    //----------------------------------------
+    int RevokeCounter = 0;
+    if (TokenJWTPayload.contains("rvk"))
+        RevokeCounter = TokenJWTPayload["rvk"].toInt();
+    ++RevokeCounter;
+    TokenJWTPayload["rvkcnt"] = RevokeCounter;
+
+    //----------------------------------------
+    QString NewToken = QJWT::getSigned(TokenJWTPayload);
+
+    //----------------------------------------
+    makeAAADAC(DAC);
+    clsDACResult Result = DAC.callSP({},
+                                     "spToken_Revoke", {
+                                         { "iToken", _token },
+                                         { "iDueDateTime", ExpireDateTime },
+                                         { "iNewToken", NewToken },
+                                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                                     });
+
+    return NewToken;
 }
 
-bool IMPL_REST_GET_OR_POST(APITokens, pause, (
+bool IMPL_REST_POST(APITokens, pause, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
-    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+    TAPI::JWT_t TokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
 
-    throw exHTTPMethodNotAllowed("Not implemented yet");
+    //----------------------------------------
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    if (TokenJWTPayload.contains("typ"))
+        TokenType = enuTokenActorType::toEnum(TokenJWTPayload["typ"].toString());
+    if (TokenType != enuTokenActorType::API)
+        throw exHTTPForbidden("Only API Token allowed");
 
+    //----------------------------------------
+    makeAAADAC(DAC);
+    clsDACResult Result = DAC.callSP({},
+                                     "spToken_Pause", {
+                                         { "iToken", _token },
+                                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                                     });
     return true;
 }
 
-bool IMPL_REST_GET_OR_POST(APITokens, resume, (
+bool IMPL_REST_POST(APITokens, resume, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
-    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+    TAPI::JWT_t TokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
 
-    throw exHTTPMethodNotAllowed("Not implemented yet");
+    //----------------------------------------
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    if (TokenJWTPayload.contains("typ"))
+        TokenType = enuTokenActorType::toEnum(TokenJWTPayload["typ"].toString());
+    if (TokenType != enuTokenActorType::API)
+        throw exHTTPForbidden("Only API Token allowed");
 
+    //----------------------------------------
+    makeAAADAC(DAC);
+    clsDACResult Result = DAC.callSP({},
+                                     "spToken_Resume", {
+                                         { "iToken", _token },
+                                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                                     });
     return true;
 }
 

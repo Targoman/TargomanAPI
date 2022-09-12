@@ -33,8 +33,9 @@ namespace Targoman::API::AccountModule {
 //structures and enumes goes here
 
 TARGOMAN_DEFINE_ENUM(enuAPITokensStatus,
-                     Active         = 'A',
                      Pending        = 'P',
+                     Active         = 'A',
+//                     Deactive       = 'D',
                      CreditFinished = 'C',
                      Removed        = 'R'
                      )
@@ -117,7 +118,8 @@ namespace tblAPITokens {
         const QList<clsORMField> ORMFields = {
             //ColName                       Type                    validation                          Default     UpBy        Sort  Filter Self  Virt   PK
             { Fields::aptID,                ORM_PRIMARYKEY_64 },
-            { Fields::aptToken,             S(QString),             QFV.asciiAlNum().maxLenght(750),    QRequired,  UPAdmin,     true, true },
+            { Fields::aptToken,             S(QString),             QFV,                                QRequired,  UPAdmin,    true, true },
+            //aptTokenMD5
             { Fields::aptName,              S(QString),             QFV.asciiAlNum().maxLenght(250),    QRequired,  UPOwner,    true, true },
             { Fields::apt_usrID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPNone },
             { Fields::aptLang,              S(TAPI::ISO639_2_t),    QFV,                                "en",       UPOwner },
@@ -286,6 +288,7 @@ public:
     );
 
 public:
+//    virtual void initializeModule();
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
@@ -294,7 +297,7 @@ private slots:
 //    bool ORMUPDATE_USER("Update token info by an authorized user")
 //    bool ORMDELETE_USER("Delete an APIToken")
 
-    Targoman::API::AccountModule::stuRequestTokenResult REST_GET_OR_POST(
+    Targoman::API::AccountModule::stuRequestTokenResult REST_POST(
         request,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
@@ -304,7 +307,7 @@ private slots:
         "create new empty api token"
     );
 
-    QString REST_GET_OR_POST(
+    QString REST_POST(
         revoke,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
@@ -313,7 +316,7 @@ private slots:
         "Deletes the token and creates a new one. It also takes the possibility of activity from the previous token"
     );
 
-    bool REST_GET_OR_POST(
+    bool REST_POST(
         pause,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
@@ -322,7 +325,7 @@ private slots:
         "Pause the token"
     );
 
-    bool REST_GET_OR_POST(
+    bool REST_POST(
         resume,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,

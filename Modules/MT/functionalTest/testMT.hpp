@@ -223,7 +223,7 @@ private slots:
         }
     }
 
-    void create_api() {
+    void request_apitoken() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
                         RESTClientHelper::enuHTTPMethod::POST,

@@ -25,7 +25,7 @@
 //#include "User.h"
 #include "../Account.h"
 
-//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuTokenBinStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuTokenBinType);
 
 namespace Targoman::API::AccountModule::ORM {
 
@@ -44,6 +44,27 @@ QVariant IMPL_ORMGET_USER(TokenBin) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+TAPI::stuTable IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    const quint64 _lastFetchedID
+)) {
+    //1: delete expired
+    this->makeDeleteQuery(APICALLBOOM_PARAM)
+            .where({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::Less, DBExpression::NOW() })
+            .execute(1)
+            ;
+
+    //2: fetch
+    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+                           .pageSize(0);
+
+    if (_lastFetchedID > 0)
+        Query.where({ tblTokenBin::Fields::tkbID, enuConditionOperator::Greater, _lastFetchedID });
+
+    return Query.all();
+
 }
 
 } //namespace Targoman::API::AccountModule::ORM
