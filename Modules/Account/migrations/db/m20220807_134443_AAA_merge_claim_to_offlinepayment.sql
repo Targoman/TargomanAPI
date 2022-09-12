@@ -43,9 +43,7 @@ ALTER TABLE `tblOfflinePaymentClaims`
     DROP FOREIGN KEY `FK_tblOfflinePaymentClaims_tblUser_creator`,
     DROP FOREIGN KEY `FK_tblOfflinePaymentClaims_tblUser_modifier`;
 
-RENAME TABLE `tblOfflinePaymentClaims` TO `DELETED_tblOfflinePaymentClaims`;
--- will be dropped in next minor version
--- DROP TABLE tblOfflinePaymentClaims;
+DROP TABLE tblOfflinePaymentClaims;
 
 DROP TRIGGER IF EXISTS `trg_tblOfflinePayments_before_update`;
 DELIMITER ;;

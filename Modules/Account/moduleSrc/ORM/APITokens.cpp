@@ -230,6 +230,19 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_GET_OR_POST(APITok
                 );
 }
 
+QString IMPL_REST_GET_OR_POST(APITokens, revoke, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    const QString &_token
+)) {
+    //TokenBin::instance().
+//    return this->create(
+//                APICALLBOOM_PARAM,
+//                APICALLBOOM_PARAM.getActorID(),
+//                _name,
+//                _services
+//                );
+}
+
 /******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokenServices)
 

@@ -302,7 +302,16 @@ private slots:
             const QStringList &_services = {}
         ),
         "create new empty api token"
-    )
+    );
+
+    QString REST_GET_OR_POST(
+        revoke,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            const QString &_token
+        ),
+        "Deletes the token and creates a new one. It also takes the possibility of activity from the previous token"
+    );
 
 };
 

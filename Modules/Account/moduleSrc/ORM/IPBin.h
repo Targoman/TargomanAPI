@@ -105,7 +105,6 @@ namespace tblIPBin {
 }
 #pragma GCC diagnostic pop
 
-
 class IPBin : public intfSQLBasedModule
 {
     Q_OBJECT
