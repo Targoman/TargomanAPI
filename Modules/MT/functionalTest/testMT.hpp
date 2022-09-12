@@ -252,6 +252,19 @@ private slots:
         }
     }
 
+    void get_tokens() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::GET,
+                        "Account/APITokens");
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void addToBasket_1() {
         QT_TRY {
             int ItemsCount = this->LastPreVoucher.Items.length();

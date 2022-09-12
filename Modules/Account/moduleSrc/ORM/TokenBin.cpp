@@ -21,26 +21,26 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "IPBin.h"
+#include "TokenBin.h"
 //#include "User.h"
 #include "../Account.h"
 
-TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuIPBinStatus);
+//TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuTokenBinStatus);
 
 namespace Targoman::API::AccountModule::ORM {
 
-TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, IPBin)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, TokenBin)
 
-IPBin::IPBin() :
+TokenBin::TokenBin() :
     intfSQLBasedModule(
         AAASchema,
-        tblIPBin::Name,
-        tblIPBin::Private::ORMFields,
-        tblIPBin::Private::Relations,
-        tblIPBin::Private::Indexes
+        tblTokenBin::Name,
+        tblTokenBin::Private::ORMFields,
+        tblTokenBin::Private::Relations,
+        tblTokenBin::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET_USER(IPBin) {
+QVariant IMPL_ORMGET_USER(TokenBin) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);

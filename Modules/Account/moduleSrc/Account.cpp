@@ -34,6 +34,7 @@
 #include "ORM/BlockingRules.h"
 #include "ORM/ForgotPassRequest.h"
 #include "ORM/IPBin.h"
+#include "ORM/TokenBin.h"
 #include "ORM/Roles.h"
 #include "ORM/IPStats.h"
 #include "ORM/Payments.h"
@@ -168,6 +169,7 @@ Account::Account() :
     this->addSubModule(&ForgotPassRequest::instance());
     this->addSubModule(&Voucher::instance());
     this->addSubModule(&IPBin::instance());
+    this->addSubModule(&TokenBin::instance());
     this->addSubModule(&IPStats::instance());
     this->addSubModule(&PaymentGatewayTypes::instance());
     this->addSubModule(&PaymentGateways::instance());
