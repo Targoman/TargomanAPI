@@ -77,6 +77,8 @@ ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARA
 }
 
 QVariant IMPL_ORMGET_USER(APITokens) {
+    APITokenServices::instance().prepareFiltersList();
+
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
 
@@ -234,6 +236,8 @@ QString IMPL_REST_GET_OR_POST(APITokens, revoke, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
+    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
     //TokenBin::instance().
 //    return this->create(
 //                APICALLBOOM_PARAM,
@@ -241,6 +245,28 @@ QString IMPL_REST_GET_OR_POST(APITokens, revoke, (
 //                _name,
 //                _services
 //                );
+}
+
+bool IMPL_REST_GET_OR_POST(APITokens, pause, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    const QString &_token
+)) {
+    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
+    throw exHTTPMethodNotAllowed("Not implemented yet");
+
+    return true;
+}
+
+bool IMPL_REST_GET_OR_POST(APITokens, resume, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    const QString &_token
+)) {
+    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
+    throw exHTTPMethodNotAllowed("Not implemented yet");
+
+    return true;
 }
 
 /******************************************************/

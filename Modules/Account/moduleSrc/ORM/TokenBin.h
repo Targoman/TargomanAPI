@@ -44,7 +44,7 @@ namespace tblTokenBin {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tkbID);
-        TARGOMAN_CREATE_CONSTEXPR(tkbToken);
+        TARGOMAN_CREATE_CONSTEXPR(tkbTokenMD5);
         TARGOMAN_CREATE_CONSTEXPR(tkbTokenExpiredAt);
         TARGOMAN_CREATE_CONSTEXPR(tkbBlockedAt);
         TARGOMAN_CREATE_CONSTEXPR(tkbBlockedBy_usrID);
@@ -58,7 +58,7 @@ namespace tblTokenBin {
         const QList<clsORMField> ORMFields = {
             //ColName                       Type                    Validation  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::tkbID,                ORM_PRIMARYKEY_64 },
-            { Fields::tkbToken,             S(QString),             QFV,        QRequired,  UPNone },
+            { Fields::tkbTokenMD5,          S(TAPI::MD5_t),         QFV,        QRequired,  UPNone },
             { Fields::tkbTokenExpiredAt,    S(TAPI::DateTime_t),    QFV,        QRequired,  UPNone },
             { Fields::tkbBlockedAt,         ORM_CREATED_ON },
             { Fields::tkbBlockedBy_usrID,   ORM_CREATED_BY },
@@ -76,7 +76,7 @@ namespace tblTokenBin {
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_ORM_PRIMARYKEY_64        (tkbID),
-        SF_QString                  (tkbToken),
+        SF_MD5_t                    (tkbTokenMD5),
         SF_DateTime_t               (tkbTokenExpiredAt),
         SF_ORM_CREATED_ON           (tkbBlockedAt),
         SF_ORM_CREATED_BY           (tkbBlockedBy_usrID)
