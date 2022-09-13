@@ -46,6 +46,8 @@ namespace Targoman::API::AccountModule::Payment {
 class PaymentLogic
 {
 public:
+    static void initialize();
+
 //    template <class TPaymentGatewayClass>
 //    static void registerGateway(const QString& _gatewayName, TPaymentGatewayClass* (*_instanceFunc)());
     static void registerGateway(const QString& _gatewayName, intfPaymentGateway* _gateway);

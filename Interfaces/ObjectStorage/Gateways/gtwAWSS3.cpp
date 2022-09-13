@@ -38,9 +38,9 @@ using namespace qhttp;
 #include <aws/s3/model/PutObjectRequest.h>
 using namespace Aws;
 
-using namespace Targoman::API::Common;
-
 namespace Targoman::API::ObjectStorage::Gateways {
+
+using namespace Common;
 
 void gtwAWSS3::InitS3()
 {

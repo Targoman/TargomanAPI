@@ -84,17 +84,17 @@ TARGOMAN_ADD_EXCEPTION_HANDLER_WITH_CODE (ESTATUS_SERVICE_UNAVAILABLE, exPayment
 //    { ; }
 //};
 
-namespace Payment {
-
+/***********************************************************************************/
 ///@TODO: move this to common
-#define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
-    struct _##_className##_static_constructor { \
-        _##_className##_static_constructor() {
+#define TARGOMAN_BEGIN_STATIC_CTOR(_name) \
+    class _##_name##_static_constructor { \
+    public: \
+        _##_name##_static_constructor() {
 
-#define TARGOMAN_END_STATIC_CTOR(_className) \
+#define TARGOMAN_END_STATIC_CTOR(_name) \
         } \
     }; \
-    static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
+    static _##_name##_static_constructor _##_name##_static_constructor_internal;
 
 ///@TODO: move this to common
 #define instanceGetterPtr(_class) static _class* instancePtr() { \
@@ -128,11 +128,12 @@ private: \
         Targoman::API::AccountModule::Payment::PaymentLogic::registerGateway(_name::Name, _name::instancePtr()); \
     TARGOMAN_END_STATIC_CTOR(_name)
 
-//PaymentLogic::registerGateway<_name>(_name::Name, _name::instancePtr());
-//PaymentLogic::registerGateway<_name>(_name::Name);
-
 #define TARGOMAN_IMPL_API_PAYMENT_GATEWAY(_name) \
+    _name::_##_name##_static_constructor _name::_##_name##_static_constructor_internal; \
     _name::_name() { ; }
+
+/***********************************************************************************/
+namespace Payment {
 
 /**
  * @brief The intfPaymentGateway class is base class of gateway drivers
