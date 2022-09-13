@@ -29,10 +29,12 @@
 #include "libTargomanDBM/clsDAC.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
 #include "Interfaces/Server/clsSimpleCrypt.h"
+#include "Interfaces/Helpers/TokenHelper.h"
 
 namespace Targoman::API::Server {
 
 using namespace TAPI;
+using namespace Helpers;
 using namespace Common;
 using namespace Targoman::Common::Configuration;
 
@@ -114,8 +116,6 @@ QString QJWT::createSigned(
     const QString &_sessionID,
     const QString &_remoteIP
 ) {
-    const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
-
     _payload["typ"] = enuTokenActorType::toStr(_tokenType);
 
     if (_payload.contains("iat") == false)
@@ -151,13 +151,35 @@ QString QJWT::createSigned(
         _privatePayload.remove("cip");
 
     if (_privatePayload.isEmpty() == false)
-        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson(QJsonDocument::Compact));
+//        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson(QJsonDocument::Compact));
+        PayloadForSign["prv"] = _privatePayload;
     else
         PayloadForSign.remove("prv");
 
-    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(PayloadForSign).toJson(QJsonDocument::Compact).toBase64();
+    return QJWT::encryptAndSigned(PayloadForSign);
+}
 
-    return Data + "." + QJWT::hash(Data).toBase64();
+QString QJWT::encryptAndSigned(QJsonObject _payload)
+{
+    if (_payload.contains("prv")) {
+        QJsonDocument Doc = QJsonDocument(_payload["prv"].toObject());
+        auto Json = Doc.toJson(QJsonDocument::Compact);
+        _payload.remove("prv");
+        _payload["prv"] = simpleCryptInstance()->encryptToString(Json);
+    }
+
+    QByteArray Head = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value())).toUtf8();
+    QByteArray Body = QJsonDocument(_payload).toJson(QJsonDocument::Compact);
+    QByteArray Data = Head.toBase64() + "." + Body.toBase64();
+    QByteArray Sign = QJWT::hash(Data).toBase64();
+
+//    TargomanDebug(5) << "-----------------------------------------------------------" << endl
+//                     << "Head:" << Head << endl
+//                     << "Body:" << Body << endl
+//                     << "Data:" << Data << endl
+//                     << "Sign:" << Sign;
+
+    return Data + "." + Sign;
 }
 
 void QJWT::extractAndDecryptPayload(
@@ -243,6 +265,12 @@ void QJWT::verifyJWT(
 
     if (static_cast<quint64>(_jWTPayload.value("exp").toInt()) <= currentDateTime)
         throw exJWTExpired("JWT expired");
+
+    enuTokenBanType TokenBanType = TokenHelper::GetTokenBanType(_jwt);
+    if (TokenBanType == enuTokenBanType::Block)
+        throw exHTTPForbidden("Token is blocked");
+    else if (TokenBanType == enuTokenBanType::Pause)
+        throw exHTTPForbidden("Token is paused");
 }
 
 QByteArray QJWT::hash(const QByteArray& _data)

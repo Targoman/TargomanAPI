@@ -43,6 +43,7 @@ PRIVATE_HEADERS += \
 HEADERS += \
     API/intfModuleHelper.h \
     Helpers/IteratorHelper.hpp \
+    Helpers/TokenHelper.h \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
     Server/APICallBoom.h \
@@ -79,6 +80,7 @@ HEADERS += \
 
 SOURCES += \
     API/intfModuleHelper.cpp \
+    Helpers/TokenHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \
     Server/APICallBoom.cpp \

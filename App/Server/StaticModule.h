@@ -111,6 +111,28 @@ private slots:
             EXRESTCONFIG_HIDDEN,
         }
     );
+
+    QVariant EXREST_GET_OR_POST(
+        pinguser,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+        ),
+        "",
+        {
+            EXRESTCONFIG_HIDDEN,
+        }
+    );
+
+    QVariant EXREST_GET_OR_POST(
+         pingapi,
+         (
+             APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM
+         ),
+         "",
+         {
+             EXRESTCONFIG_HIDDEN,
+         }
+     );
 };
 
 } //namespace Targoman::API::Server

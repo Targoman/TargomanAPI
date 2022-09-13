@@ -87,15 +87,23 @@ struct stuStatistics {
  */
 struct stuTable {
     QVariantList Rows;
-    qint64 TotalRows;
+    quint64 TotalRows;
     quint64 PageCount;
     bool HasMore;
     bool HasCount;
 
-//    stuTable(qint64 _totalRows = -1, const QVariantList& _rows = QVariantList()) :
-//        TotalRows(_totalRows),
-//        Rows(_rows)
-//    { ; }
+    stuTable(const QVariantList& _rows = QVariantList(),
+             quint64 _totalRows = 0,
+             quint64 _pageCount = 0,
+             bool _hasMore = false,
+             bool _hasCount = false
+        ) :
+        Rows(_rows),
+        TotalRows(_totalRows),
+        PageCount(_pageCount),
+        HasMore(_hasMore),
+        HasCount(_hasCount)
+    { ; }
 
     QVariant toVariant(bool _compactList = false) const;
 };
