@@ -77,10 +77,10 @@ RUN zypper ref && \
 RUN mkdir -p /targoman/bin
 
 WORKDIR /targoman
+COPY --from=builder-api /usr/lib64/libaws-cpp-sdk-s3.so /usr/lib64/libaws-cpp-sdk-s3.so
+COPY --from=builder-api /usr/lib64/libaws-cpp-sdk-core.so /usr/lib64/libaws-cpp-sdk-core.so
 COPY --from=builder-api /opt/out .
 COPY --from=builder-mt /opt/out .
-COPY --from=builder /usr/lib64/libaws-cpp-sdk-s3.so /usr/lib64/libaws-cpp-sdk-s3.so
-COPY --from=builder /usr/lib64/libaws-cpp-sdk-core.so /usr/lib64/libaws-cpp-sdk-core.so
 COPY conf conf
 COPY Docker/run-targoman-dev.sh .
 COPY Docker/migrate-dev.sh .
