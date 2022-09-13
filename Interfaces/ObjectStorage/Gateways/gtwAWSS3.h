@@ -56,9 +56,9 @@ using namespace Aws;
 git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
 mkdir aws-build.s3
 cd aws-build.s3
-- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
+- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3" -DENABLE_TESTING=OFF
 - OR
-- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3"
+- cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/usr -DBUILD_ONLY="s3" -DENABLE_TESTING=OFF
 make
 sudo make install
 */
