@@ -74,8 +74,6 @@ RUN zypper ref && \
 
 #aws-sdk-cpp-s3-libs
 
-RUN mkdir -p /targoman/bin
-
 WORKDIR /targoman
 COPY --from=builder-api /usr/lib64/libaws-cpp-sdk-s3.so /usr/lib64/libaws-cpp-sdk-s3.so
 COPY --from=builder-api /usr/lib64/libaws-cpp-sdk-core.so /usr/lib64/libaws-cpp-sdk-core.so
