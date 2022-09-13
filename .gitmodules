@@ -27,4 +27,4 @@
 	url = https://github.com/Targoman/TargomanCommon.git
 [submodule "3rdParty/E4MT"]
 	path = 3rdParty/E4MT
-	url = git@github.com:Targoman/E4MT.git
+	url = https://github.com/Targoman/E4MT.git
