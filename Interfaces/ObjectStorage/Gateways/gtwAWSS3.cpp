@@ -30,9 +30,42 @@
 #include "QHttp/qhttpfwd.hpp"
 using namespace qhttp;
 
+//#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
+#include <aws/core/Aws.h>
+//#include <aws/core/auth/AWSAuthSigner.h>
+#include <aws/core/auth/AWSCredentials.h>
+#include <aws/s3/S3Client.h>
+#include <aws/s3/model/PutObjectRequest.h>
+using namespace Aws;
+
 using namespace Targoman::API::Common;
 
 namespace Targoman::API::ObjectStorage::Gateways {
+
+void gtwAWSS3::InitS3()
+{
+    static bool Initialized = false;
+    static SDKOptions options;
+
+    if (Initialized)
+        return;
+
+    TargomanDebug(0, "Initializing S3 API");
+
+    //The Aws::SDKOptions struct contains SDK configuration options.
+    //An instance of Aws::SDKOptions is passed to the Aws::InitAPI and
+    //Aws::ShutdownAPI methods. The same instance should be sent to both methods.
+#ifdef QT_DEBUG
+    options.loggingOptions.logLevel = Utils::Logging::LogLevel::Trace;
+#else
+    options.loggingOptions.logLevel = Utils::Logging::LogLevel::Off;
+#endif
+
+    //The AWS SDK for C++ must be initialized by calling Aws::InitAPI.
+    InitAPI(options);
+
+    Initialized = true;
+}
 
 bool gtwAWSS3::storeFile(
 //    const TAPI::JSON_t &_metaInfo,
@@ -42,6 +75,9 @@ bool gtwAWSS3::storeFile(
     const QString &_fileName
 ) {
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: BEGIN");
+
+    gtwAWSS3::InitS3();
+
     TargomanLogDebug(5, "*** gtwAWSS3::storeFile: ["
                      << "_fullFileName:" << _fullFileName
                      << ",_path:" << _path

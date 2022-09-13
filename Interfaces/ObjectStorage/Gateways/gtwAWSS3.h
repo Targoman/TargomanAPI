@@ -35,13 +35,13 @@
 #include "libTargomanCommon/CmdIO.h"
 using namespace Targoman::Common;
 
-//#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
-#include <aws/core/Aws.h>
-//#include <aws/core/auth/AWSAuthSigner.h>
-#include <aws/core/auth/AWSCredentials.h>
-#include <aws/s3/S3Client.h>
-#include <aws/s3/model/PutObjectRequest.h>
-using namespace Aws;
+////#include <aws/core/utils/memory/stl/AWSStreamFwd.h>
+//#include <aws/core/Aws.h>
+////#include <aws/core/auth/AWSAuthSigner.h>
+//#include <aws/core/auth/AWSCredentials.h>
+//#include <aws/s3/S3Client.h>
+//#include <aws/s3/model/PutObjectRequest.h>
+//using namespace Aws;
 
 /** installing AmazonAWS S3 from repo (recommended) ************************************************
 15.2) zypper ar -no-gpgcheck https://download.opensuse.org/repositories/home:/targoman/openSUSE_Leap_15.2/home:targoman.repo
@@ -65,6 +65,7 @@ sudo make install
 
 namespace Targoman::API::ObjectStorage::Gateways {
 
+/*
 struct __static_s3_initializer__ {
     static inline bool Initialized = false;
     static inline SDKOptions options;
@@ -102,6 +103,7 @@ struct __static_s3_initializer__ {
     }
 };
 static __static_s3_initializer__ __static_s3_initializer__internal;
+*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -116,6 +118,8 @@ namespace AWSS3MetaInfoJsonKey {
 class gtwAWSS3 : public intfObjectStorageGateway
 {
 public:
+    static void InitS3();
+
     static bool storeFile(
 //        const TAPI::JSON_t &_metaInfo,
         const ORM::tblUploadGateways::DTO &_uploadGateway,
