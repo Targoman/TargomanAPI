@@ -23,9 +23,7 @@ LIBS += -lTargomanCommon \
         -lTargomanDBM \
         -lQFieldValidator \
         -lqhttp \
-        -lcurl \
-        -lfasttext \
-        -lTargomanTextProcessor
+        -lcurl
 
 defined(QJsonRPC, var) equals(QJsonRPC, 1) {
     DEFINES += WITH_QJsonRPC
@@ -53,6 +51,9 @@ defined(QJsonRPC, var) equals(QJsonRPC, 1) {
 defined(JWTDastreshte, var) equals(JWTDastreshte, 1) {
     DEFINES += TARGOMAN_API_ENABLE_JWT_DASTRESHTE
 }
+
+LIBS += -lfasttext \
+        -lTargomanTextProcessor
 
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-++-+-+-
 QT += core sql network
