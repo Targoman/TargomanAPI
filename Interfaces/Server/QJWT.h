@@ -53,7 +53,7 @@ public:
     static Targoman::Common::Configuration::tmplConfigurable<quint32>                 RememberLoginTTL;
     static Targoman::Common::Configuration::tmplConfigurable<quint64>                 SimpleCryptKey;
 
-    static QString getSigned(const QJsonObject &_payload);
+    static QString encryptAndSigned(QJsonObject _payload);
 
     static QString createSigned(
         INOUT QJsonObject &_payload,

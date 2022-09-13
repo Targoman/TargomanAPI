@@ -28,6 +28,7 @@
 #include "Service.h"
 #include "Interfaces/AAA/clsJWT.hpp"
 #include "Interfaces/Helpers/SecurityHelper.h"
+#include "Interfaces/Helpers/TokenHelper.h"
 #include "Interfaces/Server/QJWT.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
@@ -268,7 +269,7 @@ QString IMPL_REST_POST(APITokens, revoke, (
     TokenJWTPayload["rvkcnt"] = RevokeCounter;
 
     //----------------------------------------
-    QString NewToken = QJWT::getSigned(TokenJWTPayload);
+    QString NewToken = QJWT::encryptAndSigned(TokenJWTPayload);
 
     //----------------------------------------
     makeAAADAC(DAC);
@@ -279,6 +280,11 @@ QString IMPL_REST_POST(APITokens, revoke, (
                                          { "iNewToken", NewToken },
                                          { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                      });
+
+    TokenHelper::tokenRevoked(_token,
+                              ExpireDateTime,
+                              NewToken
+                              );
 
     return NewToken;
 }
@@ -304,6 +310,9 @@ bool IMPL_REST_POST(APITokens, pause, (
                                          { "iToken", _token },
                                          { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                      });
+
+    TokenHelper::tokenPaused(_token);
+
     return true;
 }
 
@@ -328,6 +337,9 @@ bool IMPL_REST_POST(APITokens, resume, (
                                          { "iToken", _token },
                                          { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                      });
+
+    TokenHelper::tokenResumed(_token);
+
     return true;
 }
 

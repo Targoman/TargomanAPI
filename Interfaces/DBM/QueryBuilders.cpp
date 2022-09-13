@@ -4091,8 +4091,6 @@ quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
     ///@TODO: start transaction
 
     QT_TRY {
-        QString statusFieldName = this->Data->table().getStatusColumnName();
-
         //1: invalidate OLD removed row
         QString invalidateQueryString = getInvalidatedAtQueryString(this->Data->table(), false, false);
 
@@ -4104,22 +4102,26 @@ quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
         }
 
         //2: soft delete this
-        QT_TRY {
-            quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->table())
-                    .set(statusFieldName, "Removed")
-                    .where(this->WhereTraitData->WhereClauses)
-                    .setPksByPath(this->WhereTraitData->PksByPath)
-                    .addFilters(this->WhereTraitData->Filters)
-                    .execute(_currentUserID);
-            if (rowsAffected > 0) {
-                ///@TODO: commit
-                return rowsAffected;
+        QString statusFieldName = this->Data->table().getStatusColumnName();
+        if (statusFieldName.isEmpty() == false) {
+            QT_TRY {
+                quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->table())
+                        .set(statusFieldName, "Removed")
+                        .where(this->WhereTraitData->WhereClauses)
+                        .setPksByPath(this->WhereTraitData->PksByPath)
+                        .addFilters(this->WhereTraitData->Filters)
+                        .execute(_currentUserID);
+
+                if (rowsAffected > 0) {
+                    ///@TODO: commit
+                    return rowsAffected;
+                }
             }
-        }
-        QT_CATCH(...) {
-            //update failed. use hard delete instead
-            if (_realDelete == false)
-                QT_RETHROW;
+            QT_CATCH(...) {
+                //update failed. use hard delete instead
+                if (_realDelete == false)
+                    QT_RETHROW;
+            }
         }
 
         //3: real delete this

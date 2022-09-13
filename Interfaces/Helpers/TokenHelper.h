@@ -49,12 +49,14 @@ class TokenHelper
 public:
     static bool UpdateTokenBinList();
     static enuTokenBanType GetTokenBanType(const QString &_token);
-//    static void BanToken(
-//        quint64 _id,
-//        const QString &_token,
-//        QDateTime _dueDate,
-//        enuTokenBanType _banType
-//    );
+
+    static void tokenRevoked(
+                const QString &_token,
+                QDateTime ExpireDateTime,
+                const QString &NewToken
+                );
+    static void tokenPaused(const QString &_token);
+    static void tokenResumed(const QString &_token);
 
 private:
     static quint64 LastFetchedTokenBinID;

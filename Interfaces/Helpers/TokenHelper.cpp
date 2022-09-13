@@ -35,9 +35,10 @@ QMap<QString, stuTokenBanInfo> TokenHelper::TokenBanList;
 bool TokenHelper::UpdateTokenBinList()
 {
     //every 1 minutes
-    if ((QDateTime::currentSecsSinceEpoch() - TokenHelper::LastFetchedSecsSinceEpoch < 60)
-            || TokenHelper::TokenBanList.isEmpty())
+#ifndef QT_DEBUG
+    if (QDateTime::currentSecsSinceEpoch() - TokenHelper::LastFetchedSecsSinceEpoch < 60)
         return true;
+#endif
 
     QMutexLocker Locker(&TokenHelper::Lock);
 
@@ -55,7 +56,7 @@ bool TokenHelper::UpdateTokenBinList()
     //delete expired from database and fetch newly items
     QVariant Result = RESTClientHelper::callAPI(
         RESTClientHelper::POST,
-        "/Account/removeExpiredAndFetchNew",
+        "Account/TokenBin/removeExpiredAndFetchNew",
         {},
         {
             { "lastFetchedID", TokenHelper::LastFetchedTokenBinID },
@@ -67,9 +68,9 @@ bool TokenHelper::UpdateTokenBinList()
     if (Result.isValid() == false)
         return false;
 
-    TAPI::stuTable Table = Result.value<TAPI::stuTable>();
+    QVariantList Rows = Result.toList();
 
-    foreach (QVariant Row, Table.Rows) {
+    foreach (QVariant Row, Rows) {
         QVariantMap Map = Row.toMap();
 
         stuTokenBanInfo TokenBanInfo;
@@ -84,6 +85,7 @@ bool TokenHelper::UpdateTokenBinList()
             TokenBanInfo.BanType = enuTokenBanType::Pause;
 
         TokenHelper::TokenBanList.insert(TokenBanInfo.MD5, TokenBanInfo);
+
         if (TokenHelper::LastFetchedTokenBinID < TokenBanInfo.ID)
             TokenHelper::LastFetchedTokenBinID = TokenBanInfo.ID;
     }
@@ -110,21 +112,33 @@ enuTokenBanType TokenHelper::GetTokenBanType(const QString &_token)
     }
 }
 
-//void TokenHelper::BanToken(
-//    quint64 _id,
-//    const QString &_token,
-//    QDateTime _dueDate,
-//    enuTokenBanType _banType
-//) {
+void TokenHelper::tokenRevoked(
+    const QString &_token,
+    QDateTime ExpireDateTime,
+    const QString &NewToken
+) {
+//    QMutexLocker Locker(&TokenHelper::Lock);
+
 //    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
 
-//    stuTokenBanInfo TokenBanInfo;
-//    TokenBanInfo.ID = _id;
-//    TokenBanInfo.MD5 = TokenMD5;
-//    TokenBanInfo.DueDate = _dueDate;
-//    TokenBanInfo.BanType = _banType;
+}
 
-//    TokenHelper::TokenBanList[TokenMD5] = TokenBanInfo;
-//}
+void TokenHelper::tokenPaused(const QString &_token)
+{
+//    QMutexLocker Locker(&TokenHelper::Lock);
+
+//    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
+}
+
+void TokenHelper::tokenResumed(const QString &_token)
+{
+    QMutexLocker Locker(&TokenHelper::Lock);
+
+    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
+    if (TokenHelper::TokenBanList.contains(TokenMD5))
+        TokenHelper::TokenBanList.remove(TokenMD5);
+}
 
 } //namespace Targoman::API::Helpers

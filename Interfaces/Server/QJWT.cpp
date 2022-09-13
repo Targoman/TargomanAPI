@@ -151,20 +151,35 @@ QString QJWT::createSigned(
         _privatePayload.remove("cip");
 
     if (_privatePayload.isEmpty() == false)
-        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson(QJsonDocument::Compact));
+//        PayloadForSign["prv"] = simpleCryptInstance()->encryptToString(QJsonDocument(_privatePayload).toJson(QJsonDocument::Compact));
+        PayloadForSign["prv"] = _privatePayload;
     else
         PayloadForSign.remove("prv");
 
-    return QJWT::getSigned(PayloadForSign);
+    return QJWT::encryptAndSigned(PayloadForSign);
 }
 
-QString QJWT::getSigned(const QJsonObject &_payload)
+QString QJWT::encryptAndSigned(QJsonObject _payload)
 {
-    const QString Header = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value()));
+    if (_payload.contains("prv")) {
+        QJsonDocument Doc = QJsonDocument(_payload["prv"].toObject());
+        auto Json = Doc.toJson(QJsonDocument::Compact);
+        _payload.remove("prv");
+        _payload["prv"] = simpleCryptInstance()->encryptToString(Json);
+    }
 
-    QByteArray Data = Header.toUtf8().toBase64() + "." + QJsonDocument(_payload).toJson(QJsonDocument::Compact).toBase64();
+    QByteArray Head = QString("{\"typ\":\"JWT\",\"alg\":\"%1\"}").arg(enuJWTHashAlgs::toStr(QJWT::HashAlgorithm.value())).toUtf8();
+    QByteArray Body = QJsonDocument(_payload).toJson(QJsonDocument::Compact);
+    QByteArray Data = Head.toBase64() + "." + Body.toBase64();
+    QByteArray Sign = QJWT::hash(Data).toBase64();
 
-    return Data + "." + QJWT::hash(Data).toBase64();
+//    TargomanDebug(5) << "-----------------------------------------------------------" << endl
+//                     << "Head:" << Head << endl
+//                     << "Body:" << Body << endl
+//                     << "Data:" << Data << endl
+//                     << "Sign:" << Sign;
+
+    return Data + "." + Sign;
 }
 
 void QJWT::extractAndDecryptPayload(

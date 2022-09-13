@@ -1,9 +1,6 @@
 /* Migration File: m20220911_162331_AAA_create_tokenbin.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
-/* The next line is to prevent this file from being committed. When done, delete this and next line: */
-ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
-
 USE `{{dbprefix}}{{Schema}}`;
 
 ALTER TABLE `tblAPITokens`
@@ -21,6 +18,9 @@ ALTER TABLE `tblAPITokens`
 ALTER TABLE `tblAPITokens`
     CHANGE COLUMN `aptToken` `aptToken` TEXT NOT NULL COLLATE 'utf8mb4_general_ci' AFTER `aptID`;
 
+ALTER TABLE `tblAPITokens`
+    ADD COLUMN `aptRevokeCount` SMALLINT UNSIGNED NULL AFTER `aptAccessCount`;
+
 CREATE TABLE `tblTokenBin` (
     `tkbID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     `tkbTokenMD5` CHAR(32) NOT NULL COLLATE 'utf8mb4_general_ci',
@@ -28,13 +28,16 @@ CREATE TABLE `tblTokenBin` (
     `tkbType` CHAR(1) NOT NULL DEFAULT 'B' COMMENT 'B:Block, P:Pause' COLLATE 'utf8mb4_general_ci',
     `tkbCreationDateTime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `tkbCreatedBy_usrID` BIGINT(20) UNSIGNED NOT NULL,
-    PRIMARY KEY (`tkbID`) USING BTREE
+    PRIMARY KEY (`tkbID`) USING BTREE,
+    UNIQUE INDEX `tkbTokenMD5` (`tkbTokenMD5`) USING BTREE,
+    INDEX `FK_tblTokenBin_tblUser` (`tkbCreatedBy_usrID`) USING BTREE,
+    CONSTRAINT `FK_tblTokenBin_tblUser` FOREIGN KEY (`tkbCreatedBy_usrID`) REFERENCES `tblUser` (`usrID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
-DROP PROCEDURE `spToken_Revoke`;
+DROP PROCEDURE IF EXISTS `spToken_Revoke`;
 DELIMITER //
 CREATE PROCEDURE `spToken_Revoke`(
     IN `iToken` TEXT,
@@ -89,6 +92,7 @@ BEGIN
 
     UPDATE tblAPITokens
        SET aptToken = iNewToken
+         , aptRevokeCount = IFNULL(aptRevokeCount, 0) + 1
      WHERE aptID = vTokenID;
 
     -- delete block or paused from bin
@@ -109,7 +113,7 @@ BEGIN
 END//
 DELIMITER ;
 
-DROP PROCEDURE `spToken_Pause`;
+DROP PROCEDURE IF EXISTS `spToken_Pause`;
 DELIMITER //
 CREATE PROCEDURE `spToken_Pause`(
     IN `iToken` TEXT,
@@ -168,6 +172,11 @@ BEGIN
            SET MESSAGE_TEXT = '401:Token revoked before and could not be paused';
     END IF;
 
+    IF (vTokenBinID > 0 AND vType = 'P') THEN
+        SIGNAL SQLSTATE '45000'
+           SET MESSAGE_TEXT = '401:Token paused before';
+    END IF;
+
     IF ISNULL(vTokenBinID) THEN
         INSERT INTO tblTokenBin
            SET tkbTokenMD5 = vTokenMD5
@@ -179,7 +188,7 @@ BEGIN
 END//
 DELIMITER ;
 
-DROP PROCEDURE `spToken_Resume`;
+DROP PROCEDURE IF EXISTS `spToken_Resume`;
 DELIMITER //
 CREATE PROCEDURE `spToken_Resume`(
     IN `iToken` TEXT,

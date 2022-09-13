@@ -46,26 +46,36 @@ QVariant IMPL_ORMGET_USER(TokenBin) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-/*TAPI::stuTable*/ QVariant IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
+QVariantList IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     const quint64 _lastFetchedID
 )) {
     //1: delete expired
     this->makeDeleteQuery(APICALLBOOM_PARAM)
-            .where({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::Less, DBExpression::NOW() })
-            .execute(1)
+            .where({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::NotNull })
+            .andWhere({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::Less, DBExpression::NOW() })
+            .execute(1, {}, true)
             ;
 
     //2: fetch
     ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+                           .addCols({
+                                        tblTokenBin::Fields::tkbID,
+                                        tblTokenBin::Fields::tkbTokenMD5,
+                                        tblTokenBin::Fields::tkbDueDateTime,
+                                        tblTokenBin::Fields::tkbType,
+                                        tblTokenBin::Fields::tkbCreationDateTime,
+//                                        tblTokenBin::Fields::tkbCreatedBy_usrID,
+                                    })
                            .pageSize(0);
 
     if (_lastFetchedID > 0)
         Query.where({ tblTokenBin::Fields::tkbID, enuConditionOperator::Greater, _lastFetchedID });
 
-    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
-    return Query.all().toVariant(CompactList);
+    auto Ret = Query.all();
 
+    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+    return Ret.toVariant(CompactList).toList();
 }
 
 } //namespace Targoman::API::AccountModule::ORM

@@ -116,4 +116,36 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
                        });
 }
 
+QVariant IMPL_REST_GET_OR_POST(StaticModule, pinguser, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+)) {
+    gServerStats.Success.inc();
+
+    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString ServerUrl = QString("https://%1%2")
+                        .arg(HostPort)
+                        .arg(ServerCommonConfigs::BasePathWithVersion);
+
+    return QJsonObject({
+                           { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
+                           { "server-host", ServerUrl },
+                       });
+}
+
+QVariant IMPL_REST_GET_OR_POST(StaticModule, pingapi, (
+    APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM
+)) {
+    gServerStats.Success.inc();
+
+    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString ServerUrl = QString("https://%1%2")
+                        .arg(HostPort)
+                        .arg(ServerCommonConfigs::BasePathWithVersion);
+
+    return QJsonObject({
+                           { "timestamp", QDateTime::currentDateTime().toMSecsSinceEpoch() },
+                           { "server-host", ServerUrl },
+                       });
+}
+
 } //namespace Targoman::API::Server

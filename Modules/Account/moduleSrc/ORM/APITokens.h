@@ -73,6 +73,7 @@ namespace tblAPITokens {
         TARGOMAN_CREATE_CONSTEXPR(aptExpiryDate);
         TARGOMAN_CREATE_CONSTEXPR(aptLastActivity);
         TARGOMAN_CREATE_CONSTEXPR(aptAccessCount);
+        TARGOMAN_CREATE_CONSTEXPR(aptRevokeCount);
         TARGOMAN_CREATE_CONSTEXPR(aptStatus);
         TARGOMAN_CREATE_CONSTEXPR(aptCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(aptCreatedBy_usrID);
@@ -116,18 +117,19 @@ namespace tblAPITokens {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName                       Type                    validation                          Default     UpBy        Sort  Filter Self  Virt   PK
+            //ColName                       Type                        validation                          Default     UpBy        Sort  Filter Self  Virt   PK
             { Fields::aptID,                ORM_PRIMARYKEY_64 },
-            { Fields::aptToken,             S(QString),             QFV,                                QRequired,  UPAdmin,    true, true },
+            { Fields::aptToken,             S(QString),                 QFV,                                QRequired,  UPAdmin,    true, true },
             //aptTokenMD5
-            { Fields::aptName,              S(QString),             QFV.asciiAlNum().maxLenght(250),    QRequired,  UPOwner,    true, true },
-            { Fields::apt_usrID,            S(quint64),             QFV.integer().minValue(1),          QRequired,  UPNone },
-            { Fields::aptLang,              S(TAPI::ISO639_2_t),    QFV,                                "en",       UPOwner },
-            { Fields::aptValidateIP,        S(bool),                QFV,                                false,      UPOwner },
-            { Fields::aptExtraPrivileges,   S(TAPI::PrivObject_t),  QFV,                                QNull,      UPAdmin,    false, false },
-            { Fields::aptExpiryDate,        S(TAPI::DateTime_t),    QFV,                                QNull,      UPAdmin },
-            { Fields::aptLastActivity,      S(TAPI::DateTime_t),    QFV,                                QInvalid,   UPNone },
-            { Fields::aptAccessCount,       S(quint32),             QFV.integer().minValue(1),          QInvalid,   UPNone },
+            { Fields::aptName,              S(QString),                 QFV.asciiAlNum().maxLenght(250),    QRequired,  UPOwner,    true, true },
+            { Fields::apt_usrID,            S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
+            { Fields::aptLang,              S(TAPI::ISO639_2_t),        QFV,                                "en",       UPOwner },
+            { Fields::aptValidateIP,        S(bool),                    QFV,                                false,      UPOwner },
+            { Fields::aptExtraPrivileges,   S(TAPI::PrivObject_t),      QFV,                                QNull,      UPAdmin,    false, false },
+            { Fields::aptExpiryDate,        S(TAPI::DateTime_t),        QFV,                                QNull,      UPAdmin },
+            { Fields::aptLastActivity,      S(TAPI::DateTime_t),        QFV,                                QInvalid,   UPNone },
+            { Fields::aptAccessCount,       S(quint32),                 QFV.integer().minValue(1),          QInvalid,   UPNone },
+            { Fields::aptRevokeCount,       S(NULLABLE_TYPE(quint32)),  QFV.integer(),                      QInvalid,   UPNone },
             { Fields::aptStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::aptCreationDateTime,  ORM_CREATED_ON },
@@ -167,6 +169,7 @@ namespace tblAPITokens {
         SF_DateTime_t               (aptExpiryDate),
         SF_DateTime_t               (aptLastActivity),
         SF_quint32                  (aptAccessCount),
+        SF_NULLABLE_quint32         (aptRevokeCount),
         SF_ORM_STATUS_FIELD         (aptStatus, Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active),
         SF_ORM_CREATED_BY           (aptCreatedBy_usrID),
         SF_ORM_CREATED_ON           (aptCreationDateTime),

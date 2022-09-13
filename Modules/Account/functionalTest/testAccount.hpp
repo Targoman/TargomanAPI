@@ -55,6 +55,7 @@ public:
 
     quint64 TokenID;
     QString TokenJWT;
+    QString OldTokenJWT;
 
 private slots:
     void initTestCase() {
@@ -295,6 +296,26 @@ private slots:
 
 //        u = QUrl::fromPercentEncoding(u.toLatin1());
 //        qDebug() << 6 << u;
+//    }
+
+
+
+
+//    void t1() {
+
+//        QJsonObject a = { { "svc", "aaa" } };
+
+//        QJsonObject b;
+//        b["prv"] = a;
+
+//        QJsonDocument c = QJsonDocument(a);
+//        auto cc = c.toJson();
+
+//        QJsonDocument d = QJsonDocument(b["prv"].toObject());
+//        auto dd = d.toJson();
+
+
+//        int i = 0;
 //    }
 //private:
     void NormalizePhoneNumber() {
@@ -1351,6 +1372,35 @@ private slots:
         }
     }
 
+    void apitoken_user_ping() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                this->TokenJWT,
+                RESTClientHelper::enuHTTPMethod::POST,
+                "pinguser"
+                );
+
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_api_ping() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "pingapi");
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_pause() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
@@ -1368,18 +1418,34 @@ private slots:
         }
     }
 
+    void apitoken_api_ping_after_pause() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "pingapi");
+
+//            QVERIFY(Result.isValid());
+
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_pause_again() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
-                        RESTClientHelper::enuHTTPMethod::POST,
-                        "Account/APITokens/pause",
-                        {},
-                        {
-                            { "token", this->TokenJWT },
-                        });
+                RESTClientHelper::enuHTTPMethod::POST,
+                "Account/APITokens/pause",
+                {},
+                {
+                    { "token", this->TokenJWT },
+                });
 
-            QVERIFY(Result.isValid());
-
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1402,15 +1468,12 @@ private slots:
         }
     }
 
-    void apitoken_resume_again() {
+    void apitoken_api_ping_after_resume() {
         QT_TRY {
-            QVariant Result = this->callUserAPI(
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
                         RESTClientHelper::enuHTTPMethod::POST,
-                        "Account/APITokens/resume",
-                        {},
-                        {
-                            { "token", this->TokenJWT },
-                        });
+                        "pingapi");
 
             QVERIFY(Result.isValid());
 
@@ -1419,7 +1482,26 @@ private slots:
         }
     }
 
+    void apitoken_resume_again() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                RESTClientHelper::enuHTTPMethod::POST,
+                "Account/APITokens/resume",
+                {},
+                {
+                    { "token", this->TokenJWT },
+                });
+
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_revoke() {
+        this->OldTokenJWT = this->TokenJWT;
+
         QT_TRY {
             QVariant Result = this->callUserAPI(
                         RESTClientHelper::enuHTTPMethod::POST,
@@ -1440,6 +1522,36 @@ private slots:
         }
     }
 
+    void apitoken_api_ping_after_revoke_old() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->OldTokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "pingapi");
+
+//            QVERIFY(Result.isValid());
+
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_api_ping_after_revoke_new() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "pingapi");
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_new_pause() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
@@ -1451,10 +1563,6 @@ private slots:
                         });
 
             QVERIFY(Result.isValid());
-
-            this->TokenJWT = Result.toString();
-
-            QVERIFY(this->TokenJWT.isEmpty() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1472,10 +1580,6 @@ private slots:
                         });
 
             QVERIFY(Result.isValid());
-
-            this->TokenJWT = Result.toString();
-
-            QVERIFY(this->TokenJWT.isEmpty() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
