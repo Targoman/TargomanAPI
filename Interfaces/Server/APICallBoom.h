@@ -161,7 +161,8 @@ public:
         ScopedTimer(intfAPICallBoom *_parent, const QString &_name, const QString &_desc) :
             Parent(_parent),
             Name(_name),
-            Desc(_desc)
+            Desc(_desc),
+            Finished(false)
         {
             this->ElapsedTimer.start();
         }

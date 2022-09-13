@@ -39,14 +39,15 @@ using namespace Targoman::API::Server;
 
 /***********************************************************************************/
 ///@TODO: move this to common
-#define TARGOMAN_BEGIN_STATIC_CTOR(_className) \
-    struct _##_className##_static_constructor { \
-        _##_className##_static_constructor() {
+#define TARGOMAN_BEGIN_STATIC_CTOR(_name) \
+    class _##_name##_static_constructor { \
+    public: \
+        _##_name##_static_constructor() {
 
-#define TARGOMAN_END_STATIC_CTOR(_className) \
+#define TARGOMAN_END_STATIC_CTOR(_name) \
         } \
     }; \
-    static inline _##_className##_static_constructor _##_className##_static_constructor_internal;
+    static _##_name##_static_constructor _##_name##_static_constructor_internal;
 
 ///@TODO: move this to common
 #define instanceGetterPtr(_class) static _class* instancePtr() { \
@@ -57,18 +58,19 @@ using namespace Targoman::API::Server;
 #define TAPI_DISABLE_COPY(Class) \
     Q_DISABLE_COPY(Class)
 
-#define TARGOMAN_API_MT_GATEWAY_DEFINE(_gatewayClassName) \
+#define TARGOMAN_API_MT_GATEWAY_DEFINE(_name) \
 public: \
-    instanceGetterPtr(_gatewayClassName); \
+    instanceGetterPtr(_name); \
 protected: \
-    _gatewayClassName(); \
-    TAPI_DISABLE_COPY(_gatewayClassName); \
-    TARGOMAN_BEGIN_STATIC_CTOR(_gatewayClassName) \
-        Targoman::API::ModuleHelpers::MT::MTHelper::registerGateway(_gatewayClassName::Name, _gatewayClassName::instancePtr()); \
-    TARGOMAN_END_STATIC_CTOR(_gatewayClassName)
+    _name(); \
+    TAPI_DISABLE_COPY(_name); \
+    TARGOMAN_BEGIN_STATIC_CTOR(_name) \
+        Targoman::API::ModuleHelpers::MT::MTHelper::registerGateway(_name::Name, _name::instancePtr()); \
+    TARGOMAN_END_STATIC_CTOR(_name)
 
-#define TARGOMAN_API_MT_GATEWAY_IMPL(_gatewayClassName) \
-    _gatewayClassName::_gatewayClassName() { ; }
+#define TARGOMAN_API_MT_GATEWAY_IMPL(_name) \
+    _name::_##_name##_static_constructor _name::_##_name##_static_constructor_internal; \
+    _name::_name() { ; }
 
 /***********************************************************************************/
 namespace Targoman::API::ModuleHelpers::MT {
