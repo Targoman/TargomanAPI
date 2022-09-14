@@ -1051,7 +1051,9 @@ TAPI_DEFINE_STRUCT(stuVoucherItemPrivate,
 
 TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
+    SF_Struct           (Unit, tblAccountUnitsBase::DTO, v.untID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
+
     SF_qreal            (prdQtyInHand),
     SF_qreal            (slbQtyInHand),
 
@@ -1139,6 +1141,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItem,
     SF_MD5_t                (UUID),
     SF_QString              (Desc),
     SF_qreal                (Qty),
+    SF_QString              (Unit),
     SF_qreal                (UnitPrice),
     SF_qreal                (SubTotal),
     SF_QMapOfVarStruct      (SystemDiscounts, stuSystemDiscount, SystemDiscounts_t),
