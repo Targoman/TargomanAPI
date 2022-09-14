@@ -15,8 +15,6 @@ SOURCES += \
     $$BASE_PROJECT_PATH/3rdParty/QtCurl/libsrc/QtCUrl.cpp \
     main.cpp \
 
-LIBS += -lcurl
-
 BASE_TEST_PATH = $$BASE_PROJECT_PATH/Interfaces/Test
 INCLUDEPATH += $$BASE_TEST_PATH
 include($$BASE_TEST_PATH/Test.pri)

@@ -2539,7 +2539,9 @@ ORMSelectQuery& ORMSelectQuery::addCol(const clsColSpecs& _colSpecs) {
 
     //check duplicates
     foreach (auto Col, this->Data->RequiredCols) {
-        if ((Col.name() == _colSpecs.name())
+        if ((Col.name().isEmpty() == false)
+            && (_colSpecs.name().isEmpty() == false)
+            && (Col.name() == _colSpecs.name())
             && (Col.renameAs() == _colSpecs.renameAs())
         )
             return *this;
@@ -2783,8 +2785,8 @@ QString ORMSelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, boo
     if (_reportCount) {
         this->Data->PageIndex = 0;
         this->Data->PageSize = 0;
-    } else if (_selectOne)
-        this->Data->PageSize = 1;
+    } /*else if (_selectOne)
+        this->Data->PageSize = 1;*/
 
     QStringList QueryParts;
 
@@ -2872,14 +2874,11 @@ QString ORMSelectQuery::buildQueryString(QVariantMap _args, bool _selectOne, boo
     if (_reportCount == false) {
         if (this->WhereTraitData->PksByPath.isEmpty()) {
             if ((this->Data->PageIndex > 0) || (this->Data->PageSize > 0)) {
-                QString sLimit;
-//                if (this->Data->PageIndex > 0) {
-//                    if (this->Data->PageSize > 0)
-                        sLimit = QString("%1,%2").arg(this->Data->PageIndex * this->Data->PageSize).arg(this->Data->PageSize);
-//                    else
-//                        sLimit = QString::number(this->Data->PageIndex);
-//                } else //limit > 0
-//                    sLimit = QString("0,%1").arg(this->Data->PageSize);
+                QString sLimit = QString::number(this->Data->PageIndex * this->Data->PageSize) + ",";
+                if (_selectOne)
+                    sLimit += "1";
+                else
+                    sLimit += QString::number(this->Data->PageSize);
 
                 if (SQLPrettyLen) {
                     QueryParts.append(QString("LIMIT").rightJustified(SQLPrettyLen)
