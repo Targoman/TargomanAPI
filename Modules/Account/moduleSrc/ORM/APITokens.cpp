@@ -154,30 +154,40 @@ stuRequestTokenResult APITokens::create(
     TAPI::EncodedJWT_t JWT = "TEMP_" + SecurityHelper::UUIDtoMD5();
 
     //2: insert into tblAPITokens
-    ORMCreateQuery CreateQuery = this->makeCreateQuery(APICALLBOOM_PARAM)
-                                 .addCol(tblAPITokens::Fields::aptToken)
-                                 .addCol(tblAPITokens::Fields::aptName)
-                                 .addCol(tblAPITokens::Fields::apt_usrID)
-//                           .addCol(tblAPITokens::Fields::aptLang)
-//                           .addCol(tblAPITokens::Fields::aptValidateIP)
-//                           .addCol(tblAPITokens::Fields::aptExtraPrivileges)
-//                           .addCol(tblAPITokens::Fields::aptExpiryDate)
-//                           .addCol(tblAPITokens::Fields::aptLastActivity)
-//                           .addCol(tblAPITokens::Fields::aptAccessCount)
-                           .addCol(tblAPITokens::Fields::aptStatus)
-//                           .addCol(tblAPITokens::Fields::aptCreationDateTime)
-//                           .addCol(tblAPITokens::Fields::aptCreatedBy_usrID)
-//                           .addCol(tblAPITokens::Fields::aptUpdatedBy_usrID)
+    quint64 APITokenID = 0;
+    try {
+        ORMCreateQuery CreateQuery = this->makeCreateQuery(APICALLBOOM_PARAM)
+                                     .addCol(tblAPITokens::Fields::aptToken)
+                                     .addCol(tblAPITokens::Fields::aptName)
+                                     .addCol(tblAPITokens::Fields::apt_usrID)
+    //                           .addCol(tblAPITokens::Fields::aptLang)
+    //                           .addCol(tblAPITokens::Fields::aptValidateIP)
+    //                           .addCol(tblAPITokens::Fields::aptExtraPrivileges)
+    //                           .addCol(tblAPITokens::Fields::aptExpiryDate)
+    //                           .addCol(tblAPITokens::Fields::aptLastActivity)
+    //                           .addCol(tblAPITokens::Fields::aptAccessCount)
+                               .addCol(tblAPITokens::Fields::aptStatus)
+    //                           .addCol(tblAPITokens::Fields::aptCreationDateTime)
+    //                           .addCol(tblAPITokens::Fields::aptCreatedBy_usrID)
+    //                           .addCol(tblAPITokens::Fields::aptUpdatedBy_usrID)
 
-                           .values({
-                                       { tblAPITokens::Fields::aptToken, JWT },
-                                       { tblAPITokens::Fields::aptName, _name },
-                                       { tblAPITokens::Fields::apt_usrID, _userID },
-                                       { tblAPITokens::Fields::aptStatus, enuAPITokensStatus::Pending },
+                               .values({
+                                           { tblAPITokens::Fields::aptToken, JWT },
+                                           { tblAPITokens::Fields::aptName, _name },
+                                           { tblAPITokens::Fields::apt_usrID, _userID },
+                                           { tblAPITokens::Fields::aptStatus, enuAPITokensStatus::Pending },
 
-                                   })
-                           ;
-    quint64 APITokenID = CreateQuery.execute(_userID); //APICALLBOOM_PARAM.getActorID());
+                                       })
+                               ;
+        APITokenID = CreateQuery.execute(_userID); //APICALLBOOM_PARAM.getActorID());
+
+    }  catch (const std::exception &_exp) {
+        QString ExpStr = _exp.what();
+        if (ExpStr.contains("Duplicate entry", Qt::CaseInsensitive))
+            throw /*exHTTPConflict*/exHTTPBadRequest("This name has already been used");
+
+        throw;
+    }
 
     //3: create jwt
     QJsonObject Privs;
