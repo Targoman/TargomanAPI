@@ -26,13 +26,14 @@
 #include "Roles.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
-using namespace Targoman::API::Helpers;
+#include "libTargomanDBM/clsDAC.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
 
 namespace Targoman::API::AccountModule::ORM {
 
-//using namespace DBManager;
+using namespace Helpers;
+using namespace DBManager;
 
 /*****************************************************************\
 |* User **********************************************************|

@@ -26,10 +26,8 @@
 #include "Interfaces/AAA/PrivHelpers.h"
 #include "Interfaces/Common/GenericEnums.hpp"
 #include "Interfaces/Common/HTTPExceptions.hpp"
-//#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
-using namespace Targoman::API::Helpers;
-
+#include "libTargomanDBM/clsDAC.h"
 #include "ORM/Accounting.h"
 #include "ORM/Defs.hpp"
 #include "ORM/ActiveAds.h"
@@ -37,12 +35,8 @@ using namespace Targoman::API::Helpers;
 #include "ORM/Clicks.h"
 #include "ORM/Props.h"
 #include "ORM/Locations.h"
-
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
-using namespace Targoman::API::Helpers;
-
-using namespace Targoman::API::AAA;
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AdvertModule, enuAdvertOrder);
@@ -55,12 +49,12 @@ TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     stuAdvert
 );
 
-//using namespace Targoman::API::AAA;
-//using namespace AdvertModule;
-
 namespace Targoman::API::AdvertModule {
 
 using namespace ORM;
+using namespace Helpers;
+using namespace DBManager;
+using namespace AAA;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Advert)
 //---------------------------------------------------------

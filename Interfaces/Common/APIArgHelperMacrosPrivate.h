@@ -291,7 +291,8 @@ inline QString toCammel(const QString& _name) {
 }
 
 #define TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to) \
-    if ([](Q_DECL_UNUSED auto v) -> bool { return i; }(n)) Obj[toCammel(#n)] = [](Q_DECL_UNUSED auto v) -> QJsonValue { return to; }(n);
+    if ([](Q_DECL_UNUSED auto v) -> bool { return i; }(n)) \
+        Obj[toCammel(#n)] = [](Q_DECL_UNUSED auto v) -> QJsonValue { return to; }(n);
 #define TAPI_HELPER_STRUCT_TOJSON_00(n, t, d, i, to, fr)      TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to);
 #define TAPI_HELPER_STRUCT_TOJSON_01(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELPER_STRUCT_TOJSON_00(__VA_ARGS__)
 #define TAPI_HELPER_STRUCT_TOJSON_02(n, t, d, i, to, fr, ...) TAPI_HELPER_STRUCT_TOJSON_METHOD(n, i, to); TAPI_HELPER_STRUCT_TOJSON_01(__VA_ARGS__)
@@ -345,7 +346,9 @@ inline QString toCammel(const QString& _name) {
 
 //n = _obj.contains(toCammel(#n)) ? [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(toCammel(#n))) : d
 #define TAPI_HELPER_STRUCT_FROMJSON_METHOD(n, t, d, fr) \
-    if (_obj.contains(toCammel(#n))) \
+    if (_obj.contains(#n)) \
+        n = [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(#n)); \
+    else if (_obj.contains(toCammel(#n))) \
         n = [](Q_DECL_UNUSED auto v) -> t { return fr; }(_obj.value(toCammel(#n))); \
     else if (_applyDefaultValues) \
         n = d

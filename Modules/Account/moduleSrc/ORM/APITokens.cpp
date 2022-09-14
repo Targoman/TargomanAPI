@@ -30,6 +30,7 @@
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/TokenHelper.h"
 #include "Interfaces/Server/QJWT.h"
+#include "libTargomanDBM/clsDAC.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuAPITokensStatus);
 
@@ -43,6 +44,7 @@ namespace Targoman::API::AccountModule::ORM {
 using namespace AAA;
 using namespace Helpers;
 using namespace Server;
+using namespace DBManager;
 
 /******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokens);

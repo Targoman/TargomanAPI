@@ -34,9 +34,6 @@
 #endif
 #endif
 
-#include "libTargomanDBM/clsDAC.h"
-using namespace Targoman::DBManager;
-
 class testQueryBuilders;
 
 #include "Interfaces/DBM/Defs.hpp"
@@ -555,14 +552,14 @@ public:
     bool isPure();
 
     QVariantMap one(QVariantMap _args = {});
-    template <typename T> inline T one(QVariantMap _args = {}) {
+    template <typename T> T one(QVariantMap _args = {}) {
         QVariantMap info = this->one(_args);
         T t;
         t.fromJson(QJsonObject::fromVariantMap(info));
         return t;
     }
     QVariantMap tryOne(QVariantMap _args = {});
-    template <typename T> inline T tryOne(QVariantMap _args = {}) noexcept {
+    template <typename T> T tryOne(QVariantMap _args = {}) noexcept {
         QT_TRY {
             QVariantMap info = this->one(_args);
             T t;

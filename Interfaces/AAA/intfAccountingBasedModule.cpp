@@ -31,14 +31,16 @@ using namespace Targoman::Common::Configuration;
 //#include "Server/clsSimpleCrypt.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/IteratorHelper.hpp"
-using namespace Targoman::API::Helpers;
 
+#include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/DBM/QueryBuilders.h"
-using namespace Targoman::API::DBM;
-
-using namespace Targoman::API::Common;
 
 namespace Targoman::API::AAA {
+
+using namespace Helpers;
+using namespace Common;
+using namespace DBM;
+using namespace DBManager;
 
 static QMap<QString, intfAccountingBasedModule*> ServiceRegistry;
 
