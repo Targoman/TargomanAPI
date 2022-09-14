@@ -252,6 +252,26 @@ private slots:
         }
     }
 
+    void request_apitoken_samename() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/request",
+                        {},
+                        {
+                            { "name", "test mt" },
+//                            { "services", QStringList({
+//                                "MT",
+//                                "blablabla",
+//                            }) },
+                        });
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void get_tokens() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
