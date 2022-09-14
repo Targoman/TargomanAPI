@@ -24,8 +24,8 @@
 #include "Account.h"
 #include "libQFieldValidator/QFieldValidator.h"
 #include "libTargomanCommon/Configuration/Validators.hpp"
+#include "libTargomanDBM/clsDAC.h"
 #include "Interfaces/AAA/clsJWT.hpp"
-
 #include "ORM/User.h"
 #include "ORM/APITokens.h"
 //#include "ORM/APITokenValidIPs.h"
@@ -47,22 +47,15 @@
 #include "Payment/intfPaymentGateway.h"
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/ORM/intfAlerts.h"
-
 #include "Interfaces/ObjectStorage/ObjectStorageManager.h"
 #include "Interfaces/ObjectStorage/Gateways/gtwNFS.h"
 #include "Interfaces/ObjectStorage/Gateways/gtwAWSS3.h"
-using namespace Targoman::API::ObjectStorage;
-
 #include "Interfaces/Helpers/PhoneHelper.h"
 #include "Interfaces/Helpers/SecurityHelper.h"
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
 #include "Interfaces/Helpers/IteratorHelper.hpp"
 #include "Interfaces/Helpers/URLHelper.h"
-using namespace Targoman::API::Helpers;
-
-using namespace Targoman::API::AAA;
-
 #include "Interfaces/Server/QJWT.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuOAuthType);
@@ -79,16 +72,16 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
 //    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 //);
 
-//namespace Targoman::API {
-
-//using namespace DBManager;
-//using namespace Targoman::Common;
 using namespace Targoman::Common::Configuration;
 
 namespace Targoman::API::AccountModule {
 
+using namespace ObjectStorage;
 using namespace Payment;
 using namespace ORM;
+using namespace DBManager;
+using namespace Helpers;
+using namespace AAA;
 
 ///@TODO: move this to config file
 static QSet<QString> InvalidPasswords = {

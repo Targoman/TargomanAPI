@@ -34,17 +34,18 @@
 #include "Interfaces/ObjectStorage/ObjectStorageManager.h"
 #include "Interfaces/ObjectStorage/Gateways/gtwNFS.h"
 #include "Interfaces/ObjectStorage/Gateways/gtwAWSS3.h"
-using namespace Targoman::API::ObjectStorage;
-
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
-using namespace Targoman::API::Helpers;
+#include "libTargomanDBM/clsDAC.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::TicketingModule, enuTicketType);
 
 namespace Targoman::API::TicketingModule {
 
 using namespace ORM;
+using namespace Helpers;
+using namespace DBManager;
+using namespace ObjectStorage;
 
 TARGOMAN_API_MODULE_IMPLEMENT(Ticketing)
 //---------------------------------------------------------

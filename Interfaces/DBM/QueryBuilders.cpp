@@ -24,14 +24,14 @@
 #include <QRegularExpression>
 #include "QueryBuilders.h"
 #include "clsTable.h"
-//#include "Interfaces/AAA/clsJWT.hpp"
-//using namespace Targoman::API::AAA;
 #include "Interfaces/Common/intfAPIArgManipulator.h"
 #include "Interfaces/Server/ServerCommon.h"
-
-using namespace Targoman::API::Server;
+#include "libTargomanDBM/clsDAC.h"
 
 namespace Targoman::API::DBM {
+
+using namespace DBManager;
+using namespace Server;
 
 stuRelation InvalidRelation("", "", "");
 
@@ -1224,7 +1224,7 @@ public:
     friend clsQueryGroupAndHavingTraitData<itmplDerived>;
 
 public:
-    INTFAPICALLBOOM_IMPL        &APICALLBOOM_PARAM;
+    INTFAPICALLBOOM_DECL        &APICALLBOOM_PARAM;
     itmplDerived                *Owner;
     clsTable                    _FromTable;
     ORMSelectQuery              FromQuery;
@@ -2990,8 +2990,7 @@ QVariantMap ORMSelectQuery::one(QVariantMap _args) {
 }
 
 //template <typename T>
-//T ORMSelectQuery::one(QVariantMap _args)
-//{
+//T ORMSelectQuery::one(QVariantMap _args) {
 //    QVariantMap info = this->one(_args);
 //    T t;
 //    t.fromJson(QJsonObject::fromVariantMap(info));
@@ -3006,9 +3005,9 @@ QVariantMap ORMSelectQuery::tryOne(QVariantMap _args) {
         return QVariantMap();
     }
 }
+
 //template <typename T>
-//T ORMSelectQuery::tryOne(QVariantMap _args) noexcept
-//{
+//T ORMSelectQuery::tryOne(QVariantMap _args) noexcept {
 //    QT_TRY {
 //        QVariantMap info = this->one(_args);
 //        T t;
