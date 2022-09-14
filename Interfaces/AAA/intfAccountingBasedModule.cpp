@@ -506,6 +506,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 
     AssetItem.fromJson(JsonSaleableInfo, false);
     AssetItem.Product.fromJson(JsonSaleableInfo);
+    AssetItem.Unit.fromJson(JsonSaleableInfo);
     AssetItem.Saleable.fromJson(JsonSaleableInfo);
 
     //-- --------------------------------
@@ -547,6 +548,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     PreVoucherItem.UUID             = SecurityHelper::UUIDtoMD5();
     PreVoucherItem.Desc             = AssetItem.Saleable.slbName;
     PreVoucherItem.Qty              = AssetItem.Qty; //_qty;
+    PreVoucherItem.Unit             = AssetItem.Unit.untName;
     PreVoucherItem.UnitPrice        = AssetItem.UnitPrice;
     PreVoucherItem.SubTotal         = AssetItem.SubTotal;
 
@@ -802,6 +804,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
     AccountUserAssetsBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
     stuAssetItem AssetItem;
+
     AssetItem.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
     AssetItem.Product.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
     AssetItem.Saleable.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
@@ -818,6 +821,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 //    AssetItem.APIToken          = _voucherItem.APIToken;
 
     AssetItem.Qty               = _newQty;
+    AssetItem.Unit.untName      = _voucherItem.Unit;
     AssetItem.UnitPrice         = AssetItem.Saleable.slbBasePrice;
     AssetItem.Discount          = _voucherItem.DisAmount;
 
@@ -873,6 +877,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
 //        _voucherItem.UUID = _voucherItem.UUID;
         _voucherItem.Desc               = AssetItem.Saleable.slbName;
         _voucherItem.Qty                = AssetItem.Qty;
+        _voucherItem.Unit               = AssetItem.Unit.untName;
         _voucherItem.UnitPrice          = AssetItem.UnitPrice;
         _voucherItem.SubTotal           = AssetItem.SubTotal;
 
