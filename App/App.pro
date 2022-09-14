@@ -23,7 +23,7 @@ HEADERS += \
     Server/WebSocketServer.h \
     Server/ServerConfigs.h \
     Server/clsAPIObject.h \
-    Server/OpenAPIGenerator.h \
+    Server/OpenAPIGenerator.h
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 SOURCES += \
@@ -52,4 +52,4 @@ LIBS += -lTargomanAPIInterface
 
 DISTFILES += \
     conf/test.conf \
-    conf/api.server.conf \
+    conf/api.server.conf
