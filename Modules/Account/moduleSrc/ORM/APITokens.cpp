@@ -92,31 +92,55 @@ QVariant IMPL_ORMGET_USER(APITokens) {
     APITokenServices::instance().prepareFiltersList();
 
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-//quint64 IMPL_ORMCREATE_USER(APITokens) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+QVariant IMPL_REST_GET(APITokens, byService, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    QStringList                     _services,
+//    TAPI::PKsByPath_t               _pksByPath,
+    quint64                         _pageIndex,
+    quint16                         _pageSize,
+    TAPI::Cols_t                    _cols,
+    TAPI::Filter_t                  _filters,
+    TAPI::OrderBy_t                 _orderBy
+//    TAPI::GroupBy_t                 _groupBy,
+//    bool                            _reportCount,
+//    bool                            _translate
+)) {
+    TAPI::PKsByPath_t               _pksByPath = {};
+    TAPI::GroupBy_t                 _groupBy = {};
+    bool                            _reportCount = true;
+    bool                            _translate = true;
 
-//    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
-//}
+    APITokenServices::instance().prepareFiltersList();
 
-//bool IMPL_ORMUPDATE_USER(APITokens) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
-//    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
-//}
+    if (_services.isEmpty())
+        throw exHTTPExpectationFailed("Services not provided");
 
-//bool IMPL_ORMDELETE_USER(APITokens) {
-//    TAPI::ORMFields_t ExtraFilters;
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-//        ExtraFilters.insert(tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID());
-////    this->setSelfFilters({{tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+    if ((_services.count() == 1) && (_services.at(0).indexOf(',') >= 0))
+        _services = _services.at(0).split(',', QString::SkipEmptyParts);
 
-//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
-//}
+    auto fnTouchQuery = [&APICALLBOOM_PARAM, _translate, &_services](ORMSelectQuery &_query) {
+        _query.nestedInnerJoin(APITokenServices::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
+                               .addCol(tblAPITokenServices::Fields::aptsvc_aptID, tblAPITokenServices::Fields::aptsvc_aptID)
+                               .innerJoinWith(tblAPITokenServices::Relation::Service)
+                               .where({ tblService::Fields::svcName, enuConditionOperator::In, _services.join(",") })
+                               .groupBy(tblAPITokenServices::Fields::aptsvc_aptID)
+                               , "tmpSearchAPIServices"
+                               , { "tmpSearchAPIServices", tblAPITokenServices::Fields::aptsvc_aptID,
+                                   enuConditionOperator::Equal,
+                                   tblAPITokens::Name, tblAPITokens::Fields::aptID }
+                               );
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
+}
 
 stuRequestTokenResult APITokens::create(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
@@ -256,7 +280,9 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, re
 
 QString IMPL_REST_POST(APITokens, revoke, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    const QString &_token
+    const QString   &_token,
+    TAPI::MD5_t     _pass,
+    QString         _salt
 )) {
 //    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
 
@@ -287,10 +313,12 @@ QString IMPL_REST_POST(APITokens, revoke, (
     makeAAADAC(DAC);
     clsDACResult Result = DAC.callSP({},
                                      "spToken_Revoke", {
+                                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                                         { "iPass", _pass },
+                                         { "iSalt", _salt },
                                          { "iToken", _token },
                                          { "iDueDateTime", ExpireDateTime },
                                          { "iNewToken", NewToken },
-                                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                      });
 
     TokenHelper::tokenRevoked(_token,

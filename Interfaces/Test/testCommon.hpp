@@ -319,8 +319,8 @@ protected:
                     );
     }
 
-private:
-    void deleteOldTestData() { //bool _createUsers=false)
+protected:
+    virtual void deleteOldTestData() { //bool _createUsers=false)
         clsDAC DAC("AAA");
 
         DAC.execQuery("", QString("DELETE FROM %1AAA.tblAPITokens WHERE aptToken IN(?,?)").arg(this->DBPrefix), { UT_NormalToken, UT_AdminToken });
