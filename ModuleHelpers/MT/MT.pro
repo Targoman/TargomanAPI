@@ -14,6 +14,7 @@ PRIVATE_HEADERS += \
 
 HEADERS += \
     Classes/clsDerivedHelperSubmodules.h \
+    Interfaces/intfMTAccounting.h \
     Interfaces/intfMTHelpers.h \
     MTHelper.h \
     MTDefs.hpp \
@@ -36,6 +37,7 @@ HEADERS += \
 # $$BASE_PROJECT_PATH/3rdParty/E4MT/src/clsFormalityChecker.cpp \
 SOURCES += \
     Classes/clsDerivedHelperSubmodules.cpp \
+    Interfaces/intfMTAccounting.cpp \
     Interfaces/intfMTHelpers.cpp \
     MTHelper.cpp \
     Classes/clsEngine.cpp \
