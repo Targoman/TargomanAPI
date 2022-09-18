@@ -21,29 +21,19 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#ifndef TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H
-#define TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H
+#ifndef TARGOMAN_API_MODULEHELPERS_MT_INTERFACES_INTFMTACCOUNTING_H
+#define TARGOMAN_API_MODULEHELPERS_MT_INTERFACES_INTFMTACCOUNTING_H
 
-#include "ModuleHelpers/MT/Interfaces/intfMTAccounting.h"
-//#include "Interfaces/AAA/Accounting_Defs.hpp"
-//#include "Interfaces/AAA/AAA.hpp"
-#include "../MTDefs.hpp"
+#include "Interfaces/AAA/Accounting_Defs.hpp"
+#include "Interfaces/AAA/AAA.hpp"
 
-using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
+namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
-namespace Targoman::API::MTModule {
-
-//structures and enumes goes here
-
-} //namespace Targoman::API::MTModule
-
-namespace Targoman::API::MTModule {
-namespace ORM {
-
+/******************************************************/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-namespace tblAccountUnits {
+namespace tblAccountUnitsMTBase {
 
     namespace ExtraFields {
     }
@@ -57,21 +47,25 @@ namespace tblAccountUnits {
             ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
             ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
+
+#define SF_tblAccountUnitsMTBase_DTO \
+    SF_tblAccountUnitsBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUnitsMTBase_DTO
     );
 }
 
-namespace tblAccountUnitsI18N {
+namespace tblAccountUnitsI18NMTBase {
 
     namespace ExtraFields {
     }
@@ -85,21 +79,25 @@ namespace tblAccountUnitsI18N {
             ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
             ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
+
+#define SF_tblAccountUnitsI18NMTBase_DTO \
+    SF_tblAccountUnitsI18NBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUnitsI18NMTBase_DTO
     );
 }
 
-namespace tblAccountProducts {
+namespace tblAccountProductsMTBase {
 
     namespace ExtraFields {
     }
@@ -113,21 +111,25 @@ namespace tblAccountProducts {
             ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
             ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
+
+#define SF_tblAccountProductsMTBase_DTO \
+    SF_tblAccountProductsBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsMTBase_DTO
     );
 }
 
-namespace tblAccountProductsI18N {
+namespace tblAccountProductsI18NMTBase {
 
     namespace ExtraFields {
     }
@@ -141,23 +143,29 @@ namespace tblAccountProductsI18N {
             ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
             ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
+
+#define SF_tblAccountProductsI18NMTBase_DTO \
+    SF_tblAccountProductsI18NBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsI18NMTBase_DTO
     );
 }
 
-namespace tblAccountSaleables {
+namespace tblAccountSaleablesMTBase {
 
     namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(slbValidityDurationInDays);
+        TARGOMAN_CREATE_CONSTEXPR(slbValidityWords);
     }
 
     namespace ExtraRelation {
@@ -166,10 +174,14 @@ namespace tblAccountSaleables {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            ///ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
+            //ColName                                   Type        Validation      Default UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::slbValidityDurationInDays,   S(quint32), QFV.integer(),  0,      UPOwner },
+            { ExtraFields::slbValidityWords,            S(quint32), QFV.integer(),  0,      UPOwner },
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -177,12 +189,18 @@ namespace tblAccountSaleables {
 
     } //namespace Private
 
+#define SF_tblAccountSaleablesMTBase_DTO \
+    SF_tblAccountSaleablesBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountSaleablesMTBase_DTO
+        SF_tblAccountSaleablesMTBase_DTO,
+
+        SF_quint32                  (slbValidityDurationInDays),
+        SF_quint32                  (slbValidityWords)
     );
 }
 
-namespace tblAccountSaleablesI18N {
+namespace tblAccountSaleablesI18NMTBase {
 
     namespace ExtraFields {
     }
@@ -196,8 +214,9 @@ namespace tblAccountSaleablesI18N {
             ///ColName                                    Type        Validation                         Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
             ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -205,12 +224,15 @@ namespace tblAccountSaleablesI18N {
 
     } //namespace Private
 
+#define SF_tblAccountSaleablesI18NMTBase_DTO \
+    SF_tblAccountSaleablesI18NBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesI18NMTBase_DTO
     );
 }
 
-namespace tblAccountSaleablesFiles {
+namespace tblAccountSaleablesFilesMTBase {
 
     namespace ExtraFields {
     }
@@ -223,7 +245,9 @@ namespace tblAccountSaleablesFiles {
             ///ColName                                     Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -231,12 +255,15 @@ namespace tblAccountSaleablesFiles {
 
     } //namespace Private
 
+#define SF_tblAccountSaleablesFilesMTBase_DTO \
+    SF_tblAccountSaleablesFilesBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesFilesMTBase_DTO
     );
 }
 
-namespace tblAccountUserAssets {
+namespace tblAccountUserAssetsMTBase {
 
     namespace ExtraFields {
     }
@@ -250,7 +277,9 @@ namespace tblAccountUserAssets {
             //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -258,12 +287,15 @@ namespace tblAccountUserAssets {
 
     } //namespace Private
 
+#define SF_tblAccountUserAssetsMTBase_DTO \
+    SF_tblAccountUserAssetsBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUserAssetsMTBase_DTO
     );
 }
 
-namespace tblAccountUserAssetsFiles {
+namespace tblAccountUserAssetsFilesMTBase {
 
     namespace ExtraFields {
     }
@@ -276,7 +308,9 @@ namespace tblAccountUserAssetsFiles {
             //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -284,12 +318,15 @@ namespace tblAccountUserAssetsFiles {
 
     } //namespace Private
 
+#define SF_tblAccountUserAssetsFilesMTBase_DTO \
+    SF_tblAccountUserAssetsFilesBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUserAssetsFilesMTBase_DTO
     );
 }
 
-namespace tblAccountAssetUsage {
+namespace tblAccountAssetUsageMTBase {
 
     namespace ExtraFields {
         //usgRemainingDays
@@ -304,7 +341,9 @@ namespace tblAccountAssetUsage {
             //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
@@ -312,12 +351,15 @@ namespace tblAccountAssetUsage {
 
     } //namespace Private
 
+#define SF_tblAccountAssetUsageMTBase_DTO \
+    SF_tblAccountAssetUsageBase_DTO
+
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageMTBase_DTO
     );
 }
 
-namespace tblAccountCoupons {
+namespace tblAccountCouponsMTBase {
 
     namespace ExtraFields {
     }
@@ -331,13 +373,18 @@ namespace tblAccountCoupons {
             ///ColName                  Type        Validation                  Default    UpBy       Sort  Filter Self  Virt   PK
         };
 
-        const QList<stuRelation> ExtraRelations = {
+        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
+            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
+            return { };
         };
 
         const QList<stuDBIndex> ExtraIndexes = {
         };
 
     } //namespace Private
+
+#define SF_tblAccountCouponsMTBase_DTO \
+    SF_tblAccountCouponsBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountCouponsMTBase_DTO
@@ -349,130 +396,160 @@ namespace tblAccountCoupons {
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountUnits : public intfAccountUnitsMT
+class intfAccountUnitsMT : public intfAccountUnits
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnits)
-
-protected:
-    QScopedPointer<intfAccountUnitsI18NMT> AccountUnitsI18N;
-};
-
-/******************************************************/
-class AccountUnitsI18N : public intfAccountUnitsI18NMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnitsI18N)
 
 public:
+    intfAccountUnitsMT(const QString& _schema,
+                       const QList<DBM::clsORMField>& _exclusiveCols = {},
+                       const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
 /******************************************************/
-/******************************************************/
-/******************************************************/
-class AccountProducts : public intfAccountProductsMT
+class intfAccountUnitsI18NMT : public intfAccountUnitsI18N
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProducts)
-
-protected:
-    QScopedPointer<intfAccountProductsI18NMT> AccountProductsI18N;
-};
-
-/******************************************************/
-class AccountProductsI18N : public intfAccountProductsI18NMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProductsI18N)
 
 public:
+    intfAccountUnitsI18NMT(const QString& _schema,
+                           const QList<DBM::clsORMField>& _exclusiveCols = {},
+                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountSaleables : public intfAccountSaleablesMT
+class intfAccountProductsMT : public intfAccountProducts
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleables)
-
-protected:
-    QScopedPointer<intfAccountSaleablesI18NMT> AccountSaleablesI18N;
-};
-
-/******************************************************/
-class AccountSaleablesI18N : public intfAccountSaleablesI18NMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesI18N)
-
-//public:
-};
-
-/******************************************************/
-class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesFiles)
-};
-
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class AccountUserAssets : public intfAccountUserAssetsMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssets)
-
-//public:
-};
-
-/******************************************************/
-class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssetsFiles)
-
-//public:
-};
-
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class AccountAssetUsage : public intfAccountAssetUsageMT
-{
-    Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountAssetUsage)
 
 public:
+    intfAccountProductsMT(const QString& _schema,
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+class intfAccountProductsI18NMT : public intfAccountProductsI18N
+{
+    Q_OBJECT
+
+public:
+    intfAccountProductsI18NMT(const QString& _schema,
+                              const QList<DBM::clsORMField>& _exclusiveCols = {},
+                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountCoupons : public intfAccountCouponsMT
+class intfAccountSaleablesMT : public intfAccountSaleables
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountCoupons)
 
 public:
+    intfAccountSaleablesMT(const QString& _schema,
+                           const QList<DBM::clsORMField>& _exclusiveCols = {},
+                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+class intfAccountSaleablesI18NMT : public intfAccountSaleablesI18N
+{
+    Q_OBJECT
+
+public:
+    intfAccountSaleablesI18NMT(const QString& _schema,
+                               const QList<DBM::clsORMField>& _exclusiveCols = {},
+                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+class intfAccountSaleablesFilesMT : public intfAccountSaleablesFiles
+{
+    Q_OBJECT
+
+public:
+    intfAccountSaleablesFilesMT(const QString& _schema,
+                                const QList<DBM::clsORMField>& _exclusiveCols = {},
+                                const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+class intfAccountUserAssetsMT : public intfAccountUserAssets
+{
+    Q_OBJECT
+
+public:
+    intfAccountUserAssetsMT(const QString& _schema,
+                            const QList<DBM::clsORMField>& _exclusiveCols = {},
+                            const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                            const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+class intfAccountUserAssetsFilesMT : public intfAccountUserAssetsFiles
+{
+    Q_OBJECT
+
+public:
+    intfAccountUserAssetsFilesMT(const QString& _schema,
+                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
+                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+class intfAccountAssetUsageMT : public intfAccountAssetUsage
+{
+    Q_OBJECT
+
+public:
+    intfAccountAssetUsageMT(const QString& _schema,
+                            const QList<DBM::clsORMField>& _exclusiveCols = {},
+                            const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                            const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+class intfAccountCouponsMT : public intfAccountCoupons
+{
+    Q_OBJECT
+
+public:
+    intfAccountCouponsMT(const QString& _schema,
+                         const QList<DBM::clsORMField>& _exclusiveCols = {},
+                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
 //There is no Prize in this module
-/*class AccountPrizes : public intfAccountPrizesMT
+/*class intfAccountPrizesMT : public intfAccountPrizes
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT,clsAccountPrizes)
 
-private slots:
 public:
+    intfAccountPrizesMT();
 };
 */
 
-} //namespace ORM
-} //namespace Targoman::API::MTModule
+} //namespace Targoman::API::ModuleHelpers::MT::Interfaces
 
-#endif // TARGOMAN_API_MODULES_MT_ORM_ACCOUNTING_H
+#endif // TARGOMAN_API_MODULEHELPERS_MT_INTERFACES_INTFMTACCOUNTING_H

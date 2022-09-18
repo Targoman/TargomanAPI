@@ -34,7 +34,7 @@ namespace Targoman::API::TargomanMTModule::ORM {
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountUnits)
 
 AccountUnits::AccountUnits() :
-    intfAccountUnits(
+    intfAccountUnitsMT(
 //        false,
         TargomanMTSchema,
         tblAccountUnits::Private::ExtraORMFields,
@@ -48,7 +48,7 @@ AccountUnits::AccountUnits() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountUnitsI18N)
 
 AccountUnitsI18N::AccountUnitsI18N() :
-    intfAccountUnitsI18N(
+    intfAccountUnitsI18NMT(
 //        false,
         TargomanMTSchema,
         tblAccountUnitsI18N::Private::ExtraORMFields,
@@ -62,7 +62,7 @@ AccountUnitsI18N::AccountUnitsI18N() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountProducts)
 
 AccountProducts::AccountProducts() :
-    intfAccountProducts(
+    intfAccountProductsMT(
 //        false,
         TargomanMTSchema,
         tblAccountProducts::Private::ExtraORMFields,
@@ -76,7 +76,7 @@ AccountProducts::AccountProducts() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountProductsI18N)
 
 AccountProductsI18N::AccountProductsI18N() :
-    intfAccountProductsI18N(
+    intfAccountProductsI18NMT(
 //        false,
         TargomanMTSchema,
         tblAccountProductsI18N::Private::ExtraORMFields,
@@ -90,7 +90,7 @@ AccountProductsI18N::AccountProductsI18N() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountSaleables)
 
 AccountSaleables::AccountSaleables() :
-    intfAccountSaleables(
+    intfAccountSaleablesMT(
 //        false,
         TargomanMTSchema,
         tblAccountSaleables::Private::ExtraORMFields,
@@ -104,7 +104,7 @@ AccountSaleables::AccountSaleables() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountSaleablesI18N)
 
 AccountSaleablesI18N::AccountSaleablesI18N() :
-    intfAccountSaleablesI18N(
+    intfAccountSaleablesI18NMT(
 //        false,
         TargomanMTSchema,
         tblAccountSaleablesI18N::Private::ExtraORMFields,
@@ -116,7 +116,7 @@ AccountSaleablesI18N::AccountSaleablesI18N() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountSaleablesFiles)
 
 AccountSaleablesFiles::AccountSaleablesFiles() :
-    intfAccountSaleablesFiles(
+    intfAccountSaleablesFilesMT(
 //        false,
         TargomanMTSchema,
         tblAccountSaleablesFiles::Private::ExtraORMFields,
@@ -130,7 +130,7 @@ AccountSaleablesFiles::AccountSaleablesFiles() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountUserAssets)
 
 AccountUserAssets::AccountUserAssets() :
-    intfAccountUserAssets(
+    intfAccountUserAssetsMT(
 //        false,
         TargomanMTSchema,
         tblAccountUserAssets::Private::ExtraORMFields,
@@ -142,7 +142,7 @@ AccountUserAssets::AccountUserAssets() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountUserAssetsFiles)
 
 AccountUserAssetsFiles::AccountUserAssetsFiles() :
-    intfAccountUserAssetsFiles(
+    intfAccountUserAssetsFilesMT(
 //        false,
         TargomanMTSchema,
         tblAccountUserAssetsFiles::Private::ExtraORMFields,
@@ -156,7 +156,7 @@ AccountUserAssetsFiles::AccountUserAssetsFiles() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountAssetUsage)
 
 AccountAssetUsage::AccountAssetUsage() :
-    intfAccountAssetUsage(
+    intfAccountAssetUsageMT(
 //        false,
         TargomanMTSchema,
         tblAccountAssetUsage::Private::ExtraORMFields,
@@ -170,7 +170,7 @@ AccountAssetUsage::AccountAssetUsage() :
 TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, AccountCoupons)
 
 AccountCoupons::AccountCoupons() :
-    intfAccountCoupons(
+    intfAccountCouponsMT(
 //        false,
         TargomanMTSchema,
         tblAccountCoupons::Private::ExtraORMFields,

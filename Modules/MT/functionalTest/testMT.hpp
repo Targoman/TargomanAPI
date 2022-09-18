@@ -223,6 +223,17 @@ private slots:
         }
     }
 
+    void Saleable_all() {
+        QT_TRY {
+            this->MTSaleableID = callAdminAPI(
+                RESTClientHelper::GET,
+                "MT/AccountSaleables"
+            );
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void request_apitoken() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
