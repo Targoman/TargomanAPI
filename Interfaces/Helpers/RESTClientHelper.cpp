@@ -184,8 +184,34 @@ QVariant RESTClientHelper::callAPI(
     auto makeURL = [_aPIURL, _api, _urlArgs]() {
         QUrlQuery URLQuery;
 
-        for (auto ArgIter = _urlArgs.begin(); ArgIter != _urlArgs.end(); ++ArgIter)
-            URLQuery.addQueryItem(ArgIter.key(), ArgIter.value().toString());
+        auto DocArgs = QJsonDocument::fromVariant(_urlArgs);
+        for (auto it = DocArgs.object().begin(); it != DocArgs.object().end(); ++it) {
+            QString ValueToString;
+            auto Value = it.value();
+
+            if (Value.isObject()) {
+                auto o = Value.toObject();
+            } else if (Value.isArray()) {
+                auto a = Value.toArray();
+                foreach (auto v, a) {
+                    if (ValueToString.isEmpty() == false)
+                        ValueToString += ",";
+
+                    if (v.isString())
+                        ValueToString += "'";
+                    ValueToString += v.toString();
+                    if (v.isString())
+                        ValueToString += "'";
+                }
+            } else
+                ValueToString = Value.toString();
+
+            URLQuery.addQueryItem(it.key(), ValueToString);
+        }
+
+//        for (auto it = _urlArgs.begin(); it != _urlArgs.end(); ++it) {
+//            URLQuery.addQueryItem(it.key(), it.value().toString());
+//        }
 
         QUrl URL(_aPIURL + "/" + _api);
         URL.setQuery(URLQuery);
@@ -229,6 +255,7 @@ QVariant RESTClientHelper::callAPI(
             case GET:
             case DELETE:
                 break;
+
             case POST:
             case PUT:
             case PATCH:

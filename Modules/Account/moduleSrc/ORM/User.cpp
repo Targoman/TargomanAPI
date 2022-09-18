@@ -67,7 +67,8 @@ User::User() :
 
 QVariant IMPL_ORMGET_USER(User) {
     if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
+        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -118,7 +119,9 @@ QVariant IMPL_ORMGET_USER(User) {
 
 quint64 IMPL_ORMCREATE_USER(User) {
     Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
-    if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty() && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
+
+    if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty()
+            && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
         throw exHTTPBadRequest("Either email or mobile must be provided to create user");
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
@@ -134,7 +137,8 @@ bool IMPL_ORMUPDATE_USER(User) {
 }
 
 bool IMPL_ORMDELETE_USER(User) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
+        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }

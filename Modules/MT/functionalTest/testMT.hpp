@@ -417,6 +417,27 @@ private slots:
         }
     }
 
+    void getTokens_byService() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "Account/APITokens/byService",
+                {
+                    { "services", QStringList({
+                        "MT",
+                        "aaaa",
+                        "bbbb",
+                    }) },
+                }
+            );
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void translate_en2fa_1() {
         QT_TRY {
             QVariant Result = this->callAPI(

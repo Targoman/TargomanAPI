@@ -73,6 +73,7 @@ namespace tblAPITokens {
         TARGOMAN_CREATE_CONSTEXPR(aptExpiryDate);
         TARGOMAN_CREATE_CONSTEXPR(aptLastActivity);
         TARGOMAN_CREATE_CONSTEXPR(aptAccessCount);
+        TARGOMAN_CREATE_CONSTEXPR(aptPaused);
         TARGOMAN_CREATE_CONSTEXPR(aptRevokeCount);
         TARGOMAN_CREATE_CONSTEXPR(aptStatus);
         TARGOMAN_CREATE_CONSTEXPR(aptCreationDateTime);
@@ -129,6 +130,7 @@ namespace tblAPITokens {
             { Fields::aptExpiryDate,        S(TAPI::DateTime_t),        QFV,                                QNull,      UPAdmin },
             { Fields::aptLastActivity,      S(TAPI::DateTime_t),        QFV,                                QInvalid,   UPNone },
             { Fields::aptAccessCount,       S(quint32),                 QFV.integer().minValue(1),          QInvalid,   UPNone },
+            { Fields::aptPaused,            S(bool),                    QFV,                                false,      UPOwner },
             { Fields::aptRevokeCount,       S(NULLABLE_TYPE(quint32)),  QFV.integer(),                      QInvalid,   UPNone },
             { Fields::aptStatus,            ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
@@ -169,6 +171,7 @@ namespace tblAPITokens {
         SF_DateTime_t               (aptExpiryDate),
         SF_DateTime_t               (aptLastActivity),
         SF_quint32                  (aptAccessCount),
+        SF_bool                     (aptPaused),
         SF_NULLABLE_quint32         (aptRevokeCount),
         SF_ORM_STATUS_FIELD         (aptStatus, Targoman::API::AccountModule::enuAPITokensStatus, Targoman::API::AccountModule::enuAPITokensStatus::Active),
         SF_ORM_CREATED_BY           (aptCreatedBy_usrID),
@@ -296,9 +299,24 @@ public:
 
 private slots:
     QVariant ORMGET_USER("Get APITokens information")
-//    quint64 ORMCREATE_USER("Create a new APITokens by an authorized user")
-//    bool ORMUPDATE_USER("Update token info by an authorized user")
-//    bool ORMDELETE_USER("Delete an APIToken")
+
+    QVariant REST_GET(
+        byService,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
+            QStringList                     _services,
+//            TAPI::PKsByPath_t               _pksByPath = {},
+            quint64                         _pageIndex = 0,
+            quint16                         _pageSize = 20,
+            TAPI::Cols_t                    _cols = {},
+            TAPI::Filter_t                  _filters = {},
+            TAPI::OrderBy_t                 _orderBy = {}
+//            TAPI::GroupBy_t                 _groupBy = {},
+//            bool                            _reportCount = true,
+//            bool                            _translate = true
+        ),
+        "Get APITokens information filter by Service(s)"
+    );
 
     Targoman::API::AccountModule::stuRequestTokenResult REST_POST(
         request,
@@ -314,7 +332,9 @@ private slots:
         revoke,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            const QString &_token
+            const QString   &_token,
+            TAPI::MD5_t     _pass = {},
+            QString         _salt = {}
         ),
         "Deletes the token and creates a new one. It also takes the possibility of activity from the previous token"
     );
