@@ -211,7 +211,7 @@ TARGOMAN_DEFINE_ENUM(enuGenericStatus,
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QJsonObject,
     /* typeName             */ JWT_t,
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) {
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) {
         Q_UNUSED(_paramName);
         this->fromVariantMap(_value.toMap());
     }
@@ -219,7 +219,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QVariantMap,
     /* typeName             */ ORMFields_t,
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) {
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) {
         Q_UNUSED(_paramName);
         *this = _value.toMap();
     }
@@ -227,7 +227,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QDate,
     /* typeName             */ Date_t,
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) {
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) {
         Q_UNUSED(_paramName);
         *this = _value.toDate();
     }
@@ -235,7 +235,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QTime,
     /* typeName             */ Time_t,
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) {
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) {
         Q_UNUSED(_paramName);
         *this = _value.toTime();
     }
@@ -243,7 +243,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
 TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     /* baseType             */ QDateTime,
     /* typeName             */ DateTime_t,
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) {
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) {
         _DEBUG_TAPI_REGISTER_METATYPE_3(DateTime_t, "***** fnSetFromVariant", _paramName, _value);
         *this = _value.toDateTime();
     }
@@ -253,7 +253,7 @@ TAPI_ADD_TYPE_SPECIALFROMVARIANT(
     TAPI_ADD_TYPE_SPECIALFROMVARIANT( \
     /* baseType             */ QJsonDocument, \
     /* typeName             */ _type, \
-    /* fnSetFromVariant */ [=](const QVariant &_value, const QString &_paramName = {}) { \
+    /* fnSetFromVariant     */ [=](const QVariant &_value, const QString &_paramName = {}) { \
         _DEBUG_TAPI_REGISTER_METATYPE_3(_type, "***** fnSetFromVariant", _paramName, _value); \
         if (_value.isValid() == false) { \
             this->setObject({}); \

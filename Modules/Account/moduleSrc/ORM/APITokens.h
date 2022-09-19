@@ -285,6 +285,10 @@ class APITokens : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokens);
 
 public:
+    static inline QString makeConfig(const QString& _name) { return "/Account/APITokens/" + _name; }
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> TTL;
+
+public:
     stuRequestTokenResult create(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
 //        APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
