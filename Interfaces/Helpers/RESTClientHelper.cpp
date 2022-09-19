@@ -197,11 +197,9 @@ QVariant RESTClientHelper::callAPI(
                     if (ValueToString.isEmpty() == false)
                         ValueToString += ",";
 
-                    if (v.isString())
-                        ValueToString += "'";
-                    ValueToString += v.toString();
-                    if (v.isString())
-                        ValueToString += "'";
+//                    if (v.isString()) ValueToString += "'";
+                    ValueToString += v.toVariant().toString();
+//                    if (v.isString()) ValueToString += "'";
                 }
             } else
                 ValueToString = Value.toString();

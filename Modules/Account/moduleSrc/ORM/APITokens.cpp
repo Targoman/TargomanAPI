@@ -46,6 +46,18 @@ using namespace Helpers;
 using namespace Server;
 using namespace DBManager;
 
+using namespace Targoman::Common::Configuration;
+
+tmplConfigurable<quint32> APITokens::TTL(
+    APITokens::makeConfig("TTL"),
+    "Time to live for the api token in days",
+    static_cast<quint16>(365), //1 year
+    ReturnTrueCrossValidator(),
+    "",
+    "TTL-DAYS",
+    "apitoken-ttl-days",
+    enuConfigSource::Arg | enuConfigSource::File);
+
 /******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokens);
 
@@ -130,7 +142,7 @@ QVariant IMPL_REST_GET(APITokens, byService, (
         _query.nestedInnerJoin(APITokenServices::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
                                .addCol(tblAPITokenServices::Fields::aptsvc_aptID, tblAPITokenServices::Fields::aptsvc_aptID)
                                .innerJoinWith(tblAPITokenServices::Relation::Service)
-                               .where({ tblService::Fields::svcName, enuConditionOperator::In, _services.join(",") })
+                               .where({ tblService::Fields::svcName, enuConditionOperator::In, "'" + _services.join("','") + "'" })
                                .groupBy(tblAPITokenServices::Fields::aptsvc_aptID)
                                , "tmpSearchAPIServices"
                                , { "tmpSearchAPIServices", tblAPITokenServices::Fields::aptsvc_aptID,
@@ -226,13 +238,11 @@ stuRequestTokenResult APITokens::create(
 //        { JWTItems::rolName,        _activeAccount.Privs["rolName"] },
     };
 
-    qint64 TTL = 1 * 365 * 24 * 3600; //1 year
-
     JWT = QJWT::createSigned(
         Payload,
         enuTokenActorType::API,
         QJsonObject({ { "svc", _services.join(",") } }),
-        TTL
+        APITokens::TTL.value() * 24 * 3600
 //        _activeAccount.Privs["ssnKey"].toString()
     );
 
