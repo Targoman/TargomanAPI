@@ -97,7 +97,7 @@ namespace Targoman::API::AAA {
 /******************************************************************/
 /******************************************************************/
 //key: schema
-QMap<QString, intfAccountUnitsI18N*> intfAccountUnitsI18N::myInstance;
+QMap<QString, intfAccountUnitsI18N*> intfAccountUnitsI18N::MyInstance;
 
 intfAccountUnitsI18N::intfAccountUnitsI18N(
     // bool _isTokenBase,
@@ -115,7 +115,7 @@ intfAccountUnitsI18N::intfAccountUnitsI18N(
     )
     // intfAccountORMBase(_isTokenBase)
 {
-    intfAccountUnitsI18N::myInstance[_schema] = this;
+    intfAccountUnitsI18N::MyInstance[_schema] = this;
 }
 
 /******************************************************************/
@@ -138,7 +138,7 @@ intfAccountUnits::intfAccountUnits(
 
 ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
-    intfAccountUnitsI18N::myInstance[this->Schema]->prepareFiltersList();
+    intfAccountUnitsI18N::MyInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -149,7 +149,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountUnits"
                       , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
@@ -166,7 +166,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountUnitsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountUnitsI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountUnitsI18NBase::Fields::untNameI18N)),
@@ -212,7 +212,7 @@ bool IMPL_ORMDELETE_USER(intfAccountUnits) {
 /******************************************************************/
 /******************************************************************/
 //key: schema
-QMap<QString, intfAccountProductsI18N*> intfAccountProductsI18N::myInstance;
+QMap<QString, intfAccountProductsI18N*> intfAccountProductsI18N::MyInstance;
 
 intfAccountProductsI18N::intfAccountProductsI18N(
     // bool _isTokenBase,
@@ -230,7 +230,7 @@ intfAccountProductsI18N::intfAccountProductsI18N(
     )
     // intfAccountORMBase(_isTokenBase)
 {
-    intfAccountProductsI18N::myInstance[_schema] = this;
+    intfAccountProductsI18N::MyInstance[_schema] = this;
 }
 
 /******************************************************************/
@@ -252,7 +252,7 @@ intfAccountProducts::intfAccountProducts(
 { ; }
 
 ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountProductsI18N::myInstance[this->Schema]->prepareFiltersList();
+    intfAccountProductsI18N::MyInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -273,7 +273,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountProducts"
                       , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
@@ -296,7 +296,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountProductsI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountProductsI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountProductsI18NBase::Fields::prdNameI18N)),
@@ -349,7 +349,7 @@ bool IMPL_ORMDELETE_USER(intfAccountProducts) {
 /******************************************************************/
 /******************************************************************/
 //key: schema
-QMap<QString, intfAccountSaleablesI18N*> intfAccountSaleablesI18N::myInstance;
+QMap<QString, intfAccountSaleablesI18N*> intfAccountSaleablesI18N::MyInstance;
 
 intfAccountSaleablesI18N::intfAccountSaleablesI18N(
     // bool _isTokenBase,
@@ -367,10 +367,13 @@ intfAccountSaleablesI18N::intfAccountSaleablesI18N(
     )
     // intfAccountORMBase(_isTokenBase)
 {
-    intfAccountSaleablesI18N::myInstance[_schema] = this;
+    intfAccountSaleablesI18N::MyInstance[_schema] = this;
 }
 
 /******************************************************************/
+//key: schema
+QMap<QString, intfAccountSaleables*> intfAccountSaleables::MyInstance;
+
 intfAccountSaleables::intfAccountSaleables(
     // bool _isTokenBase,
     const QString& _schema,
@@ -386,10 +389,12 @@ intfAccountSaleables::intfAccountSaleables(
         tblAccountSaleablesBase::Private::Indexes + _exclusiveIndexes
     )
     // intfAccountORMBase(_isTokenBase)
-{ ; }
+{
+    intfAccountSaleables::MyInstance[_schema] = this;
+}
 
 ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
-    intfAccountSaleablesI18N::myInstance[this->Schema]->prepareFiltersList();
+    intfAccountSaleablesI18N::MyInstance[this->Schema]->prepareFiltersList();
 
     ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
         .addCols(this->selectableColumnNames())
@@ -401,7 +406,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                       .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
                       , "lng_tblAccountSaleables"
                       , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
@@ -424,7 +429,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountSaleablesI18N::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
+            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
                             .addCol(tblAccountSaleablesI18NBase::Fields::pid)
                             .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
                                                         .arg(tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
@@ -508,7 +513,7 @@ bool IMPL_ORMDELETE_USER(intfAccountSaleables) {
 
 /******************************************************************/
 //key: schema
-QMap<QString, intfAccountSaleablesFiles*> intfAccountSaleablesFiles::myInstance;
+QMap<QString, intfAccountSaleablesFiles*> intfAccountSaleablesFiles::MyInstance;
 
 intfAccountSaleablesFiles::intfAccountSaleablesFiles(
     // bool _isTokenBase,
@@ -526,7 +531,7 @@ intfAccountSaleablesFiles::intfAccountSaleablesFiles(
     )
     // intfAccountORMBase(_isTokenBase)
 {
-    intfAccountSaleablesFiles::myInstance[_schema] = this;
+    intfAccountSaleablesFiles::MyInstance[_schema] = this;
 }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleablesFiles) {
@@ -628,7 +633,7 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
 //                      ) tmpNeededFiles
 //                   ON tmpNeededFiles.slf_slbID = tblAccountUserAssets.uas_slbID
 
-             .nestedLeftJoin(intfAccountSaleablesFiles::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+             .nestedLeftJoin(intfAccountSaleablesFiles::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                              .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID, tblAccountSaleablesFilesBase::Fields::slf_slbID)
                              .addCol(enuAggregation::SUM, tblAccountSaleablesFilesBase::Fields::slfMinCount, "MandatoryFilesCount")
                              .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount, enuConditionOperator::Greater, 0 })
@@ -663,7 +668,7 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
 //                   ON tmpProvidedFiles.uasufl_uasID = tblAccountUserAssets.uasID
 
             .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
-                                           intfAccountUserAssetsFiles::myInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+                                           intfAccountUserAssetsFiles::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_slfID)
                                            .addCol(tblAccountSaleablesFilesBase::Fields::slfMinCount)
@@ -697,7 +702,20 @@ QVariant IMPL_ORMGET_USER(intfAccountUserAssets) {
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+    auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
+        if (_cols.isEmpty())
+            _query.addCols(this->selectableColumnNames());
+        else {
+            _query.addCSVCols(_cols);
+            _cols = {};
+        }
+
+        _query.innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+                .addCols(intfAccountSaleables::MyInstance[this->Schema]->selectableColumnNames())
+                ;
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
 }
 
 bool IMPL_REST_UPDATE(intfAccountUserAssets, setAsPrefered, (
@@ -738,7 +756,7 @@ bool IMPL_REST_UPDATE(intfAccountUserAssets, disablePackage, (
 
 /******************************************************************/
 //key: schema
-QMap<QString, intfAccountUserAssetsFiles*> intfAccountUserAssetsFiles::myInstance;
+QMap<QString, intfAccountUserAssetsFiles*> intfAccountUserAssetsFiles::MyInstance;
 
 intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
     // bool _isTokenBase,
@@ -756,7 +774,7 @@ intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
     )
     // intfAccountORMBase(_isTokenBase)
 {
-    intfAccountUserAssetsFiles::myInstance[_schema] = this;
+    intfAccountUserAssetsFiles::MyInstance[_schema] = this;
 }
 
 QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {

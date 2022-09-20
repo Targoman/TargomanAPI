@@ -28,6 +28,7 @@
 #include <QDateTime>
 #include <QMutex>
 #include "libTargomanCommon/Macros.h"
+#include "libTargomanCommon/Configuration/tmplConfigurable.h"
 
 namespace Targoman::API::Helpers {
 
@@ -46,6 +47,11 @@ struct stuTokenBanInfo {
 
 class TokenHelper
 {
+public:
+    static inline QString makeConfig(const QString& _name) { return "/APIToken/" + _name; }
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> APITokenTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> TokenBinRefetchTime;
+
 public:
     static bool UpdateTokenBinList();
     static enuTokenBanType GetTokenBanType(const QString &_token);

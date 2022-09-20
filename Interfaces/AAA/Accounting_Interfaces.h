@@ -60,7 +60,7 @@ public:
 
 public:
     //key: schema
-    static QMap<QString, intfAccountUnitsI18N*> myInstance;
+    static QMap<QString, intfAccountUnitsI18N*> MyInstance;
 //    friend class intfAccountUnits;
 };
 
@@ -102,7 +102,7 @@ public:
 
 public:
     //key: schema
-    static QMap<QString, intfAccountProductsI18N*> myInstance;
+    static QMap<QString, intfAccountProductsI18N*> MyInstance;
 //    friend class intfAccountProducts;
 };
 
@@ -144,7 +144,7 @@ public:
 
 public:
     //key: schema
-    static QMap<QString, intfAccountSaleablesI18N*> myInstance;
+    static QMap<QString, intfAccountSaleablesI18N*> MyInstance;
 //    friend class intfAccountSaleables;
 };
 
@@ -159,6 +159,10 @@ public:
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+public:
+    //key: schema
+    static QMap<QString, intfAccountSaleables*> MyInstance;
 
 public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
@@ -187,7 +191,7 @@ public:
 
 public:
     //key: schema
-    static QMap<QString, intfAccountSaleablesFiles*> myInstance;
+    static QMap<QString, intfAccountSaleablesFiles*> MyInstance;
 //    friend class intfAccountUserAssets;
 
 private slots:
@@ -250,7 +254,7 @@ public:
 
 public:
     //key: schema
-    static QMap<QString, intfAccountUserAssetsFiles*> myInstance;
+    static QMap<QString, intfAccountUserAssetsFiles*> MyInstance;
 //    friend class intfAccountUserAssets;
 
 private slots:

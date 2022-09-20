@@ -26,6 +26,28 @@
 
 namespace Targoman::API::Helpers {
 
+using namespace Targoman::Common::Configuration;
+
+tmplConfigurable<quint32> TokenHelper::APITokenTTL(
+    TokenHelper::makeConfig("APITokenTTL"),
+    "Time to live for the api token in days",
+    static_cast<quint32>(365), //1 year
+    ReturnTrueCrossValidator(),
+    "",
+    "DAYS",
+    "apitoken-ttl",
+    enuConfigSource::Arg | enuConfigSource::File);
+
+tmplConfigurable<quint32> TokenHelper::TokenBinRefetchTime(
+    TokenHelper::makeConfig("TokenBinRefetchTime"),
+    "Token bin refetch cycle time in seconds",
+    static_cast<quint32>(60), //1 minute
+    ReturnTrueCrossValidator(),
+    "",
+    "SEC",
+    "tokenbin-refetch-time",
+    enuConfigSource::Arg | enuConfigSource::File);
+
 quint64 TokenHelper::LastFetchedTokenBinID = 0;
 qint64 TokenHelper::LastFetchedSecsSinceEpoch = 0;
 QMutex TokenHelper::Lock;
@@ -34,11 +56,9 @@ QMap<QString, stuTokenBanInfo> TokenHelper::TokenBanList;
 
 bool TokenHelper::UpdateTokenBinList()
 {
-    //every 1 minutes
-#ifndef QT_DEBUG
-    if (QDateTime::currentSecsSinceEpoch() - TokenHelper::LastFetchedSecsSinceEpoch < 60)
+    if ((TokenHelper::TokenBinRefetchTime.value() > 0)
+            && (QDateTime::currentSecsSinceEpoch() - TokenHelper::LastFetchedSecsSinceEpoch < TokenHelper::TokenBinRefetchTime.value()))
         return true;
-#endif
 
     QMutexLocker Locker(&TokenHelper::Lock);
 
