@@ -184,13 +184,18 @@ QVariant RESTClientHelper::callAPI(
     auto makeURL = [_aPIURL, _api, _urlArgs]() {
         QUrlQuery URLQuery;
 
-        auto DocArgs = QJsonDocument::fromVariant(_urlArgs);
-        for (auto it = DocArgs.object().begin(); it != DocArgs.object().end(); ++it) {
-            QString ValueToString;
+        auto DocArgs = QJsonDocument::fromVariant(_urlArgs).object();
+        for (auto it = DocArgs.begin(); it != DocArgs.end(); it++) {
+
+            QString Key = it.key();
             auto Value = it.value();
 
+            QString ValueToString = "";
+
             if (Value.isObject()) {
-                auto o = Value.toObject();
+                ///@TODO: complete this
+//                auto o = Value.toObject();
+                ValueToString = Value.toVariant().toString();
             } else if (Value.isArray()) {
                 auto a = Value.toArray();
                 foreach (auto v, a) {
@@ -202,9 +207,9 @@ QVariant RESTClientHelper::callAPI(
 //                    if (v.isString()) ValueToString += "'";
                 }
             } else
-                ValueToString = Value.toString();
+                ValueToString = Value.toVariant().toString();
 
-            URLQuery.addQueryItem(it.key(), ValueToString);
+            URLQuery.addQueryItem(Key, ValueToString);
         }
 
 //        for (auto it = _urlArgs.begin(); it != _urlArgs.end(); ++it) {
