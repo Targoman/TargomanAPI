@@ -18,6 +18,24 @@ USE `{{dbprefix}}{{Schema}}`;
 ALTER TABLE `tblApprovalRequest`
     CHANGE COLUMN `apr_usrID` `apr_usrID` BIGINT(20) UNSIGNED NULL AFTER `aprID`;
 
+ALTER TABLE `tblApprovalRequest`
+    ADD COLUMN `aprExpireDate` DATETIME NULL AFTER `aprRequestDate`;
+
+UPDATE `tblApprovalRequest`
+    SET aprExpireDate = DATE_ADD(aprRequestDate, INTERVAL 24 HOUR)
+    WHERE aprExpireDate IS NULL
+    AND aprRequestedFor = 'E'
+    ;
+
+UPDATE `tblApprovalRequest`
+    SET aprExpireDate = DATE_ADD(aprRequestDate, INTERVAL 15 MINUTE)
+    WHERE aprExpireDate IS NULL
+    AND aprRequestedFor = 'M'
+    ;
+
+ALTER TABLE `tblApprovalRequest`
+    CHANGE COLUMN `aprExpireDate` `aprExpireDate` DATETIME NOT NULL AFTER `aprRequestDate`;
+
 
 
 
@@ -86,10 +104,13 @@ CREATE PROCEDURE `spApproval_Request`(
     IN `iPass` VARCHAR(100),
     IN `iSalt` VARCHAR(100),
     IN `iThrowIfPassNotSet` TINYINT UNSIGNED,
-    IN `iApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iResendApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iExpireApprovalTTLSecs` BIGINT UNSIGNED,
     IN `iUserLanguage` CHAR(2)
 )
 proc: BEGIN
+    DECLARE vErr VARCHAR(500);
+
     DECLARE vApprovalCode VARCHAR(50);
     DECLARE vAprStatus CHAR(1);
     DECLARE vAprElapsedSecs BIGINT UNSIGNED;
@@ -110,6 +131,13 @@ proc: BEGIN
     IF (NOT ISNULL(iPass) OR iThrowIfPassNotSet) THEN
         CALL spUser_CheckPassword(iUserID, iPass, iSalt, iThrowIfPassNotSet);
     END IF;
+
+    -- expire old requests
+    UPDATE tblApprovalRequest
+       SET tblApprovalRequest.aprStatus = 'E'
+     WHERE tblApprovalRequest.aprStatus != 'E'
+       AND tblApprovalRequest.aprExpireDate <= NOW()
+    ;
 
     -- search in tblApprovalRequest and get last code -> vApprovalCode
     SELECT tblApprovalRequest.apr_usrID
@@ -145,9 +173,11 @@ proc: BEGIN
 
     -- found in tblApprovalRequest
     IF NOT ISNULL(vApprovalCode) THEN
-        IF vAprElapsedSecs < iApprovalTTLSecs THEN
+        IF vAprElapsedSecs < iResendApprovalTTLSecs THEN
+            SET vErr = CONCAT('401:The waiting time has not elapsed. (', SEC_TO_TIME(iResendApprovalTTLSecs - vAprElapsedSecs), ' remained)');
+
             SIGNAL SQLSTATE '45000'
-               SET MESSAGE_TEXT = '401:The waiting time has not elapsed';
+               SET MESSAGE_TEXT = vErr;
         END IF;
 
         -- resend last code
@@ -380,7 +410,8 @@ proc: BEGIN
        SET apr_usrID = iUserID,
            aprRequestedFor = iBy,
            aprApprovalKey = iKey,
-           aprApprovalCode = vApprovalCode
+           aprApprovalCode = vApprovalCode,
+           aprExpireDate = DATE_ADD(NOW(), INTERVAL iExpireApprovalTTLSecs SECOND)
     ;
 
     IF ((iBy = 'E' AND vUsrEnableEmailAlerts = 1) OR (iBy = 'M' AND vUsrEnableSMSAlerts = 1)) THEN
@@ -410,8 +441,7 @@ CREATE PROCEDURE `spApproval_Accept`(
     IN `iLogin` TINYINT,
     IN `iLoginIP` VARCHAR(50),
     IN `iLoginInfo` JSON,
-    IN `iLoginRemember` TINYINT,
-    IN `iApprovalTTLSecs` INT
+    IN `iLoginRemember` TINYINT
 )
 BEGIN
     DECLARE vAprID BIGINT UNSIGNED;
@@ -433,21 +463,14 @@ BEGIN
            SET MESSAGE_TEXT = '401:Invalid key';
     END IF;
 
-    -- 24*60*60
-    -- never expire?
-    IF iApprovalTTLSecs = 0 THEN
-        SET iApprovalTTLSecs = NULL;
-    END IF;
-
       SELECT tblApprovalRequest.aprID
            , tblApprovalRequest.apr_usrID
            , tblApprovalRequest.aprApprovalKey
            , tblApprovalRequest.aprRequestedFor
            , tblApprovalRequest.aprStatus
-           , (tblApprovalRequest.aprStatus = 'E'
-          OR (iApprovalTTLSecs IS NOT NULL
-         AND tblApprovalRequest.aprSentDate IS NOT NULL
-         AND TIME_TO_SEC(TIMEDIFF(NOW(), tblApprovalRequest.aprSentDate)) > iApprovalTTLSecs)
+           , (
+             tblApprovalRequest.aprStatus = 'E'
+          OR tblApprovalRequest.aprExpireDate <= NOW()
              )
         INTO vAprID
            , vUsrID
@@ -461,7 +484,7 @@ BEGIN
        WHERE tblApprovalRequest.aprApprovalKey = iKey
          AND tblApprovalRequest.aprApprovalCode = iCode
          AND tblApprovalRequest.aprStatus IN ('N', 'S', 'A', '1', '2', 'E')
---         N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2:SecondTry, E: Expired
+--           N: New, S: Sent, A: Applied, R: Removed, 1: FirstTry, 2:SecondTry, E: Expired
     ORDER BY aprRequestDate DESC
        LIMIT 1
              ;
@@ -512,8 +535,8 @@ BEGIN
     /****************************************/
 
     UPDATE tblApprovalRequest
-       SET aprApplyDate = NOW(),
-           aprStatus = 'A'
+       SET aprApplyDate = NOW()
+         , aprStatus = 'A'
      WHERE aprID = vAprID;
 
     IF vByType = 'E' THEN
@@ -528,11 +551,11 @@ BEGIN
         END IF;
 
         UPDATE tblUser
-           SET usrEmail = vNewKey,
-               usrApprovalState = IF(usrApprovalState IN ('N','E'), 'E', 'A'),
-               usrStatus = IF(usrStatus IN('A','V'), 'A', usrStatus),
-               usrUpdatedBy_usrID = vUsrID
-         WHERE usrID = vUsrID
+           SET tblUser.usrEmail = vNewKey,
+               tblUser.usrApprovalState = IF(tblUser.usrApprovalState IN ('N', 'E'), 'E', 'A'),
+               tblUser.usrStatus = IF(tblUser.usrStatus IN('A', 'V'), 'A', tblUser.usrStatus),
+               tblUser.usrUpdatedBy_usrID = vUsrID
+         WHERE tblUser.usrID = vUsrID
         ;
     ELSE
         IF ISNULL(vUsrID) THEN
@@ -546,6 +569,14 @@ BEGIN
                    SET MESSAGE_TEXT = '400:This mobile number is already taken';
             END IF;
 
+            -- invalidate last removed user
+            UPDATE tblUser
+               SET _InvalidatedAt = UNIX_TIMESTAMP()
+             WHERE _InvalidatedAt = 0
+               AND usrStatus = 'R'
+               AND usrMobile = vNewKey
+            ;
+
             -- create user in case of loginByMobileOnly
             INSERT INTO tblUser
                SET tblUser.usrMobile = vNewKey,
@@ -555,7 +586,9 @@ BEGIN
              WHERE LOWER(tblRoles.rolName) = 'user' -- LOWER(iSignupRole)
                    ),
                    tblUser.usrEnableEmailAlerts = 1, -- iSignupEnableEmailAlerts,
-                   tblUser.usrEnableSMSAlerts = 1 -- iSignupEnableSMSAlerts
+                   tblUser.usrEnableSMSAlerts = 1, -- iSignupEnableSMSAlerts
+                   tblUser.usrApprovalState = 'M',
+                   tblUser.usrStatus = 'A'
             ;
 
             SET vUsrID = LAST_INSERT_ID();
@@ -571,11 +604,11 @@ BEGIN
             END IF;
 
             UPDATE tblUser
-               SET usrMobile = vNewKey,
-                   usrApprovalState = IF(usrApprovalState IN ('N','M'), 'M', 'A'),
-                   usrStatus = IF(usrStatus IN('A','V'), 'A', usrStatus),
-                   usrUpdatedBy_usrID = vUsrID
-             WHERE usrID = vUsrID
+               SET tblUser.usrMobile = vNewKey,
+                   tblUser.usrApprovalState = IF(tblUser.usrApprovalState IN ('N', 'M'), 'M', 'A'),
+                   tblUser.usrStatus = IF(tblUser.usrStatus IN('A', 'V'), 'A', tblUser.usrStatus),
+                   tblUser.usrUpdatedBy_usrID = vUsrID
+             WHERE tblUser.usrID = vUsrID
             ;
         END IF;
     END IF;
@@ -583,8 +616,7 @@ BEGIN
     IF iLogin = 1 THEN
         SET vSessionGUID = SUBSTRING(dev_CommonFuncs.guid(NULL), 1, 32);
 
-        INSERT
-          INTO tblActiveSessions
+        INSERT INTO tblActiveSessions
            SET tblActiveSessions.ssnKey          = vSessionGUID,
                tblActiveSessions.ssn_usrID       = vUsrID,
                tblActiveSessions.ssnIP           = INET_ATON(iLoginIP),
@@ -598,8 +630,7 @@ BEGIN
          WHERE tblUser.usrID = vUsrID
         ;
 
-        INSERT
-          INTO tblActionLogs
+        INSERT INTO tblActionLogs
            SET tblActionLogs.atlBy_usrID = vUsrID,
                tblActionLogs.atlType = 'UserLoggedIn'
         ;
@@ -644,7 +675,8 @@ CREATE PROCEDURE `spSignup`(
     IN `iCreatorUserID` BIGINT UNSIGNED,
     IN `iEnableEmailAlerts` TINYINT,
     IN `iEnableSMSAlerts` TINYINT,
-    IN `iApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iResendApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iExpireApprovalTTLSecs` BIGINT UNSIGNED,
     IN `iUserLanguage` CHAR(2),
     OUT `oUserID` BIGINT UNSIGNED
 )
@@ -704,8 +736,11 @@ BEGIN
            SET MESSAGE_TEXT = "403:Role not found or is not allowed to signup from this IP";
     END IF;
 
+    /****************************************/
     START TRANSACTION;
+    /****************************************/
 
+    -- invalidate last removed user
     UPDATE tblUser
        SET _InvalidatedAt = UNIX_TIMESTAMP()
      WHERE _InvalidatedAt = 0
@@ -740,14 +775,15 @@ BEGIN
     SET oUserID = LAST_INSERT_ID();
 
     CALL spApproval_Request(
-        /* iBy                */ iBy,
-        /* iKey               */ iLogin,
-        /* iUserID            */ oUserID,
-        /* iPass              */ NULL,
-        /* iSalt              */ NULL,
-        /* iThrowIfPassNotSet */ 0,
-        /* iApprovalTTLSecs   */ iApprovalTTLSecs,
-        /* iUserLanguage      */ iUserLanguage
+        /* iBy                    */ iBy,
+        /* iKey                   */ iLogin,
+        /* iUserID                */ oUserID,
+        /* iPass                  */ NULL,
+        /* iSalt                  */ NULL,
+        /* iThrowIfPassNotSet     */ 0,
+        /* iResendApprovalTTLSecs */ iResendApprovalTTLSecs,
+        /* iExpireApprovalTTLSecs */ iExpireApprovalTTLSecs,
+        /* iUserLanguage          */ iUserLanguage
     );
 
     INSERT INTO tblUserWallets
@@ -776,7 +812,8 @@ CREATE PROCEDURE `spLogin_ByMobileOnly`(
     IN `iSignupRole` VARCHAR(50),
     IN `iSignupEnableEmailAlerts` TINYINT,
     IN `iSignupEnableSMSAlerts` TINYINT,
-    IN `iApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iResendApprovalTTLSecs` BIGINT UNSIGNED,
+    IN `iExpireApprovalTTLSecs` BIGINT UNSIGNED,
     IN `iUserLanguage` CHAR(2)
 )
 BEGIN
@@ -803,6 +840,15 @@ BEGIN
     ;
 
     IF ISNULL(vUsrID) AND iPreSignup = 1 THEN
+
+        -- invalidate last removed user
+        UPDATE tblUser
+           SET _InvalidatedAt = UNIX_TIMESTAMP()
+         WHERE _InvalidatedAt = 0
+           AND usrStatus = 'R'
+           AND usrMobile = iMobile
+        ;
+
         INSERT INTO tblUser
            SET tblUser.usrMobile = iMobile,
                tblUser.usr_rolID = (
@@ -828,14 +874,15 @@ BEGIN
     END IF;
 
     CALL spApproval_Request(
-        /* iBy                */ 'M',
-        /* iKey               */ imobile,
-        /* iUserID            */ vUsrID,
-        /* iPass              */ NULL,
-        /* iSalt              */ NULL,
-        /* iThrowIfPassNotSet */ 0,
-        /* iApprovalTTLSecs   */ iApprovalTTLSecs,
-        /* iUserLanguage      */ iUserLanguage
+        /* iBy                    */ 'M',
+        /* iKey                   */ imobile,
+        /* iUserID                */ vUsrID,
+        /* iPass                  */ NULL,
+        /* iSalt                  */ NULL,
+        /* iThrowIfPassNotSet     */ 0,
+        /* iResendApprovalTTLSecs */ iResendApprovalTTLSecs,
+        /* iExpireApprovalTTLSecs */ iExpireApprovalTTLSecs,
+        /* iUserLanguage          */ iUserLanguage
     );
 /*
     SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;

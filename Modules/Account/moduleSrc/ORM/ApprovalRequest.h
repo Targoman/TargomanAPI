@@ -66,10 +66,11 @@ namespace tblApprovalRequest {
         TARGOMAN_CREATE_CONSTEXPR(aprRequestedFor);
         TARGOMAN_CREATE_CONSTEXPR(aprApprovalKey);
         TARGOMAN_CREATE_CONSTEXPR(aprApprovalCode);
+        TARGOMAN_CREATE_CONSTEXPR(aprRequestDate);
+        TARGOMAN_CREATE_CONSTEXPR(aprExpireDate);
         TARGOMAN_CREATE_CONSTEXPR(aprSentDate);
         TARGOMAN_CREATE_CONSTEXPR(aprApplyDate);
         TARGOMAN_CREATE_CONSTEXPR(aprStatus);
-        TARGOMAN_CREATE_CONSTEXPR(aprRequestDate);
     }
 
     namespace Relation {
@@ -84,11 +85,12 @@ namespace tblApprovalRequest {
             { Fields::aprRequestedFor,  S(Targoman::API::AccountModule::enuApprovalType::Type), QFV,    Targoman::API::AccountModule::enuApprovalType::Email, UPNone },
             { Fields::aprApprovalKey,   S(QString),                 QFV.allwaysInvalid(),               QRequired,  UPNone, false, false },
             { Fields::aprApprovalCode,  S(QString),                 QFV.asciiAlNum().maxLenght(32),     QRequired,  UPNone, false, false }, //,   false,  false,  false,  false },
+            { Fields::aprRequestDate,   ORM_CREATED_ON },
+            { Fields::aprExpireDate,    S(TAPI::DateTime_t),        QFV,                                QRequired,  UPNone },
             { Fields::aprSentDate,      S(NULLABLE_TYPE(TAPI::DateTime_t)),  QFV,                       QNull,      UPAdmin },
             { Fields::aprApplyDate,     S(NULLABLE_TYPE(TAPI::DateTime_t)),  QFV,                       QNull,      UPNone },
             { Fields::aprStatus,        ORM_STATUS_FIELD(Targoman::API::AccountModule::enuAPRStatus, Targoman::API::AccountModule::enuAPRStatus::New) },
             { ORM_INVALIDATED_AT_FIELD },
-            { Fields::aprRequestDate,   ORM_CREATED_ON },
         };
 
         const QList<stuRelation> Relations = {
@@ -112,10 +114,11 @@ namespace tblApprovalRequest {
         SF_Enum                     (aprRequestedFor, Targoman::API::AccountModule::enuApprovalType, Targoman::API::AccountModule::enuApprovalType::Email),
         SF_QString                  (aprApprovalKey),
         SF_QString                  (aprApprovalCode),
+        SF_ORM_CREATED_ON           (aprRequestDate),
+        SF_DateTime_t               (aprExpireDate),
         SF_DateTime_t               (aprSentDate),
         SF_DateTime_t               (aprApplyDate),
-        SF_ORM_STATUS_FIELD         (aprStatus, Targoman::API::AccountModule::enuAPRStatus, Targoman::API::AccountModule::enuAPRStatus::New),
-        SF_ORM_CREATED_ON           (aprRequestDate)
+        SF_ORM_STATUS_FIELD         (aprStatus, Targoman::API::AccountModule::enuAPRStatus, Targoman::API::AccountModule::enuAPRStatus::New)
     );
 }
 #pragma GCC diagnostic pop
@@ -126,8 +129,11 @@ class ApprovalRequest : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, ApprovalRequest)
 
 public:
-    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailApprovalCodeTTL;
-    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileApprovalCodeTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailResendApprovalCodeTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileResendApprovalCodeTTL;
+
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> EmailExpireApprovalCodeTTL;
+    static Targoman::Common::Configuration::tmplConfigurable<quint32> MobileExpireApprovalCodeTTL;
 
 private slots:
     QVariant ORMGET_USER("Get ApprovalRequest information.")

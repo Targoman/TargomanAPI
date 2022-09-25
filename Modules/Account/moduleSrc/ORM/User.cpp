@@ -266,7 +266,8 @@ bool IMPL_REST_UPDATE(User, email, (
                      { "iPass", _pass },
                      { "iSalt", _salt },
                      { "iThrowIfPassNotSet", 1 },
-                     { "iApprovalTTLSecs", ApprovalRequest::EmailApprovalCodeTTL.value() },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::EmailResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::EmailExpireApprovalCodeTTL.value() },
                      { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 
@@ -305,7 +306,8 @@ bool IMPL_REST_UPDATE(User, mobile, (
                      { "iPass", _pass },
                      { "iSalt", _salt },
                      { "iThrowIfPassNotSet", 1 },
-                     { "iApprovalTTLSecs", ApprovalRequest::MobileApprovalCodeTTL.value() },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
                      { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 

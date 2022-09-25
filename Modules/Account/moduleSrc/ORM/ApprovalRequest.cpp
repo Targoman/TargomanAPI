@@ -34,25 +34,47 @@ using namespace Targoman::Common::Configuration;
 
 namespace Targoman::API::AccountModule::ORM {
 
-tmplConfigurable<quint32> ApprovalRequest::EmailApprovalCodeTTL(
-    AAA::makeConfig("EmailApprovalCodeTTL"),
-    "Time to live for the email approval code",
-    static_cast<quint16>(2*24*60*60), //2 days
+tmplConfigurable<quint32> ApprovalRequest::EmailResendApprovalCodeTTL(
+    AAA::makeConfig("EmailResendApprovalCodeTTL"),
+    "Time to live for the email resend approval code",
+    static_cast<quint16>(120),
     ReturnTrueCrossValidator(),
     "",
     "",
-    "email-approval-code-ttl",
+    "email-resend-approval-code-ttl",
     enuConfigSource::Arg | enuConfigSource::File
 );
 
-tmplConfigurable<quint32> ApprovalRequest::MobileApprovalCodeTTL(
-    AAA::makeConfig("MobileApprovalCodeTTL"),
-    "Time to live for the mobile approval code",
-    static_cast<quint16>(2*60), //2 minutes
+tmplConfigurable<quint32> ApprovalRequest::MobileResendApprovalCodeTTL(
+    AAA::makeConfig("MobileResendApprovalCodeTTL"),
+    "Time to live for the mobile resend approval code",
+    static_cast<quint16>(120),
     ReturnTrueCrossValidator(),
     "",
     "",
-    "mobile-approval-code-ttl",
+    "mobile-resend-approval-code-ttl",
+    enuConfigSource::Arg | enuConfigSource::File
+);
+
+tmplConfigurable<quint32> ApprovalRequest::EmailExpireApprovalCodeTTL(
+    AAA::makeConfig("EmailExpireApprovalCodeTTL"),
+    "Time to live for the email expire approval code",
+    static_cast<quint16>(24*60*60), //one day
+    ReturnTrueCrossValidator(),
+    "",
+    "",
+    "email-expire-approval-code-ttl",
+    enuConfigSource::Arg | enuConfigSource::File
+);
+
+tmplConfigurable<quint32> ApprovalRequest::MobileExpireApprovalCodeTTL(
+    AAA::makeConfig("MobileExpireApprovalCodeTTL"),
+    "Time to live for the mobile expire approval code",
+    static_cast<quint16>(15*60), //15 minutes
+    ReturnTrueCrossValidator(),
+    "",
+    "",
+    "mobile-expire-approval-code-ttl",
     enuConfigSource::Arg | enuConfigSource::File
 );
 
@@ -125,8 +147,8 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
         throw exTargomanBase("Code expired");
 
     quint32 ConfigTTL = (Type == enuApprovalType::Email
-                            ? ApprovalRequest::EmailApprovalCodeTTL.value()
-                            : ApprovalRequest::MobileApprovalCodeTTL.value()
+                            ? ApprovalRequest::EmailExpireApprovalCodeTTL.value()
+                            : ApprovalRequest::MobileExpireApprovalCodeTTL.value()
                         );
 
     QDateTime Now = Info.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();

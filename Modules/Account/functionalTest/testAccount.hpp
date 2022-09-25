@@ -789,7 +789,8 @@ private slots:
                            { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                            { "iSalt", 1234 },
                            { "iThrowIfPassNotSet", 0 },
-                           { "iApprovalTTLSecs", 120 },
+                           { "iResendApprovalTTLSecs", 2 * 60 },
+                           { "iExpireApprovalTTLSecs", 15 * 60 },
                            { "iUserLanguage", "en" },
                        });
 
@@ -824,7 +825,8 @@ private slots:
                            { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                            { "iSalt", 1234 },
                            { "iThrowIfPassNotSet", 0 },
-                           { "iApprovalTTLSecs", 120 },
+                           { "iResendApprovalTTLSecs", 2 * 60 },
+                           { "iExpireApprovalTTLSecs", 15 * 60 },
                            { "iUserLanguage", "en" },
                        });
 

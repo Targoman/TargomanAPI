@@ -294,7 +294,8 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
                                       { "iCreatorUserID", QVariant() },
                                       { "iEnableEmailAlerts", _enableEmailAlerts ? 1 : 0 },
                                       { "iEnableSMSAlerts", _enableSMSAlerts ? 1 : 0 },
-                                      { "iApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailApprovalCodeTTL.value() : ApprovalRequest::MobileApprovalCodeTTL.value() },
+                                      { "iResendApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailResendApprovalCodeTTL.value() : ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                                      { "iExpireApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailExpireApprovalCodeTTL.value() : ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
                                       { "iUserLanguage", APICALLBOOM_PARAM.language() },
                                   })
                                   .spDirectOutputs()
@@ -331,7 +332,8 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
                                             { "iLoginInfo", _sessionInfo.object() },
                                             { "iLoginRemember", _rememberMe ? 1 : 0 },
                                             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-                                            { "iApprovalTTLSecs", ApprovalRequest::EmailApprovalCodeTTL.value() },
+//                                            { "iResendApprovalTTLSecs", ApprovalRequest::EmailResendApprovalCodeTTL.value() },
+//                                            { "iExpireApprovalTTLSecs", ApprovalRequest::EmailExpireApprovalCodeTTL.value() },
                                         })
                                         .toJson(true)
                                         .object();
@@ -375,7 +377,8 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
                                             { "iLoginInfo", _sessionInfo.object() },
                                             { "iLoginRemember", _rememberMe ? 1 : 0 },
                                             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-                                            { "iApprovalTTLSecs", ApprovalRequest::MobileApprovalCodeTTL.value() },
+//                                            { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+//                                            { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
                                         })
                                         .toJson(true)
                                         .object();
@@ -457,7 +460,8 @@ bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
                      { "iSignupRole", _signupRole },
                      { "iSignupEnableEmailAlerts", _signupEnableEmailAlerts ? 1 : 0 },
                      { "iSignupEnableSMSAlerts", _signupEnableSMSAlerts ? 1 : 0 },
-                     { "iApprovalTTLSecs", ApprovalRequest::MobileApprovalCodeTTL.value() },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
                      { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 
@@ -480,7 +484,8 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
                      { "iPass", {} },
                      { "iSalt", {} },
                      { "iThrowIfPassNotSet", 0 },
-                     { "iApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailApprovalCodeTTL.value() : ApprovalRequest::MobileApprovalCodeTTL.value() },
+                     { "iResendApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailResendApprovalCodeTTL.value() : ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailExpireApprovalCodeTTL.value() : ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
                      { "iUserLanguage", APICALLBOOM_PARAM.language() },
 //                     { "iIP", APICALLBOOM_PARAM.getIP() },
 //                     { "iRecreateIfExpired", true },
