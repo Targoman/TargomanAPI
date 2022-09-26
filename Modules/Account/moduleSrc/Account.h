@@ -109,7 +109,7 @@ private slots:
         "Base method for signup with email or mobile. this method can be called just by predefined IPs"
     )
 
-    TAPI::EncodedJWT_t REST_POST(
+    /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         approveEmail,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
@@ -124,7 +124,7 @@ private slots:
         "Approves Email by provided UUID, then login if needed"
     )
 
-    TAPI::EncodedJWT_t REST_POST(
+    /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         approveMobile,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
@@ -139,7 +139,7 @@ private slots:
         "Approves Mobile by provided mobile and verify code, then login if needed"
     )
 
-    TAPI::EncodedJWT_t REST_GET_OR_POST(
+    /*TAPI::EncodedJWT_t*/QVariantMap REST_GET_OR_POST(
         login,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
@@ -164,13 +164,6 @@ private slots:
             QString _signupRole = "BaseUser",
             bool _signupEnableEmailAlerts = true,
             bool _signupEnableSMSAlerts = true
-//            quint32 _verifyCode = 0/* = {}*/,
-//            TAPI::MD5_t _pass = {},
-//            QString _salt = {},
-//            TAPI::CommaSeparatedStringList_t _services = {},
-//            bool _rememberMe = false,
-//            TAPI::JSON_t _sessionInfo = {},
-//            TAPI::MD5_t _fingerprint = {}
         ),
         "Login user by mobile only and return an encoded JWT."
         "A new random code is generated and sent to the user via SMS."
@@ -210,7 +203,7 @@ private slots:
 //        "check verification code for provided mobile."
 //    )
 
-    TAPI::EncodedJWT_t REST_GET_OR_POST(
+    /*TAPI::EncodedJWT_t*/QVariantMap REST_GET_OR_POST(
         loginByOAuth,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
@@ -241,13 +234,13 @@ private slots:
         "Logout logged in user"
     )
 
-    QString REST_GET_OR_POST(
+    bool REST_GET_OR_POST(
         createForgotPasswordLink,
         (
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             QString _emailOrMobile
         ),
-        "Create a forgot password request returning a UUID for the requiest"
+        "Create a forgot password request returning a UUID for the request"
     )
 
     bool REST_GET_OR_POST(

@@ -208,10 +208,10 @@ int main(int _argc, char *_argv[]) {
 //        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testAPITokens(DBPrefix), progArgsCount, progArgs);
     } catch (exTargomanBase &e) {
         ++FailedTests;
-        qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());
+        qDebug() << endl << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what()) << endl;
     } catch (std::exception &e) {
         ++FailedTests;
-        qDebug() << "*** EXCEPTION ***" << e.what();
+        qDebug() << endl << "*** EXCEPTION ***" << e.what() << endl;
     }
 
     if (FailedTests > 0)

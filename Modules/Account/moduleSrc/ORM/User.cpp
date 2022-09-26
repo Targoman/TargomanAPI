@@ -27,6 +27,7 @@
 //#include "Interfaces/ORM/APIQueryBuilders.h"
 #include "Interfaces/Helpers/PhoneHelper.h"
 #include "libTargomanDBM/clsDAC.h"
+#include "ApprovalRequest.h"
 
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AccountModule, enuUserExtraInfoJsonKey);
 
@@ -249,21 +250,25 @@ bool IMPL_REST_UPDATE(User, email, (
     if ((QFV.email().isValid(_email) == false) || (QFV.emailNotFake().isValid(_email) == false))
         throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
 
-    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
-    if (cJWT.canChangePass()) { //hasPass
-        if (_pass.isEmpty() || _salt.isEmpty())
-            throw exHTTPBadRequest("Password and salt are required to change email");
+//    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+//    if (cJWT.canChangePass()) { //hasPass
+//        if (_pass.isEmpty() || _salt.isEmpty())
+//            throw exHTTPBadRequest("Password and salt are required to change email");
 
-        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-    }
+//        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+//    }
 
     this->callSP(APICALLBOOM_PARAM,
                  "spApproval_Request", {
                      { "iBy", "E" },
-                     { "iUserID", CurrentUserID },
                      { "iKey", _email },
+                     { "iUserID", CurrentUserID },
                      { "iPass", _pass },
                      { "iSalt", _salt },
+                     { "iThrowIfPassNotSet", 1 },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::EmailResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::EmailExpireApprovalCodeTTL.value() },
+                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 
     return true;
@@ -285,21 +290,25 @@ bool IMPL_REST_UPDATE(User, mobile, (
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Invalid mobile.");
 
-    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
-    if (cJWT.canChangePass()) { //hasPass
-        if (_pass.isEmpty() || _salt.isEmpty())
-            throw exHTTPBadRequest("Password and salt are required to change email");
+//    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+//    if (cJWT.canChangePass()) { //hasPass
+//        if (_pass.isEmpty() || _salt.isEmpty())
+//            throw exHTTPBadRequest("Password and salt are required to change email");
 
-        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
-    }
+//        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
+//    }
 
     this->callSP(APICALLBOOM_PARAM,
                  "spApproval_Request", {
                      { "iBy", "M" },
-                     { "iUserID", CurrentUserID },
                      { "iKey", _mobile },
+                     { "iUserID", CurrentUserID },
                      { "iPass", _pass },
                      { "iSalt", _salt },
+                     { "iThrowIfPassNotSet", 1 },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
+                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 
     return true;

@@ -81,8 +81,8 @@ private slots:
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Email_t   _email,
-            TAPI::MD5_t     _pass = {},
-            QString         _salt = {}
+            TAPI::MD5_t     _pass,
+            QString         _salt
         ),
         "Update user email"
     )
@@ -92,8 +92,8 @@ private slots:
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             TAPI::Mobile_t  _mobile,
-            TAPI::MD5_t     _pass = {},
-            QString         _salt = {}
+            TAPI::MD5_t     _pass,
+            QString         _salt
         ),
         "Update user mobile"
     )

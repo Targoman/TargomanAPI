@@ -287,13 +287,16 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
                                       { "iPass", _pass },
                                       { "iRole", _role },
                                       { "iIP", APICALLBOOM_PARAM.getIP() },
-                                      { "iName", _name.isEmpty()? QVariant() : _name },
-                                      { "iFamily", _family.isEmpty()? QVariant() : _family },
-                                      { "iSpecialPrivs", _specialPrivs.isEmpty()? QVariant() : _specialPrivs },
+                                      { "iName", _name.isEmpty() ? QVariant() : _name },
+                                      { "iFamily", _family.isEmpty() ? QVariant() : _family },
+                                      { "iSpecialPrivs", _specialPrivs.isEmpty() ? QVariant() : _specialPrivs },
                                       { "iMaxSessions", _maxSessions },
                                       { "iCreatorUserID", QVariant() },
                                       { "iEnableEmailAlerts", _enableEmailAlerts ? 1 : 0 },
                                       { "iEnableSMSAlerts", _enableSMSAlerts ? 1 : 0 },
+                                      { "iResendApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailResendApprovalCodeTTL.value() : ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                                      { "iExpireApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailExpireApprovalCodeTTL.value() : ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
+                                      { "iUserLanguage", APICALLBOOM_PARAM.language() },
                                   })
                                   .spDirectOutputs()
                                   .value("oUserID")
@@ -305,7 +308,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     };
 }
 
-TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_POST(Account, approveEmail, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _email,
     TAPI::MD5_t _code,
@@ -329,27 +332,35 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveEmail, (
                                             { "iLoginInfo", _sessionInfo.object() },
                                             { "iLoginRemember", _rememberMe ? 1 : 0 },
                                             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-                                            { "iTTL", ApprovalRequest::EmailApprovalCodeTTL.value() },
                                         })
                                         .toJson(true)
                                         .object();
 
-    if (_autoLogin == false)
-        return TAPI::EncodedJWT_t();
+    if (UserInfo.contains(DBM_SPRESULT_ROWS))
+        UserInfo = UserInfo[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
-    auto LoginInfo = PrivHelpers::processUserObject(
-                         UserInfo,
-                         {},
-                         _services.split(",", QString::SkipEmptyParts)
-                         );
+    QVariantMap Result({
+        { "userID", UserInfo["usrID"].toInt() },
+    });
 
-    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _email, LoginInfo, _services);
+    if (_autoLogin) {
+        auto LoginInfo = PrivHelpers::processUserObject(
+                             UserInfo,
+                             {},
+                             _services.split(",", QString::SkipEmptyParts)
+                             );
+
+        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _email, LoginInfo, _services));
+    }
+
+    return Result;
+
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
 }
 
-TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_POST(Account, approveMobile, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::Mobile_t _mobile,
     quint32 _code,
@@ -373,27 +384,36 @@ TAPI::EncodedJWT_t IMPL_REST_POST(Account, approveMobile, (
                                             { "iLoginInfo", _sessionInfo.object() },
                                             { "iLoginRemember", _rememberMe ? 1 : 0 },
                                             { "iFingerPrint", _fingerprint.isEmpty() ? QVariant() : _fingerprint },
-                                            { "iTTL", ApprovalRequest::MobileApprovalCodeTTL.value() },
                                         })
-                                        .toJson(true)
-                                        .object();
+//                           .spDirectOutputs();
+                           .toJson(true)
+                           .object();
 
-    if (_autoLogin == false)
-        return TAPI::EncodedJWT_t();
+    if (UserInfo.contains(DBM_SPRESULT_ROWS))
+        UserInfo = UserInfo[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
 
-    auto LoginInfo = PrivHelpers::processUserObject(
-                         UserInfo,
-                         {},
-                         _services.split(",", QString::SkipEmptyParts)
-                         );
+    QVariantMap Result({
+        { "userID", UserInfo["usrID"].toInt() },
+    });
 
-    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _mobile, LoginInfo, _services);
+    if (_autoLogin) {
+        auto LoginInfo = PrivHelpers::processUserObject(
+                             UserInfo,
+                             {},
+                             _services.split(",", QString::SkipEmptyParts)
+                             );
+
+        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _mobile, LoginInfo, _services));
+    }
+
+    return Result;
+
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                                         this->createLoginJWT(_rememberMe, _mobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                                                     });
 }
 
-TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_GET_OR_POST(Account, login, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
@@ -419,7 +439,14 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, login, (
                                                        _fingerprint
                                                        );
 
-    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _emailOrMobile, LoginInfo, _services);
+    QVariantMap Result({
+//        { "userID", UserInfo["usrID"].toInt() },
+    });
+
+    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _emailOrMobile, LoginInfo, _services));
+
+    return Result;
+
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(_rememberMe, _emailOrMobile, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -449,12 +476,15 @@ bool IMPL_REST_GET_OR_POST(Account, loginByMobileOnly, (
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
     this->callSP(APICALLBOOM_PARAM,
-                 "spMobileVerifyCode_Request", {
+                 "spLogin_ByMobileOnly", {
                      { "iMobile", _mobile },
-                     { "iSignupIfNotExists", _signupIfNotExists ? 1 : 0 },
+                     { "iPreSignup", _signupIfNotExists ? 1 : 0 },
                      { "iSignupRole", _signupRole },
                      { "iSignupEnableEmailAlerts", _signupEnableEmailAlerts ? 1 : 0 },
                      { "iSignupEnableSMSAlerts", _signupEnableSMSAlerts ? 1 : 0 },
+                     { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
+                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
                  });
 
     return true;
@@ -468,24 +498,19 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
 
-//    this->callSP(APICALLBOOM_PARAM,
-//    "spApprovalRequestAgain", {
-//                     { "iBy", Type },
-//                     { "iKey", _emailOrMobile },
-//                     { "iIP", APICALLBOOM_PARAM.getIP() },
-//                     { "iRecreateIfExpired", true },
-//                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
-//                 });
     this->callSP(APICALLBOOM_PARAM,
                  "spApproval_Request", {
                      { "iBy", Type },
                      { "iKey", _emailOrMobile },
                      { "iUserID", {} },
                      { "iPass", {} },
-                     { "iSalt", {} }
+                     { "iSalt", {} },
+                     { "iThrowIfPassNotSet", 0 },
+                     { "iResendApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailResendApprovalCodeTTL.value() : ApprovalRequest::MobileResendApprovalCodeTTL.value() },
+                     { "iExpireApprovalTTLSecs", Type == 'E' ? ApprovalRequest::EmailExpireApprovalCodeTTL.value() : ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
+                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
 //                     { "iIP", APICALLBOOM_PARAM.getIP() },
 //                     { "iRecreateIfExpired", true },
-//                     { "iTTL", Type == 'E' ? Account::EmailApprovalCodeTTL.value() : Account::MobileApprovalCodeTTL.value() },
                  });
 
     return true;
@@ -494,7 +519,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 ///@TODO: cache to ban users for every service
 ///@TODO: update cache for each module
 ///@TODO: JWT lifetime dynamic based on current hour
-TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::enuOAuthType::Type _type,
     QString _oAuthToken,
@@ -541,7 +566,14 @@ TAPI::EncodedJWT_t IMPL_REST_GET_OR_POST(Account, loginByOAuth, (
                          _fingerprint
                          );
 
-    return this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, OAuthInfo.Email, LoginInfo, _services);
+    QVariantMap Result({
+//        { "userID", UserInfo["usrID"].toInt() },
+    });
+
+    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, OAuthInfo.Email, LoginInfo, _services));
+
+    return Result;
+
 //    return Targoman::API::AccountModule::stuMultiJWT({
 //                                 this->createLoginJWT(true, OAuthInfo.Email, LoginInfo.Privs["ssnKey"].toString(), _services),
 //                             });
@@ -582,7 +614,7 @@ bool IMPL_REST_GET_OR_POST(Account, logout, (
     return true;
 }
 
-QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
+bool IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile
 )) {
@@ -596,7 +628,7 @@ QString IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
                      { "iBy", Type },
                  });
 
-    return (Type == "E" ? "email" : "mobile");
+    return true; //(Type == "E" ? "email" : "mobile");
 }
 
 bool IMPL_REST_GET_OR_POST(Account, changePass, (

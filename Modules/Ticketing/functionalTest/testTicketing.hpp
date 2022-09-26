@@ -113,7 +113,7 @@ private slots:
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedJWT = Result.toString();
+        gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).actorID() == gUserID);
@@ -130,7 +130,7 @@ private slots:
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedAdminJWT = Result.toString();
+        gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);

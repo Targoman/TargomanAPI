@@ -393,7 +393,7 @@ void clsAPIObject::invokeMethod(
 
         for (int i=0; i<_arguments.size(); ++i)
             cleanArgAt(i); //CLEAN_ARG_AT(i);
-    } catch (...) {
+    } catch (std::exception &_exp) {
 
         for (int i=0; i<_arguments.size(); ++i)
             cleanArgAt(i); //CLEAN_ARG_AT(i);
