@@ -285,24 +285,21 @@ class APITokens : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, APITokens);
 
 public:
-    static inline QString makeConfig(const QString& _name) { return "/Account/APITokens/" + _name; }
-    static Targoman::Common::Configuration::tmplConfigurable<quint32> TTL;
+//    virtual void initializeModule();
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
-public:
     stuRequestTokenResult create(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-//        APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
         quint64 _userID,
         const QString &_name,
         const QStringList &_services = {}
     );
 
-public:
-//    virtual void initializeModule();
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
-
 private slots:
     QVariant ORMGET_USER("Get APITokens information")
+//    quint64 ORMCREATE_USER("Create a new APIToken")
+//    bool ORMUPDATE_USER("Update an APIToken")
+//    bool ORMDELETE_USER("Delete an APIToken")
 
     QVariant REST_GET(
         byService,

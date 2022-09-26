@@ -159,7 +159,6 @@ public:
     template <TAPI::enuTokenActorType::Type _tokenActorType>
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-//        const QJsonObject& _privInfo,
         clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
@@ -170,6 +169,21 @@ public:
         int& _translationTime
     );
 
+protected:
+    template <TAPI::enuTokenActorType::Type _tokenActorType>
+    QVariantMap internalDoTranslation(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+        QString _text,
+        const TranslationDir_t& _dir,
+        const QString& _engine,
+        bool _useSpecialClass,
+        bool _detailed, bool _detokenize,
+        int& _preprocessTime,
+        int& _translationTime
+    );
+
+public:
     QString tokenize(const QString& _text, const QString& _lang);
     QString detokenize(const QString& _text, const QString& _lang);
     QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
@@ -204,7 +218,7 @@ private:
     MTHelper();
     Q_DISABLE_COPY(MTHelper)
 
-    QHash<QString, /*intfTranslatorGateway*/clsEngine*> RegisteredEngines;
+    QHash<QString, clsEngine*> RegisteredEngines;
     Targoman::Common::tmplBoundedCache<QHash, QString, QVariantMap> TranslationCache;
     QList<QPair<QRegularExpression, QString>> CorrectionRule;
     QTime LastCorrectionRuleUpdateTime;

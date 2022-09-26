@@ -42,6 +42,9 @@ using namespace Targoman::API::AAA;
 #include "Interfaces/Helpers/SecurityHelper.h"
 using namespace Targoman::API::Helpers;
 
+#include "ModuleHelpers/MT/Interfaces/intfMTAccounting.h"
+using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
+
 class testMT : public clsBaseTest
 {
     Q_OBJECT
@@ -196,6 +199,34 @@ private slots:
         }
     }
 
+    void createSaleable_mt_ERROR_ON_no_validities() {
+        this->MTSaleableCode = QString("%1-s%2").arg(this->MTProductCode).arg(QRandomGenerator::global()->generate());
+
+        QT_TRY {
+            QVariant Result = callAdminAPI(
+                RESTClientHelper::PUT,
+                "MT/AccountSaleables",
+                {},
+                {
+                    { tblAccountSaleablesBase::Fields::slbCode,             this->MTSaleableCode },
+                    { tblAccountSaleablesBase::Fields::slbName,             "test mt Saleable 456 name" },
+                    { tblAccountSaleablesBase::Fields::slbDesc,             "test mt Saleable 456 desc" },
+                    { tblAccountSaleablesBase::Fields::slb_prdID,           this->MTProductID },
+                    { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+                    { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
+                    { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
+                    { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
+//                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityDurationInDays,    60 },
+//                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords,             1000 },
+                }
+            );
+        } QT_CATCH (exTargomanBase &exp) {
+            qDebug() << "OK" << exp.what();
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void createSaleable_mt() {
         this->MTSaleableCode = QString("%1-s%2").arg(this->MTProductCode).arg(QRandomGenerator::global()->generate());
 
@@ -213,6 +244,8 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
+                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityDurationInDays,    60 },
+                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords,             1000 },
                 }
             );
 
@@ -242,10 +275,10 @@ private slots:
                         {},
                         {
                             { "name", "test mt" },
-                            { "services", QStringList({
-                                "MT",
-                                "blablabla",
-                            }) },
+//                            { "services", QStringList({
+//                                "MT",
+//                                "blablabla",
+//                            }) },
                         });
 
             QVERIFY(Result.isValid());

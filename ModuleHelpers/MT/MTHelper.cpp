@@ -168,6 +168,55 @@ QVariantMap MTHelper::doTranslation(
 ) {
     APICALLBOOM_PARAM.createScopeTiming("translate");
 
+    TranslationDir_t PreTranslateDir;
+    TranslationDir_t PostTranslateDir;
+
+    //find class and engine
+    clsEngine* TranslationEngine = nullptr;
+    QString Class;
+    if (_useSpecialClass) {
+        Class = this->detectClass(_engine, _text, _dir.first);
+        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
+    }
+    if (TranslationEngine == nullptr)
+        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+
+    if (TranslationEngine == nullptr) {
+        if (_dir.first == "en" || _dir.second == "en")
+            throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
+
+        PreTranslateDir = { _dir.first, "en" };
+        PostTranslateDir = { "en", _dir.second };
+    }
+
+    //
+    return this->internalDoTranslation(
+        APICALLBOOM_PARAM,
+        DerivedHelperSubmodules,
+        _text,
+        _dir,
+        _engine,
+        _useSpecialClass,
+        _detailed,
+        _detokenize,
+        _preprocessTime,
+        _translationTime
+    );
+}
+
+template <TAPI::enuTokenActorType::Type _tokenActorType>
+QVariantMap MTHelper::internalDoTranslation(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+    QString _text,
+    const TranslationDir_t& _dir,
+    const QString& _engine,
+    bool _useSpecialClass,
+    bool _detailed,
+    bool _detokenize,
+    int& _preprocessTime,
+    int& _translationTime
+) {
     if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM/*, _privInfo*/, { TARGOMAN_PRIV_PREFIX + "Detailed" }) == false)
         throw exAuthorization("Not enought privileges to get detailed translation response.");
 
@@ -181,7 +230,7 @@ QVariantMap MTHelper::doTranslation(
         QTime Timer;
         Timer.start();
 
-        /*intfTranslatorGateway*/clsEngine* TranslationEngine = nullptr;
+        clsEngine* TranslationEngine = nullptr;
         QString Class;
 
         if (_useSpecialClass) {

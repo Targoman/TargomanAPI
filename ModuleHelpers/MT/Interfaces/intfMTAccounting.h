@@ -174,9 +174,9 @@ namespace tblAccountSaleablesMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                                   Type        Validation      Default UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::slbValidityDurationInDays,   S(quint32), QFV.integer(),  0,      UPOwner },
-            { ExtraFields::slbValidityWords,            S(quint32), QFV.integer(),  0,      UPOwner },
+            //ColName                                   Type        Validation      Default     UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::slbValidityDurationInDays,   S(quint32), QFV.integer(),  QRequired,  UPOwner },
+            { ExtraFields::slbValidityWords,            S(quint32), QFV.integer(),  QRequired,  UPOwner },
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
