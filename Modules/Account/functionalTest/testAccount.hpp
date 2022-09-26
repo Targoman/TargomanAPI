@@ -910,15 +910,48 @@ private slots:
     ///@TODO: test [DELETE]  Account/User/photo
     ///@TODO: test [PATCH]   Account/User/email
 
+    void UpdateMobile_invalid_password() {
+        QT_TRY {
+            callUserAPI(RESTClientHelper::PATCH,
+                        "Account/User/mobile",
+                        {},
+                        {
+                            { "mobile", this->RandomPhoneNumber },
+                            { "pass", "00000000000000000000000000000000" },
+                            { "salt", "1111" },
+                        });
+
+        } QT_CATCH (exTargomanBase &exp) {
+            QString Message = exp.what();
+            if (Message == "Incorrect password")
+                qDebug() << "OK" << Message;
+            else
+                QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void UpdateMobile_exists() {
-        QVERIFY_EXCEPTION_THROWN(callUserAPI(RESTClientHelper::PATCH,
-                                    "Account/User/mobile",
-                                    {},
-                                    {
-                                        { "mobile", this->RandomPhoneNumber },
-                                    }),
-                                 exTargomanBase
-                                 );
+        QT_TRY {
+            callUserAPI(RESTClientHelper::PATCH,
+                        "Account/User/mobile",
+                        {},
+                        {
+                            { "mobile", this->RandomPhoneNumber },
+                            { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                            { "salt", "1234" },
+                        });
+
+        } QT_CATCH (exTargomanBase &exp) {
+            QString Message = exp.what();
+            if (Message == "This mobile number is already taken")
+                qDebug() << "OK" << Message;
+            else
+                QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
     }
 
     void UpdateUserPersonalInfo() {

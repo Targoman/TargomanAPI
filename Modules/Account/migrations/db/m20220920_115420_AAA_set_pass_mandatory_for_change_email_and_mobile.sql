@@ -1,19 +1,7 @@
 /* Migration File: m20220920_115420_AAA_set_pass_mandatory_for_change_email_and_mobile.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
-/* The next line is to prevent this file from being committed. When done, delete this and next line: */
-ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
-
-
-
-***********
-dev_ to {{dbprefix}}
-***********
-
-
-
 USE `{{dbprefix}}{{Schema}}`;
-
 
 ALTER TABLE `tblApprovalRequest`
     CHANGE COLUMN `apr_usrID` `apr_usrID` BIGINT(20) UNSIGNED NULL AFTER `aprID`;
@@ -35,9 +23,6 @@ UPDATE `tblApprovalRequest`
 
 ALTER TABLE `tblApprovalRequest`
     CHANGE COLUMN `aprExpireDate` `aprExpireDate` DATETIME NOT NULL AFTER `aprRequestDate`;
-
-
-
 
 DROP PROCEDURE IF EXISTS `spUser_CheckPassword`;
 DELIMITER //
@@ -182,7 +167,7 @@ proc: BEGIN
 
         -- resend last code
         IF ((iBy = 'E' AND vUsrEnableEmailAlerts = 1) OR (iBy = 'M' AND vUsrEnableSMSAlerts = 1)) THEN
-            INSERT INTO dev_Common.tblAlerts
+            INSERT INTO {{dbprefix}}Common.tblAlerts
                SET alr_usrID = vUsrID,
                    alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
                    alrLanguage = vUsrLanguage,
@@ -401,7 +386,7 @@ proc: BEGIN
     ;
 
     IF iBy = 'E' THEN
-        SET vApprovalCode = dev_Common.fnCreateRandomMD5();
+        SET vApprovalCode = {{dbprefix}}Common.fnCreateRandomMD5();
     ELSE
         SET vApprovalCode = FLOOR(RAND() * 90000) + 10000;
     END IF;
@@ -415,7 +400,7 @@ proc: BEGIN
     ;
 
     IF ((iBy = 'E' AND vUsrEnableEmailAlerts = 1) OR (iBy = 'M' AND vUsrEnableSMSAlerts = 1)) THEN
-        INSERT INTO dev_Common.tblAlerts
+        INSERT INTO {{dbprefix}}Common.tblAlerts
            SET alr_usrID = iUserID,
                alr_altCode = IF(iBy = 'E', 'approveEmail', 'approveMobile'),
                alrLanguage = vUsrLanguage,
@@ -619,7 +604,7 @@ BEGIN
     END IF;
 
     IF iLogin = 1 THEN
-        SET vSessionGUID = SUBSTRING(dev_CommonFuncs.guid(NULL), 1, 32);
+        SET vSessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
 
         INSERT INTO tblActiveSessions
            SET tblActiveSessions.ssnKey          = vSessionGUID,
@@ -726,7 +711,7 @@ BEGIN
            SET MESSAGE_TEXT = '409:Already registered.';
     END;
 
-    CALL dev_Common.spLogDebug('AAA', 'signup');
+    CALL {{dbprefix}}Common.spLogDebug('AAA', 'signup');
 
     SELECT tblRoles.rolID
       INTO vRoleID
@@ -900,7 +885,7 @@ BEGIN
     ;
 
     IF (vUsrEnableSMSAlerts = 1) THEN
-        INSERT INTO dev_Common.tblAlerts
+        INSERT INTO {{dbprefix}}Common.tblAlerts
            SET alr_usrID = vUsrID,
                alr_altCode = 'approveMobileOnly',
                alrLanguage = vUsrLanguage,
