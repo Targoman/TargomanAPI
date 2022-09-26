@@ -592,6 +592,11 @@ BEGIN
             ;
 
             SET vUsrID = LAST_INSERT_ID();
+
+            UPDATE tblApprovalRequest
+               SET apr_usrID = vUsrID
+             WHERE aprID = vAprID;
+
         ELSE
             IF (EXISTS(SELECT * FROM tblUser
                 WHERE usrMobile = vNewKey

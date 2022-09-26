@@ -453,7 +453,10 @@ private slots:
 
         QVERIFY(Result.isValid());
 
-        gEncodedJWT = Result.toString();
+        QVariantMap ResultAsMap = Result.toMap();
+        QVERIFY(ResultAsMap.contains("token"));
+
+        gEncodedJWT = ResultAsMap.value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).actorID() == UserID);
@@ -614,7 +617,12 @@ private slots:
                                       { "code", Code },
                                       { "autoLogin", false },
                                   });
+
         QVERIFY(Result.isValid());
+
+        QVariantMap ResultAsMap = Result.toMap();
+        QVERIFY(ResultAsMap.contains("userID"));
+        QVERIFY(ResultAsMap.contains("token") == false);
     }
 
     void ApproveAdminEmail() {
@@ -663,12 +671,11 @@ private slots:
                                 {
                                     { "emailOrMobile", this->UserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
-                                    { "salt", 1234} ,
+                                    { "salt", 1234 },
                                 });
-
         QVERIFY(Result.isValid());
 
-        gEncodedJWT = Result.toString();
+        gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).actorID() == gUserID);
@@ -682,13 +689,6 @@ private slots:
         gJWT = {};
     }
 
-//    void loginAsGuest() {
-//        QVERIFY((callUserAPI(RESTClientHelper::POST,
-//                         "Account/loginAsGuest",{}, {
-//                             {"sessionInfo", "{\"a\":1}"},
-//                        }).toString()).size());
-//    }
-
     void LoginAgain() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callGuestAPI(RESTClientHelper::POST,
@@ -701,19 +701,21 @@ private slots:
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedJWT = Result.toString();
+        gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         Result = callGuestAPI(RESTClientHelper::POST,
-                                "Account/login",{}, {
+                                "Account/login",
+                                {},
+                                {
                                     {"emailOrMobile", this->AdminEmail},
                                     {"pass", "5d12d36cd5f66fe3e72f7b03cbb75333"},
                                     {"salt", 1234},
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedAdminJWT = Result.toString();
+        gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
     }
 
@@ -778,27 +780,27 @@ private slots:
     }
 
     void ResendMobileApproveCode() {
-        clsDAC DAC;
-
         try {
+//            clsDAC DAC;
+
             //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-            DAC.callSP("", "spApproval_Request", {
-                           { "iBy", "M" },
-                           { "iKey", this->RandomPhoneNumber2 },
-                           { "iUserID", gUserID },
-                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
-                           { "iSalt", 1234 },
-                           { "iThrowIfPassNotSet", 0 },
-                           { "iResendApprovalTTLSecs", 2 * 60 },
-                           { "iExpireApprovalTTLSecs", 15 * 60 },
-                           { "iUserLanguage", "en" },
-                       });
+//            DAC.callSP("", "spApproval_Request", {
+//                           { "iBy", "M" },
+//                           { "iKey", this->RandomPhoneNumber2 },
+//                           { "iUserID", gUserID },
+//                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+//                           { "iSalt", 1234 },
+//                           { "iThrowIfPassNotSet", 0 },
+//                           { "iResendApprovalTTLSecs", 120 },
+//                           { "iExpireApprovalTTLSecs", 15 * 60 },
+//                           { "iUserLanguage", "en" },
+//                       });
 
-            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
-            { gUserID }).toJson(true).object();
+//            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
+//            { gUserID }).toJson(true).object();
 
-            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
-            { gUserID });
+//            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
+//            { gUserID });
 
             //----------
             QVariant Result = callUserAPI(RESTClientHelper::POST,
@@ -814,40 +816,60 @@ private slots:
     }
 
     void ApproveMobile() {
-        clsDAC DAC;
-
         try {
+//            clsDAC DAC;
+
             //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
-            DAC.callSP("", "spApproval_Request", {
-                           { "iBy", "M" },
-                           { "iKey", this->RandomPhoneNumber2 },
-                           { "iUserID", gUserID },
-                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
-                           { "iSalt", 1234 },
-                           { "iThrowIfPassNotSet", 0 },
-                           { "iResendApprovalTTLSecs", 2 * 60 },
-                           { "iExpireApprovalTTLSecs", 15 * 60 },
-                           { "iUserLanguage", "en" },
-                       });
+//            DAC.callSP("", "spApproval_Request", {
+//                           { "iBy", "M" },
+//                           { "iKey", this->RandomPhoneNumber2 },
+//                           { "iUserID", gUserID },
+//                           { "iPass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+//                           { "iSalt", 1234 },
+//                           { "iThrowIfPassNotSet", 0 },
+//                           { "iResendApprovalTTLSecs", 120 },
+//                           { "iExpireApprovalTTLSecs", 15 * 60 },
+//                           { "iUserLanguage", "en" },
+//                       });
 
-            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
-            {gUserID}).toJson(true).object();
+//            QJsonObject Obj = DAC.execQuery("", "SELECT aprApprovalCode FROM tblApprovalRequest WHERE apr_usrID=? AND aprRequestedFor = 'M'",
+//            {gUserID}).toJson(true).object();
 
-            QString Code = Obj.value("aprApprovalCode").toString();
+//            QString Code = Obj.value("aprApprovalCode").toString();
 
-            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
-            {gUserID});
+//            DAC.execQuery("", "UPDATE tblApprovalRequest SET aprStatus = 'S', aprSentDate = NOW() WHERE apr_usrID=?",
+//            {gUserID});
 
-            QVariant Result = callUserAPI(RESTClientHelper::POST,
+            QVariant Result = callGuestAPI(
+                                  RESTClientHelper::POST,
+                                  "Account/fixtureGetLastApprovalRequestCodeAndMakeAsSent",
+                                  {},
+                                  {
+                                      { "emailOrMobile", this->RandomPhoneNumber2 },
+                                   })
+                              ;
+
+            QVERIFY(Result.isValid());
+
+            QString Code = Result.toMap().value("aprApprovalCode").toString();
+            QVERIFY(Code.isEmpty() == false);
+
+//            quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
+//            QVERIFY(UserID > 0);
+
+            //------------------
+            Result = callUserAPI(RESTClientHelper::POST,
                             "Account/approveMobile", {}, {
                                 { "mobile", this->RandomPhoneNumber2 },
                                 { "code", Code }
                             });
 
-            QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
-            {gUserID}).toJson(true).object().value("usrMobile").toString();
+            QVERIFY(Result.isValid());
 
-            QVERIFY(Mobile == this->RandomPhoneNumber2);
+//            QString Mobile = DAC.execQuery("", "SELECT usrMobile FROM tblUser WHERE usrID=?",
+//            {gUserID}).toJson(true).object().value("usrMobile").toString();
+
+//            QVERIFY(Mobile == this->RandomPhoneNumber2);
         } catch (std::exception &e) {
             QFAIL (e.what());
         }

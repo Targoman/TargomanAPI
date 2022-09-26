@@ -231,14 +231,16 @@ private slots:
     void login_user() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
+                                "Account/login",
+                                {},
+                                {
                                     { "emailOrMobile", this->CreatedUserEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedJWT = Result.toString();
+        gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gJWT).actorID() == gUserID);
@@ -248,14 +250,16 @@ private slots:
     void login_admin() {
         //5d12d36cd5f66fe3e72f7b03cbb75333 = MD5(1234 + df6d2338b2b8fce1ec2f6dda0a630eb0 # 987)
         QVariant Result = callUserAPI(RESTClientHelper::POST,
-                                "Account/login",{},{
+                                "Account/login",
+                                {},
+                                {
                                     { "emailOrMobile", this->CreatedAdminEmail },
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
         QVERIFY(Result.isValid());
 
-        gEncodedAdminJWT = Result.toString();
+        gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
         QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
