@@ -147,8 +147,8 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
         throw exTargomanBase("Code expired");
 
     quint32 ConfigTTL = (Type == enuApprovalType::Email
-                            ? ApprovalRequest::EmailExpireApprovalCodeTTL.value()
-                            : ApprovalRequest::MobileExpireApprovalCodeTTL.value()
+                            ? ApprovalRequest::EmailResendApprovalCodeTTL.value()
+                            : ApprovalRequest::MobileResendApprovalCodeTTL.value()
                         );
 
     QDateTime Now = Info.value(Targoman::API::CURRENT_TIMESTAMP).toDateTime();
