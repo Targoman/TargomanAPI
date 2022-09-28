@@ -217,6 +217,92 @@ QVariant IMPL_ORMGET_USER(APITokens) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
+QVariantMap IMPL_REST_UPDATE(APITokens, , (
+    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+    QString _token,
+    QString _name,
+    NULLABLE_TYPE(TAPI::DateTime_t) _expireDate
+)) {
+    QVariantMap MethodResult;
+
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+
+    TAPI::JWT_t TokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
+
+    if (CurrentUserID != TokenJWTPayload["own"].toDouble())
+        throw exAuthorization("This API Token is not yours");
+
+    //----------------------------------------
+    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    if (TokenJWTPayload.contains("typ"))
+        TokenType = enuTokenActorType::toEnum(TokenJWTPayload["typ"].toString());
+    if (TokenType != enuTokenActorType::API)
+        throw exHTTPForbidden("Only API Token allowed");
+
+    //----------------------------------------
+    auto UpdateQuery = this->makeUpdateQuery(APICALLBOOM_PARAM)
+                       .where({ tblAPITokens::Fields::aptToken, enuConditionOperator::Equal, _token });
+
+    int ToUpdateCount = 0;
+
+    if (_name.isNull() == false) {
+        ++ToUpdateCount;
+        UpdateQuery.set(tblAPITokens::Fields::aptName, _name);
+    }
+
+    QString NewToken;
+
+    if (NULLABLE_HAS_VALUE(_expireDate)) {
+        TokenJWTPayload["exp"] = (NULLABLE_VALUE(_expireDate)).toSecsSinceEpoch();
+        NewToken = QJWT::encryptAndSigned(TokenJWTPayload);
+        MethodResult.insert("token", NewToken);
+
+        ++ToUpdateCount;
+        UpdateQuery
+                .set(tblAPITokens::Fields::aptToken, NewToken)
+                .set(tblAPITokens::Fields::aptExpiryDate, NULLABLE_VALUE(_expireDate))
+                ;
+    }
+
+    if (ToUpdateCount == 0)
+        throw exHTTPInternalServerError("Nothing to do");
+
+    try {
+        if (UpdateQuery.execute(CurrentUserID) == 0)
+            throw exHTTPInternalServerError("Error in updating");
+    }  catch (const std::exception &_exp) {
+        QString ExpStr = _exp.what();
+        if (ExpStr.contains("Duplicate entry", Qt::CaseInsensitive))
+            throw /*exHTTPConflict*/exHTTPBadRequest("This name has already been used");
+
+        throw;
+    }
+
+    if (NewToken.isEmpty() == false) {
+        QString OldTokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+        QString NewTokenMD5 = QCryptographicHash::hash(NewToken.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+
+        QString qry = QString()
+              + "UPDATE " + tblTokenBin::Name
+              + "   SET tkbTokenMD5=?"
+              + " WHERE tkbTokenMD5=?"
+              ;
+
+        clsDACResult Result = TokenBin::instance().execQuery(APICALLBOOM_PARAM,
+                                                             qry,
+                                                             QVariantList({
+                                                                              NewTokenMD5,
+                                                                              OldTokenMD5
+                                                                          })
+                                                             );
+    }
+
+    MethodResult.insert("result", true);
+
+    return MethodResult;
+}
+
 QVariant IMPL_REST_GET(APITokens, byService, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
     QStringList                     _services,
@@ -283,8 +369,13 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, re
 )) {
 //    QString TokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
 
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+
     TAPI::JWT_t TokenJWTPayload;
     QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
+
+    if (CurrentUserID != TokenJWTPayload["own"].toDouble())
+        throw exAuthorization("This API Token is not yours");
 
     //----------------------------------------
     enuTokenActorType::Type TokenType = enuTokenActorType::USER;
@@ -342,8 +433,13 @@ bool IMPL_REST_POST(APITokens, pause, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+
     TAPI::JWT_t TokenJWTPayload;
     QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
+
+    if (CurrentUserID != TokenJWTPayload["own"].toDouble())
+        throw exAuthorization("This API Token is not yours");
 
     //----------------------------------------
     enuTokenActorType::Type TokenType = enuTokenActorType::USER;
@@ -369,8 +465,13 @@ bool IMPL_REST_POST(APITokens, resume, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_token
 )) {
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+
     TAPI::JWT_t TokenJWTPayload;
     QJWT::extractAndDecryptPayload(_token, TokenJWTPayload);
+
+    if (CurrentUserID != TokenJWTPayload["own"].toDouble())
+        throw exAuthorization("This API Token is not yours");
 
     //----------------------------------------
     enuTokenActorType::Type TokenType = enuTokenActorType::USER;

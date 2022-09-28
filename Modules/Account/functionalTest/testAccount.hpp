@@ -1732,6 +1732,27 @@ private slots:
         }
     }
 
+    void apitoken_edit_name_and_expiry() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::PATCH,
+                        "Account/APITokens",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                            { "name", "new name aa" },
+                            { "expireDate", "2345/06/07 12:34:56" },
+                        });
+
+            QVERIFY(Result.isValid());
+
+            this->TokenJWT = Result.toMap().value("token").toString();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_new_resume() {
         QT_TRY {
             QVariant Result = this->callUserAPI(

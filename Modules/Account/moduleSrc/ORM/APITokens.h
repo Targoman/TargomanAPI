@@ -120,14 +120,14 @@ namespace tblAPITokens {
         const QList<clsORMField> ORMFields = {
             //ColName                       Type                        validation                          Default     UpBy        Sort  Filter Self  Virt   PK
             { Fields::aptID,                ORM_PRIMARYKEY_64 },
-            { Fields::aptToken,             S(QString),                 QFV,                                QRequired,  UPAdmin,    true, true },
+            { Fields::aptToken,             S(QString),                 QFV,                                QRequired,  UPOwner,    true, true },
             //aptTokenMD5
             { Fields::aptName,              S(QString),                 QFV.asciiAlNum().maxLenght(250),    QRequired,  UPOwner,    true, true },
             { Fields::apt_usrID,            S(quint64),                 QFV.integer().minValue(1),          QRequired,  UPNone },
             { Fields::aptLang,              S(TAPI::ISO639_2_t),        QFV,                                "en",       UPOwner },
             { Fields::aptValidateIP,        S(bool),                    QFV,                                false,      UPOwner },
-            { Fields::aptExtraPrivileges,   S(TAPI::PrivObject_t),      QFV,                                QNull,      UPAdmin,    false, false },
-            { Fields::aptExpiryDate,        S(TAPI::DateTime_t),        QFV,                                QNull,      UPAdmin },
+            { Fields::aptExtraPrivileges,   S(TAPI::PrivObject_t),      QFV,                                QNull,      UPOwner,    false, false },
+            { Fields::aptExpiryDate,        S(TAPI::DateTime_t),        QFV,                                QNull,      UPOwner },
             { Fields::aptLastActivity,      S(TAPI::DateTime_t),        QFV,                                QInvalid,   UPNone },
             { Fields::aptAccessCount,       S(quint32),                 QFV.integer().minValue(1),          QInvalid,   UPNone },
             { Fields::aptPaused,            S(bool),                    QFV,                                false,      UPOwner },
@@ -300,6 +300,17 @@ private slots:
 //    quint64 ORMCREATE_USER("Create a new APIToken")
 //    bool ORMUPDATE_USER("Update an APIToken")
 //    bool ORMDELETE_USER("Delete an APIToken")
+
+    QVariantMap REST_UPDATE(
+        ,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _token,
+            QString _name = {},
+            NULLABLE_TYPE(TAPI::DateTime_t) _expireDate = NULLABLE_NULL_VALUE
+        ),
+        "Update token name and expire date. Returns new token and other info"
+    )
 
     QVariant REST_GET(
         byService,

@@ -50,7 +50,17 @@ private slots:
     QVariant ORMGET_USER("Get user information")
     quint64 ORMCREATE_USER("Create a new user by an authorized user. Email or Mobile is required")
     bool ORMUPDATE_USER("Update User info by an authorized user")
-    bool ORMDELETE_USER("Delete a User by an authorized user")
+//    bool ORMDELETE_USER("Delete a User by an authorized user")
+
+    bool REST_DELETE(
+        ,
+        (
+            USER_DELETE_METHOD_ARGS_DECL_APICALL,
+            TAPI::MD5_t         _pass = {},
+            QString             _salt = {}
+        ),
+        "Delete an user"
+    )
 
     TAPI::Base64Image_t REST_GET(
         photo,
