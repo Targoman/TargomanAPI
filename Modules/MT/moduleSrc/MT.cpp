@@ -62,9 +62,12 @@ MT::MT() :
         MTSchema,
         true,
         {
-            //           day                week   month                total
-//            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
-//            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+            { "words", {
+                /* day   */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerDay,
+                /* week  */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerWeek,
+                /* month */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerMonth,
+                /* total */ tblAccountSaleablesMTBase::ExtraFields::slbValidityWords
+            }},
         },
         &AccountUnits::instance(),
         &AccountProducts::instance(),
@@ -379,19 +382,6 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         throw;
     }
 }
-
-/*
-QVariantMap IMPL_REST_GET_OR_POST(MT, Test, (
-    const TAPI::RemoteIP_t& _REMOTE_IP,
-    const QString& _token,
-    const QString& _arg
-)) {
-    return {
-        {"inputArg", _arg},
-        {"info", Authorization::retrieveTokenInfo(_token, _REMOTE_IP)}
-    };
-}
-*/
 
 /****************************************************************\
 |** fixture *****************************************************|

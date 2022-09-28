@@ -154,6 +154,9 @@ intfAccountingBasedModule::intfAccountingBasedModule(
     ServiceRegistry.insert(this->ServiceName, this);
 }
 
+/******************************************************************\
+|** credit ********************************************************|
+\******************************************************************/
 stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
     return this->findBestMatchedCredit(_usrID);
 }
@@ -172,7 +175,7 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
-    auto checkCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+    auto CheckCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
         if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
 
@@ -197,9 +200,9 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
                 continue;
 
             if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
-                checkCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
+                CheckCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
 
-            checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+            CheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
         }
 
         return;
@@ -210,11 +213,12 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
 
     for (auto UsageIter = _requestedUsage.begin();
         UsageIter != _requestedUsage.end();
-        UsageIter++) {
+        UsageIter++
+    ) {
         if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
             continue;
 
-        checkCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+        CheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
     }
 }
 
@@ -228,13 +232,13 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 
     QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
 
-    auto effectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto EffectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
         return _assetItem.Product.prdValidFromHour //.isNull() == fasle
             ? QDateTime(Now.date()).addSecs(*_assetItem.Product.prdValidFromHour * 3600)
             : QDateTime(Now.date());
     };
 
-    auto effectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto EffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
         if (NULLABLE_IS_NULL(_assetItem.Product.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.Product.prdValidToHour))
             QDateTime(Now.date().addDays(1));
 
@@ -245,11 +249,11 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                 : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.Product.prdValidToHour * 3600);
     };
 
-    auto isInvalidPackage = [this, Now, effectiveStartDateTime, effectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
+    auto IsInvalidPackage = [this, Now, EffectiveStartDateTime, EffectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
         if ((_assetItem.Product.prdValidFromDate.isValid() && _assetItem.Product.prdValidFromDate > Now.date())
                || (_assetItem.Product.prdValidToDate.isValid() && _assetItem.Product.prdValidToDate < Now.date())
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidFromHour) && Now < effectiveStartDateTime(_assetItem))
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidToHour) && Now > effectiveEndDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidFromHour) && Now < EffectiveStartDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidToHour) && Now > EffectiveEndDateTime(_assetItem))
                || this->isEmpty(_assetItem.Digested.Limits)
             )
             return false;
@@ -275,13 +279,13 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
         return true;
     };
 
-    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && isInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && IsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
         return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
                                NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
                                ServiceCreditsInfo.MyLimitsOnParent,
                                -1);
 
-    auto comparePackages = [this, &effectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+    auto ComparePackages = [this, &EffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() == false) return -1;
         if (a.Product.prdValidToDate.isValid() == false && b.Product.prdValidToDate.isValid()) return 1;
         if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
@@ -289,8 +293,8 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
         if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_IS_NULL(b.Product.prdValidToHour)) return -1;
         if (NULLABLE_IS_NULL(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) return 1;
         if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) {
-            if (effectiveEndDateTime(a) < effectiveEndDateTime(b)) return -1;
-            if (effectiveEndDateTime(a) > effectiveEndDateTime(b)) return 1;
+            if (EffectiveEndDateTime(a) < EffectiveEndDateTime(b)) return -1;
+            if (EffectiveEndDateTime(a) > EffectiveEndDateTime(b)) return 1;
         }
         if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() && a.Product.prdValidToDate != b.Product.prdValidToDate)
             return b.Product.prdValidToDate > a.Product.prdValidToDate ? -1 : 1;
@@ -301,10 +305,11 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 
     for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
         AccountIter != ServiceCreditsInfo.ActiveCredits.end();
-        AccountIter++) {
+        AccountIter++
+    ) {
         const stuAssetItem& Item = AccountIter.value();
 
-        if (isInvalidPackage(Item))
+        if (IsInvalidPackage(Item))
             continue;
 
         if (CandidateCredit.isEmpty()) {
@@ -315,8 +320,9 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
         bool Inserted = false;
         for (auto CandidateIter = CandidateCredit.begin();
             CandidateIter != CandidateCredit.end();
-            CandidateIter++) {
-            if (comparePackages(Item, *CandidateIter) <0) {
+            CandidateIter++
+        ) {
+            if (ComparePackages(Item, *CandidateIter) < 0) {
                 this->breakCredit(CandidateIter->Saleable.slbID);
                 CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
@@ -338,11 +344,11 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
     QDateTime NextDigestTime;
     if (ActivePackage.Product.prdValidToDate.isNull() == false) {
         if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
-            NextDigestTime = effectiveEndDateTime(ActivePackage);
+            NextDigestTime = EffectiveEndDateTime(ActivePackage);
         else
             NextDigestTime = QDateTime(ActivePackage.Product.prdValidToDate.addDays(1));
     } else if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
-        NextDigestTime = effectiveEndDateTime(ActivePackage);
+        NextDigestTime = EffectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
                            NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
@@ -350,6 +356,9 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
                            NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
 }
 
+/******************************************************************\
+|** basket ********************************************************|
+\******************************************************************/
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
     APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t                    _saleableCode,

@@ -46,18 +46,6 @@ using namespace Helpers;
 using namespace Server;
 using namespace DBManager;
 
-using namespace Targoman::Common::Configuration;
-
-tmplConfigurable<quint32> APITokens::TTL(
-    APITokens::makeConfig("TTL"),
-    "Time to live for the api token in days",
-    static_cast<quint16>(365), //1 year
-    ReturnTrueCrossValidator(),
-    "",
-    "TTL-DAYS",
-    "apitoken-ttl-days",
-    enuConfigSource::Arg | enuConfigSource::File);
-
 /******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Account, APITokens);
 
@@ -69,6 +57,11 @@ APITokens::APITokens() :
         tblAPITokens::Private::Relations,
         tblAPITokens::Private::Indexes
 ) { ; }
+
+//void APITokens::initializeModule()
+//{
+//    APITokenServices::instance().prepareFiltersList();
+//}
 
 ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
@@ -95,68 +88,8 @@ ORMSelectQuery APITokens::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARA
     return Query;
 }
 
-//void APITokens::initializeModule()
-//{
-//    APITokenServices::instance().prepareFiltersList();
-//}
-
-QVariant IMPL_ORMGET_USER(APITokens) {
-    APITokenServices::instance().prepareFiltersList();
-
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
-
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
-}
-
-QVariant IMPL_REST_GET(APITokens, byService, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    QStringList                     _services,
-//    TAPI::PKsByPath_t               _pksByPath,
-    quint64                         _pageIndex,
-    quint16                         _pageSize,
-    TAPI::Cols_t                    _cols,
-    TAPI::Filter_t                  _filters,
-    TAPI::OrderBy_t                 _orderBy
-//    TAPI::GroupBy_t                 _groupBy,
-//    bool                            _reportCount,
-//    bool                            _translate
-)) {
-    TAPI::PKsByPath_t               _pksByPath = {};
-    TAPI::GroupBy_t                 _groupBy = {};
-    bool                            _reportCount = true;
-    bool                            _translate = true;
-
-    APITokenServices::instance().prepareFiltersList();
-
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
-
-    if (_services.isEmpty())
-        throw exHTTPExpectationFailed("Services not provided");
-
-    if ((_services.count() == 1) && (_services.at(0).indexOf(',') >= 0))
-        _services = _services.at(0).split(',', QString::SkipEmptyParts);
-
-    auto fnTouchQuery = [&APICALLBOOM_PARAM, _translate, &_services](ORMSelectQuery &_query) {
-        _query.nestedInnerJoin(APITokenServices::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
-                               .addCol(tblAPITokenServices::Fields::aptsvc_aptID, tblAPITokenServices::Fields::aptsvc_aptID)
-                               .innerJoinWith(tblAPITokenServices::Relation::Service)
-                               .where({ tblService::Fields::svcName, enuConditionOperator::In, "'" + _services.join("','") + "'" })
-                               .groupBy(tblAPITokenServices::Fields::aptsvc_aptID)
-                               , "tmpSearchAPIServices"
-                               , { "tmpSearchAPIServices", tblAPITokenServices::Fields::aptsvc_aptID,
-                                   enuConditionOperator::Equal,
-                                   tblAPITokens::Name, tblAPITokens::Fields::aptID }
-                               );
-    };
-
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
-}
-
 stuRequestTokenResult APITokens::create(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-//    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const QString &_name,
     const QStringList &_services
@@ -242,7 +175,7 @@ stuRequestTokenResult APITokens::create(
         Payload,
         enuTokenActorType::API,
         QJsonObject({ { "svc", _services.join(",") } }),
-        APITokens::TTL.value() * 24 * 3600
+        TokenHelper::APITokenTTL.value() * 24 * 3600
 //        _activeAccount.Privs["ssnKey"].toString()
     );
 
@@ -275,20 +208,74 @@ stuRequestTokenResult APITokens::create(
     return stuRequestTokenResult(APITokenID, JWT);
 }
 
+QVariant IMPL_ORMGET_USER(APITokens) {
+    APITokenServices::instance().prepareFiltersList();
+
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+QVariant IMPL_REST_GET(APITokens, byService, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    QStringList                     _services,
+//    TAPI::PKsByPath_t               _pksByPath,
+    quint64                         _pageIndex,
+    quint16                         _pageSize,
+    TAPI::Cols_t                    _cols,
+    TAPI::Filter_t                  _filters,
+    TAPI::OrderBy_t                 _orderBy
+//    TAPI::GroupBy_t                 _groupBy,
+//    bool                            _reportCount,
+//    bool                            _translate
+)) {
+    TAPI::PKsByPath_t               _pksByPath = {};
+    TAPI::GroupBy_t                 _groupBy = {};
+    bool                            _reportCount = true;
+    bool                            _translate = true;
+
+    APITokenServices::instance().prepareFiltersList();
+
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAPITokens::Fields::apt_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+
+    if (_services.isEmpty())
+        throw exHTTPExpectationFailed("Services not provided");
+
+    if ((_services.count() == 1) && (_services.at(0).indexOf(',') >= 0))
+        _services = _services.at(0).split(',', QString::SkipEmptyParts);
+
+    auto fnTouchQuery = [&APICALLBOOM_PARAM, _translate, &_services](ORMSelectQuery &_query) {
+        _query.nestedInnerJoin(APITokenServices::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
+                               .addCol(tblAPITokenServices::Fields::aptsvc_aptID, tblAPITokenServices::Fields::aptsvc_aptID)
+                               .innerJoinWith(tblAPITokenServices::Relation::Service)
+                               .where({ tblService::Fields::svcName, enuConditionOperator::In, "'" + _services.join("','") + "'" })
+                               .groupBy(tblAPITokenServices::Fields::aptsvc_aptID)
+                               , "tmpSearchAPIServices"
+                               , { "tmpSearchAPIServices", tblAPITokenServices::Fields::aptsvc_aptID,
+                                   enuConditionOperator::Equal,
+                                   tblAPITokens::Name, tblAPITokens::Fields::aptID }
+                               );
+    };
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES, {}, 0, fnTouchQuery);
+}
+
 Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, request, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString &_name,
-    const QStringList &_services
+    Q_DECL_UNUSED const QStringList &_services
 )) {
     return this->create(
                 APICALLBOOM_PARAM,
                 APICALLBOOM_PARAM.getActorID(),
-                _name,
-                _services
+                _name/*,
+                _services*/
                 );
 }
 
-QString IMPL_REST_POST(APITokens, revoke, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_POST(APITokens, revoke, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString   &_token,
     TAPI::MD5_t     _pass,
@@ -321,7 +308,8 @@ QString IMPL_REST_POST(APITokens, revoke, (
 
     //----------------------------------------
     makeAAADAC(DAC);
-    clsDACResult Result = DAC.callSP({},
+
+    /*clsDACResult DACResult = */DAC.callSP({},
                                      "spToken_Revoke", {
                                          { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                          { "iPass", _pass },
@@ -336,7 +324,13 @@ QString IMPL_REST_POST(APITokens, revoke, (
                               NewToken
                               );
 
-    return NewToken;
+    QVariantMap Result({
+        { "counter", RevokeCounter },
+    });
+
+    Result.insert("token", NewToken);
+
+    return Result;
 }
 
 bool IMPL_REST_POST(APITokens, pause, (

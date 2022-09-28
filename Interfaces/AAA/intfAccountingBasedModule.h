@@ -33,13 +33,7 @@ namespace Targoman::API::AAA {
 
 using namespace API;
 
-//class intfAccountingBasedModuleBase
-//{
-//public:
-//    virtual stuActiveCredit activeAccountObject(quint64 _usrID) = 0;
-//};
-
-class intfAccountingBasedModule : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
+class intfAccountingBasedModule : public intfSQLBasedModule
 {
     Q_OBJECT
 

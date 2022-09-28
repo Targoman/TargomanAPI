@@ -58,7 +58,7 @@ void PaymentLogic::registerGateway(const QString& _gatewayName, intfPaymentGatew
     if (PaymentLogic::RegisteredGateways.contains(_gatewayName))
         throw Targoman::Common::exTargomanBase(QString("The class for driver name `%1` has been already registered").arg(_gatewayName));
 
-    TargomanDebug(0) << "registering payment gateway:" << _gatewayName;
+    TargomanDebug(5) << "registering payment gateway:" << _gatewayName;
 
     PaymentLogic::RegisteredGateways.insert(_gatewayName, _gateway);
 }

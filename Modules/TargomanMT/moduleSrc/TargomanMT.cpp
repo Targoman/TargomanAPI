@@ -62,9 +62,18 @@ TargomanMT::TargomanMT() :
         TargomanMTSchema,
         false,
         {
-            //           day                week   month                total
-//            { "show",  { "slbShowPerDay",   {},    {},                  "slbShowTotal" } },
-//            { "click", { "slbClicksPerDay", {},    "slbClicksPerMonth", "slbClicksTotal" } },
+//            { "show", {
+//                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
+//                /* week  */ {},
+//                /* month */ {},
+//                /* total */ tblAccountSaleables::ExtraFields::slbShowTotal
+//            }},
+//            { "click", {
+//                /* day   */ tblAccountSaleables::ExtraFields::slbClicksPerDay,
+//                /* week  */ {},
+//                /* month */ tblAccountSaleables::ExtraFields::slbClicksPerMonth,
+//                /* total */ tblAccountSaleables::ExtraFields::slbClicksTotal
+//            }},
         },
         &AccountUnits::instance(),
         &AccountProducts::instance(),
