@@ -137,8 +137,28 @@ bool IMPL_ORMUPDATE_USER(User) {
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
-bool IMPL_ORMDELETE_USER(User) {
-    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
+//bool IMPL_ORMDELETE_USER(User) {
+//    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
+//        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+
+//    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
+//}
+
+bool IMPL_REST_DELETE(User, , (
+    USER_DELETE_METHOD_ARGS_IMPL_APICALL,
+    TAPI::MD5_t         _pass,
+    QString             _salt
+)) {
+    if (APICALLBOOM_PARAM.getActorID() == _pksByPath.toULongLong()) {
+        //check password if is set
+        this->callSP(APICALLBOOM_PARAM,
+                     "spUser_CheckPassword", {
+                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                         { "iPass", _pass },
+                         { "iSalt", _salt },
+                         { "iThrowIfPassNotSet", 0 },
+                     });
+    } else
         Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
