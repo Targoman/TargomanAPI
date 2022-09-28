@@ -297,11 +297,16 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, re
     QDateTime ExpireDateTime = QDateTime::fromSecsSinceEpoch(TokenJWTPayload["exp"].toDouble());
 
     //----------------------------------------
+
+//    TargomanDebug(5) << "before" << TokenJWTPayload;
+
     int RevokeCounter = 0;
-    if (TokenJWTPayload.contains("rvk"))
-        RevokeCounter = TokenJWTPayload["rvk"].toInt();
+    if (TokenJWTPayload.contains("rvkcnt"))
+        RevokeCounter = TokenJWTPayload["rvkcnt"].toInt();
     ++RevokeCounter;
     TokenJWTPayload["rvkcnt"] = RevokeCounter;
+
+//    TargomanDebug(5) << "after" << TokenJWTPayload;
 
     //----------------------------------------
     QString NewToken = QJWT::encryptAndSigned(TokenJWTPayload);

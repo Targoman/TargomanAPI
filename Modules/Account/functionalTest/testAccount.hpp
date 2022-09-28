@@ -1660,6 +1660,31 @@ private slots:
         }
     }
 
+    void apitoken_revoke_again() {
+        this->OldTokenJWT = this->TokenJWT;
+
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/revoke",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                            { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
+                            { "salt", "1234" },
+                        });
+
+            QVERIFY(Result.isValid());
+
+            this->TokenJWT = Result.toMap().value("token").toString();
+
+            QVERIFY(this->TokenJWT.isEmpty() == false);
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
     void apitoken_api_ping_after_revoke_old() {
         QT_TRY {
             QVariant Result = this->callAPI(
