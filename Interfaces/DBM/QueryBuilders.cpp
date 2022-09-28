@@ -2538,12 +2538,20 @@ ORMSelectQuery& ORMSelectQuery::addColsFromInlineJoinCols(Q_DECL_UNUSED const QL
 ORMSelectQuery& ORMSelectQuery::addCol(const clsColSpecs& _colSpecs) {
 
     //check duplicates
+    QString ColSpecToCompare;
+    if (_colSpecs.renameAs().isEmpty())
+        ColSpecToCompare = _colSpecs.name();
+    else
+        ColSpecToCompare = _colSpecs.renameAs();
+
     foreach (auto Col, this->Data->RequiredCols) {
-        if ((Col.name().isEmpty() == false)
-            && (_colSpecs.name().isEmpty() == false)
-            && (Col.name() == _colSpecs.name())
-            && (Col.renameAs() == _colSpecs.renameAs())
-        )
+        QString ColToCompare;
+        if (Col.renameAs().isEmpty())
+            ColToCompare = Col.name();
+        else
+            ColToCompare = Col.renameAs();
+
+        if (ColSpecToCompare == ColToCompare)
             return *this;
     }
 
