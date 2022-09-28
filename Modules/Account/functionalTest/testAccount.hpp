@@ -1651,7 +1651,7 @@ private slots:
 
             QVERIFY(Result.isValid());
 
-            this->TokenJWT = Result.toString();
+            this->TokenJWT = Result.toMap().value("token").toString();
 
             QVERIFY(this->TokenJWT.isEmpty() == false);
 

@@ -57,14 +57,14 @@ void appTargomanAPI::slotExecute() {
     try {
 //        ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(Helpers::SecurityHelper::UUIDtoMD5()));
         ServerCommonConfigs::InstanceID.setFromVariant(QString("TAPI-%1").arg(QSysInfo::machineHostName()));
-        TargomanDebug(0) << "Instance-ID: " << ServerCommonConfigs::InstanceID.value();
+        TargomanDebug(5) << "Instance-ID: " << ServerCommonConfigs::InstanceID.value();
 
         QMap<QString, stuModuleDBInfo> RequiredDBs;
 
         auto RegisterModule = [&RequiredDBs](intfPureModule *_module) {
             _module->setInstancePointer();
 
-            TargomanDebug(0) << "Registering module <" << _module->moduleFullName() << ">";
+            TargomanDebug(5) << "Registering module <" << _module->moduleFullName() << ">";
 
             foreach (auto ModuleMethod, _module->listOfMethods())
                 RESTAPIRegistry::registerRESTAPI(ModuleMethod.Module, ModuleMethod.Method);

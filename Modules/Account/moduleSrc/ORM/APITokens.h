@@ -329,7 +329,7 @@ private slots:
         "create new empty api token"
     );
 
-    QString REST_POST(
+    /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         revoke,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,

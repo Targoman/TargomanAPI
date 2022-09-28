@@ -275,7 +275,7 @@ Targoman::API::AccountModule::stuRequestTokenResult IMPL_REST_POST(APITokens, re
                 );
 }
 
-QString IMPL_REST_POST(APITokens, revoke, (
+/*TAPI::EncodedJWT_t*/QVariantMap IMPL_REST_POST(APITokens, revoke, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     const QString   &_token,
     TAPI::MD5_t     _pass,
@@ -308,7 +308,8 @@ QString IMPL_REST_POST(APITokens, revoke, (
 
     //----------------------------------------
     makeAAADAC(DAC);
-    clsDACResult Result = DAC.callSP({},
+
+    /*clsDACResult DACResult = */DAC.callSP({},
                                      "spToken_Revoke", {
                                          { "iUserID", APICALLBOOM_PARAM.getActorID() },
                                          { "iPass", _pass },
@@ -323,7 +324,13 @@ QString IMPL_REST_POST(APITokens, revoke, (
                               NewToken
                               );
 
-    return NewToken;
+    QVariantMap Result({
+        { "counter", RevokeCounter },
+    });
+
+    Result.insert("token", NewToken);
+
+    return Result;
 }
 
 bool IMPL_REST_POST(APITokens, pause, (

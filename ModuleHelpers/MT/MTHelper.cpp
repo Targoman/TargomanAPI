@@ -76,7 +76,7 @@ void MTHelper::registerGateway(const QString& _gatewayName, intfTranslatorGatewa
     if (MTHelper::RegisteredGateways.contains(_gatewayName))
         throw Targoman::Common::exTargomanBase(QString("The class for gateway name `%1` has been already registered").arg(_gatewayName));
 
-    TargomanDebug(0) << "registering MT gateway:" << _gatewayName;
+    TargomanDebug(5) << "registering MT gateway:" << _gatewayName;
 
     MTHelper::RegisteredGateways.insert(_gatewayName, _gateway);
 }
@@ -112,7 +112,7 @@ void MTHelper::registerEngines() {
                 continue;
 //                throw exTargomanInitialization(QString("Engine %1 already registered").arg(Engine->fullName()));
 
-            TargomanDebug(0) << "registering MT engine:"
+            TargomanDebug(5) << "registering MT engine:"
                              << Key
                              << Server.SourceLang.value()
                              << Server.DestLang.value()
@@ -167,41 +167,261 @@ QVariantMap MTHelper::doTranslation(
     int& _translationTime
 ) {
     APICALLBOOM_PARAM.createScopeTiming("translate");
+throw exTargomanBase("not finished yet");
+/*
+    auto FnFindClassAndEngine = [this](
+                                QString _text,
+                                const TranslationDir_t &_dir,
+                                const QString &_engine,
+                                bool _useSpecialClass,
+                                QString &_class
+    ) -> clsEngine* {
+        clsEngine* TranslationEngine = nullptr;
+        _class = "";
 
-    TranslationDir_t PreTranslateDir;
-    TranslationDir_t PostTranslateDir;
+        if (_useSpecialClass) {
+            _class = this->detectClass(_engine, _text, _dir.first);
 
-    //find class and engine
-    clsEngine* TranslationEngine = nullptr;
-    QString Class;
-    if (_useSpecialClass) {
-        Class = this->detectClass(_engine, _text, _dir.first);
-        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
-    }
-    if (TranslationEngine == nullptr)
+            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, _class));
+
+            if (TranslationEngine != nullptr)
+                return TranslationEngine;
+        }
+
         TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+        if (TranslationEngine != nullptr)
+            return TranslationEngine;
 
-    if (TranslationEngine == nullptr) {
         if (_dir.first == "en" || _dir.second == "en")
             throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
 
-        PreTranslateDir = { _dir.first, "en" };
-        PostTranslateDir = { "en", _dir.second };
+        return nullptr;
+    };
+
+    //1: find _dir.first class end engine
+    QString Class;
+    clsEngine* TranslationEngine = FnFindClassAndEngine(
+                                       _text,
+                                       _dir,
+                                       _engine,
+                                       _useSpecialClass,
+                                       Class
+                                       );
+
+    if (TranslationEngine != nullptr) {
+        return this->internalDoTranslation(
+            APICALLBOOM_PARAM,
+            DerivedHelperSubmodules,
+            _text,
+            _dir,
+            _engine,
+            _useSpecialClass,
+            Class,
+            TranslationEngine,
+            _detailed,
+            _detokenize,
+            _preprocessTime,
+            _translationTime
+        );
     }
 
-    //
-    return this->internalDoTranslation(
+    //need more steps
+    QString TextToTranslate = _text;
+    TranslationDir_t Dir;
+
+    //phase 1
+    Dir = { _dir.first, "en" };
+    TranslationEngine = FnFindClassAndEngine(
+                            TextToTranslate,
+                            Dir,
+                            _engine,
+                            _useSpecialClass,
+                            Class
+                            );
+
+    QVariantMap PreTranslateResult = this->internalDoTranslation(
         APICALLBOOM_PARAM,
         DerivedHelperSubmodules,
-        _text,
-        _dir,
+        TextToTranslate,
+        Dir,
         _engine,
         _useSpecialClass,
+        Class,
+        TranslationEngine,
         _detailed,
         _detokenize,
         _preprocessTime,
         _translationTime
     );
+
+    QVariantMap TranslationResultAsMap = PreTranslateResult[RESULTItems::TRANSLATION].toMap();
+    if (TranslationResultAsMap.contains(RESULTItems::SIMPLE))
+        TextToTranslate = TranslationResultAsMap[RESULTItems::SIMPLE].toString();
+    else if (TranslationResultAsMap.contains(RESULTItems::SIMPLE))
+        TextToTranslate = TranslationResultAsMap[RESULTItems::SIMPLE].toString();
+//    else
+
+    //phase 2
+    Dir = { "en", _dir.second };
+    TranslationEngine = FnFindClassAndEngine(
+                            TextToTranslate,
+                            Dir,
+                            _engine,
+                            _useSpecialClass,
+                            Class
+                            );
+
+
+
+
+
+
+
+
+
+
+    struct stuTranslateStep {
+        QString FromLang;
+        QString ToLang;
+        QString Class;
+        clsEngine* Engine;
+        QString TranslatedText;
+    };
+    QList<stuTranslateStep> TranslateSteps;
+
+    if (_dir.first == "en" || _dir.second == "en") {
+        stuTranslateStep Step;
+
+        Step.FromLang = _dir.first;
+        Step.ToLang = _dir.second;
+        Step.Engine = MTHelper::findEngine(
+            APICALLBOOM_PARAM,
+            _text,
+            _dir,
+            _engine,
+            _useSpecialClass,
+            Step.Class
+        );
+
+        TranslateSteps.append(Step);
+    } else {
+
+    }
+
+
+    //find class and engine
+    QString Class;
+    clsEngine* TranslationEngine = MTHelper::findEngine(
+        APICALLBOOM_PARAM,
+        _text,
+        _dir,
+        _engine,
+        _useSpecialClass,
+        Class
+    );
+
+    if (TranslationEngine != nullptr) {
+        return this->internalDoTranslation(
+            APICALLBOOM_PARAM,
+            DerivedHelperSubmodules,
+            _text,
+            _dir,
+            _engine,
+            _useSpecialClass,
+            Class,
+            TranslationEngine,
+            _detailed,
+            _detokenize,
+            _preprocessTime,
+            _translationTime
+        );
+    }
+
+
+    //-- pre
+    TranslationDir_t PreTranslateDir = { _dir.first, "en" };
+    QString PreClass;
+    clsEngine* PreTranslationEngine = MTHelper::findEngine(
+        APICALLBOOM_PARAM,
+        _text,
+        PreTranslateDir,
+        _engine,
+        _useSpecialClass,
+        PreClass
+    );
+
+    //-- post
+    TranslationDir_t PostTranslateDir = { "en", _dir.second };
+    QString PostClass;
+    clsEngine* PostTranslationEngine = MTHelper::findEngine(
+        APICALLBOOM_PARAM,
+        _text,
+        PostTranslateDir,
+        _engine,
+        _useSpecialClass,
+        PostClass
+    );
+
+    //
+    PreTranslateResult = this->internalDoTranslation(
+        APICALLBOOM_PARAM,
+        DerivedHelperSubmodules,
+        _text,
+        PreTranslateDir,
+        _engine,
+        _useSpecialClass,
+        PreClass,
+        PreTranslationEngine,
+        _detailed,
+        _detokenize,
+        _preprocessTime,
+        _translationTime
+    );
+
+    auto PostTranslateResult = this->internalDoTranslation(
+        APICALLBOOM_PARAM,
+        DerivedHelperSubmodules,
+        _text,
+        PostTranslateDir,
+        _engine,
+        _useSpecialClass,
+        PostClass,
+        PostTranslationEngine,
+        _detailed,
+        _detokenize,
+        _preprocessTime,
+        _translationTime
+    );
+*/
+}
+
+clsEngine* MTHelper::findEngine(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    QString _text,
+    const TranslationDir_t& _dir,
+    const QString& _engine,
+    bool _useSpecialClass,
+    /*OUT*/ QString &_class
+) {
+    clsEngine* TranslationEngine = nullptr;
+
+    if (_useSpecialClass) {
+        _class = this->detectClass(_engine, _text, _dir.first);
+
+        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, _class));
+
+        if (TranslationEngine != nullptr)
+            return TranslationEngine;
+    }
+
+    TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+    if (TranslationEngine != nullptr)
+        return TranslationEngine;
+
+    if (_dir.first == "en" || _dir.second == "en")
+        throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
+
+    return nullptr;
 }
 
 template <TAPI::enuTokenActorType::Type _tokenActorType>
@@ -212,6 +432,8 @@ QVariantMap MTHelper::internalDoTranslation(
     const TranslationDir_t& _dir,
     const QString& _engine,
     bool _useSpecialClass,
+    const QString &_class,
+    clsEngine* _translationEngine,
     bool _detailed,
     bool _detokenize,
     int& _preprocessTime,
@@ -230,23 +452,23 @@ QVariantMap MTHelper::internalDoTranslation(
         QTime Timer;
         Timer.start();
 
-        clsEngine* TranslationEngine = nullptr;
-        QString Class;
+//        clsEngine* TranslationEngine = nullptr;
+//        QString Class;
 
-        if (_useSpecialClass) {
-            Class = this->detectClass(_engine, _text, _dir.first);
-            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
-        }
+//        if (_useSpecialClass) {
+//            Class = this->detectClass(_engine, _text, _dir.first);
+//            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
+//        }
 
-        if (TranslationEngine == nullptr) {
-            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+//        if (TranslationEngine == nullptr) {
+//            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
 
-            if (TranslationEngine == nullptr)
-                throw exHTTPInternalServerError("Unable to find generic translator engine");
-        }
+//            if (TranslationEngine == nullptr)
+//                throw exHTTPInternalServerError("Unable to find generic translator engine");
+//        }
 
-        if (TranslationEngine == nullptr)
-            throw exHTTPInternalServerError(QString("Unable to find %1 translator engine").arg(Class));
+//        if (TranslationEngine == nullptr)
+//            throw exHTTPInternalServerError(QString("Unable to find %1 translator engine").arg(Class));
 
         _text = this->preprocessText(
                     APICALLBOOM_PARAM,
@@ -258,11 +480,11 @@ QVariantMap MTHelper::internalDoTranslation(
         _preprocessTime = Timer.elapsed();
         Timer.restart();
 
-        if (TranslationEngine->specs().SupportsIXML == false)
+        if (_translationEngine->specs().SupportsIXML == false)
             _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
 
         /********************************/
-        CachedTranslation = TranslationEngine->doTranslation(
+        CachedTranslation = _translationEngine->doTranslation(
                                 APICALLBOOM_PARAM,
                                 _text,
                                 _detailed,
@@ -270,8 +492,8 @@ QVariantMap MTHelper::internalDoTranslation(
         /********************************/
 
         _translationTime = Timer.elapsed();
-        if (Class.size() && Authorization::hasPriv(APICALLBOOM_PARAM/*, _privInfo*/, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
-            CachedTranslation[RESULTItems::CLASS] = Class;
+        if (_class.size() && Authorization::hasPriv(APICALLBOOM_PARAM/*, _privInfo*/, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
+            CachedTranslation[RESULTItems::CLASS] = _class;
 
         if (CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
             this->TranslationCache.insert(CacheKey, CachedTranslation);

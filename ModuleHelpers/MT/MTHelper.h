@@ -164,12 +164,22 @@ public:
         const TranslationDir_t& _dir,
         const QString& _engine,
         bool _useSpecialClass,
-        bool _detailed, bool _detokenize,
+        bool _detailed,
+        bool _detokenize,
         int& _preprocessTime,
         int& _translationTime
     );
 
 protected:
+    clsEngine* findEngine(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        QString _text,
+        const TranslationDir_t& _dir,
+        const QString& _engine,
+        bool _useSpecialClass,
+        /*OUT*/ QString &_class
+    );
+
     template <TAPI::enuTokenActorType::Type _tokenActorType>
     QVariantMap internalDoTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
@@ -178,7 +188,10 @@ protected:
         const TranslationDir_t& _dir,
         const QString& _engine,
         bool _useSpecialClass,
-        bool _detailed, bool _detokenize,
+        const QString &_class,
+        clsEngine* _translationEngine,
+        bool _detailed,
+        bool _detokenize,
         int& _preprocessTime,
         int& _translationTime
     );
