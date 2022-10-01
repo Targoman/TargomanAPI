@@ -520,6 +520,25 @@ private slots:
         }
     }
 
+    void translate_fa2ar_1() {
+        QT_TRY {
+            QVariant Result = this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "MT/translate",
+                        {},
+                        {
+                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "dir", "fa2ar" },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
 };
 
 #endif // TEST_MT_HPP

@@ -72,7 +72,10 @@ public:
     static void verifyJWT(
         const QString &_jwt,
         const QString &_remoteIP,
-        const TAPI::enuTokenActorType::Type &_acceptableActorType,
+//        const TAPI::enuTokenActorType::Type &_acceptableActorType,
+        bool _tokenAllowUSER,
+        bool _tokenAllowAPI,
+        TAPI::enuTokenActorType::Type &_jwtTokenActorType,
         TAPI::JWT_t &_jWTPayload
     );
 

@@ -156,10 +156,10 @@ public:
         return this->RegisteredEngines.contains(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
     }
 
-    template <TAPI::enuTokenActorType::Type _tokenActorType>
+    template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+        clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -180,10 +180,10 @@ protected:
         /*OUT*/ QString &_class
     );
 
-    template <TAPI::enuTokenActorType::Type _tokenActorType>
+    template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap internalDoTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+        clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -201,10 +201,10 @@ public:
     QString detokenize(const QString& _text, const QString& _lang);
     QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
 
-    template <TAPI::enuTokenActorType::Type _tokenActorType>
+    template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QString preprocessText(
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+            clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
             const QString& _text,
             const QString& _lang
             );

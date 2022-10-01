@@ -31,19 +31,90 @@ using namespace Targoman::API::API;
 
 namespace Targoman::API::AAA {
 
+/******************************************************\
+
+If!TB: If NOT token base
+If=TB: If IS token base
+
+------------------|-------|-------|-------|---------
+AccountUnits      | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |  x    |       |
+ R                |  x    |  x    |       |
+ U                |       |  x    |       |
+ D                |       |  x    |       |
+
+------------------|-------|-------|-------|---------
+AccountProducts   | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |  x    |       |
+ R                |  x    |  x    |       |
+ U                |       |  x    |       |
+ D                |       |  x    |       |
+
+------------------|-------|-------|-------|---------
+AccountSaleables  | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |  x    |       |
+ R                |  x    |  x    |       |
+ U                |       |  x    |       |
+ D                |       |  x    |       |
+
+------------------|-------|-------|-------|---------
+AccountUserAssets | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |  x    |       |
+ R                |       | If!TB | If=TB |
+ U                |       |       |       |
+ D                |       |       |       |
+
+------------------|-------|-------|-------|---------
+AccountAssetUsage | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       | If!TB | If=TB |
+ R                |       |  x    | If=TB |
+ U                |       |  x    | If=TB |
+ D                |       |       |       |
+
+------------------|-------|-------|-------|---------
+AccountCoupons    | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |  x    |       |
+ R                |  x    |  x    |       |
+ U                |       |  x    |       |
+ D                |       |  x    |       |
+
+------------------|-------|-------|-------|---------
+AccountPrizes     | ANONY | USER  | API   |
+------------------|-------|-------|-------|---------
+ C                |       |       |       |
+ R                |       |       |       |
+ U                |       |       |       |
+ D                |       |       |       |
+------------------|-------|-------|-------|---------
+
+\******************************************************/
+
+
 /******************************************************/
-/*
+template <bool _itmplIsTokenBase>
 class intfAccountORMBase
 {
 public:
-    intfAccountORMBase(bool _isTokenBase) :
-        IsTokenBase(_isTokenBase)
-    { ; }
+    typedef typename std::conditional<_itmplIsTokenBase,
+                            APICALLBOOM_TYPE_JWT_API_DECL,
+                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
+    ACCORM_JWT_TYPE_DECL;
+
+    typedef Q_DECL_UNUSED typename std::conditional<_itmplIsTokenBase,
+                            APICALLBOOM_TYPE_JWT_API_DECL,
+                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
+    ACCORM_JWT_TYPE_IMPL;
 
 public:
-    bool IsTokenBase;
+    bool IsTokenBase() { return _itmplIsTokenBase; }
 };
-*/
+
 /******************************************************/
 /******************************************************/
 /******************************************************/
@@ -219,7 +290,7 @@ public:
     virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
-    QVariant ORMGET_USER("Get User Assets")
+    QVariant ORMGET_USER_OR_API("Get User Assets")
 
     bool REST_UPDATE(
         disablePackage,
@@ -266,7 +337,8 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountAssetUsage : public intfSQLBasedModule//, public intfAccountORMBase
+//template <bool _itmplIsTokenBase>
+class intfAccountAssetUsage : public intfSQLBasedModule//, public intfAccountORMBase<_itmplIsTokenBase>
 {
     Q_OBJECT
 

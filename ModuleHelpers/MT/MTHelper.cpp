@@ -152,11 +152,11 @@ void MTHelper::registerEngines() {
     }
 }
 
-template <TAPI::enuTokenActorType::Type _tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
 //    const QJsonObject& _privInfo,
-    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -167,8 +167,7 @@ QVariantMap MTHelper::doTranslation(
     int& _translationTime
 ) {
     APICALLBOOM_PARAM.createScopeTiming("translate");
-throw exTargomanBase("not finished yet");
-/*
+
     auto FnFindClassAndEngine = [this](
                                 QString _text,
                                 const TranslationDir_t &_dir,
@@ -198,8 +197,26 @@ throw exTargomanBase("not finished yet");
         return nullptr;
     };
 
-    //1: find _dir.first class end engine
+    auto FnGetTranslateResultText = [](const QVariantMap &_translateResult) -> QString {
+        QVariantMap ResultAsMap = _translateResult[RESULTItems::TRANSLATION].toMap();
+
+        if (ResultAsMap.contains(RESULTItems::SIMPLE))
+            return ResultAsMap[RESULTItems::SIMPLE].toString();
+
+        if (ResultAsMap.contains(RESULTItems::TRANSLATIONItems::BASE)) {
+            QStringList ResultList;
+            foreach (auto OneLine, ResultAsMap[RESULTItems::TRANSLATIONItems::BASE].toList())
+                ResultList.append(OneLine.toString());
+
+            return ResultList.join('\n');
+        }
+
+        throw exHTTPInternalServerError("Unable to find pre translate result");
+    };
+
     QString Class;
+
+    //1: find _dir.first class end engine
     clsEngine* TranslationEngine = FnFindClassAndEngine(
                                        _text,
                                        _dir,
@@ -209,20 +226,22 @@ throw exTargomanBase("not finished yet");
                                        );
 
     if (TranslationEngine != nullptr) {
-        return this->internalDoTranslation(
-            APICALLBOOM_PARAM,
-            DerivedHelperSubmodules,
-            _text,
-            _dir,
-            _engine,
-            _useSpecialClass,
-            Class,
-            TranslationEngine,
-            _detailed,
-            _detokenize,
-            _preprocessTime,
-            _translationTime
-        );
+        QVariantMap TranslateResult = this->internalDoTranslation(
+                                          APICALLBOOM_PARAM,
+                                          DerivedHelperSubmodules,
+                                          _text,
+                                          _dir,
+                                          _engine,
+                                          _useSpecialClass,
+                                          Class,
+                                          TranslationEngine,
+                                          _detailed,
+                                          _detokenize,
+                                          _preprocessTime,
+                                          _translationTime
+                                          );
+
+        return TranslateResult;
     }
 
     //need more steps
@@ -231,168 +250,62 @@ throw exTargomanBase("not finished yet");
 
     //phase 1
     Dir = { _dir.first, "en" };
-    TranslationEngine = FnFindClassAndEngine(
-                            TextToTranslate,
-                            Dir,
-                            _engine,
-                            _useSpecialClass,
-                            Class
-                            );
+    clsEngine* PreTranslationEngine = FnFindClassAndEngine(
+                                          TextToTranslate,
+                                          Dir,
+                                          _engine,
+                                          _useSpecialClass,
+                                          Class
+                                          );
 
     QVariantMap PreTranslateResult = this->internalDoTranslation(
-        APICALLBOOM_PARAM,
-        DerivedHelperSubmodules,
-        TextToTranslate,
-        Dir,
-        _engine,
-        _useSpecialClass,
-        Class,
-        TranslationEngine,
-        _detailed,
-        _detokenize,
-        _preprocessTime,
-        _translationTime
-    );
+                                         APICALLBOOM_PARAM,
+                                         DerivedHelperSubmodules,
+                                         TextToTranslate,
+                                         Dir,
+                                         _engine,
+                                         _useSpecialClass,
+                                         Class,
+                                         PreTranslationEngine,
+                                         _detailed,
+                                         _detokenize,
+                                         _preprocessTime,
+                                         _translationTime
+                                         );
 
-    QVariantMap TranslationResultAsMap = PreTranslateResult[RESULTItems::TRANSLATION].toMap();
-    if (TranslationResultAsMap.contains(RESULTItems::SIMPLE))
-        TextToTranslate = TranslationResultAsMap[RESULTItems::SIMPLE].toString();
-    else if (TranslationResultAsMap.contains(RESULTItems::SIMPLE))
-        TextToTranslate = TranslationResultAsMap[RESULTItems::SIMPLE].toString();
-//    else
+    TextToTranslate = FnGetTranslateResultText(PreTranslateResult);
 
     //phase 2
     Dir = { "en", _dir.second };
-    TranslationEngine = FnFindClassAndEngine(
-                            TextToTranslate,
-                            Dir,
-                            _engine,
-                            _useSpecialClass,
-                            Class
-                            );
+    clsEngine* PostTranslationEngine = FnFindClassAndEngine(
+                                           TextToTranslate,
+                                           Dir,
+                                           _engine,
+                                           _useSpecialClass,
+                                           Class
+                                           );
+
+    QVariantMap PostTranslateResult = this->internalDoTranslation(
+                                          APICALLBOOM_PARAM,
+                                          DerivedHelperSubmodules,
+                                          TextToTranslate,
+                                          Dir,
+                                          _engine,
+                                          _useSpecialClass,
+                                          Class,
+                                          PostTranslationEngine,
+                                          _detailed,
+                                          _detokenize,
+                                          _preprocessTime,
+                                          _translationTime
+                                          );
+
+    TextToTranslate = FnGetTranslateResultText(PostTranslateResult);
+
+    //result
 
 
-
-
-
-
-
-
-
-
-    struct stuTranslateStep {
-        QString FromLang;
-        QString ToLang;
-        QString Class;
-        clsEngine* Engine;
-        QString TranslatedText;
-    };
-    QList<stuTranslateStep> TranslateSteps;
-
-    if (_dir.first == "en" || _dir.second == "en") {
-        stuTranslateStep Step;
-
-        Step.FromLang = _dir.first;
-        Step.ToLang = _dir.second;
-        Step.Engine = MTHelper::findEngine(
-            APICALLBOOM_PARAM,
-            _text,
-            _dir,
-            _engine,
-            _useSpecialClass,
-            Step.Class
-        );
-
-        TranslateSteps.append(Step);
-    } else {
-
-    }
-
-
-    //find class and engine
-    QString Class;
-    clsEngine* TranslationEngine = MTHelper::findEngine(
-        APICALLBOOM_PARAM,
-        _text,
-        _dir,
-        _engine,
-        _useSpecialClass,
-        Class
-    );
-
-    if (TranslationEngine != nullptr) {
-        return this->internalDoTranslation(
-            APICALLBOOM_PARAM,
-            DerivedHelperSubmodules,
-            _text,
-            _dir,
-            _engine,
-            _useSpecialClass,
-            Class,
-            TranslationEngine,
-            _detailed,
-            _detokenize,
-            _preprocessTime,
-            _translationTime
-        );
-    }
-
-
-    //-- pre
-    TranslationDir_t PreTranslateDir = { _dir.first, "en" };
-    QString PreClass;
-    clsEngine* PreTranslationEngine = MTHelper::findEngine(
-        APICALLBOOM_PARAM,
-        _text,
-        PreTranslateDir,
-        _engine,
-        _useSpecialClass,
-        PreClass
-    );
-
-    //-- post
-    TranslationDir_t PostTranslateDir = { "en", _dir.second };
-    QString PostClass;
-    clsEngine* PostTranslationEngine = MTHelper::findEngine(
-        APICALLBOOM_PARAM,
-        _text,
-        PostTranslateDir,
-        _engine,
-        _useSpecialClass,
-        PostClass
-    );
-
-    //
-    PreTranslateResult = this->internalDoTranslation(
-        APICALLBOOM_PARAM,
-        DerivedHelperSubmodules,
-        _text,
-        PreTranslateDir,
-        _engine,
-        _useSpecialClass,
-        PreClass,
-        PreTranslationEngine,
-        _detailed,
-        _detokenize,
-        _preprocessTime,
-        _translationTime
-    );
-
-    auto PostTranslateResult = this->internalDoTranslation(
-        APICALLBOOM_PARAM,
-        DerivedHelperSubmodules,
-        _text,
-        PostTranslateDir,
-        _engine,
-        _useSpecialClass,
-        PostClass,
-        PostTranslationEngine,
-        _detailed,
-        _detokenize,
-        _preprocessTime,
-        _translationTime
-    );
-*/
+    return PostTranslateResult;
 }
 
 clsEngine* MTHelper::findEngine(
@@ -424,10 +337,10 @@ clsEngine* MTHelper::findEngine(
     return nullptr;
 }
 
-template <TAPI::enuTokenActorType::Type _tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::internalDoTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -530,10 +443,10 @@ QString MTHelper::detectClass(const QString& _engine, const QString& _text, cons
     return FormalityChecker::instance().check(_lang, _text);
 }
 
-template <TAPI::enuTokenActorType::Type _tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QString MTHelper::preprocessText(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<_tokenActorType> &DerivedHelperSubmodules,
+    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
     const QString& _text,
     const QString& _lang
 ) {

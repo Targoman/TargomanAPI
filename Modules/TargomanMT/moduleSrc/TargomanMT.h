@@ -96,7 +96,7 @@ private slots:
     QVariantMap REST_GET_OR_POST(
         Translate,
         (
-            APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL &APICALLBOOM_PARAM,
             QString _text,
             QString _dir,
             bool _detailed = false,

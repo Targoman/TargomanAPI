@@ -53,39 +53,62 @@ TARGOMAN_DEFINE_ENUM(enuTokenActorType,
 
 //-- NO JWT
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL                APICallBoom<TAPI::enuTokenActorType::ANONYMOUSE, true>
-#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL_STR            TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)
-
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL                APICallBoom<TAPI::enuTokenActorType::ANONYMOUSE, true>
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL_STR            TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL                APICallBoom<true,false,false>
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL_STR            "APICallBoom<true,false,false>"
 //just for use in api methods (.cpp)
 #define APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL                Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL
 
 //-- JWT : USER
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_USER_DECL                      APICallBoom<TAPI::enuTokenActorType::USER,false>
-#define APICALLBOOM_TYPE_JWT_USER_DECL_STR                  "APICallBoom<TAPI::enuTokenActorType::USER,false>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_USER_DECL)
+//#define APICALLBOOM_TYPE_JWT_USER_DECL                      APICallBoom<TAPI::enuTokenActorType::USER,false>
+//#define APICALLBOOM_TYPE_JWT_USER_DECL_STR                  "APICallBoom<TAPI::enuTokenActorType::USER,false>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_USER_DECL)
+#define APICALLBOOM_TYPE_JWT_USER_DECL                      APICallBoom<false,true,false>
+#define APICALLBOOM_TYPE_JWT_USER_DECL_STR                  "APICallBoom<false,true,false>"
 //just for use in api methods (.cpp)
 #define APICALLBOOM_TYPE_JWT_USER_IMPL                      Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_USER_DECL
 
-//-- JWT : USER or ANONYMOUSE
+//-- JWT : ANONYMOUSE or USER
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL        APICallBoom<TAPI::enuTokenActorType::USER,true>
-#define APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL_STR    "APICallBoom<TAPI::enuTokenActorType::USER,true>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL)
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL        APICallBoom<TAPI::enuTokenActorType::USER,true>
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL_STR    "APICallBoom<TAPI::enuTokenActorType::USER,true>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL)
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL        APICallBoom<true,true,false>
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL_STR    "APICallBoom<true,true,false>"
 //just for use in api methods (.cpp)
-#define APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_IMPL        Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_IMPL        Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL
 
 //-- JWT : API
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_API_DECL                       APICallBoom<TAPI::enuTokenActorType::API,false>
-#define APICALLBOOM_TYPE_JWT_API_DECL_STR                   "APICallBoom<TAPI::enuTokenActorType::API,false>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_API_DECL)
+//#define APICALLBOOM_TYPE_JWT_API_DECL                       APICallBoom<TAPI::enuTokenActorType::API,false>
+//#define APICALLBOOM_TYPE_JWT_API_DECL_STR                   "APICallBoom<TAPI::enuTokenActorType::API,false>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_API_DECL)
+#define APICALLBOOM_TYPE_JWT_API_DECL                       APICallBoom<false,false,true>
+#define APICALLBOOM_TYPE_JWT_API_DECL_STR                   "APICallBoom<false,false,true>"
 //just for use in api methods (.cpp)
 #define APICALLBOOM_TYPE_JWT_API_IMPL                       Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_API_DECL
 
-//-- JWT : API or ANONYMOUSE
+//-- JWT : ANONYMOUSE or API
 //just for use in api methods (.h)
-#define APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL         APICallBoom<TAPI::enuTokenActorType::API,true>
-#define APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL_STR     "APICallBoom<TAPI::enuTokenActorType::API,true>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL)
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL         APICallBoom<TAPI::enuTokenActorType::API,true>
+//#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL_STR     "APICallBoom<TAPI::enuTokenActorType::API,true>" //TARGOMAN_M2STR(APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL)
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL         APICallBoom<true,false,true>
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL_STR     "APICallBoom<true,false,true>"
 //just for use in api methods (.cpp)
-#define APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_IMPL         Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_IMPL         Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL
+
+//-- JWT : ANONYMOUSE or USER or API
+//just for use in api methods (.h)
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL         APICallBoom<true,true,true>
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL_STR     "APICallBoom<true,true,true>"
+//just for use in api methods (.cpp)
+#define APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_IMPL         Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL
+
+//-- JWT : USER or API
+//just for use in api methods (.h)
+#define APICALLBOOM_TYPE_JWT_USER_OR_API_DECL                       APICallBoom<false,true,true>
+#define APICALLBOOM_TYPE_JWT_USER_OR_API_DECL_STR                   "APICallBoom<false,true,true>"
+//just for use in api methods (.cpp)
+#define APICALLBOOM_TYPE_JWT_USER_OR_API_IMPL                       Q_DECL_UNUSED APICALLBOOM_TYPE_JWT_USER_OR_API_DECL
 
 //--
 #define INTFAPICALLBOOM                                     intfAPICallBoom
@@ -121,12 +144,27 @@ public:
     );
 
 //    virtual bool needJWT() = 0;
-    virtual TAPI::enuTokenActorType::Type tokenActorType() = 0;
-    virtual bool tokenIsOptional() = 0;
+//    virtual TAPI::enuTokenActorType::Type tokenActorType() = 0;
+//    virtual bool tokenIsOptional() = 0;
+    virtual bool tokenAllowANONYMOUSE() = 0;
+    virtual bool tokenAllowUSER() = 0;
+    virtual bool tokenAllowAPI() = 0;
+
+    inline bool mustProvideJWT() {
+        return ((this->tokenAllowANONYMOUSE() == false)
+                && (this->tokenAllowUSER() || this->tokenAllowAPI())
+                );
+    }
+    inline bool canProvideJWT() {
+        return (this->tokenAllowANONYMOUSE()
+                && (this->tokenAllowUSER() || this->tokenAllowAPI())
+                );
+    }
 
     void setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT);
     /*TAPI::JWT_t*/QJsonObject &getJWT();
     bool isAnonymouse();
+    TAPI::enuTokenActorType::Type jwtActorType();
     quint64 getActorID(quint64 _default=0);
     QJsonObject getJWTPrivsObject();
 
@@ -201,7 +239,7 @@ protected:
     QExplicitlySharedDataPointer<APICallBoomData> Data;
 };
 
-template <TAPI::enuTokenActorType::Type _tokenActorType, bool _tokenIsOptional>
+template <bool _itmplAllowANONYMOUSE, bool _itmplAllowUSER, bool _itmplAllowAPI>
 class APICallBoom : public intfAPICallBoom
 {
 public:
@@ -209,9 +247,23 @@ public:
         intfAPICallBoom(_fnTiming)
     { ; }
 
-    virtual TAPI::enuTokenActorType::Type tokenActorType() final { return _tokenActorType; }
-    virtual bool tokenIsOptional() { return _tokenIsOptional; }
+//    virtual TAPI::enuTokenActorType::Type tokenActorType() final { return _tokenActorType; }
+    virtual bool tokenAllowANONYMOUSE() { return _itmplAllowANONYMOUSE; }
+    virtual bool tokenAllowUSER() { return _itmplAllowUSER; }
+    virtual bool tokenAllowAPI() { return _itmplAllowAPI; }
 };
+
+//template <TAPI::enuTokenActorType::Type _tokenActorType, bool _tokenIsOptional>
+//class APICallBoom : public intfAPICallBoom
+//{
+//public:
+//    APICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
+//        intfAPICallBoom(_fnTiming)
+//    { ; }
+
+//    virtual TAPI::enuTokenActorType::Type tokenActorType() final { return _tokenActorType; }
+//    virtual bool tokenIsOptional() { return _tokenIsOptional; }
+//};
 
 } //namespace Targoman::API::Server
 

@@ -413,30 +413,30 @@ namespace tblTranslationLogsBase {
 #pragma GCC diagnostic pop
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfHelperORMBase
 {
 public:
-    typedef typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
+    typedef typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::USER,
                              APICALLBOOM_TYPE_JWT_USER_DECL,
                              APICALLBOOM_TYPE_JWT_API_DECL>::type
     MT_JWT_TYPE_DECL;
 
-    typedef Q_DECL_UNUSED typename std::conditional<_tokenActorType == TAPI::enuTokenActorType::USER,
+    typedef Q_DECL_UNUSED typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::USER,
                              APICALLBOOM_TYPE_JWT_USER_DECL,
                              APICALLBOOM_TYPE_JWT_API_DECL>::type
     MT_JWT_TYPE_IMPL;
 
 public:
-    TAPI::enuTokenActorType::Type tokenActorType() { return _tokenActorType; }
-    bool IsTokenBase() { return _tokenActorType == TAPI::enuTokenActorType::API; }
+    TAPI::enuTokenActorType::Type tokenActorType() { return _itmplTokenActorType; }
+    bool IsTokenBase() { return _itmplTokenActorType == TAPI::enuTokenActorType::API; }
 };
 
 /******************************************************/
 /* intf classes ***************************************/
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfCorrectionRules : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfCorrectionRules : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
@@ -448,8 +448,8 @@ public:
 };
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfDigestedTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfDigestedTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
@@ -461,8 +461,8 @@ public:
 };
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfMultiDic : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfMultiDic : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
@@ -474,8 +474,8 @@ public:
 };
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfTokenStats : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfTokenStats : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
@@ -487,8 +487,8 @@ public:
 };
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfTranslatedPhrases : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfTranslatedPhrases : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
@@ -500,8 +500,8 @@ public:
 };
 
 /******************************************************/
-template <TAPI::enuTokenActorType::Type _tokenActorType>
-class intfTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_tokenActorType>
+template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
+class intfTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 

@@ -335,25 +335,51 @@ clsRequestHandler::stuResult clsRequestHandler::run(
     const QString& _pksByPath,
     const QString& _api
 ) {
-    auto fnTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+    auto FnTiming = [=](const QString &_name, const QString &_desc, quint64 _nanoSecs) {
         this->addToTimings(_name, _desc, _nanoSecs);
     };
 
-    enuTokenActorType::Type TokenActorType = _apiObject->tokenActorType();
     QScopedPointer<intfAPICallBoom> APICALLBOOM;
 
-    if (TokenActorType == enuTokenActorType::USER) {
-        if (_apiObject->tokenIsOptional())
-            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL(fnTiming));
-        else
-            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
-    } else if (TokenActorType == enuTokenActorType::API) {
-        if (_apiObject->tokenIsOptional())
-            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_OR_ANONYMOUSE_DECL(fnTiming));
-        else
-            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
-    } else //enuTokenActorType::ANONYMOUSE
-        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(fnTiming));
+    if (_apiObject->tokenAllowANONYMOUSE()) {
+        if (_apiObject->tokenAllowUSER()) {
+            if (_apiObject->tokenAllowAPI())
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL(FnTiming));
+            else
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(FnTiming));
+        } else {
+            if (_apiObject->tokenAllowAPI())
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL(FnTiming));
+            else
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(FnTiming));
+        }
+    } else {
+        if (_apiObject->tokenAllowUSER()) {
+            if (_apiObject->tokenAllowAPI())
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_OR_API_DECL(FnTiming));
+            else
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(FnTiming));
+        } else {
+            if (_apiObject->tokenAllowAPI())
+                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(FnTiming));
+            else
+                throw exHTTPInternalServerError("jwt f,f,f");
+        }
+    }
+
+//    enuTokenActorType::Type TokenActorType = _apiObject->tokenActorType();
+//    if (TokenActorType == enuTokenActorType::USER) {
+//        if (_apiObject->tokenIsOptional())
+//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(fnTiming));
+//        else
+//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
+//    } else if (TokenActorType == enuTokenActorType::API) {
+//        if (_apiObject->tokenIsOptional())
+//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL(fnTiming));
+//        else
+//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
+//    } else //enuTokenActorType::ANONYMOUSE
+//        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(fnTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -379,26 +405,28 @@ clsRequestHandler::stuResult clsRequestHandler::run(
             }
 
             if (BearerToken.isEmpty()) {
-                if ((TokenActorType != enuTokenActorType::ANONYMOUSE)
-                    && (_apiObject->tokenIsOptional() == false))
-                throw exHTTPForbidden("No authentication header is present");
-
-            } else if (TokenActorType == enuTokenActorType::ANONYMOUSE) {
+                if (_apiObject->mustProvideJWT())
+                    throw exHTTPForbidden("No authentication header is present");
+            } else if (_apiObject->noJWTNeeded()) {
 //                throw exHTTPForbidden("The authentication header should not be sent for anonymouse apis");
                 APICALLBOOM->addResponseHeader("x-tapi-jwt-warning", "no jwt needed");
                 APICALLBOOM->addResponseHeaderNameToExpose("x-tapi-jwt-warning");
 
             } else {
                 try {
+                    TAPI::enuTokenActorType::Type JWTTokenActorType;
+
                     QJWT::verifyJWT(
                                 BearerToken,
                                 RemoteIP,
-                                TokenActorType,
+                                _apiObject->tokenAllowUSER(),
+                                _apiObject->tokenAllowAPI(),
+                                JWTTokenActorType,
                                 JWT
                                 );
 
                     //check svcs just for API tokens
-                    if ((TokenActorType == enuTokenActorType::API)
+                    if ((JWTTokenActorType == enuTokenActorType::API)
                             && JWT.contains("prv") && JWT["prv"].toObject().contains("svc")) {
                         QString ModuleBaseName = _apiObject->parentModule()->moduleBaseName().split(":").first();
                         if (ModuleBaseName.isEmpty() == false) {
@@ -409,12 +437,12 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     }
 
                 } catch (exJWTExpired &exp) {
-                    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+                    enuTokenActorType::Type JWTTokenActorType = enuTokenActorType::USER;
 
                     if (JWT.contains("typ"))
-                        TokenType = enuTokenActorType::toEnum(JWT["typ"].toString());
+                        JWTTokenActorType = enuTokenActorType::toEnum(JWT["typ"].toString());
 
-                    if (TokenType == enuTokenActorType::USER) {
+                    if (JWTTokenActorType == enuTokenActorType::USER) {
                         auto RenewJWTServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
 
                         bool IsRenewed = false;
@@ -433,10 +461,10 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                             APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
                             APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
                         }
-                    } else if (TokenType == enuTokenActorType::API)
+                    } else if (JWTTokenActorType == enuTokenActorType::API)
                         throw exHTTPForbidden("API token is expired");
                     else
-                        throw exHTTPForbidden(QString("Unknown token type `%1`").arg(TokenType));
+                        throw exHTTPForbidden(QString("Unknown token type `%1`").arg(JWTTokenActorType));
                 } //catch (exJWTExpired &exp)
 
                 JWT["encodedJWT"] = BearerToken;

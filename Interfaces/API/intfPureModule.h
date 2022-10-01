@@ -77,32 +77,40 @@ using namespace TAPI;
     bool                _reportCount, \
     bool                _translate
 
-#define ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)
-#define       USER_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_DECL)
-#define        API_GET_METHOD_ARGS_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_API_DECL)
-#define ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL)
-#define       USER_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_IMPL)
-#define        API_GET_METHOD_ARGS_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_API_IMPL)
+#define GET_METHOD_ARGS_ANONYMOUSE_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)
+#define GET_METHOD_ARGS_USER_DECL_APICALL           INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_DECL)
+#define GET_METHOD_ARGS_API_DECL_APICALL            INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_API_DECL)
+#define GET_METHOD_ARGS_USER_OR_API_DECL_APICALL    INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_OR_API_DECL)
 
-#define ORMGET_ANONYMOUSE(_doc, ...)                apiGET(ANONYMOUSE_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
+#define GET_METHOD_ARGS_ANONYMOUSE_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL)
+#define GET_METHOD_ARGS_USER_IMPL_APICALL           INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_IMPL)
+#define GET_METHOD_ARGS_API_IMPL_APICALL            INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_API_IMPL)
+#define GET_METHOD_ARGS_USER_OR_API_IMPL_APICALL    INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_OR_API_IMPL)
+
+#define ORMGET_ANONYMOUSE(_doc, ...)                apiGET(GET_METHOD_ARGS_ANONYMOUSE_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_USER_DECL_APICALL)); } \
                                                     QString docOfGET() { return _doc; }
 
 #define ORMGET_ANONYMOUSE_HIDDEN(_doc, ...)         ORMGET_ANONYMOUSE(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
-#define ORMGET_USER(_doc, ...)                      apiGET(USER_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
+#define ORMGET_USER(_doc, ...)                      apiGET(GET_METHOD_ARGS_USER_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_USER_DECL_APICALL)); } \
                                                     QString docOfGET() { return _doc; }
-
-#define IMPL_ORMGET_ANONYMOUSE(_module)             _module::apiGET(ANONYMOUSE_GET_METHOD_ARGS_IMPL_APICALL)
-#define IMPL_ORMGET_USER(_module)                   _module::apiGET(USER_GET_METHOD_ARGS_IMPL_APICALL)
-#define IMPL_ORMGET_API(_module)                    _module::apiGET(API_GET_METHOD_ARGS_IMPL_APICALL)
 
 #define ORMGET_USER_HIDDEN(_doc, ...)               ORMGET_USER(_doc, __VA_ARGS__); ORM_EX_CONFIG(GET, { EXRESTCONFIG_HIDDEN })
 
-#define ORMGET_USER_ByName(_name, _doc, ...)        apiGET##_name(USER_GET_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
-                                                    QString signOfGET##_name() { return TARGOMAN_M2STR((USER_GET_METHOD_ARGS_DECL_APICALL)); } \
+#define ORMGET_USER_ByName(_name, _doc, ...)        apiGET##_name(GET_METHOD_ARGS_USER_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET##_name() { return TARGOMAN_M2STR((GET_METHOD_ARGS_USER_DECL_APICALL)); } \
                                                     QString docOfGET##_name() { return _doc; }
+
+#define ORMGET_USER_OR_API(_doc, ...)               apiGET(GET_METHOD_ARGS_USER_OR_API_DECL_APICALL) __VA_ARGS__; \
+                                                    QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_USER_OR_API_DECL_APICALL)); } \
+                                                    QString docOfGET() { return _doc; }
+
+#define IMPL_ORMGET_ANONYMOUSE(_module)             _module::apiGET(GET_METHOD_ARGS_ANONYMOUSE_IMPL_APICALL)
+#define IMPL_ORMGET_USER(_module)                   _module::apiGET(GET_METHOD_ARGS_USER_IMPL_APICALL)
+#define IMPL_ORMGET_API(_module)                    _module::apiGET(GET_METHOD_ARGS_API_IMPL_APICALL)
+#define IMPL_ORMGET_USER_OR_API(_module)            _module::apiGET(GET_METHOD_ARGS_USER_OR_API_IMPL_APICALL)
 
 //used by intfSQLBasedModule
 #define GET_METHOD_ARGS_DECL_INTERNAL               INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLBOOM_DECL)

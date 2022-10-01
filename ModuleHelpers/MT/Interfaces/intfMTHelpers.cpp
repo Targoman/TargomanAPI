@@ -27,8 +27,8 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuCorrectionRuleT
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuMultiDicStatus);
 
 #define TAPI_HELPERORM_SUBMODULE_IMPLEMENT(_className, _tblName) \
-    template <TAPI::enuTokenActorType::Type _tokenActorType> \
-    _className<_tokenActorType>::_className( \
+    template <TAPI::enuTokenActorType::Type _itmplTokenActorType> \
+    _className<_itmplTokenActorType>::_className( \
         const QString& _schema, \
         const QList<DBM::clsORMField>& _exclusiveCols, \
         const QList<DBM::stuRelation>& _exclusiveRelations, \
@@ -41,7 +41,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuMultiDicStatus)
             _tblName::Private::Relations(_schema) + _exclusiveRelations, \
             _tblName::Private::Indexes + _exclusiveIndexes \
         ), \
-        intfHelperORMBase<_tokenActorType>()
+        intfHelperORMBase<_itmplTokenActorType>()
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 

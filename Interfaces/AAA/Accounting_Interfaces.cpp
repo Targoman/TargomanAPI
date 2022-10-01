@@ -698,9 +698,22 @@ ORMSelectQuery intfAccountUserAssets::makeSelectQuery(INTFAPICALLBOOM_IMPL &APIC
     return Query;
 }
 
-QVariant IMPL_ORMGET_USER(intfAccountUserAssets) {
+QVariant IMPL_ORMGET_USER_OR_API(intfAccountUserAssets) {
+
+
+
+
+    if (APICALLBOOM_PARAM.jwtActorType() == TAPI::enuTokenActorType::USER) {
+
+    } else { //API
+
+    }
+
+
+
+
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+        this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
     auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
         if (_cols.isEmpty())
