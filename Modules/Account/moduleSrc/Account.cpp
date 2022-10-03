@@ -809,6 +809,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
+
 #ifndef QT_DEBUG
     if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
         throw exHTTPBadRequest("DeveloperTest not available" /*, stuVoucher(_preVoucher).toJson() */);
