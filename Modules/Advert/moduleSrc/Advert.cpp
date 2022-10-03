@@ -69,7 +69,7 @@ Advert::Advert() :
     intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
-        false,
+//        false,
         {
             { "show", {
                 /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,

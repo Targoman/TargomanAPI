@@ -60,7 +60,7 @@ TargomanMT::TargomanMT() :
     intfAccountingBasedModule(
         TargomanMTDomain,
         TargomanMTSchema,
-        false,
+//        false,
         {
 //            { "show", {
 //                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,

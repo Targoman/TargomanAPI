@@ -33,29 +33,30 @@ namespace Targoman::API::AAA {
 
 using namespace API;
 
-class intfAccountingBasedModule : public intfSQLBasedModule
+/******************************************************/
+class baseintfAccountingBasedModule : public intfSQLBasedModule
 {
     Q_OBJECT
 
-protected:
-    intfAccountingBasedModule(
-        const QString              &_module,
-        const QString              &_schema,
-        bool                       _isTokenBase,
+public:
+    baseintfAccountingBasedModule(
+        const QString &_module,
+        const QString &_schema,
         AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
         intfAccountUnits           *_units,
         intfAccountProducts        *_products,
         intfAccountSaleables       *_saleables,
         intfAccountSaleablesFiles  *_saleablesFiles,
-        intfAccountUserAssets      *_userAssets,
+        baseintfAccountUserAssets  *_userAssets,
         intfAccountUserAssetsFiles *_userAssetsFiles,
-        intfAccountAssetUsage      *_assetUsages,
+        baseintfAccountAssetUsage  *_assetUsages,
         intfAccountCoupons         *_discounts = nullptr,
         intfAccountPrizes          *_prizes = nullptr
     );
-//    virtual ~intfAccountingBasedModule();
 
 public:
+    virtual bool IsTokenBase() = 0;
+
     virtual stuActiveCredit activeAccountObject(quint64 _usrID);
 
 protected:
@@ -64,6 +65,7 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
+protected:
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const ServiceUsage_t& _requestedUsage
@@ -180,6 +182,16 @@ protected:
         return true;
     };
 
+
+protected:
+    Targoman::API::AAA::stuBasketActionResult internalUpdateBasketItem(
+        INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
+        Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
+        stuVoucherItem                      &_voucherItem,
+        qreal                               _newQty,
+        NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
+    );
+
 protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
@@ -222,15 +234,6 @@ protected slots:
         "Only Pending items can be removed."
     )
 
-protected:
-    Targoman::API::AAA::stuBasketActionResult internalUpdateBasketItem(
-        INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
-        Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
-        stuVoucherItem                      &_voucherItem,
-        qreal                               _newQty,
-        NULLABLE_TYPE(TAPI::CouponCode_t)   _newDiscountCode = NULLABLE_NULL_VALUE
-    );
-
 protected slots:
     bool REST_POST(
         processVoucherItem,
@@ -253,15 +256,13 @@ protected slots:
 protected:
     QString ServiceName;
 
-    bool IsTokenBase;
-
     QScopedPointer<intfAccountUnits>            AccountUnits;
     QScopedPointer<intfAccountProducts>         AccountProducts;
     QScopedPointer<intfAccountSaleables>        AccountSaleables;
     QScopedPointer<intfAccountSaleablesFiles>   AccountSaleablesFiles;
-    QScopedPointer<intfAccountUserAssets>       AccountUserAssets;
+    QScopedPointer<baseintfAccountUserAssets>   AccountUserAssets;
     QScopedPointer<intfAccountUserAssetsFiles>  AccountUserAssetsFiles;
-    QScopedPointer<intfAccountAssetUsage>       AccountAssetUsages;
+    QScopedPointer<baseintfAccountAssetUsage>   AccountAssetUsages;
     QScopedPointer<intfAccountCoupons>          AccountCoupons;
     QScopedPointer<intfAccountPrizes>           AccountPrizes;
 
@@ -269,7 +270,35 @@ protected:
     QStringList AssetUsageLimitsColsName;
 };
 
-extern intfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
+/******************************************************/
+template <bool _itmplIsTokenBase>
+class intfAccountingBasedModule : public baseintfAccountingBasedModule
+{
+protected:
+    intfAccountingBasedModule(
+        const QString              &_module,
+        const QString              &_schema,
+//        bool                       _isTokenBase,
+        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
+        intfAccountUnits           *_units,
+        intfAccountProducts        *_products,
+        intfAccountSaleables       *_saleables,
+        intfAccountSaleablesFiles  *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>      *_userAssets,
+        intfAccountUserAssetsFiles *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>      *_assetUsages,
+        intfAccountCoupons         *_discounts = nullptr,
+        intfAccountPrizes          *_prizes = nullptr
+    );
+//    virtual ~intfAccountingBasedModule();
+
+protected:
+    inline bool IsTokenBase() {
+        return _itmplIsTokenBase;
+    }
+};
+
+extern baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
 
 } //namespace Targoman::API::AAA
 

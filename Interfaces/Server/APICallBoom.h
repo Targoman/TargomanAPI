@@ -156,8 +156,8 @@ public:
                 );
     }
     inline bool canProvideJWT() {
-        return (this->tokenAllowANONYMOUSE()
-                && (this->tokenAllowUSER() || this->tokenAllowAPI())
+        return (/*this->tokenAllowANONYMOUSE()
+                &&*/ (this->tokenAllowUSER() || this->tokenAllowAPI())
                 );
     }
 

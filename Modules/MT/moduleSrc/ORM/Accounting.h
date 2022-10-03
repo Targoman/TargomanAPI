@@ -419,7 +419,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountUserAssets : public intfAccountUserAssetsMT
+class AccountUserAssets : public intfAccountUserAssetsMT<true>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssets)
@@ -439,7 +439,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountAssetUsage : public intfAccountAssetUsageMT
+class AccountAssetUsage : public intfAccountAssetUsageMT<true>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountAssetUsage)
@@ -462,7 +462,8 @@ public:
 /******************************************************/
 /******************************************************/
 //There is no Prize in this module
-/*class AccountPrizes : public intfAccountPrizesMT
+/*
+class AccountPrizes : public intfAccountPrizesMT
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT,clsAccountPrizes)

@@ -97,34 +97,46 @@ AccountPrizes     | ANONY | USER  | API   |
 
 
 /******************************************************/
-template <bool _itmplIsTokenBase>
-class intfAccountORMBase
-{
-public:
-    typedef typename std::conditional<_itmplIsTokenBase,
-                            APICALLBOOM_TYPE_JWT_API_DECL,
-                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
-    ACCORM_JWT_TYPE_DECL;
+//template <bool _itmplIsTokenBase>
+//class intfAccountORMBase
+//{
+//public:
+//    typedef typename std::conditional<_itmplIsTokenBase,
+//                            APICALLBOOM_TYPE_JWT_API_DECL,
+//                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
+//    APICALLBOOM_TYPE_JWT_TOKENBASE_DECL;
 
-    typedef Q_DECL_UNUSED typename std::conditional<_itmplIsTokenBase,
-                            APICALLBOOM_TYPE_JWT_API_DECL,
-                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
-    ACCORM_JWT_TYPE_IMPL;
+//    typedef Q_DECL_UNUSED typename std::conditional<_itmplIsTokenBase,
+//                            APICALLBOOM_TYPE_JWT_API_DECL,
+//                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
+//    APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL;
 
-public:
-    bool IsTokenBase() { return _itmplIsTokenBase; }
-};
+//public:
+//    bool IsTokenBase() { return _itmplIsTokenBase; }
+//};
+
+#define ACCORM_TOKENBASE_TYPES(_isTokenBase) \
+    public: \
+        typedef typename std::conditional<_isTokenBase, \
+                                APICALLBOOM_TYPE_JWT_API_DECL, \
+                                APICALLBOOM_TYPE_JWT_USER_DECL>::type \
+        APICALLBOOM_TYPE_JWT_TOKENBASE_DECL; \
+        typedef Q_DECL_UNUSED typename std::conditional<_isTokenBase, \
+                                APICALLBOOM_TYPE_JWT_API_DECL, \
+                                APICALLBOOM_TYPE_JWT_USER_DECL>::type \
+        APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL; \
+    public: \
+        bool IsTokenBase() { return _isTokenBase; }
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUnitsI18N : public intfSQLBasedModule//, public intfAccountORMBase
+class intfAccountUnitsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUnitsI18N(//bool _isTokenBase,
-                         const QString& _schema,
+    intfAccountUnitsI18N(const QString& _schema,
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -136,13 +148,14 @@ public:
 };
 
 /******************************************************/
-class intfAccountUnits : public intfSQLBasedModule//, public intfAccountORMBase
+/******************************************************/
+/******************************************************/
+class intfAccountUnits : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUnits(//bool _isTokenBase,
-                     const QString& _schema,
+    intfAccountUnits(const QString& _schema,
                      const QList<DBM::clsORMField>& _exclusiveCols = {},
                      const QList<DBM::stuRelation>& _exclusiveRelations = {},
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -160,13 +173,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountProductsI18N : public intfSQLBasedModule//, public intfAccountORMBase
+class intfAccountProductsI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountProductsI18N(//bool _isTokenBase,
-                            const QString& _schema,
+    intfAccountProductsI18N(const QString& _schema,
                             const QList<DBM::clsORMField>& _exclusiveCols = {},
                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
                             const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -178,13 +190,14 @@ public:
 };
 
 /******************************************************/
-class intfAccountProducts : public intfSQLBasedModule//, public intfAccountORMBase
+/******************************************************/
+/******************************************************/
+class intfAccountProducts : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountProducts(//bool _isTokenBase,
-                        const QString& _schema,
+    intfAccountProducts(const QString& _schema,
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -202,13 +215,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountSaleablesI18N : public intfSQLBasedModule//, public intfAccountORMBase
+class intfAccountSaleablesI18N : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesI18N(//bool _isTokenBase,
-                             const QString& _schema,
+    intfAccountSaleablesI18N(const QString& _schema,
                              const QList<DBM::clsORMField>& _exclusiveCols = {},
                              const QList<DBM::stuRelation>& _exclusiveRelations = {},
                              const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -220,13 +232,14 @@ public:
 };
 
 /******************************************************/
-class intfAccountSaleables : public intfSQLBasedModule//, public intfAccountORMBase
+/******************************************************/
+/******************************************************/
+class intfAccountSaleables : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleables(//bool _isTokenBase,
-                         const QString& _schema,
+    intfAccountSaleables(const QString& _schema,
                          const QList<DBM::clsORMField>& _exclusiveCols = {},
                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -246,13 +259,14 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountSaleablesFiles : public intfSQLBasedModule//, public intfAccountORMBase
+/******************************************************/
+/******************************************************/
+class intfAccountSaleablesFiles : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountSaleablesFiles(//bool _isTokenBase,
-                              const QString& _schema,
+    intfAccountSaleablesFiles(const QString& _schema,
                               const QList<DBM::clsORMField>& _exclusiveCols = {},
                               const QList<DBM::stuRelation>& _exclusiveRelations = {},
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -275,23 +289,20 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUserAssets : public intfSQLBasedModule//, public intfAccountORMBase
+class baseintfAccountUserAssets : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssets(//bool _isTokenBase,
-                          const QString& _schema,
-                          const QList<DBM::clsORMField>& _exclusiveCols = {},
-                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+    baseintfAccountUserAssets(const QString& _schema,
+                              const QList<DBM::clsORMField>& _cols = {},
+                              const QList<DBM::stuRelation>& _relations = {},
+                              const QList<DBM::stuDBIndex>& _indexes = {});
 
-public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+protected:
+//    QVariant ORMGET_INTERNAL
 
 private slots:
-    QVariant ORMGET_USER_OR_API("Get User Assets")
-
     bool REST_UPDATE(
         disablePackage,
         (
@@ -312,13 +323,63 @@ private slots:
 };
 
 /******************************************************/
-class intfAccountUserAssetsFiles : public intfSQLBasedModule//, public intfAccountORMBase
+class baseintfAccountUserAssets_USER : public baseintfAccountUserAssets
+{
+    Q_OBJECT
+    ACCORM_TOKENBASE_TYPES(false)
+
+public:
+    baseintfAccountUserAssets_USER(const QString& _schema,
+                                   const QList<DBM::clsORMField>& _cols = {},
+                                   const QList<DBM::stuRelation>& _relations = {},
+                                   const QList<DBM::stuDBIndex>& _indexes = {});
+
+private slots:
+//    QVariant ORMGET_TOKENBASE("Get User Assets")
+    QVariant ORMGET_USER("Get User Assets")
+};
+
+/******************************************************/
+class baseintfAccountUserAssets_API : public baseintfAccountUserAssets
+{
+    Q_OBJECT
+    ACCORM_TOKENBASE_TYPES(true)
+
+public:
+    baseintfAccountUserAssets_API(const QString& _schema,
+                                  const QList<DBM::clsORMField>& _cols = {},
+                                  const QList<DBM::stuRelation>& _relations = {},
+                                  const QList<DBM::stuDBIndex>& _indexes = {});
+
+private slots:
+//    QVariant ORMGET_TOKENBASE("Get User Assets")
+    QVariant ORMGET_API("Get User Assets")
+};
+
+/******************************************************/
+template <bool _itmplIsTokenBase>
+class intfAccountUserAssets :
+    public std::conditional<_itmplIsTokenBase, baseintfAccountUserAssets_API, baseintfAccountUserAssets_USER>::type //intfSQLBasedModule// , public intfAccountORMBase<_itmplIsTokenBase>
+{
+public:
+    intfAccountUserAssets(const QString& _schema,
+                          const QList<DBM::clsORMField>& _exclusiveCols = {},
+                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+public:
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+class intfAccountUserAssetsFiles : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountUserAssetsFiles(//bool _isTokenBase,
-                               const QString& _schema,
+    intfAccountUserAssetsFiles(const QString& _schema,
                                const QList<DBM::clsORMField>& _exclusiveCols = {},
                                const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -337,31 +398,75 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-//template <bool _itmplIsTokenBase>
-class intfAccountAssetUsage : public intfSQLBasedModule//, public intfAccountORMBase<_itmplIsTokenBase>
+class baseintfAccountAssetUsage : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountAssetUsage(//bool _isTokenBase,
-                          const QString& _schema,
-                          const QList<DBM::clsORMField>& _exclusiveCols = {},
-                          const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                          const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+    baseintfAccountAssetUsage(const QString& _schema,
+                              const QList<DBM::clsORMField>& _cols = {},
+                              const QList<DBM::stuRelation>& _relations = {},
+                              const QList<DBM::stuDBIndex>& _indexes = {});
+
 private slots:
-    QVariant ORMGET_USER("Get user Usage on each Asset")
+};
+
+/******************************************************/
+class baseintfAccountAssetUsage_USER : public baseintfAccountAssetUsage
+{
+    Q_OBJECT
+    ACCORM_TOKENBASE_TYPES(false)
+
+public:
+    baseintfAccountAssetUsage_USER(const QString& _schema,
+                                   const QList<DBM::clsORMField>& _cols = {},
+                                   const QList<DBM::stuRelation>& _relations = {},
+                                   const QList<DBM::stuDBIndex>& _indexes = {});
+
+private slots:
+//    QVariant ORMGET_TOKENBASE("Get User Assets")
+    QVariant ORMGET_USER("Get User Assets")
+};
+
+/******************************************************/
+class baseintfAccountAssetUsage_API : public baseintfAccountAssetUsage
+{
+    Q_OBJECT
+    ACCORM_TOKENBASE_TYPES(true)
+
+public:
+    baseintfAccountAssetUsage_API(const QString& _schema,
+                                  const QList<DBM::clsORMField>& _cols = {},
+                                  const QList<DBM::stuRelation>& _relations = {},
+                                  const QList<DBM::stuDBIndex>& _indexes = {});
+
+private slots:
+//    QVariant ORMGET_TOKENBASE("Get User Assets")
+    QVariant ORMGET_API("Get User Assets")
+};
+
+/******************************************************/
+template <bool _itmplIsTokenBase>
+class intfAccountAssetUsage : public std::conditional<_itmplIsTokenBase, baseintfAccountAssetUsage_API, baseintfAccountAssetUsage_USER>::type //intfSQLBasedModule// , public intfAccountORMBase<_itmplIsTokenBase>
+{
+public:
+    intfAccountAssetUsage(//bool _isTokenBase,
+                     const QString& _schema,
+                     const QList<DBM::clsORMField>& _exclusiveCols = {},
+                     const QList<DBM::stuRelation>& _exclusiveRelations = {},
+                     const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
 };
 
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountCoupons : public intfSQLBasedModule//, public intfAccountORMBase
+class intfAccountCoupons : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountCoupons(//bool _isTokenBase,
-                       const QString& _schema,
+    intfAccountCoupons(const QString& _schema,
                        const QList<DBM::clsORMField>& _exclusiveCols = {},
                        const QList<DBM::stuRelation>& _exclusiveRelations = {},
                        const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -376,13 +481,12 @@ private slots:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountPrizes : public intfSQLBasedModule//, public intfAccountORMBase
+class intfAccountPrizes : public intfSQLBasedModule
 {
     Q_OBJECT
 
 public:
-    intfAccountPrizes(//bool _isTokenBase,
-                      const QString& _schema,
+    intfAccountPrizes(const QString& _schema,
                       const QList<DBM::clsORMField>& _exclusiveCols = {},
                       const QList<DBM::stuRelation>& _exclusiveRelations = {},
                       const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});

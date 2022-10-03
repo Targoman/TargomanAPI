@@ -42,8 +42,6 @@ using namespace Common;
 using namespace DBM;
 using namespace DBManager;
 
-static QMap<QString, intfAccountingBasedModule*> ServiceRegistry;
-
 Targoman::Common::Configuration::tmplConfigurable<QString> Secret(
     makeConfig("Secret"),
     "Secret to be used for signing voucher and prevoucher",
@@ -101,31 +99,32 @@ clsSimpleCrypt* simpleCryptInstance()
     return SimpleCryptInstance;
 }
 
-intfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
+static QMap<QString, baseintfAccountingBasedModule*> ServiceRegistry;
+
+baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
     return ServiceRegistry.value(_serviceName);
 }
 
 /***************************************************************************************************\
-|** intfAccountingBasedModule **********************************************************************|
+|** baseintfAccountingBasedModule ******************************************************************|
 \***************************************************************************************************/
-intfAccountingBasedModule::intfAccountingBasedModule(
+baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     const QString               &_module,
     const QString               &_schema,
-    bool                        _isTokenBase,
     AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
     intfAccountUnits            *_units,
     intfAccountProducts         *_products,
     intfAccountSaleables        *_saleables,
     intfAccountSaleablesFiles   *_saleablesFiles,
-    intfAccountUserAssets       *_userAssets,
+    baseintfAccountUserAssets   *_userAssets,
     intfAccountUserAssetsFiles  *_userAssetsFiles,
-    intfAccountAssetUsage       *_assetUsages,
+    baseintfAccountAssetUsage   *_assetUsages,
     intfAccountCoupons          *_discounts,
     intfAccountPrizes           *_prizes
 ) :
     intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
-    IsTokenBase(_isTokenBase),
+//    IsTokenBase(_isTokenBase),
     AccountUnits(_units),
     AccountProducts(_products),
     AccountSaleables(_saleables),
@@ -150,18 +149,16 @@ intfAccountingBasedModule::intfAccountingBasedModule(
         if (Col.Total.size())
             this->AssetUsageLimitsColsName.append(Col.Total);
     }
-
-    ServiceRegistry.insert(this->ServiceName, this);
 }
 
 /******************************************************************\
 |** credit ********************************************************|
 \******************************************************************/
-stuActiveCredit intfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
+stuActiveCredit baseintfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
     return this->findBestMatchedCredit(_usrID);
 }
 
-void intfAccountingBasedModule::checkUsageIsAllowed(
+void baseintfAccountingBasedModule::checkUsageIsAllowed(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage
 ) {
@@ -222,7 +219,7 @@ void intfAccountingBasedModule::checkUsageIsAllowed(
     }
 }
 
-stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
+stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     quint64 _usrID,
     const ServiceUsage_t& _requestedUsage
 ) {
@@ -359,7 +356,7 @@ stuActiveCredit intfAccountingBasedModule::findBestMatchedCredit(
 /******************************************************************\
 |** basket ********************************************************|
 \******************************************************************/
-Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, addToBasket, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, addToBasket, (
     APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
@@ -392,7 +389,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
 
     //-- --------------------------------
     _apiToken = _apiToken.trimmed();
-    if (this->IsTokenBase) {
+    if (this->IsTokenBase()) {
         if (_apiToken.isEmpty())
             throw exHTTPInternalServerError("This product IS token base");
 
@@ -409,7 +406,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
             throw exAuthorization("API Token is not yours");
     }
 
-    if ((this->IsTokenBase == false) && (_apiToken.isEmpty() == false))
+    if ((this->IsTokenBase() == false) && (_apiToken.isEmpty() == false))
         throw exHTTPInternalServerError("This product IS NOT token base");
 
     //-- --------------------------------
@@ -691,7 +688,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
                 PreVoucherItem.UUID);
 }
 
-Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, updateBasketItem, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, updateBasketItem, (
     APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID,
@@ -719,7 +716,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
     throw exHTTPNotFound("item not found");
 }
 
-Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModule, removeBasketItem, (
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, removeBasketItem, (
     APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID
@@ -738,7 +735,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(intfAccountingBasedModu
   *     updateBasketItem
   *     removeBasketItem
   */
-Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpdateBasketItem(
+Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::internalUpdateBasketItem(
     INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
     stuVoucherItem                      &_voucherItem,
@@ -970,7 +967,7 @@ Targoman::API::AAA::stuBasketActionResult intfAccountingBasedModule::internalUpd
   *        updateBasketItem
   *        removeBasketItem
   */
-void intfAccountingBasedModule::processItemForBasket(
+void baseintfAccountingBasedModule::processItemForBasket(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -1093,7 +1090,7 @@ void intfAccountingBasedModule::processItemForBasket(
     fnComputeTotalPrice("finish");
 }
 
-void intfAccountingBasedModule::digestPrivs(
+void baseintfAccountingBasedModule::digestPrivs(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -1101,7 +1098,7 @@ void intfAccountingBasedModule::digestPrivs(
     ///@TODO: What should I do here?
 }
 
-void intfAccountingBasedModule::computeSystemDiscount(
+void baseintfAccountingBasedModule::computeSystemDiscount(
     INTFAPICALLBOOM_IMPL            &APICALLBOOM_PARAM,
     INOUT stuAssetItem              &_assetItem,
     const stuPendingSystemDiscount  &_pendingSystemDiscount /*= {}*/,
@@ -1162,7 +1159,7 @@ void intfAccountingBasedModule::computeSystemDiscount(
     ///@TODO: tblAccountSystemDiscounts and all its behaviors must be implemented
 }
 
-void intfAccountingBasedModule::computeCouponDiscount(
+void baseintfAccountingBasedModule::computeCouponDiscount(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
@@ -1393,7 +1390,7 @@ void intfAccountingBasedModule::computeCouponDiscount(
 /******************************************************************\
 |** process and cancel voucher item *******************************|
 \******************************************************************/
-bool intfAccountingBasedModule::increaseDiscountUsage(
+bool baseintfAccountingBasedModule::increaseDiscountUsage(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
@@ -1415,7 +1412,7 @@ bool intfAccountingBasedModule::increaseDiscountUsage(
     return true;
 }
 
-bool intfAccountingBasedModule::decreaseDiscountUsage(
+bool baseintfAccountingBasedModule::decreaseDiscountUsage(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
@@ -1437,7 +1434,7 @@ bool intfAccountingBasedModule::decreaseDiscountUsage(
     return true;
 }
 
-bool intfAccountingBasedModule::activateUserAsset(
+bool baseintfAccountingBasedModule::activateUserAsset(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
@@ -1455,7 +1452,7 @@ bool intfAccountingBasedModule::activateUserAsset(
                         });
 }
 
-bool intfAccountingBasedModule::removeFromUserAssets(
+bool baseintfAccountingBasedModule::removeFromUserAssets(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
@@ -1470,7 +1467,7 @@ bool intfAccountingBasedModule::removeFromUserAssets(
     );
 }
 
-bool intfAccountingBasedModule::processVoucherItem(
+bool baseintfAccountingBasedModule::processVoucherItem(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
@@ -1493,7 +1490,7 @@ bool intfAccountingBasedModule::processVoucherItem(
     return true;
 }
 
-bool intfAccountingBasedModule::cancelVoucherItem(
+bool baseintfAccountingBasedModule::cancelVoucherItem(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
@@ -1578,7 +1575,7 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
         throw exHTTPBadRequest("Invalid voucher item sign");
 }
 
-bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
+bool IMPL_REST_POST(baseintfAccountingBasedModule, processVoucherItem, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
@@ -1587,7 +1584,7 @@ bool IMPL_REST_POST(intfAccountingBasedModule, processVoucherItem, (
     return this->processVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem, _data.VoucherID);
 }
 
-bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
+bool IMPL_REST_POST(baseintfAccountingBasedModule, cancelVoucherItem, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
@@ -1595,5 +1592,45 @@ bool IMPL_REST_POST(intfAccountingBasedModule, cancelVoucherItem, (
 
     return this->cancelVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem);
 }
+
+/***************************************************************************************************\
+|** intfAccountingBasedModule **********************************************************************|
+\***************************************************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
+    const QString               &_module,
+    const QString               &_schema,
+//    bool                        _isTokenBase,
+    AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
+    intfAccountUnits            *_units,
+    intfAccountProducts         *_products,
+    intfAccountSaleables        *_saleables,
+    intfAccountSaleablesFiles   *_saleablesFiles,
+    intfAccountUserAssets<_itmplIsTokenBase>       *_userAssets,
+    intfAccountUserAssetsFiles  *_userAssetsFiles,
+    intfAccountAssetUsage<_itmplIsTokenBase>       *_assetUsages,
+    intfAccountCoupons          *_discounts,
+    intfAccountPrizes           *_prizes
+) :
+    baseintfAccountingBasedModule(
+        _module,
+        _schema,
+        _AssetUsageLimitsCols,
+        _units,
+        _products,
+        _saleables,
+        _saleablesFiles,
+        _userAssets,
+        _userAssetsFiles,
+        _assetUsages,
+        _discounts,
+        _prizes
+    )
+{
+    ServiceRegistry.insert(this->ServiceName, this);
+}
+
+template class intfAccountingBasedModule<false>;
+template class intfAccountingBasedModule<true>;
 
 } //namespace Targoman::API::AAA

@@ -408,6 +408,8 @@ public:
 };
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class intfAccountUnitsI18NMT : public intfAccountUnitsI18N
 {
     Q_OBJECT
@@ -433,6 +435,8 @@ public:
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountProductsI18NMT : public intfAccountProductsI18N
 {
@@ -460,6 +464,8 @@ public:
 };
 
 /******************************************************/
+/******************************************************/
+/******************************************************/
 class intfAccountSaleablesI18NMT : public intfAccountSaleablesI18N
 {
     Q_OBJECT
@@ -471,6 +477,8 @@ public:
                                const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 };
 
+/******************************************************/
+/******************************************************/
 /******************************************************/
 class intfAccountSaleablesFilesMT : public intfAccountSaleablesFiles
 {
@@ -486,9 +494,22 @@ public:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountUserAssetsMT : public intfAccountUserAssets
+class baseintfAccountUserAssetsMT //: private QObject
 {
-    Q_OBJECT
+//    Q_OBJECT
+
+public:
+    baseintfAccountUserAssetsMT();
+
+protected slots:
+//APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
+//APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
+};
+
+template <bool _itmplIsTokenBase>
+class intfAccountUserAssetsMT : public intfAccountUserAssets<_itmplIsTokenBase>, public baseintfAccountUserAssetsMT
+{
+//    Q_OBJECT
 
 public:
     intfAccountUserAssetsMT(const QString& _schema,
@@ -512,9 +533,22 @@ public:
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class intfAccountAssetUsageMT : public intfAccountAssetUsage
+class baseintfAccountAssetUsageMT //: private QObject
 {
-    Q_OBJECT
+//    Q_OBJECT
+
+public:
+    baseintfAccountAssetUsageMT();
+
+protected slots:
+//APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
+//APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
+};
+
+template <bool _itmplIsTokenBase>
+class intfAccountAssetUsageMT : public intfAccountAssetUsage<_itmplIsTokenBase>, public baseintfAccountAssetUsageMT
+{
+//    Q_OBJECT
 
 public:
     intfAccountAssetUsageMT(const QString& _schema,
@@ -541,9 +575,10 @@ public:
 /******************************************************/
 /******************************************************/
 //There is no Prize in this module
-/*class intfAccountPrizesMT : public intfAccountPrizes
+/*
+class intfAccountPrizesMT : public intfAccountPrizes
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     intfAccountPrizesMT();

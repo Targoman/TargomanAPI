@@ -256,21 +256,21 @@ QVariantMap IMPL_REST_UPDATE(APITokens, , (
     if (NULLABLE_HAS_VALUE(_expireDate)) {
         TokenJWTPayload["exp"] = (NULLABLE_VALUE(_expireDate)).toSecsSinceEpoch();
         NewToken = QJWT::encryptAndSigned(TokenJWTPayload);
-        MethodResult.insert("token", NewToken);
 
         ++ToUpdateCount;
         UpdateQuery
                 .set(tblAPITokens::Fields::aptToken, NewToken)
                 .set(tblAPITokens::Fields::aptExpiryDate, NULLABLE_VALUE(_expireDate))
                 ;
+
+        MethodResult.insert("token", NewToken);
     }
 
     if (ToUpdateCount == 0)
         throw exHTTPInternalServerError("Nothing to do");
 
     try {
-        if (UpdateQuery.execute(CurrentUserID) == 0)
-            throw exHTTPInternalServerError("Error in updating");
+        UpdateQuery.execute(CurrentUserID);
     }  catch (const std::exception &_exp) {
         QString ExpStr = _exp.what();
         if (ExpStr.contains("Duplicate entry", Qt::CaseInsensitive))

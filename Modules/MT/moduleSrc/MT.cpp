@@ -60,7 +60,7 @@ MT::MT() :
     intfAccountingBasedModule(
         MTDomain,
         MTSchema,
-        true,
+//        true,
         {
             { "words", {
                 /* day   */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerDay,
