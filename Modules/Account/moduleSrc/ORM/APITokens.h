@@ -295,22 +295,17 @@ public:
         const QStringList &_services = {}
     );
 
+    QVariantMap addServices(
+        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        quint64 _tokenID,
+        QMap<QString, quint64> &_services
+    );
+
 private slots:
     QVariant ORMGET_USER("Get APITokens information")
 //    quint64 ORMCREATE_USER("Create a new APIToken")
 //    bool ORMUPDATE_USER("Update an APIToken")
 //    bool ORMDELETE_USER("Delete an APIToken")
-
-    QVariantMap REST_UPDATE(
-        ,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString _token,
-            QString _name = {},
-            NULLABLE_TYPE(TAPI::DateTime_t) _expireDate = NULLABLE_NULL_VALUE
-        ),
-        "Update token name and expire date. Returns new token and other info"
-    )
 
     QVariant REST_GET(
         byService,
@@ -330,6 +325,17 @@ private slots:
         "Get APITokens information filter by Service(s)"
     );
 
+    QVariantMap REST_UPDATE(
+        ,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _token,
+            QString _name = {},
+            NULLABLE_TYPE(TAPI::DateTime_t) _expireDate = NULLABLE_NULL_VALUE
+        ),
+        "Update token name and expire date. Returns new token and other info"
+    )
+
     Targoman::API::AccountModule::stuRequestTokenResult REST_POST(
         request,
         (
@@ -338,6 +344,16 @@ private slots:
             const QStringList &_services = {}
         ),
         "create new empty api token"
+    );
+
+    QVariantMap REST_POST(
+        addServices,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            const QString       &_token,
+            const QStringList   &_services = {}
+        ),
+        "Add services to the token"
     );
 
     /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(

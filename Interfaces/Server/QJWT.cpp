@@ -235,22 +235,15 @@ void QJWT::verifyJWT(
 
     //-- check actor type -----
     _jwtTokenActorType = enuTokenActorType::USER;
+
     if (_jWTPayload.contains("typ"))
         _jwtTokenActorType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
 
     if ((_jwtTokenActorType == enuTokenActorType::USER) && (_tokenAllowUSER == false))
-//    if (TokenType != _acceptableActorType)
-        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: USER")
-                              .arg(enuTokenActorType::toStr(_jwtTokenActorType))
-//                              .arg(enuTokenActorType::toStr(_acceptableActorType))
-                              );
+        throw exHTTPForbidden("Token type `USER` not acceptable by this module. expected: API");
 
     if ((_jwtTokenActorType == enuTokenActorType::API) && (_tokenAllowAPI == false))
-//    if (TokenType != _acceptableActorType)
-        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: API")
-                              .arg(enuTokenActorType::toStr(_jwtTokenActorType))
-//                              .arg(enuTokenActorType::toStr(_acceptableActorType))
-                              );
+        throw exHTTPForbidden("Token type `API` not acceptable by this module. expected: USER");
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {
