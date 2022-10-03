@@ -63,7 +63,11 @@ public:
     inline quint64 expireAt() const                             { return static_cast<quint64>(this->Token.value(JWTItems::exp).toDouble()); }
     //
     inline quint64 actorID() const                              { return static_cast<quint64>(this->Token.value(JWTItems::uid).toDouble()); }
-    inline TAPI::enuTokenActorType::Type actorType() const      { return TAPI::enuTokenActorType::toEnum(this->Token.value(JWTItems::typ).toString()); }
+    inline TAPI::enuTokenActorType::Type actorType() const      {
+        if (this->Token.contains(JWTItems::typ) == false)
+            return TAPI::enuTokenActorType::USER;
+        return TAPI::enuTokenActorType::toEnum(this->Token.value(JWTItems::typ).toString());
+    }
     //
     inline QVariantMap privatePart() const                      { return this->Token.value(JWTItems::priv).toObject().toVariantMap(); }
     inline QVariantMap privs() const                            { return this->Token.value(JWTItems::privs).toObject().toVariantMap(); }

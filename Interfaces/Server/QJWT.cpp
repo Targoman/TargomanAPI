@@ -225,20 +225,32 @@ void QJWT::extractAndDecryptPayload(
 void QJWT::verifyJWT(
     const QString &_jwt,
     Q_DECL_UNUSED const QString &_remoteIP,
-    const enuTokenActorType::Type &_acceptableActorType,
+//    const enuTokenActorType::Type &_acceptableActorType,
+    bool _tokenAllowUSER,
+    bool _tokenAllowAPI,
+    TAPI::enuTokenActorType::Type &_jwtTokenActorType,
     TAPI::JWT_t &_jWTPayload
 ) {
     QJWT::extractAndDecryptPayload(_jwt, _jWTPayload);
 
     //-- check actor type -----
-    enuTokenActorType::Type TokenType = enuTokenActorType::USER;
+    _jwtTokenActorType = enuTokenActorType::USER;
     if (_jWTPayload.contains("typ"))
-        TokenType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
+        _jwtTokenActorType = enuTokenActorType::toEnum(_jWTPayload["typ"].toString());
 
-    if (TokenType != _acceptableActorType)
-        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: %2")
-                              .arg(enuTokenActorType::toStr(TokenType))
-                              .arg(enuTokenActorType::toStr(_acceptableActorType)));
+    if ((_jwtTokenActorType == enuTokenActorType::USER) && (_tokenAllowUSER == false))
+//    if (TokenType != _acceptableActorType)
+        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: USER")
+                              .arg(enuTokenActorType::toStr(_jwtTokenActorType))
+//                              .arg(enuTokenActorType::toStr(_acceptableActorType))
+                              );
+
+    if ((_jwtTokenActorType == enuTokenActorType::API) && (_tokenAllowAPI == false))
+//    if (TokenType != _acceptableActorType)
+        throw exHTTPForbidden(QString("Token type `%1` not acceptable by this module. expected: API")
+                              .arg(enuTokenActorType::toStr(_jwtTokenActorType))
+//                              .arg(enuTokenActorType::toStr(_acceptableActorType))
+                              );
 
     //-- check client ip -----
 //    if (_jWTPayload.contains("prv")) {
@@ -251,7 +263,7 @@ void QJWT::verifyJWT(
     uint currentDateTime = QDateTime::currentDateTime().toTime_t();
 
     //-- check large expiration -----
-    if (TokenType == enuTokenActorType::USER) {
+    if (_jwtTokenActorType == enuTokenActorType::USER) {
         if (_jWTPayload.contains("ssnexp") == false)
             throw exHTTPForbidden("Invalid ssnexp in JWT");
 

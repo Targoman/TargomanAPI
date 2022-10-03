@@ -79,15 +79,26 @@ public:
         return this->Parent;
     }
 
-//    inline bool requiresJWT() const {
-//        return this->RequiresJWT; //ParamTypesName.contains(PARAM_JWT);
-//    }
+//    enuTokenActorType::Type tokenActorType() { return this->TokenActorType; }
+//    bool tokenIsOptional() { return this->TokenIsOptional; }
 
-//    inline enuTokenActorType::Type moduleActorType() const {
-//        return this->Parent->actorType();
-//    }
-    enuTokenActorType::Type tokenActorType() { return this->TokenActorType; }
-    bool tokenIsOptional() { return this->TokenIsOptional; }
+    bool tokenAllowANONYMOUSE() { return this->TokenAllowANONYMOUSE; }
+    bool tokenAllowUSER() { return this->TokenAllowUSER; }
+    bool tokenAllowAPI() { return this->TokenAllowAPI; }
+
+    inline bool mustProvideJWT() {
+        return ((this->tokenAllowANONYMOUSE() == false)
+                && (this->tokenAllowUSER() || this->tokenAllowAPI())
+                );
+    }
+    inline bool canProvideJWT() {
+        return (/*this->tokenAllowANONYMOUSE()
+                &&*/ (this->tokenAllowUSER() || this->tokenAllowAPI())
+                );
+    }
+    inline bool noJWTNeeded() {
+        return ((this->tokenAllowUSER() == false) && (this->tokenAllowAPI() == false));
+    }
 
 //    inline bool requiresCookies() const {
 //        return this->ParamTypesName.contains(PARAM_COOKIES);
@@ -164,9 +175,11 @@ private:
     quint8                      RequiredParamsCount;
     bool                        HasExtraMethodName;
     intfPureModule*             Parent;
-//    bool                        RequiresJWT;
-    enuTokenActorType::Type     TokenActorType;
-    bool                        TokenIsOptional;
+//    enuTokenActorType::Type     TokenActorType;
+//    bool                        TokenIsOptional;
+    bool                        TokenAllowANONYMOUSE;
+    bool                        TokenAllowUSER;
+    bool                        TokenAllowAPI;
 
     friend class RESTAPIRegistry;
     friend class OpenAPIGenerator;

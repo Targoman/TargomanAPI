@@ -397,8 +397,7 @@ QMap<QString, QString> RESTAPIRegistry::extractMethods(
         clsAPIObject* APIObject = _registry.value(Key);
         QStringList Parameters;
 
-//        if (APIObject->requiresJWT())
-        if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE)
+        if (APIObject->mustProvideJWT())
             Parameters.append(QString(_showTypes ? "TAPI::JWT_t " : "") + "JWT");
 
         for (quint8 i=0; i<APIObject->/*BaseMethod.parameterCount()*/ParamTypesName.count(); ++i) {
@@ -704,12 +703,16 @@ void RESTAPIRegistry::dumpAPIs()
             bool IsLastMethod = (Method == Methods.last());
 
             QString JWTType = "";
-//            if (API.APIObject->requiresJWT())
-            if (API.APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE)
-                JWTType = QString(" (JWT:%1%2)")
-                          .arg(enuTokenActorType::toStr(API.APIObject->tokenActorType()))
-                          .arg(API.APIObject->tokenIsOptional() ? "/OPTIONAL" : "")
-                          ;
+            if (API.APIObject->canProvideJWT()) {
+                QStringList JWTTypesList;
+                if (API.APIObject->tokenAllowANONYMOUSE())
+                    JWTTypesList.append("ANONYMOUSE");
+                if (API.APIObject->tokenAllowUSER())
+                    JWTTypesList.append("USER");
+                if (API.APIObject->tokenAllowAPI())
+                    JWTTypesList.append("API");
+                JWTType = QString(" (JWT:%1)").arg(JWTTypesList.join(','));
+            }
 
             TargomanDebug(5).noLabel().noquote().nospace()
                     << (IsLastAPI ? " " : "│") << "   "

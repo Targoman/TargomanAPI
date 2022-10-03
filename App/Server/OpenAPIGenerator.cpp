@@ -509,16 +509,14 @@ QJsonObject OpenAPIGenerator::retrieveJson(
                                                        });
             }
 
-//            if (APIObject->requiresJWT()) {
-            if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE) {
+            if (APIObject->mustProvideJWT()) {
                 ResponseModel["401"] = QJsonObject({{ "description", "Authorization information is missing or invalid" }});
                 ResponseModel["403"] = QJsonObject({{ "description", "Access forbidden" }});
             }
 
             PathInfo["responses"] = ResponseModel;
 
-//            if (APIObject->requiresJWT()) {
-            if (APIObject->tokenActorType() != enuTokenActorType::ANONYMOUSE) {
+            if (APIObject->mustProvideJWT()) {
                 PathInfo["security"] = QJsonArray({
                                                       QJsonObject({
                                                           { "Bearer", QJsonArray() },

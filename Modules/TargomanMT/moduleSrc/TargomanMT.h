@@ -48,7 +48,7 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class TargomanMT : public intfAccountingBasedModule
+class TargomanMT : public intfAccountingBasedModule<false>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -96,7 +96,7 @@ private slots:
     QVariantMap REST_GET_OR_POST(
         Translate,
         (
-            APICALLBOOM_TYPE_JWT_USER_OR_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL &APICALLBOOM_PARAM,
             QString _text,
             QString _dir,
             bool _detailed = false,

@@ -139,20 +139,39 @@ intfAccountSaleablesFilesMT::intfAccountSaleablesFilesMT(
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountUserAssetsMT::intfAccountUserAssetsMT(
+baseintfAccountUserAssetsMT::baseintfAccountUserAssetsMT(
+//    const QString& _schema,
+//    const QList<DBM::clsORMField>& _exclusiveCols,
+//    const QList<DBM::stuRelation>& _exclusiveRelations,
+//    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+//) :
+//    baseintfAccountUserAssets(
+//        _schema,
+//        _exclusiveCols,
+//        _exclusiveRelations,
+//        _exclusiveIndexes
+    )
+{ ; }
+
+/******************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountUserAssetsMT<_itmplIsTokenBase>::intfAccountUserAssetsMT(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-    intfAccountUserAssets(
+    intfAccountUserAssets<_itmplIsTokenBase>(
         _schema,
         tblAccountUserAssetsMTBase::Private::ExtraORMFields + _exclusiveCols,
         tblAccountUserAssetsMTBase::Private::ExtraRelations(_schema) + _exclusiveRelations,
         tblAccountUserAssetsMTBase::Private::ExtraIndexes + _exclusiveIndexes
-    )
+    ),
+    baseintfAccountUserAssetsMT()
 { ; }
 
+/******************************************************************/
+/******************************************************************/
 /******************************************************************/
 intfAccountUserAssetsFilesMT::intfAccountUserAssetsFilesMT(
     const QString& _schema,
@@ -171,18 +190,35 @@ intfAccountUserAssetsFilesMT::intfAccountUserAssetsFilesMT(
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
-intfAccountAssetUsageMT::intfAccountAssetUsageMT(
+baseintfAccountAssetUsageMT::baseintfAccountAssetUsageMT(
+//    const QString& _schema,
+//    const QList<DBM::clsORMField>& _exclusiveCols,
+//    const QList<DBM::stuRelation>& _exclusiveRelations,
+//    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+//) :
+//    baseintfAccountAssetUsage(
+//        _schema,
+//        _exclusiveCols,
+//        _exclusiveRelations,
+//        _exclusiveIndexes
+    )
+{ ; }
+
+/******************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountAssetUsageMT<_itmplIsTokenBase>::intfAccountAssetUsageMT(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
     const QList<DBM::stuRelation>& _exclusiveRelations,
     const QList<stuDBIndex>& _exclusiveIndexes
 ) :
-    intfAccountAssetUsage(
+    intfAccountAssetUsage<_itmplIsTokenBase>(
         _schema,
         tblAccountAssetUsageMTBase::Private::ExtraORMFields + _exclusiveCols,
         tblAccountAssetUsageMTBase::Private::ExtraRelations(_schema) + _exclusiveRelations,
         tblAccountAssetUsageMTBase::Private::ExtraIndexes + _exclusiveIndexes
-    )
+    ),
+    baseintfAccountAssetUsageMT()
 { ; }
 
 /******************************************************************/
@@ -218,5 +254,34 @@ intfAccountCouponsMT::intfAccountCouponsMT(
 //        tblAccountPrizesMTBase::Private::ExtraIndexes + _exclusiveIndexes
 //    )
 //{ ; }
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+//template class intfAccountUnitsMT<false>;
+//template class intfAccountUnitsI18NMT<false>;
+//template class intfAccountProductsMT<false>;
+//template class intfAccountProductsI18NMT<false>;
+//template class intfAccountSaleablesMT<false>;
+//template class intfAccountSaleablesI18NMT<false>;
+//template class intfAccountSaleablesFilesMT<false>;
+template class intfAccountUserAssetsMT<false>;
+//template class intfAccountUserAssetsFilesMT<false>;
+template class intfAccountAssetUsageMT<false>;
+//template class intfAccountCouponsMT<false>;
+//template class intfAccountPrizesMT<false>;
+
+//template class intfAccountUnitsMT<true>;
+//template class intfAccountUnitsI18NMT<true>;
+//template class intfAccountProductsMT<true>;
+//template class intfAccountProductsI18NMT<true>;
+//template class intfAccountSaleablesMT<true>;
+//template class intfAccountSaleablesI18NMT<true>;
+//template class intfAccountSaleablesFilesMT<true>;
+template class intfAccountUserAssetsMT<true>;
+//template class intfAccountUserAssetsFilesMT<true>;
+template class intfAccountAssetUsageMT<true>;
+//template class intfAccountCouponsMT<true>;
+//template class intfAccountPrizesMT<true>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces

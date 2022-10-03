@@ -48,7 +48,7 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfAccountingBasedModule
+class MT : public intfAccountingBasedModule<true>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)

@@ -502,7 +502,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFiles
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountUserAssets : public intfAccountUserAssets
+class AccountUserAssets : public intfAccountUserAssets<false>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountUserAssets)
@@ -522,7 +522,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFiles
 /******************************************************/
 /******************************************************/
 /******************************************************/
-class AccountAssetUsage : public intfAccountAssetUsage
+class AccountAssetUsage : public intfAccountAssetUsage<false>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountAssetUsage)
@@ -545,10 +545,11 @@ public:
 /******************************************************/
 /******************************************************/
 //There is no Prize in the advertisement module
-/*class clsAccountPrizes: public Accounting::intfAccountPrizes
+/*
+class clsAccountPrizes: public intfAccountPrizes
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(Advert,clsAccountPrizes)
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, clsAccountPrizes)
 
 private slots:
 public:
