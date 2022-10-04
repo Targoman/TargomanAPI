@@ -1463,7 +1463,8 @@ private slots:
         }
     }
 
-    //token
+    // token
+    //----------------------------------------------------------------
     void apitoken_request() {
         QT_TRY {
             QVariant Result = this->callUserAPI(
@@ -1761,6 +1762,63 @@ private slots:
                         {},
                         {
                             { "token", this->TokenJWT },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_addservices_empty() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/addServices",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_addservices() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/addServices",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                            { "services", QStringList({
+                                  "MT"
+                            }) },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_addservices_same_again() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/addServices",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                            { "services", QStringList({
+                                  "MT"
+                            }) },
                         });
 
             QVERIFY(Result.isValid());

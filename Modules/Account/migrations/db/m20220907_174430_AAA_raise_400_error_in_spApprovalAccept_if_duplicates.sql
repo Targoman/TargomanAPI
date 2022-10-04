@@ -143,7 +143,7 @@ BEGIN
     END IF;
 
     IF iLogin = 1 THEN
-        SET vSessionGUID = SUBSTRING(dev_CommonFuncs.guid(NULL), 1, 32);
+        SET vSessionGUID = SUBSTRING({{dbprefix}}CommonFuncs.guid(NULL), 1, 32);
 
         INSERT
           INTO tblActiveSessions

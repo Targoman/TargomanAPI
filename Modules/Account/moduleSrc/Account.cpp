@@ -809,6 +809,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
 
         QFV.url().validate(_paymentVerifyCallback, "callBack");
     }
+
 #ifndef QT_DEBUG
     if (_gatewayType == enuPaymentGatewayType::_DeveloperTest)
         throw exHTTPBadRequest("DeveloperTest not available" /*, stuVoucher(_preVoucher).toJson() */);
@@ -1829,7 +1830,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
         QVariantMap vchProcessResult = VoucherDTO.vchProcessResult.object().toVariantMap();
         quint8 ErrorCount = 0;
-
+/*
         struct stuTokenInfo {
 //            quint64 TokenID;
             tblAPITokens::DTO TokensDTO;
@@ -1840,6 +1841,9 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         };
 
         QMap<quint64, stuTokenInfo> ChangingTokens;
+*/
+        //tokenID => [ 'MT' => serviceID ]
+        QMap<quint64, QMap<QString, quint64>> AddingTokens;
 
         //1: process voucher items
         foreach (stuVoucherItem VoucherItem, PreVoucher.Items) {
@@ -1863,7 +1867,7 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                             QVariantMap ServiceInfo = _service.toMap();
                             return (ServiceInfo.value(tblService::Fields::svcName) == VoucherItem.Service);
                         })
-                        .runFirst([&APICALLBOOM_PARAM, &ChangingTokens, &VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
+                        .runFirst([/*&APICALLBOOM_PARAM,*/ &AddingTokens, &VoucherDTO, &_voucherID, &VoucherItem, &ItemResult, &vchProcessResult](auto _service) -> bool {
 //                            QVariantMap ServiceInfo = _service.toMap();
 
                             tblService::DTO ServiceDTO;
@@ -1904,6 +1908,16 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
 
                                 //check token changes
                                 if (NULLABLE_HAS_VALUE(VoucherItem.APITokenID)) {
+                                    quint64 APITokenID = NULLABLE_VALUE(VoucherItem.APITokenID);
+
+                                    if (AddingTokens.contains(APITokenID))
+                                        AddingTokens[APITokenID].insert(ServiceDTO.svcName, ServiceDTO.svcID);
+                                    else
+                                        AddingTokens.insert(APITokenID, {
+                                                                { ServiceDTO.svcName, ServiceDTO.svcID }
+                                                            });
+
+/*
                                     if (ChangingTokens.contains(NULLABLE_VALUE(VoucherItem.APITokenID)) == false) {
                                         tblAPITokens::DTO APITokensDTO = APITokens::instance().makeSelectQuery(APICALLBOOM_PARAM)
                                                 .where({ tblAPITokens::Fields::aptID,
@@ -1942,6 +1956,11 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
                                     }
 
                                     ChangingTokens[NULLABLE_VALUE(VoucherItem.APITokenID)] = TokenInfo;
+*/
+
+
+
+
 
                                 } //if (NULLABLE_HAS_VALUE(VoucherItem.TokenID))
 
@@ -1980,55 +1999,66 @@ Targoman::API::AAA::stuVoucher Account::processVoucher(
         //3: save token changes
 //        QMap<QString, QString> ChangedSignedTokens;
 
-        if (ChangingTokens.isEmpty() == false) {
-            foreach (auto TokenInfo, ChangingTokens) {
-                if (TokenInfo.NewServices.isEmpty())
-                    continue;
+        if (AddingTokens.isEmpty() == false) {
+            for (auto it = AddingTokens.constBegin();
+                 it != AddingTokens.constEnd();
+                 it++
+            ) {
+                auto Val = it.value();
 
-                //create new Token
-                QString Token = TokenInfo.TokensDTO.aptToken;
-
-                TAPI::JWT_t JWTPayload;
-                QJWT::extractAndDecryptPayload(Token, JWTPayload);
-
-                QJsonObject PrivatePayload;
-                if (JWTPayload.contains("prv"))
-                    PrivatePayload = JWTPayload["prv"].toObject();
-
-                PrivatePayload["svc"] = TokenInfo.AllServiceNames.join(",");
-                qint64 TTL = 1 * 365 * 24 * 3600; //1 year
-
-//                QString OldToken = Token;
-                Token = QJWT::createSigned(
-                    JWTPayload,
-                    enuTokenActorType::API,
-                    PrivatePayload,
-                    TTL
-            //        _activeAccount.Privs["ssnKey"].toString()
+                APITokens::instance().addServices(
+                    APICALLBOOM_PARAM,
+                    it.key(),
+                    Val
                 );
-//                ChangedSignedTokens.insert(OldToken, Token);
 
-                //save into tblAPITokens
-                APITokens::instance().makeUpdateQuery(APICALLBOOM_PARAM)
-                        .set(tblAPITokens::Fields::aptToken, Token)
-                        .setPksByPath(TokenInfo.TokensDTO.aptID)
-                        .execute(VoucherDTO.vch_usrID) //APICALLBOOM_PARAM.getActorID())
-                        ;
+//                if (TokenInfo.NewServices.isEmpty())
+//                    continue;
 
-                //save into tblAPITokenServices
-                ORMCreateQuery CreateQueryServices = APITokenServices::instance().makeCreateQuery(APICALLBOOM_PARAM)
-                                                     .addCol(tblAPITokenServices::Fields::aptsvc_aptID)
-                                                     .addCol(tblAPITokenServices::Fields::aptsvc_svcID)
-                                                     ;
+//                //create new Token
+//                QString Token = TokenInfo.TokensDTO.aptToken;
 
-                foreach (quint32 SvcID, TokenInfo.NewServices) {
-                    CreateQueryServices.values({
-                                                   { tblAPITokenServices::Fields::aptsvc_aptID, TokenInfo.TokensDTO.aptID },
-                                                   { tblAPITokenServices::Fields::aptsvc_svcID, SvcID },
-                                               });
-                }
+//                TAPI::JWT_t JWTPayload;
+//                QJWT::extractAndDecryptPayload(Token, JWTPayload);
 
-                CreateQueryServices.execute(VoucherDTO.vch_usrID); //APICALLBOOM_PARAM.getActorID());
+//                QJsonObject PrivatePayload;
+//                if (JWTPayload.contains("prv"))
+//                    PrivatePayload = JWTPayload["prv"].toObject();
+
+//                PrivatePayload["svc"] = TokenInfo.AllServiceNames.join(",");
+//                qint64 TTL = 1 * 365 * 24 * 3600; //1 year
+
+////                QString OldToken = Token;
+//                Token = QJWT::createSigned(
+//                    JWTPayload,
+//                    enuTokenActorType::API,
+//                    PrivatePayload,
+//                    TTL
+//            //        _activeAccount.Privs["ssnKey"].toString()
+//                );
+////                ChangedSignedTokens.insert(OldToken, Token);
+
+//                //save into tblAPITokens
+//                APITokens::instance().makeUpdateQuery(APICALLBOOM_PARAM)
+//                        .set(tblAPITokens::Fields::aptToken, Token)
+//                        .setPksByPath(TokenInfo.TokensDTO.aptID)
+//                        .execute(VoucherDTO.vch_usrID) //APICALLBOOM_PARAM.getActorID())
+//                        ;
+
+//                //save into tblAPITokenServices
+//                ORMCreateQuery CreateQueryServices = APITokenServices::instance().makeCreateQuery(APICALLBOOM_PARAM)
+//                                                     .addCol(tblAPITokenServices::Fields::aptsvc_aptID)
+//                                                     .addCol(tblAPITokenServices::Fields::aptsvc_svcID)
+//                                                     ;
+
+//                foreach (quint32 SvcID, TokenInfo.NewServices) {
+//                    CreateQueryServices.values({
+//                                                   { tblAPITokenServices::Fields::aptsvc_aptID, TokenInfo.TokensDTO.aptID },
+//                                                   { tblAPITokenServices::Fields::aptsvc_svcID, SvcID },
+//                                               });
+//                }
+
+//                CreateQueryServices.execute(VoucherDTO.vch_usrID); //APICALLBOOM_PARAM.getActorID());
             }
         }
 
