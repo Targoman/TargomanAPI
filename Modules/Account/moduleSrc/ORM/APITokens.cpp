@@ -297,7 +297,7 @@ QVariantMap APITokens::addServices(
     this->makeUpdateQuery(APICALLBOOM_PARAM)
             .set(tblAPITokens::Fields::aptToken, NewToken)
             .setPksByPath(APITokensDTO.aptID)
-            .execute(APICALLBOOM_PARAM.getActorID())
+            .execute(APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID))
             ;
 
     //save into tblAPITokenServices
@@ -317,7 +317,7 @@ QVariantMap APITokens::addServices(
                                    });
     }
 
-    CreateQueryServices.execute(APICALLBOOM_PARAM.getActorID());
+    CreateQueryServices.execute(APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID));
 
     //----------------------------------------
     MethodResult.insert("tokenid", _tokenID);
@@ -445,24 +445,25 @@ QVariantMap IMPL_REST_UPDATE(APITokens, , (
         throw;
     }
 
-    if (NewToken.isEmpty() == false) {
-        QString OldTokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
-        QString NewTokenMD5 = QCryptographicHash::hash(NewToken.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+    //moved to trigger
+//    if (NewToken.isEmpty() == false) {
+//        QString OldTokenMD5 = QCryptographicHash::hash(_token.toLatin1(), QCryptographicHash::Md5).toHex().constData();
+//        QString NewTokenMD5 = QCryptographicHash::hash(NewToken.toLatin1(), QCryptographicHash::Md5).toHex().constData();
 
-        QString qry = QString()
-              + "UPDATE " + tblTokenBin::Name
-              + "   SET tkbTokenMD5=?"
-              + " WHERE tkbTokenMD5=?"
-              ;
+//        QString qry = QString()
+//              + "UPDATE " + tblTokenBin::Name
+//              + "   SET tkbTokenMD5=?"
+//              + " WHERE tkbTokenMD5=?"
+//              ;
 
-        clsDACResult Result = TokenBin::instance().execQuery(APICALLBOOM_PARAM,
-                                                             qry,
-                                                             QVariantList({
-                                                                              NewTokenMD5,
-                                                                              OldTokenMD5
-                                                                          })
-                                                             );
-    }
+//        clsDACResult Result = TokenBin::instance().execQuery(APICALLBOOM_PARAM,
+//                                                             qry,
+//                                                             QVariantList({
+//                                                                              NewTokenMD5,
+//                                                                              OldTokenMD5
+//                                                                          })
+//                                                             );
+//    }
 
     MethodResult.insert("result", true);
 
