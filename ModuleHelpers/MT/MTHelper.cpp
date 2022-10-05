@@ -175,10 +175,7 @@ void MTHelper::registerEngines() {
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-        intfMTModule<true>,
-        intfMTModule<false>
-    >::type *_mtModule,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -462,10 +459,7 @@ QVariantMap MTHelper::doTranslation(
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::internalDoTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-        intfMTModule<true>,
-        intfMTModule<false>
-    >::type *_mtModule,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
 //    const QString& _engine,
@@ -552,10 +546,7 @@ QString MTHelper::detectClass(const QString& _engine, const QString& _text, cons
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QString MTHelper::preprocessText(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-        intfMTModule<true>,
-        intfMTModule<false>
-    >::type *_mtModule,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     const QString& _text,
     const QString& _lang
 ) {

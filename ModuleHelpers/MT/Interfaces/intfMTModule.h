@@ -33,35 +33,24 @@ namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 template <bool _itmplIsTokenBase>
 class intfMTModule : public intfAccountingBasedModule<_itmplIsTokenBase>
 {
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTCorrectionRules<TAPI::enuTokenActorType::API>,
-        intfMTCorrectionRules<TAPI::enuTokenActorType::USER>
-    >::type intfMTCorrectionRules_Type;
 
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::API>,
-        intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::USER>
-    >::type intfMTDigestedTranslationLogs_Type;
+typedef intfMTCorrectionRules<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTCorrectionRules_Type;
 
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTMultiDic<TAPI::enuTokenActorType::API>,
-        intfMTMultiDic<TAPI::enuTokenActorType::USER>
-    >::type intfMTMultiDic_Type;
+typedef intfMTDigestedTranslationLogs<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTDigestedTranslationLogs_Type;
 
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTTokenStats<TAPI::enuTokenActorType::API>,
-        intfMTTokenStats<TAPI::enuTokenActorType::USER>
-    >::type intfMTTokenStats_Type;
+typedef intfMTMultiDic<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTMultiDic_Type;
 
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTTranslatedPhrases<TAPI::enuTokenActorType::API>,
-        intfMTTranslatedPhrases<TAPI::enuTokenActorType::USER>
-    >::type intfMTTranslatedPhrases_Type;
+typedef intfMTTokenStats<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTTokenStats_Type;
 
-typedef typename std::conditional<_itmplIsTokenBase,
-        intfMTTranslationLogs<TAPI::enuTokenActorType::API>,
-        intfMTTranslationLogs<TAPI::enuTokenActorType::USER>
-    >::type intfMTTranslationLogs_Type;
+typedef intfMTTranslatedPhrases<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTTranslatedPhrases_Type;
+
+typedef intfMTTranslationLogs<_itmplIsTokenBase ? TAPI::enuTokenActorType::API : TAPI::enuTokenActorType::USER>
+    intfMTTranslationLogs_Type;
 
 public:
     intfMTModule(

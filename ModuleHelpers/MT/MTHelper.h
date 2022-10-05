@@ -162,10 +162,7 @@ public:
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-            intfMTModule<true>,
-            intfMTModule<false>
-        >::type *_mtModule,
+        intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -191,10 +188,7 @@ protected:
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap internalDoTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-            intfMTModule<true>,
-            intfMTModule<false>
-        >::type *_mtModule,
+        intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         QString _text,
         const TranslationDir_t& _dir,
 //        const QString& _engine,
@@ -215,14 +209,11 @@ public:
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QString preprocessText(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
-                intfMTModule<true>,
-                intfMTModule<false>
-            >::type *_mtModule,
-            const QString& _text,
-            const QString& _lang
-            );
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
+        const QString& _text,
+        const QString& _lang
+    );
 
     QVariantMap retrieveDicResponse(const QString& _text, const QString& _lang);
     void addDicLog(const QString& _lang, quint64 _worcCount, const QString& _text);
