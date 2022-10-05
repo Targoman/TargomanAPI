@@ -28,16 +28,17 @@
 #include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/AAA/intfAccountingBasedModule.h"
+//#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 #include "MTDefs.hpp"
-#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
+//#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
+#include "ModuleHelpers/MT/Interfaces/intfMTModule.h"
 
-using namespace Targoman::API::ModuleHelpers::MT::Classes;
+using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
 
 namespace Targoman::API::MTModule {
 
@@ -48,7 +49,7 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class MT : public intfAccountingBasedModule<true>
+class MT : public intfMTModule<true> //intfAccountingBasedModule<true>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -108,28 +109,8 @@ private slots:
         "Translates input text if specified engine and language are found."
     )
 
-#ifdef QT_DEBUG
-//    QVariant REST_POST(
-//        fixtureSetup,
-//        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-//            QString _random = {}
-//        ),
-//        "Create sample data. give random=1 to auto generate random number"
-//    )
-
-//    QVariant REST_POST(
-//        fixtureCleanup,
-//        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-//            QString _random = {}
-//        ),
-//        "Cleanup sample data"
-//    )
-#endif
-
-private:
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
+//private:
+//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);

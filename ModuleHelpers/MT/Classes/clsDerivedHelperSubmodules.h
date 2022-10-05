@@ -35,21 +35,21 @@ class clsDerivedHelperSubmodules
 {
 public:
     clsDerivedHelperSubmodules(
-        intfCorrectionRules<_itmplTokenActorType>         *_correctionRules,
-        intfDigestedTranslationLogs<_itmplTokenActorType> *_digestedTranslationLogs,
-        intfMultiDic<_itmplTokenActorType>                *_multiDic,
-        intfTokenStats<_itmplTokenActorType>              *_tokenStats,
-        intfTranslatedPhrases<_itmplTokenActorType>       *_translatedPhrases,
-        intfTranslationLogs<_itmplTokenActorType>         *_translationLogs
+        intfMTCorrectionRules<_itmplTokenActorType>         *_correctionRules,
+        intfMTDigestedTranslationLogs<_itmplTokenActorType> *_digestedTranslationLogs,
+        intfMTMultiDic<_itmplTokenActorType>                *_multiDic,
+        intfMTTokenStats<_itmplTokenActorType>              *_tokenStats,
+        intfMTTranslatedPhrases<_itmplTokenActorType>       *_translatedPhrases,
+        intfMTTranslationLogs<_itmplTokenActorType>         *_translationLogs
     );
 
 public:
-    QScopedPointer<intfCorrectionRules<_itmplTokenActorType>>         CorrectionRules;
-    QScopedPointer<intfDigestedTranslationLogs<_itmplTokenActorType>> DigestedTranslationLogs;
-    QScopedPointer<intfMultiDic<_itmplTokenActorType>>                MultiDic;
-    QScopedPointer<intfTokenStats<_itmplTokenActorType>>              TokenStats;
-    QScopedPointer<intfTranslatedPhrases<_itmplTokenActorType>>       TranslatedPhrases;
-    QScopedPointer<intfTranslationLogs<_itmplTokenActorType>>         TranslationLogs;
+    QScopedPointer<intfMTCorrectionRules<_itmplTokenActorType>>         MTCorrectionRules;
+    QScopedPointer<intfMTDigestedTranslationLogs<_itmplTokenActorType>> MTDigestedTranslationLogs;
+    QScopedPointer<intfMTMultiDic<_itmplTokenActorType>>                MTMultiDic;
+    QScopedPointer<intfMTTokenStats<_itmplTokenActorType>>              MTTokenStats;
+    QScopedPointer<intfMTTranslatedPhrases<_itmplTokenActorType>>       MTTranslatedPhrases;
+    QScopedPointer<intfMTTranslationLogs<_itmplTokenActorType>>         MTTranslationLogs;
 };
 
 } //namespace Targoman::API::ModuleHelpers::MT::Classes

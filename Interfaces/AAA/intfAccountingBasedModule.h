@@ -276,19 +276,18 @@ class intfAccountingBasedModule : public baseintfAccountingBasedModule
 {
 protected:
     intfAccountingBasedModule(
-        const QString              &_module,
-        const QString              &_schema,
-//        bool                       _isTokenBase,
-        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
-        intfAccountUnits           *_units,
-        intfAccountProducts        *_products,
-        intfAccountSaleables       *_saleables,
-        intfAccountSaleablesFiles  *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>      *_userAssets,
-        intfAccountUserAssetsFiles *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>      *_assetUsages,
-        intfAccountCoupons         *_discounts = nullptr,
-        intfAccountPrizes          *_prizes = nullptr
+        const QString                               &_module,
+        const QString                               &_schema,
+        AssetUsageLimitsCols_t                      _AssetUsageLimitsCols,
+        intfAccountUnits                            *_units,
+        intfAccountProducts                         *_products,
+        intfAccountSaleables                        *_saleables,
+        intfAccountSaleablesFiles                   *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
+        intfAccountUserAssetsFiles                  *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
+        intfAccountCoupons                          *_discounts = nullptr,
+        intfAccountPrizes                           *_prizes = nullptr
     );
 //    virtual ~intfAccountingBasedModule();
 

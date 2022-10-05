@@ -57,10 +57,9 @@ TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(TargomanMT, TargomanMTSchema);
 
 TargomanMT::TargomanMT() :
-    intfAccountingBasedModule(
+    intfMTModule( //intfAccountingBasedModule(
         TargomanMTDomain,
         TargomanMTSchema,
-//        false,
         {
 //            { "show", {
 //                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
@@ -82,27 +81,28 @@ TargomanMT::TargomanMT() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
-        &AccountCoupons::instance()
-    ),
-    DerivedHelperSubmodules(
-        &CorrectionRules::instance(),
-        &DigestedTranslationLogs::instance(),
-        &MultiDic::instance(),
-        &TokenStats::instance(),
-        &TranslatedPhrases::instance(),
-        &TranslationLogs::instance()
+        &AccountCoupons::instance(),
+                  nullptr,
+//    ),
+//    DerivedHelperSubmodules(
+        &MTCorrectionRules::instance(),
+        &MTDigestedTranslationLogs::instance(),
+        &MTMultiDic::instance(),
+        &MTTokenStats::instance(),
+        &MTTranslatedPhrases::instance(),
+        &MTTranslationLogs::instance()
 ) {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Targoman, TargomanMTSchema);
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Targoman, TargomanMTSchema);
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Targoman, TargomanMTSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Targoman, TargomanMTSchema);
 
-    this->addSubModule(&CorrectionRules::instance());
-    this->addSubModule(&DigestedTranslationLogs::instance());
-    this->addSubModule(&MultiDic::instance());
-    this->addSubModule(&TokenStats::instance());
-    this->addSubModule(&TranslatedPhrases::instance());
-    this->addSubModule(&TranslationLogs::instance());
+    this->addSubModule(&MTCorrectionRules::instance());
+    this->addSubModule(&MTDigestedTranslationLogs::instance());
+    this->addSubModule(&MTMultiDic::instance());
+    this->addSubModule(&MTTokenStats::instance());
+    this->addSubModule(&MTTranslatedPhrases::instance());
+    this->addSubModule(&MTTranslationLogs::instance());
 
     this->addSubModule(AccountUnits.data());
     this->addSubModule(AccountProducts.data());
@@ -285,7 +285,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 
 
 //    QJsonObject Stats = this->execQuery(
-//            "SELECT * FROM tblTokenStats "
+//            "SELECT * FROM tblMTTokenStats "
 //            "WHERE tks_tokID = ? "
 //            "  AND tksEngine=? "
 //            "  AND tksDir=? ",
@@ -297,7 +297,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 //    ).toJson(true).object ();
 
 //    if (Stats.isEmpty())
-//        this->execQuery("INSERT IGNORE INTO tblTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
+//        this->execQuery("INSERT IGNORE INTO tblMTTokenStats (tks_tokID,tksEngine,tksDir) VALUES(?, ?, ?)", {
 //        {TokenInfo[TOKENItems::tokID]},
 //        {_engine},
 //        {_dir},
@@ -352,14 +352,16 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 
         QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::USER>(
                                       APICALLBOOM_PARAM,
-//                                      Privs,
-                                      this->DerivedHelperSubmodules,
+                                      this,
+//                                      this->DerivedHelperSubmodules,
                                       _text,
                                       Dir,
                                       _engine,
                                       true,
                                       _detailed,
                                       _detok,
+                                      _dic,
+                                      _dicFull,
                                       InternalPreprocessTime,
                                       InternalTranslationTime
                                       );

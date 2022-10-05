@@ -90,7 +90,7 @@ QVariantMap intfBaseNMTGateway::doTranslation(
             return Result;
         } else {
             QJsonParseError JsonError;
-            QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(),& JsonError);
+            QJsonDocument Doc = QJsonDocument::fromJson(CUrlResult.toUtf8(), &JsonError);
             if (JsonError.error != QJsonParseError::NoError) {
                 Result[RESULTItems::ERRNO] = enuTranslationError::JsonParseError;
                 Result[RESULTItems::MESSAGE] = "Unable to parse JSON: " + JsonError.errorString() + '"' + CUrlResult + '"';

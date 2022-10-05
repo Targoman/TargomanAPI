@@ -27,19 +27,19 @@ namespace Targoman::API::ModuleHelpers::MT::Classes {
 
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 clsDerivedHelperSubmodules<_itmplTokenActorType>::clsDerivedHelperSubmodules(
-    intfCorrectionRules<_itmplTokenActorType>         *_correctionRules,
-    intfDigestedTranslationLogs<_itmplTokenActorType> *_digestedTranslationLogs,
-    intfMultiDic<_itmplTokenActorType>                *_multiDic,
-    intfTokenStats<_itmplTokenActorType>              *_tokenStats,
-    intfTranslatedPhrases<_itmplTokenActorType>       *_translatedPhrases,
-    intfTranslationLogs<_itmplTokenActorType>         *_translationLogs
+    intfMTCorrectionRules<_itmplTokenActorType>         *_correctionRules,
+    intfMTDigestedTranslationLogs<_itmplTokenActorType> *_digestedTranslationLogs,
+    intfMTMultiDic<_itmplTokenActorType>                *_multiDic,
+    intfMTTokenStats<_itmplTokenActorType>              *_tokenStats,
+    intfMTTranslatedPhrases<_itmplTokenActorType>       *_translatedPhrases,
+    intfMTTranslationLogs<_itmplTokenActorType>         *_translationLogs
 ) :
-    CorrectionRules         (_correctionRules),
-    DigestedTranslationLogs (_digestedTranslationLogs),
-    MultiDic                (_multiDic),
-    TokenStats              (_tokenStats),
-    TranslatedPhrases       (_translatedPhrases),
-    TranslationLogs         (_translationLogs)
+    MTCorrectionRules         (_correctionRules),
+    MTDigestedTranslationLogs (_digestedTranslationLogs),
+    MTMultiDic                (_multiDic),
+    MTTokenStats              (_tokenStats),
+    MTTranslatedPhrases       (_translatedPhrases),
+    MTTranslationLogs         (_translationLogs)
 { ; }
 
 template class clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER>;

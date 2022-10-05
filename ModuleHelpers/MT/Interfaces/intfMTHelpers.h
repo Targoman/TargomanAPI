@@ -54,8 +54,8 @@ namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-namespace tblCorrectionRulesBase {
-    constexpr char Name[] = "tblCorrectionRules";
+namespace tblMTCorrectionRulesBase {
+    constexpr char Name[] = "tblMTCorrectionRules";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(crlID);
@@ -65,8 +65,8 @@ namespace tblCorrectionRulesBase {
     } //namespace Fields
 }
 
-namespace tblDigestedTranslationLogsBase {
-    constexpr char Name[] = "tblDigestedTranslationLogs";
+namespace tblMTDigestedTranslationLogsBase {
+    constexpr char Name[] = "tblMTDigestedTranslationLogs";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(dtlDateTime);
@@ -88,8 +88,8 @@ namespace tblDigestedTranslationLogsBase {
     } //namespace Fields
 }
 
-namespace tblMultiDicBase {
-    constexpr char Name[] = "tblMultiDic";
+namespace tblMTMultiDicBase {
+    constexpr char Name[] = "tblMTMultiDic";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(dicID);
@@ -104,8 +104,8 @@ namespace tblMultiDicBase {
     }
 }
 
-namespace tblTokenStatsBase {
-    constexpr char Name[] = "tblTokenStats";
+namespace tblMTTokenStatsBase {
+    constexpr char Name[] = "tblMTTokenStats";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tks_tokID);
@@ -117,8 +117,8 @@ namespace tblTokenStatsBase {
     }
 }
 
-namespace tblTranslatedPhrasesBase {
-    constexpr char Name[] = "tblTranslatedPhrases";
+namespace tblMTTranslatedPhrasesBase {
+    constexpr char Name[] = "tblMTTranslatedPhrases";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tps_tlsID);
@@ -127,8 +127,8 @@ namespace tblTranslatedPhrasesBase {
     }
 }
 
-namespace tblTranslationLogsBase {
-    constexpr char Name[] = "tblTranslationLogs";
+namespace tblMTTranslationLogsBase {
+    constexpr char Name[] = "tblMTTranslationLogs";
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(tlsID);
@@ -146,7 +146,7 @@ namespace tblTranslationLogsBase {
 }
 
 //-- tbl inside
-namespace tblCorrectionRulesBase {
+namespace tblMTCorrectionRulesBase {
     namespace Relation {
     }
 
@@ -168,18 +168,18 @@ namespace tblCorrectionRulesBase {
 
     } //namespace Private
 
-#define SF_tblCorrectionRulesBase_DTO \
+#define SF_tblMTCorrectionRulesBase_DTO \
     SF_ORM_PRIMARYKEY_32        (crlID), \
     SF_Enum                     (crlType, Targoman::API::ModuleHelpers::MT::enuCorrectionRuleType, Targoman::API::ModuleHelpers::MT::enuCorrectionRuleType::Replace), \
     SF_QString                  (crlPattern), \
     SF_QString                  (crlReplacement)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblCorrectionRulesBase_DTO
+        SF_tblMTCorrectionRulesBase_DTO
     );
 }
 
-namespace tblDigestedTranslationLogsBase {
+namespace tblMTDigestedTranslationLogsBase {
     namespace Relation {
     }
 
@@ -220,7 +220,7 @@ namespace tblDigestedTranslationLogsBase {
 
     } //namespace Private
 
-#define SF_tblDigestedTranslationLogsBase_DTO \
+#define SF_tblMTDigestedTranslationLogsBase_DTO \
     SF_Date_t                   (dtlDateTime), \
     SF_quint64                  (dtl_aptID), \
     SF_quint64                  (dtl_actorID), \
@@ -239,11 +239,11 @@ namespace tblDigestedTranslationLogsBase {
     SF_quint64                  (dtlErrOtherCount)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblDigestedTranslationLogsBase_DTO
+        SF_tblMTDigestedTranslationLogsBase_DTO
     );
 }
 
-namespace tblMultiDicBase {
+namespace tblMTMultiDicBase {
     namespace Relation {
     }
 
@@ -270,7 +270,7 @@ namespace tblMultiDicBase {
 
     } //namespace Private
 
-#define SF_tblMultiDicBase_DTO \
+#define SF_tblMTMultiDicBase_DTO \
     SF_ORM_PRIMARYKEY_32        (dicID), \
     SF_QString                  (dicSourceLang), \
     SF_QString                  (dicWord), \
@@ -282,11 +282,11 @@ namespace tblMultiDicBase {
     SF_ORM_UPDATED_BY           (dicUpdatedBy_actorID)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblMultiDicBase_DTO
+        SF_tblMTMultiDicBase_DTO
     );
 }
 
-namespace tblTokenStatsBase {
+namespace tblMTTokenStatsBase {
     namespace Relation {
     }
 
@@ -315,7 +315,7 @@ namespace tblTokenStatsBase {
 
     } //namespace Private
 
-#define SF_tblTokenStatsBase_DTO \
+#define SF_tblMTTokenStatsBase_DTO \
     SF_quint64                  (tks_tokID), \
     SF_QString                  (tksEngine), \
     SF_QString                  (tksDir), \
@@ -324,11 +324,11 @@ namespace tblTokenStatsBase {
     SF_quint64                  (tksTotalWords)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTokenStatsBase_DTO
+        SF_tblMTTokenStatsBase_DTO
     );
 }
 
-namespace tblTranslatedPhrasesBase {
+namespace tblMTTranslatedPhrasesBase {
     namespace Relation {
     }
 
@@ -343,7 +343,7 @@ namespace tblTranslatedPhrasesBase {
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 //Col                   Reference Table                             ForeignCol                              Rename    LeftJoin
-                { Fields::tps_tlsID,    R(_schema, tblTranslationLogsBase::Name),   tblTranslationLogsBase::Fields::tlsID },
+                { Fields::tps_tlsID,    R(_schema, tblMTTranslationLogsBase::Name),   tblMTTranslationLogsBase::Fields::tlsID },
             };
         };
 
@@ -353,17 +353,17 @@ namespace tblTranslatedPhrasesBase {
 
     } //namespace Private
 
-#define SF_tblTranslatedPhrasesBase_DTO \
+#define SF_tblMTTranslatedPhrasesBase_DTO \
     SF_quint64                  (tps_tlsID), \
     SF_QString                  (tpsSourceString), \
     SF_QString                  (tpsTargetString)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTranslatedPhrasesBase_DTO
+        SF_tblMTTranslatedPhrasesBase_DTO
     );
 }
 
-namespace tblTranslationLogsBase {
+namespace tblMTTranslationLogsBase {
     namespace Relation {
     }
 
@@ -392,7 +392,7 @@ namespace tblTranslationLogsBase {
 
     } //namespace Private
 
-#define SF_tblTranslationLogsBase_DTO \
+#define SF_tblMTTranslationLogsBase_DTO \
     SF_ORM_PRIMARYKEY_64        (tlsID), \
     SF_quint64                  (tls_actorID), \
     SF_NULLABLE_quint32         (tls_aptID), \
@@ -406,7 +406,7 @@ namespace tblTranslationLogsBase {
     SF_qint8                    (tlsErrNo)
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTranslationLogsBase_DTO
+        SF_tblMTTranslationLogsBase_DTO
     );
 }
 
@@ -414,7 +414,7 @@ namespace tblTranslationLogsBase {
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfHelperORMBase
+class intfMTHelperORMBase
 {
 public:
     typedef typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::USER,
@@ -438,12 +438,12 @@ public:
 /* intf classes ***************************************/
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfCorrectionRules : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTCorrectionRules : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfCorrectionRules(const QString& _schema,
+    intfMTCorrectionRules(const QString& _schema,
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -451,12 +451,12 @@ public:
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfDigestedTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTDigestedTranslationLogs : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfDigestedTranslationLogs(const QString& _schema,
+    intfMTDigestedTranslationLogs(const QString& _schema,
                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -464,12 +464,12 @@ public:
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfMultiDic : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTMultiDic : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfMultiDic(const QString& _schema,
+    intfMTMultiDic(const QString& _schema,
                  const QList<DBM::clsORMField>& _exclusiveCols = {},
                  const QList<DBM::stuRelation>& _exclusiveRelations = {},
                  const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -477,12 +477,12 @@ public:
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfTokenStats : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTTokenStats : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfTokenStats(const QString& _schema,
+    intfMTTokenStats(const QString& _schema,
                    const QList<DBM::clsORMField>& _exclusiveCols = {},
                    const QList<DBM::stuRelation>& _exclusiveRelations = {},
                    const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -490,12 +490,12 @@ public:
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfTranslatedPhrases : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTTranslatedPhrases : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfTranslatedPhrases(const QString& _schema,
+    intfMTTranslatedPhrases(const QString& _schema,
                           const QList<DBM::clsORMField>& _exclusiveCols = {},
                           const QList<DBM::stuRelation>& _exclusiveRelations = {},
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
@@ -503,12 +503,12 @@ public:
 
 /******************************************************/
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
-class intfTranslationLogs : public intfSQLBasedModule, public intfHelperORMBase<_itmplTokenActorType>
+class intfMTTranslationLogs : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
 //    Q_OBJECT
 
 public:
-    intfTranslationLogs(const QString& _schema,
+    intfMTTranslationLogs(const QString& _schema,
                         const QList<DBM::clsORMField>& _exclusiveCols = {},
                         const QList<DBM::stuRelation>& _exclusiveRelations = {},
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});

@@ -29,11 +29,14 @@
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "MTDefs.hpp"
 #include "Classes/clsEngine.h"
-#include "Classes/clsDerivedHelperSubmodules.h"
+//#include "Classes/clsDerivedHelperSubmodules.h"
 #include "Gateways/intfTranslatorGateway.hpp"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/API/intfModuleHelper.h"
+#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/intfMTModule.h"
 using namespace Targoman::Common::Configuration;
+using namespace Targoman::API::AAA;
 using namespace Targoman::API::API;
 using namespace Targoman::API::Server;
 
@@ -77,6 +80,7 @@ namespace Targoman::API::ModuleHelpers::MT {
 
 using namespace Classes;
 using namespace Gateways;
+using namespace Interfaces;
 
 static QString TARGOMAN_PRIV_PREFIX = "Targoman:can";
 static QString TARGOMAN_QUOTA_PREFIX = "Targoman:";
@@ -159,35 +163,45 @@ public:
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap doTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+        typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
+            intfMTModule<true>,
+            intfMTModule<false>
+        >::type *_mtModule,
+//        clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
         bool _useSpecialClass,
         bool _detailed,
         bool _detokenize,
+        bool _dic, // = false,
+        bool _dicFull, // = false
         int& _preprocessTime,
         int& _translationTime
     );
 
 protected:
-    clsEngine* findEngine(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        QString _text,
-        const TranslationDir_t& _dir,
-        const QString& _engine,
-        bool _useSpecialClass,
-        /*OUT*/ QString &_class
-    );
+//    clsEngine* findEngine(
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        QString _text,
+//        const TranslationDir_t& _dir,
+//        const QString& _engine,
+//        bool _useSpecialClass,
+//        /*OUT*/ QString &_class
+//    );
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap internalDoTranslation(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+        typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
+            intfMTModule<true>,
+            intfMTModule<false>
+        >::type *_mtModule,
+//        clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
-        const QString& _engine,
-        bool _useSpecialClass,
+//        const QString& _engine,
+//        bool _useSpecialClass,
         const QString &_class,
         clsEngine* _translationEngine,
         bool _detailed,
@@ -197,6 +211,7 @@ protected:
     );
 
 public:
+//    QString cleanText(QString &_text);
     QString tokenize(const QString& _text, const QString& _lang);
     QString detokenize(const QString& _text, const QString& _lang);
     QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
@@ -204,7 +219,11 @@ public:
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QString preprocessText(
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+            typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::API,
+                intfMTModule<true>,
+                intfMTModule<false>
+            >::type *_mtModule,
+//            clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
             const QString& _text,
             const QString& _lang
             );

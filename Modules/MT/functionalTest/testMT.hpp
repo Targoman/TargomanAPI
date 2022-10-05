@@ -221,7 +221,7 @@ private slots:
                 }
             );
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -310,7 +310,7 @@ private slots:
 //                            }) },
                         });
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -482,6 +482,62 @@ private slots:
         }
     }
 
+    //------------------------------------------------
+    void apitoken_pause() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/pause",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void paused_get_userassets() {
+        QT_TRY {
+            this->callAPI(
+                        this->TokenJWT,
+                        RESTClientHelper::enuHTTPMethod::GET,
+                        "MT/AccountUserAssets",
+                        {},
+                        {});
+
+        } QT_CATCH (exTargomanBase &exp) {
+            QString Message = exp.what();
+            if (Message == "Token is paused")
+                qDebug() << "OK:" << Message;
+            else
+                QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void apitoken_resume() {
+        QT_TRY {
+            QVariant Result = this->callUserAPI(
+                        RESTClientHelper::enuHTTPMethod::POST,
+                        "Account/APITokens/resume",
+                        {},
+                        {
+                            { "token", this->TokenJWT },
+                        });
+
+            QVERIFY(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    //------------------------------------------------
     void translate_en2fa_1() {
         QT_TRY {
             QVariant Result = this->callAPI(

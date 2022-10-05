@@ -44,7 +44,7 @@ namespace Targoman::API::MTModule::ORM {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-namespace tblCorrectionRules {
+namespace tblMTCorrectionRules {
 
     namespace ExtraFields {
     }
@@ -67,11 +67,11 @@ namespace tblCorrectionRules {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblCorrectionRulesBase_DTO
+        SF_tblMTCorrectionRulesBase_DTO
     );
 }
 
-namespace tblDigestedTranslationLogs {
+namespace tblMTDigestedTranslationLogs {
 
     namespace ExtraFields {
     }
@@ -94,11 +94,11 @@ namespace tblDigestedTranslationLogs {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblDigestedTranslationLogsBase_DTO
+        SF_tblMTDigestedTranslationLogsBase_DTO
     );
 }
 
-namespace tblMultiDic {
+namespace tblMTMultiDic {
 
     namespace ExtraFields {
     }
@@ -120,11 +120,11 @@ namespace tblMultiDic {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblMultiDicBase_DTO
+        SF_tblMTMultiDicBase_DTO
     );
 }
 
-namespace tblTokenStats {
+namespace tblMTTokenStats {
 
     namespace ExtraFields {
     }
@@ -146,11 +146,11 @@ namespace tblTokenStats {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTokenStatsBase_DTO
+        SF_tblMTTokenStatsBase_DTO
     );
 }
 
-namespace tblTranslatedPhrases {
+namespace tblMTTranslatedPhrases {
 
     namespace ExtraFields {
         //usgRemainingDays
@@ -173,11 +173,11 @@ namespace tblTranslatedPhrases {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTranslatedPhrasesBase_DTO
+        SF_tblMTTranslatedPhrasesBase_DTO
     );
 }
 
-namespace tblTranslationLogs {
+namespace tblMTTranslationLogs {
 
     namespace ExtraFields {
     }
@@ -199,52 +199,52 @@ namespace tblTranslationLogs {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblTranslationLogsBase_DTO
+        SF_tblMTTranslationLogsBase_DTO
     );
 }
 
 #pragma GCC diagnostic pop
 
 /******************************************************/
-class CorrectionRules : public intfCorrectionRules<TAPI::enuTokenActorType::API>
+class MTCorrectionRules : public intfMTCorrectionRules<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, CorrectionRules)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTCorrectionRules)
 };
 
 /******************************************************/
-class DigestedTranslationLogs : public intfDigestedTranslationLogs<TAPI::enuTokenActorType::API>
+class MTDigestedTranslationLogs : public intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, DigestedTranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTDigestedTranslationLogs)
 };
 
 /******************************************************/
-class MultiDic : public intfMultiDic<TAPI::enuTokenActorType::API>
+class MTMultiDic : public intfMTMultiDic<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, MultiDic)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTMultiDic)
 };
 
 /******************************************************/
-class TokenStats : public intfTokenStats<TAPI::enuTokenActorType::API>
+class MTTokenStats : public intfMTTokenStats<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, TokenStats)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTokenStats)
 };
 
 /******************************************************/
-class TranslatedPhrases : public intfTranslatedPhrases<TAPI::enuTokenActorType::API>
+class MTTranslatedPhrases : public intfMTTranslatedPhrases<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslatedPhrases)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTranslatedPhrases)
 };
 
 /******************************************************/
-class TranslationLogs : public intfTranslationLogs<TAPI::enuTokenActorType::API>
+class MTTranslationLogs : public intfMTTranslationLogs<TAPI::enuTokenActorType::API>
 {
     Q_OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(MT, TranslationLogs)
+    TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTranslationLogs)
 };
 
 /******************************************************/
