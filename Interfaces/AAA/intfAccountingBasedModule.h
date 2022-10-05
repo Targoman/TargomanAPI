@@ -253,6 +253,17 @@ protected slots:
         "Cancel voucher item"
     )
 
+public:
+    intfAccountUnits*            accountUnits()             { return this->AccountUnits.data(); }
+    intfAccountProducts*         accountProducts()          { return this->AccountProducts.data(); }
+    intfAccountSaleables*        accountSaleables()         { return this->AccountSaleables.data(); }
+    intfAccountSaleablesFiles*   accountSaleablesFiles()    { return this->AccountSaleablesFiles.data(); }
+    baseintfAccountUserAssets*   accountUserAssets()        { return this->AccountUserAssets.data(); }
+    intfAccountUserAssetsFiles*  accountUserAssetsFiles()   { return this->AccountUserAssetsFiles.data(); }
+    baseintfAccountAssetUsage*   accountAssetUsages()       { return this->AccountAssetUsages.data(); }
+    intfAccountCoupons*          accountCoupons()           { return this->AccountCoupons.data(); }
+    intfAccountPrizes*           accountPrizes()            { return this->AccountPrizes.data(); }
+
 protected:
     QString ServiceName;
 

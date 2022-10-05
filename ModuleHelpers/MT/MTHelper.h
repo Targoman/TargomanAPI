@@ -29,7 +29,6 @@
 #include "libTargomanCommon/Configuration/tmplConfigurableMultiMap.hpp"
 #include "MTDefs.hpp"
 #include "Classes/clsEngine.h"
-//#include "Classes/clsDerivedHelperSubmodules.h"
 #include "Gateways/intfTranslatorGateway.hpp"
 #include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/API/intfModuleHelper.h"
@@ -167,7 +166,6 @@ public:
             intfMTModule<true>,
             intfMTModule<false>
         >::type *_mtModule,
-//        clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
         const QString& _engine,
@@ -197,7 +195,6 @@ protected:
             intfMTModule<true>,
             intfMTModule<false>
         >::type *_mtModule,
-//        clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
         QString _text,
         const TranslationDir_t& _dir,
 //        const QString& _engine,
@@ -223,7 +220,6 @@ public:
                 intfMTModule<true>,
                 intfMTModule<false>
             >::type *_mtModule,
-//            clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
             const QString& _text,
             const QString& _lang
             );

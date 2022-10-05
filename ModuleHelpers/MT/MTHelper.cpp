@@ -179,7 +179,6 @@ QVariantMap MTHelper::doTranslation(
         intfMTModule<true>,
         intfMTModule<false>
     >::type *_mtModule,
-//    clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -263,12 +262,12 @@ QVariantMap MTHelper::doTranslation(
     //check credit
     //-----------------------------------------
     if (APICALLBOOM_PARAM.isAnonymouse() == false) {
-//        QVariant Result = _derivedHelperSubmodules.MTCorrectionRules->Select(APICALLBOOM_PARAM,
-//                                                                           {}, 0, 0, {}, {}, {}, {}, false, false,
-//                                                                           clsCondition(tblMTCorrectionRulesBase::Fields::crlType,
-//                                                                                        enuConditionOperator::Equal,
-//                                                                                        enuCorrectionRuleType::Replace),
-//                                                                           3600);
+        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
+                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
+                                                                 clsCondition(tblAccountUserAssetsBase::Fields::uas_actorID,
+                                                                              enuConditionOperator::Equal,
+                                                                              APICALLBOOM_PARAM.getActorID())/*,
+                                                                 3600*/);
 
 
 //        $SPResult = $this->DB['MT']->call("sp_READ_usedCredit", array($this->Privs["tokID"], $EngineSQLName));
@@ -342,10 +341,9 @@ QVariantMap MTHelper::doTranslation(
                                        );
 
     if (TranslationEngine != nullptr) {
-        QVariantMap TranslationResult = this->internalDoTranslation(
+        QVariantMap TranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                           APICALLBOOM_PARAM,
                                           _mtModule,
-//                                          _derivedHelperSubmodules,
                                           _text,
                                           _dir,
 //                                          _engine,
@@ -381,10 +379,9 @@ QVariantMap MTHelper::doTranslation(
                                           Class
                                           );
 
-    QVariantMap PreTranslationResult = this->internalDoTranslation(
+    QVariantMap PreTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                          APICALLBOOM_PARAM,
                                          _mtModule,
-//                                         _derivedHelperSubmodules,
                                          TextToTranslate,
                                          Dir,
 //                                         _engine,
@@ -409,10 +406,9 @@ QVariantMap MTHelper::doTranslation(
                                            Class
                                            );
 
-    QVariantMap PostTranslationResult = this->internalDoTranslation(
+    QVariantMap PostTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                           APICALLBOOM_PARAM,
                                           _mtModule,
-//                                          _derivedHelperSubmodules,
                                           TextToTranslate,
                                           Dir,
 //                                          _engine,
@@ -470,7 +466,6 @@ QVariantMap MTHelper::internalDoTranslation(
         intfMTModule<true>,
         intfMTModule<false>
     >::type *_mtModule,
-//    clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
 //    const QString& _engine,
@@ -487,10 +482,9 @@ QVariantMap MTHelper::internalDoTranslation(
     QTime Timer;
     Timer.start();
 
-    _text = this->preprocessText(
+    _text = this->preprocessText<_itmplTokenActorType>(
                 APICALLBOOM_PARAM,
                 _mtModule,
-//                _derivedHelperSubmodules,
                 _text,
                 _dir.first
                 );
@@ -562,7 +556,6 @@ QString MTHelper::preprocessText(
         intfMTModule<true>,
         intfMTModule<false>
     >::type *_mtModule,
-//    clsDerivedHelperSubmodules<_itmplTokenActorType> &_derivedHelperSubmodules,
     const QString& _text,
     const QString& _lang
 ) {
@@ -645,7 +638,6 @@ void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const Q
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
     INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
     intfMTModule<false> *_mtModule,
-//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &_derivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -661,7 +653,6 @@ template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::USER>(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     intfMTModule<false> *_mtModule,
-//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &_derivedHelperSubmodules,
     const QString& _text,
     const QString& _lang
 );
@@ -669,7 +660,6 @@ template QString MTHelper::preprocessText<TAPI::enuTokenActorType::USER>(
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
     INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
     intfMTModule<true> *_mtModule,
-//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &_derivedHelperSubmodules,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
@@ -685,7 +675,6 @@ template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::API>(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     intfMTModule<true> *_mtModule,
-//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &_derivedHelperSubmodules,
     const QString& _text,
     const QString& _lang
 );

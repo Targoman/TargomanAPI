@@ -35,7 +35,6 @@
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 #include "MTDefs.hpp"
-//#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
 #include "ModuleHelpers/MT/Interfaces/intfMTModule.h"
 
 using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
@@ -108,9 +107,6 @@ private slots:
         ),
         "Translates input text if specified engine and language are found."
     )
-
-//private:
-//    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(MT, MTSchema);

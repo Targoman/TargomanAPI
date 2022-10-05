@@ -77,8 +77,7 @@ MT::MT() :
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance(),
         nullptr,
-//    ),
-//    DerivedHelperSubmodules(
+        //---------------------
         &MTCorrectionRules::instance(),
         &MTDigestedTranslationLogs::instance(),
         &MTMultiDic::instance(),
@@ -315,7 +314,6 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::API>(
                                       APICALLBOOM_PARAM,
                                       this,
-//                                      this->DerivedHelperSubmodules,
                                       _text,
                                       Dir,
                                       _engine,

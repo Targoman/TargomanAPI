@@ -82,9 +82,8 @@ TargomanMT::TargomanMT() :
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
         &AccountCoupons::instance(),
-                  nullptr,
-//    ),
-//    DerivedHelperSubmodules(
+        nullptr,
+        //---------------------
         &MTCorrectionRules::instance(),
         &MTDigestedTranslationLogs::instance(),
         &MTMultiDic::instance(),
@@ -353,7 +352,6 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
         QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::USER>(
                                       APICALLBOOM_PARAM,
                                       this,
-//                                      this->DerivedHelperSubmodules,
                                       _text,
                                       Dir,
                                       _engine,
