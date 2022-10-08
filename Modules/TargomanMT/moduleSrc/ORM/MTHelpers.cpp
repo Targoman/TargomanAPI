@@ -31,69 +31,69 @@
 namespace Targoman::API::TargomanMTModule::ORM {
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, CorrectionRules)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTCorrectionRules)
 
-CorrectionRules::CorrectionRules() :
-    intfCorrectionRules(
+MTCorrectionRules::MTCorrectionRules() :
+    intfMTCorrectionRules(
         TargomanMTSchema,
-        tblCorrectionRules::Private::ExtraORMFields,
-        tblCorrectionRules::Private::ExtraRelations,
-        tblCorrectionRules::Private::ExtraIndexes
+        tblMTCorrectionRules::Private::ExtraORMFields,
+        tblMTCorrectionRules::Private::ExtraRelations,
+        tblMTCorrectionRules::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, DigestedTranslationLogs)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTDigestedTranslationLogs)
 
-DigestedTranslationLogs::DigestedTranslationLogs() :
-    intfDigestedTranslationLogs(
+MTDigestedTranslationLogs::MTDigestedTranslationLogs() :
+    intfMTDigestedTranslationLogs(
         TargomanMTSchema,
-        tblDigestedTranslationLogs::Private::ExtraORMFields,
-        tblDigestedTranslationLogs::Private::ExtraRelations,
-        tblDigestedTranslationLogs::Private::ExtraIndexes
+        tblMTDigestedTranslationLogs::Private::ExtraORMFields,
+        tblMTDigestedTranslationLogs::Private::ExtraRelations,
+        tblMTDigestedTranslationLogs::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MultiDic)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTMultiDic)
 
-MultiDic::MultiDic() :
-    intfMultiDic(
+MTMultiDic::MTMultiDic() :
+    intfMTMultiDic(
         TargomanMTSchema,
-        tblMultiDic::Private::ExtraORMFields,
-        tblMultiDic::Private::ExtraRelations,
-        tblMultiDic::Private::ExtraIndexes
+        tblMTMultiDic::Private::ExtraORMFields,
+        tblMTMultiDic::Private::ExtraRelations,
+        tblMTMultiDic::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, TokenStats)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTTokenStats)
 
-TokenStats::TokenStats() :
-    intfTokenStats(
+MTTokenStats::MTTokenStats() :
+    intfMTTokenStats(
         TargomanMTSchema,
-        tblTokenStats::Private::ExtraORMFields,
-        tblTokenStats::Private::ExtraRelations,
-        tblTokenStats::Private::ExtraIndexes
+        tblMTTokenStats::Private::ExtraORMFields,
+        tblMTTokenStats::Private::ExtraRelations,
+        tblMTTokenStats::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, TranslatedPhrases)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTTranslatedPhrases)
 
-TranslatedPhrases::TranslatedPhrases() :
-    intfTranslatedPhrases(
+MTTranslatedPhrases::MTTranslatedPhrases() :
+    intfMTTranslatedPhrases(
         TargomanMTSchema,
-        tblTranslatedPhrases::Private::ExtraORMFields,
-        tblTranslatedPhrases::Private::ExtraRelations,
-        tblTranslatedPhrases::Private::ExtraIndexes
+        tblMTTranslatedPhrases::Private::ExtraORMFields,
+        tblMTTranslatedPhrases::Private::ExtraRelations,
+        tblMTTranslatedPhrases::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, TranslationLogs)
+TARGOMAN_API_SUBMODULE_IMPLEMENT(TargomanMT, MTTranslationLogs)
 
-TranslationLogs::TranslationLogs() :
-    intfTranslationLogs(
+MTTranslationLogs::MTTranslationLogs() :
+    intfMTTranslationLogs(
         TargomanMTSchema,
-        tblTranslationLogs::Private::ExtraORMFields,
-        tblTranslationLogs::Private::ExtraRelations,
-        tblTranslationLogs::Private::ExtraIndexes
+        tblMTTranslationLogs::Private::ExtraORMFields,
+        tblMTTranslationLogs::Private::ExtraRelations,
+        tblMTTranslationLogs::Private::ExtraIndexes
 ) { ; }
 
 /******************************************************/

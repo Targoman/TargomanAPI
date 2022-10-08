@@ -113,7 +113,7 @@ class Service : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, Service)
 
 private slots:
-    QVariant ORMGET_USER("Get Service information")
+    QVariant ORMGET_ANONYMOUSE("Get Service information")
     quint64 ORMCREATE_USER("Create a new Service by an authorized user")
     bool ORMUPDATE_USER("Update Service info by an authorized user")
     bool ORMDELETE_USER("Delete a Service")

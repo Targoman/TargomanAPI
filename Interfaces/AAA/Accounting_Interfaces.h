@@ -353,7 +353,23 @@ public:
 
 private slots:
 //    QVariant ORMGET_TOKENBASE("Get User Assets")
-    QVariant ORMGET_API("Get User Assets")
+//    QVariant ORMGET_API("Get User Assets")
+    QVariant REST_GET(
+        ,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString             _apiToken,
+            TAPI::PKsByPath_t   _pksByPath = {},
+            quint64             _pageIndex = 0,
+            quint16             _pageSize = 20,
+            TAPI::Cols_t        _cols = {},
+            TAPI::Filter_t      _filters = {},
+            TAPI::OrderBy_t     _orderBy = {},
+            TAPI::GroupBy_t     _groupBy = {},
+            bool                _reportCount = true
+        ),
+        "Get User Assets"
+    );
 };
 
 /******************************************************/
@@ -424,8 +440,8 @@ public:
                                    const QList<DBM::stuDBIndex>& _indexes = {});
 
 private slots:
-//    QVariant ORMGET_TOKENBASE("Get User Assets")
-    QVariant ORMGET_USER("Get User Assets")
+//    QVariant ORMGET_TOKENBASE("Get User Asset Usage")
+    QVariant ORMGET_USER("Get User Asset Usage")
 };
 
 /******************************************************/
@@ -441,8 +457,24 @@ public:
                                   const QList<DBM::stuDBIndex>& _indexes = {});
 
 private slots:
-//    QVariant ORMGET_TOKENBASE("Get User Assets")
-    QVariant ORMGET_API("Get User Assets")
+//    QVariant ORMGET_TOKENBASE("Get User Asset Usage")
+//    QVariant ORMGET_API("Get User Asset Usage")
+    QVariant REST_GET(
+        ,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString             _apiToken,
+            TAPI::PKsByPath_t   _pksByPath = {},
+            quint64             _pageIndex = 0,
+            quint16             _pageSize = 20,
+            TAPI::Cols_t        _cols = {},
+            TAPI::Filter_t      _filters = {},
+            TAPI::OrderBy_t     _orderBy = {},
+            TAPI::GroupBy_t     _groupBy = {},
+            bool                _reportCount = true
+        ),
+        "Get User Asset Usage"
+    );
 };
 
 /******************************************************/

@@ -65,7 +65,6 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-protected:
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const ServiceUsage_t& _requestedUsage
@@ -73,6 +72,7 @@ protected:
 
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
+protected:
     //-- used by addToBasket: ----------------------------------------
     virtual void processItemForBasket(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
@@ -253,6 +253,17 @@ protected slots:
         "Cancel voucher item"
     )
 
+public:
+    intfAccountUnits*            accountUnits()             { return this->AccountUnits.data(); }
+    intfAccountProducts*         accountProducts()          { return this->AccountProducts.data(); }
+    intfAccountSaleables*        accountSaleables()         { return this->AccountSaleables.data(); }
+    intfAccountSaleablesFiles*   accountSaleablesFiles()    { return this->AccountSaleablesFiles.data(); }
+    baseintfAccountUserAssets*   accountUserAssets()        { return this->AccountUserAssets.data(); }
+    intfAccountUserAssetsFiles*  accountUserAssetsFiles()   { return this->AccountUserAssetsFiles.data(); }
+    baseintfAccountAssetUsage*   accountAssetUsages()       { return this->AccountAssetUsages.data(); }
+    intfAccountCoupons*          accountCoupons()           { return this->AccountCoupons.data(); }
+    intfAccountPrizes*           accountPrizes()            { return this->AccountPrizes.data(); }
+
 protected:
     QString ServiceName;
 
@@ -276,19 +287,18 @@ class intfAccountingBasedModule : public baseintfAccountingBasedModule
 {
 protected:
     intfAccountingBasedModule(
-        const QString              &_module,
-        const QString              &_schema,
-//        bool                       _isTokenBase,
-        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
-        intfAccountUnits           *_units,
-        intfAccountProducts        *_products,
-        intfAccountSaleables       *_saleables,
-        intfAccountSaleablesFiles  *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>      *_userAssets,
-        intfAccountUserAssetsFiles *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>      *_assetUsages,
-        intfAccountCoupons         *_discounts = nullptr,
-        intfAccountPrizes          *_prizes = nullptr
+        const QString                               &_module,
+        const QString                               &_schema,
+        AssetUsageLimitsCols_t                      _AssetUsageLimitsCols,
+        intfAccountUnits                            *_units,
+        intfAccountProducts                         *_products,
+        intfAccountSaleables                        *_saleables,
+        intfAccountSaleablesFiles                   *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
+        intfAccountUserAssetsFiles                  *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
+        intfAccountCoupons                          *_discounts = nullptr,
+        intfAccountPrizes                           *_prizes = nullptr
     );
 //    virtual ~intfAccountingBasedModule();
 

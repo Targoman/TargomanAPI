@@ -41,48 +41,48 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ModuleHelpers::MT, enuMultiDicStatus)
             _tblName::Private::Relations(_schema) + _exclusiveRelations, \
             _tblName::Private::Indexes + _exclusiveIndexes \
         ), \
-        intfHelperORMBase<_itmplTokenActorType>()
+        intfMTHelperORMBase<_itmplTokenActorType>()
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfCorrectionRules, tblCorrectionRulesBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTCorrectionRules, tblMTCorrectionRulesBase)
 { ; }
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfDigestedTranslationLogs, tblDigestedTranslationLogsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTDigestedTranslationLogs, tblMTDigestedTranslationLogsBase)
 { ; }
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMultiDic, tblMultiDicBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTMultiDic, tblMTMultiDicBase)
 { ; }
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTokenStats, tblTokenStatsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTTokenStats, tblMTTokenStatsBase)
 { ; }
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTranslatedPhrases, tblTranslatedPhrasesBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTTranslatedPhrases, tblMTTranslatedPhrasesBase)
 { ; }
 
 /******************************************************/
-TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfTranslationLogs, tblTranslationLogsBase)
+TAPI_HELPERORM_SUBMODULE_IMPLEMENT(intfMTTranslationLogs, tblMTTranslationLogsBase)
 { ; }
 
 /******************************************************/
 
-template class intfCorrectionRules<TAPI::enuTokenActorType::USER>;
-template class intfDigestedTranslationLogs<TAPI::enuTokenActorType::USER>;
-template class intfMultiDic<TAPI::enuTokenActorType::USER>;
-template class intfTokenStats<TAPI::enuTokenActorType::USER>;
-template class intfTranslatedPhrases<TAPI::enuTokenActorType::USER>;
-template class intfTranslationLogs<TAPI::enuTokenActorType::USER>;
+template class intfMTCorrectionRules<TAPI::enuTokenActorType::USER>;
+template class intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::USER>;
+template class intfMTMultiDic<TAPI::enuTokenActorType::USER>;
+template class intfMTTokenStats<TAPI::enuTokenActorType::USER>;
+template class intfMTTranslatedPhrases<TAPI::enuTokenActorType::USER>;
+template class intfMTTranslationLogs<TAPI::enuTokenActorType::USER>;
 
-template class intfCorrectionRules<TAPI::enuTokenActorType::API>;
-template class intfDigestedTranslationLogs<TAPI::enuTokenActorType::API>;
-template class intfMultiDic<TAPI::enuTokenActorType::API>;
-template class intfTokenStats<TAPI::enuTokenActorType::API>;
-template class intfTranslatedPhrases<TAPI::enuTokenActorType::API>;
-template class intfTranslationLogs<TAPI::enuTokenActorType::API>;
+template class intfMTCorrectionRules<TAPI::enuTokenActorType::API>;
+template class intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::API>;
+template class intfMTMultiDic<TAPI::enuTokenActorType::API>;
+template class intfMTTokenStats<TAPI::enuTokenActorType::API>;
+template class intfMTTranslatedPhrases<TAPI::enuTokenActorType::API>;
+template class intfMTTranslationLogs<TAPI::enuTokenActorType::API>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces

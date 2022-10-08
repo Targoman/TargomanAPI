@@ -26,6 +26,8 @@
 #include <QUrl>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QString>
+#include <QRegularExpression>
 
 #include "MTHelper.h"
 #include "libTargomanTextProcessor/TextProcessor.h"
@@ -152,22 +154,132 @@ void MTHelper::registerEngines() {
     }
 }
 
+//https://stackoverflow.com/questions/1401317/remove-non-utf8-characters-from-string
+//QString MTHelper::cleanText(QString &_text) {
+//    QString Regex = R"(
+///
+//  (
+//    (?: [\x00-\x7F]                 # single-byte sequences   0xxxxxxx
+//    |   [\xC0-\xDF][\x80-\xBF]      # double-byte sequences   110xxxxx 10xxxxxx
+//    |   [\xE0-\xEF][\x80-\xBF]{2}   # triple-byte sequences   1110xxxx 10xxxxxx * 2
+//    |   [\xF0-\xF7][\x80-\xBF]{3}   # quadruple-byte sequence 11110xxx 10xxxxxx * 3
+//    ){1,100}                        # ...one or more times
+//  )
+//| .                                 # anything else
+///x
+//)";
+
+//    return _text.replace(QRegularExpression(Regex), "$1");
+//}
+
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-//    const QJsonObject& _privInfo,
-    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
     bool _useSpecialClass,
     bool _detailed,
     bool _detokenize,
+    bool _dic,
+    bool _dicFull,
     int& _preprocessTime,
     int& _translationTime
 ) {
     APICALLBOOM_PARAM.createScopeTiming("translate");
 
+    QTime Timer;
+    Timer.start();
+
+    if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Detailed" }) == false)
+        throw exAuthorization("Not enought privileges to get detailed translation response.");
+
+//    _text = this->cleanText(unicode_trim(_text));
+//    auto SourceWordCount = _text.split(QRegularExpression("~[^\\p{L}\\p{N}\\']+~u")).length();
+
+    _text = this->tokenize(_text, _dir.first);
+    quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
+
+    //dic
+    //-----------------------------------------
+    if (_dic) {
+        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
+            if (_dicFull && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
+                throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
+
+            _preprocessTime = Timer.elapsed();
+            Timer.restart();
+
+            QVariantMap DicResponse = MTHelper::instance().retrieveDicResponse(_text, _dir.first);
+
+            _translationTime = Timer.elapsed();
+
+            if (DicResponse.size()) {
+                if (_detailed) {
+                    DicResponse[RESULTItems::TIMES] = QVariantMap({
+                                                                      { RESULTItems::TIMESItems::PRE,  _preprocessTime },
+                                                                      { RESULTItems::TIMESItems::TR,   _translationTime },
+                                                                      { RESULTItems::TIMESItems::POST, 0 },
+                                                                      { RESULTItems::TIMESItems::ALL,  _preprocessTime + _translationTime },
+                                                                  });
+                }
+
+                MTHelper::instance().addDicLog(_dir.first, SourceWordCount, _text);
+                return DicResponse;
+            }
+        } else
+            throw exAuthorization("Not enought privileges to retrieve dictionary response.");
+    }
+
+    //cache
+    //-----------------------------------------
+    QTime CacheLookupTime;
+    CacheLookupTime.start();
+
+    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5")
+                                                    .arg(_useSpecialClass)
+                                                    .arg(_engine)
+                                                    .arg(_dir.first)
+                                                    .arg(_dir.second)
+                                                    .arg(_text)
+                                                .toUtf8(),
+                                            QCryptographicHash::Md4).toHex();
+
+    QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
+
+    if (CachedTranslation.isEmpty() == false) {
+
+//        $this->addTranslationLog($ClientIP,$dir,NULL,$EngineSQLName,"127.0.0.254",$SourceWordCount,0,$sourcePhrase,"Cache");
+
+        CachedTranslation[RESULTItems::CACHE] = CacheLookupTime.elapsed();
+        return CachedTranslation;
+    }
+
+    //check credit
+    //-----------------------------------------
+    if (APICALLBOOM_PARAM.isAnonymouse() == false) {
+        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
+                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
+                                                                 clsCondition(tblAccountUserAssetsBase::Fields::uas_actorID,
+                                                                              enuConditionOperator::Equal,
+                                                                              APICALLBOOM_PARAM.getActorID())/*,
+                                                                 3600*/);
+
+
+//        $SPResult = $this->DB['MT']->call("sp_READ_usedCredit", array($this->Privs["tokID"], $EngineSQLName));
+
+//        if(count($SPResult['rows']) == 2){
+//            $this->checkCredit($EngineSQLName.'MaxPerDay', $SPResult['rows'][0]['tstTodayWordCount'] + $SourceWordCount);
+//            $this->checkCredit($EngineSQLName.'MaxPerMonth', $SPResult['rows'][0]['tstMonthWordCount'] + $SourceWordCount);
+//            $this->checkCredit($EngineSQLName.'MaxTotal', $SPResult['rows'][0]['tstTotalWordCount'] + $SourceWordCount);
+//            $this->checkCredit('MaxPerDay', $SPResult['rows'][1]['tstTodayWordCount'] + $SourceWordCount);
+//            $this->checkCredit('MaxPerMonth', $SPResult['rows'][1]['tstMonthWordCount'] + $SourceWordCount);
+//            $this->checkCredit('MaxTotal', $SPResult['rows'][1]['tstTotalWordCount'] + $SourceWordCount);
+//        }
+    }
+
+    //-----------------------------------------
     auto FnFindClassAndEngine = [this](
                                 QString _text,
                                 const TranslationDir_t &_dir,
@@ -192,13 +304,13 @@ QVariantMap MTHelper::doTranslation(
             return TranslationEngine;
 
         if (_dir.first == "en" || _dir.second == "en")
-            throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
+            throw exHTTPInternalServerError(QString("Unable to find translator engine for `%1 -> %2`").arg(_dir.first).arg(_dir.second));
 
         return nullptr;
     };
 
-    auto FnGetTranslateResultText = [](const QVariantMap &_translateResult) -> QString {
-        QVariantMap ResultAsMap = _translateResult[RESULTItems::TRANSLATION].toMap();
+    auto FnGetTranslationResultText = [](const QVariantMap &_TranslationResult) -> QString {
+        QVariantMap ResultAsMap = _TranslationResult[RESULTItems::TRANSLATION].toMap();
 
         if (ResultAsMap.contains(RESULTItems::SIMPLE))
             return ResultAsMap[RESULTItems::SIMPLE].toString();
@@ -211,7 +323,7 @@ QVariantMap MTHelper::doTranslation(
             return ResultList.join('\n');
         }
 
-        throw exHTTPInternalServerError("Unable to find pre translate result");
+        throw exHTTPInternalServerError("Unable to find translate result");
     };
 
     QString Class;
@@ -226,13 +338,13 @@ QVariantMap MTHelper::doTranslation(
                                        );
 
     if (TranslationEngine != nullptr) {
-        QVariantMap TranslateResult = this->internalDoTranslation(
+        QVariantMap TranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                           APICALLBOOM_PARAM,
-                                          DerivedHelperSubmodules,
+                                          _mtModule,
                                           _text,
                                           _dir,
-                                          _engine,
-                                          _useSpecialClass,
+//                                          _engine,
+//                                          _useSpecialClass,
                                           Class,
                                           TranslationEngine,
                                           _detailed,
@@ -241,12 +353,18 @@ QVariantMap MTHelper::doTranslation(
                                           _translationTime
                                           );
 
-        return TranslateResult;
+
+        if (TranslationResult.value(RESULTItems::ERRNO, 0).toInt() == 0)
+            this->TranslationCache.insert(CacheKey, TranslationResult);
+
+        return TranslationResult;
     }
 
     //need more steps
+    //-----------------------------------------
     QString TextToTranslate = _text;
     TranslationDir_t Dir;
+    _detailed = false;
 
     //phase 1
     Dir = { _dir.first, "en" };
@@ -258,13 +376,13 @@ QVariantMap MTHelper::doTranslation(
                                           Class
                                           );
 
-    QVariantMap PreTranslateResult = this->internalDoTranslation(
+    QVariantMap PreTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                          APICALLBOOM_PARAM,
-                                         DerivedHelperSubmodules,
+                                         _mtModule,
                                          TextToTranslate,
                                          Dir,
-                                         _engine,
-                                         _useSpecialClass,
+//                                         _engine,
+//                                         _useSpecialClass,
                                          Class,
                                          PreTranslationEngine,
                                          _detailed,
@@ -273,7 +391,7 @@ QVariantMap MTHelper::doTranslation(
                                          _translationTime
                                          );
 
-    TextToTranslate = FnGetTranslateResultText(PreTranslateResult);
+    TextToTranslate = FnGetTranslationResultText(PreTranslationResult);
 
     //phase 2
     Dir = { "en", _dir.second };
@@ -285,13 +403,13 @@ QVariantMap MTHelper::doTranslation(
                                            Class
                                            );
 
-    QVariantMap PostTranslateResult = this->internalDoTranslation(
+    QVariantMap PostTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
                                           APICALLBOOM_PARAM,
-                                          DerivedHelperSubmodules,
+                                          _mtModule,
                                           TextToTranslate,
                                           Dir,
-                                          _engine,
-                                          _useSpecialClass,
+//                                          _engine,
+//                                          _useSpecialClass,
                                           Class,
                                           PostTranslationEngine,
                                           _detailed,
@@ -300,51 +418,52 @@ QVariantMap MTHelper::doTranslation(
                                           _translationTime
                                           );
 
-    TextToTranslate = FnGetTranslateResultText(PostTranslateResult);
+    TextToTranslate = FnGetTranslationResultText(PostTranslationResult);
 
     //result
+    if (PostTranslationResult.value(RESULTItems::ERRNO, 0).toInt() == 0)
+        this->TranslationCache.insert(CacheKey, PostTranslationResult);
 
-
-    return PostTranslateResult;
+    return PostTranslationResult;
 }
 
-clsEngine* MTHelper::findEngine(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    QString _text,
-    const TranslationDir_t& _dir,
-    const QString& _engine,
-    bool _useSpecialClass,
-    /*OUT*/ QString &_class
-) {
-    clsEngine* TranslationEngine = nullptr;
+//clsEngine* MTHelper::findEngine(
+//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    QString _text,
+//    const TranslationDir_t& _dir,
+//    const QString& _engine,
+//    bool _useSpecialClass,
+//    /*OUT*/ QString &_class
+//) {
+//    clsEngine* TranslationEngine = nullptr;
 
-    if (_useSpecialClass) {
-        _class = this->detectClass(_engine, _text, _dir.first);
+//    if (_useSpecialClass) {
+//        _class = this->detectClass(_engine, _text, _dir.first);
 
-        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, _class));
+//        TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, _class));
 
-        if (TranslationEngine != nullptr)
-            return TranslationEngine;
-    }
+//        if (TranslationEngine != nullptr)
+//            return TranslationEngine;
+//    }
 
-    TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
-    if (TranslationEngine != nullptr)
-        return TranslationEngine;
+//    TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+//    if (TranslationEngine != nullptr)
+//        return TranslationEngine;
 
-    if (_dir.first == "en" || _dir.second == "en")
-        throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
+//    if (_dir.first == "en" || _dir.second == "en")
+//        throw exHTTPInternalServerError(QString("Unable to find translator engine for %1_%2").arg(_dir.first).arg(_dir.second));
 
-    return nullptr;
-}
+//    return nullptr;
+//}
 
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::internalDoTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
-    const QString& _engine,
-    bool _useSpecialClass,
+//    const QString& _engine,
+//    bool _useSpecialClass,
     const QString &_class,
     clsEngine* _translationEngine,
     bool _detailed,
@@ -352,86 +471,67 @@ QVariantMap MTHelper::internalDoTranslation(
     int& _preprocessTime,
     int& _translationTime
 ) {
-    if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM/*, _privInfo*/, { TARGOMAN_PRIV_PREFIX + "Detailed" }) == false)
-        throw exAuthorization("Not enought privileges to get detailed translation response.");
+    QVariantMap TranslationResult;
 
-    QTime CacheLookupTime;
-    CacheLookupTime.start();
+    QTime Timer;
+    Timer.start();
 
-    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5").arg(_useSpecialClass).arg(_engine, _dir.first, _dir.second, _text).toUtf8(), QCryptographicHash::Md4).toHex();
-    QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
+    _text = this->preprocessText<_itmplTokenActorType>(
+                APICALLBOOM_PARAM,
+                _mtModule,
+                _text,
+                _dir.first
+                );
 
-    if (CachedTranslation.isEmpty()) {
-        QTime Timer;
-        Timer.start();
+    _preprocessTime = Timer.elapsed();
+    Timer.restart();
 
-//        clsEngine* TranslationEngine = nullptr;
-//        QString Class;
+    if (_translationEngine->specs().SupportsIXML == false)
+        _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
 
-//        if (_useSpecialClass) {
-//            Class = this->detectClass(_engine, _text, _dir.first);
-//            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, Class));
-//        }
+    /********************************/
+    TranslationResult = _translationEngine->doTranslation(
+                            APICALLBOOM_PARAM,
+                            _text,
+                            _detailed,
+                            _detokenize);
+    /********************************/
 
-//        if (TranslationEngine == nullptr) {
-//            TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second));
+    _translationTime = Timer.elapsed();
 
-//            if (TranslationEngine == nullptr)
-//                throw exHTTPInternalServerError("Unable to find generic translator engine");
-//        }
+    if (_class.size() && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
+        TranslationResult[RESULTItems::CLASS] = _class;
 
-//        if (TranslationEngine == nullptr)
-//            throw exHTTPInternalServerError(QString("Unable to find %1 translator engine").arg(Class));
+    switch (TranslationResult.value(RESULTItems::ERRNO, 0).toInt()) {
+        case enuTranslationError::Ok:
+            break;
 
-        _text = this->preprocessText(
-                    APICALLBOOM_PARAM,
-                    DerivedHelperSubmodules,
-                    _text,
-                    _dir.first
-                    );
+        case enuTranslationError::OperationTimedOut:
+        case enuTranslationError::ConnectionRefused:
+            throw exHTTPRequestTimeout(QString("%1 (%2 -> %3)")
+                                       .arg(TranslationResult.value(RESULTItems::MESSAGE).toString())
+                                       .arg(_dir.first)
+                                       .arg(_dir.second)
+                                       );
 
-        _preprocessTime = Timer.elapsed();
-        Timer.restart();
+        case enuTranslationError::InvalidServerResponse:
+        case enuTranslationError::JsonParseError:
+            throw exHTTPUnprocessableEntity(QString("%1 (%2 -> %3)")
+                                            .arg(TranslationResult.value(RESULTItems::MESSAGE).toString())
+                                            .arg(_dir.first)
+                                            .arg(_dir.second)
+                                            );
 
-        if (_translationEngine->specs().SupportsIXML == false)
-            _text = TargomanTextProcessor::instance().ixml2Text(_text, false, false,false);
+        case enuTranslationError::CURLError:
+        default:
+            throw exHTTPExpectationFailed(QString("%1 (%2 -> %3)")
+                                          .arg(TranslationResult.value(RESULTItems::MESSAGE).toString())
+                                          .arg(_dir.first)
+                                          .arg(_dir.second)
+                                          );
+    }
 
-        /********************************/
-        CachedTranslation = _translationEngine->doTranslation(
-                                APICALLBOOM_PARAM,
-                                _text,
-                                _detailed,
-                                _detokenize);
-        /********************************/
-
-        _translationTime = Timer.elapsed();
-        if (_class.size() && Authorization::hasPriv(APICALLBOOM_PARAM/*, _privInfo*/, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
-            CachedTranslation[RESULTItems::CLASS] = _class;
-
-        if (CachedTranslation.value(RESULTItems::ERRNO, 0).toInt() == 0)
-            this->TranslationCache.insert(CacheKey, CachedTranslation);
-        else {
-            switch (CachedTranslation.value(RESULTItems::ERRNO, 0).toInt()) {
-                case enuTranslationError::Ok:
-                    break;
-
-                case enuTranslationError::OperationTimedOut:
-                case enuTranslationError::ConnectionRefused:
-                    throw exHTTPRequestTimeout(CachedTranslation.value(RESULTItems::MESSAGE).toString());
-
-                case enuTranslationError::InvalidServerResponse:
-                case enuTranslationError::JsonParseError:
-                    throw exHTTPUnprocessableEntity(CachedTranslation.value(RESULTItems::MESSAGE).toString());
-
-                case enuTranslationError::CURLError:
-                default:
-                    throw exHTTPExpectationFailed(CachedTranslation.value(RESULTItems::MESSAGE).toString());
-            }
-        }
-    } else
-        CachedTranslation[RESULTItems::CACHE] = CacheLookupTime.elapsed();
-
-    return CachedTranslation;
+    return TranslationResult;
 }
 
 QString MTHelper::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
@@ -446,19 +546,19 @@ QString MTHelper::detectClass(const QString& _engine, const QString& _text, cons
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QString MTHelper::preprocessText(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<_itmplTokenActorType> &DerivedHelperSubmodules,
+    intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     const QString& _text,
     const QString& _lang
 ) {
     Q_UNUSED (_lang)
 
     if (this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600) {
-        QVariant Result = DerivedHelperSubmodules.CorrectionRules->Select(APICALLBOOM_PARAM,
-                                                                          {}, 0, 0, {}, {}, {}, {}, false, false,
-                                                                          clsCondition(tblCorrectionRulesBase::Fields::crlType,
-                                                                                       enuConditionOperator::Equal,
-                                                                                       enuCorrectionRuleType::Replace),
-                                                                          3600);
+        QVariant Result = _mtModule->MTCorrectionRules->Select(APICALLBOOM_PARAM,
+                                                               {}, 0, 0, {}, {}, {}, {}, false, false,
+                                                               clsCondition(tblMTCorrectionRulesBase::Fields::crlType,
+                                                                            enuConditionOperator::Equal,
+                                                                            enuCorrectionRuleType::Replace),
+                                                               3600);
 
         if (Result.isValid()) {
             TAPI::stuTable ResultTable = Result.value<TAPI::stuTable>();
@@ -467,9 +567,9 @@ QString MTHelper::preprocessText(
             foreach (auto Row, ResultTable.Rows) {
                 this->CorrectionRule.append(
                         qMakePair(
-                            QRegularExpression(Row.toMap()[tblCorrectionRulesBase::Fields::crlPattern].toString(),
+                            QRegularExpression(Row.toMap()[tblMTCorrectionRulesBase::Fields::crlPattern].toString(),
                                                QRegularExpression::UseUnicodePropertiesOption | QRegularExpression::MultilineOption),
-                            Row.toMap()[tblCorrectionRulesBase::Fields::crlReplacement].toString())
+                            Row.toMap()[tblMTCorrectionRulesBase::Fields::crlReplacement].toString())
                         );
             }
             this->LastCorrectionRuleUpdateTime.start();
@@ -528,38 +628,44 @@ void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const Q
 /***********************************************************************************/
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
     INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &DerivedHelperSubmodules,
+    intfMTModule<false> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
     bool _useSpecialClass,
-    bool _detailed, bool _detokenize,
+    bool _detailed,
+    bool _detokenize,
+    bool _dic, // = false,
+    bool _dicFull, // = false
     int& _preprocessTime,
     int& _translationTime
 );
 
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::USER>(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> &DerivedHelperSubmodules,
+    intfMTModule<false> *_mtModule,
     const QString& _text,
     const QString& _lang
 );
 
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
     INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &DerivedHelperSubmodules,
+    intfMTModule<true> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
     const QString& _engine,
     bool _useSpecialClass,
-    bool _detailed, bool _detokenize,
+    bool _detailed,
+    bool _detokenize,
+    bool _dic, // = false,
+    bool _dicFull, // = false
     int& _preprocessTime,
     int& _translationTime
 );
 
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::API>(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::API> &DerivedHelperSubmodules,
+    intfMTModule<true> *_mtModule,
     const QString& _text,
     const QString& _lang
 );

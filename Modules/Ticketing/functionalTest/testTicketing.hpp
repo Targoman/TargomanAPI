@@ -358,7 +358,9 @@ private slots:
             QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
                 "Ticketing/TicketAttachments",
-                {},
+                {
+                    { "filters", QString("tat_tktID=%1").arg(this->Reply2TicketID) },
+                },
                 {}
             );
 

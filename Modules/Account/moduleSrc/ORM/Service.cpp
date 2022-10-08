@@ -40,8 +40,8 @@ Service::Service() :
         tblService::Private::Indexes
 ) { ; }
 
-QVariant IMPL_ORMGET_USER(Service) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+QVariant IMPL_ORMGET_ANONYMOUSE(Service) {
+//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 

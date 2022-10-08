@@ -28,16 +28,16 @@
 #include "Interfaces/ORM/intfMigrations.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/AAA/intfAccountingBasedModule.h"
+//#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/AAA/Accounting_Defs.hpp"
 #include "Interfaces/ORM/intfFAQ.h"
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::ORM;
 #include "TargomanMTDefs.hpp"
-#include "ModuleHelpers/MT/Classes/clsDerivedHelperSubmodules.h"
+#include "ModuleHelpers/MT/Interfaces/intfMTModule.h"
 
-using namespace Targoman::API::ModuleHelpers::MT::Classes;
+using namespace Targoman::API::ModuleHelpers::MT::Interfaces;
 
 namespace Targoman::API::TargomanMTModule {
 
@@ -48,7 +48,7 @@ TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
 
-class TargomanMT : public intfAccountingBasedModule<false>
+class TargomanMT : public intfMTModule<false> //intfAccountingBasedModule<false>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID INTFPUREMODULE_IID)
@@ -106,9 +106,6 @@ private slots:
         ),
         "Translates input text"
     )
-
-private:
-    clsDerivedHelperSubmodules<TAPI::enuTokenActorType::USER> DerivedHelperSubmodules;
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(TargomanMT, TargomanMTSchema);

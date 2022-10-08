@@ -924,7 +924,7 @@ private slots:
         } QT_CATCH (exTargomanBase &exp) {
             QString Message = exp.what();
             if (Message == "Incorrect password")
-                qDebug() << "OK" << Message;
+                qDebug() << "OK:" << Message;
             else
                 QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
         } QT_CATCH (const std::exception &exp) {
@@ -946,7 +946,7 @@ private slots:
         } QT_CATCH (exTargomanBase &exp) {
             QString Message = exp.what();
             if (Message == "This mobile number is already taken")
-                qDebug() << "OK" << Message;
+                qDebug() << "OK:" << Message;
             else
                 QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
         } QT_CATCH (const std::exception &exp) {
@@ -1499,7 +1499,7 @@ private slots:
                 );
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1546,7 +1546,7 @@ private slots:
 //            QVERIFY(Result.isValid());
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1563,7 +1563,7 @@ private slots:
                 });
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1611,7 +1611,7 @@ private slots:
                 });
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1630,7 +1630,7 @@ private slots:
                         });
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
@@ -1696,7 +1696,7 @@ private slots:
 //            QVERIFY(Result.isValid());
 
         } QT_CATCH (exTargomanBase &exp) {
-            qDebug() << "OK" << exp.what();
+            qDebug() << "OK:" << exp.what();
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
