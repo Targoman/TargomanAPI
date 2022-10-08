@@ -427,7 +427,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         /* discountCode     */ CouponCode,
         /* referrer         */ "",
         /* referrerParams   */ {},
-        /* apiToken         */ {},
+//        /* apiToken         */ {},
         /* lastPreVoucher   */ LastPreVoucher
     );
     LastPreVoucher = BasketActionResult.PreVoucher;

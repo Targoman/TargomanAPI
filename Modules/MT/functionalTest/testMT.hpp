@@ -117,7 +117,7 @@ private slots:
                     { "random", 1 },
                 });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
             this->LastRandomNumber = Result.toMap().value("Random").toString();
 
@@ -140,13 +140,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).actorID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).actorID() == gUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     void login_admin() {
@@ -157,13 +157,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
-        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).actorID() == gAdminUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     /***************************************************/
@@ -171,7 +171,7 @@ private slots:
         this->MTProductCode = QString("p%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
-            this->MTProductID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "MT/AccountProducts",
                 {},
@@ -192,7 +192,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->MTProductID > 0);
+            this->MTProductID = Result;
+
+            QVERIFY_DUMP_RESULT(this->MTProductID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -231,7 +233,7 @@ private slots:
         this->MTSaleableCode = QString("%1-s%2").arg(this->MTProductCode).arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
-            this->MTSaleableID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "MT/AccountSaleables",
                 {},
@@ -249,7 +251,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->MTSaleableID > 0);
+            this->MTSaleableID = Result;
+
+            QVERIFY_DUMP_RESULT(this->MTSaleableID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -281,15 +285,15 @@ private slots:
 //                            }) },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
             QVariantMap ResultToMap = Result.toMap();
 
             this->TokenID  = ResultToMap["iD"].toULongLong();
             this->TokenJWT = ResultToMap["token"].toString();
 
-            QVERIFY(this->TokenID > 0);
-            QVERIFY(this->TokenJWT.isEmpty() == false);
+            QVERIFY_DUMP_RESULT(this->TokenID > 0);
+            QVERIFY_DUMP_RESULT(this->TokenJWT.isEmpty() == false);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -322,7 +326,7 @@ private slots:
                         RESTClientHelper::enuHTTPMethod::GET,
                         "Account/APITokens");
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -351,9 +355,9 @@ private slots:
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.TotalPrice == 12'000);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 12'000);
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -382,9 +386,9 @@ private slots:
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.TotalPrice == 12'000);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 12'000);
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -409,8 +413,8 @@ private slots:
             this->BasketVoucher.fromJson(Result.toJsonObject());
             this->LastPreVoucher = this->BasketVoucher.Info;
 
-            QVERIFY(this->BasketVoucher.ID > 0);
-            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.VoucherID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -435,9 +439,9 @@ private slots:
 
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 24'000);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Payed == 24'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Remained == 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -452,7 +456,7 @@ private slots:
                 "Account/APITokens/" + QString::number(this->TokenID)
             );
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
             this->TokenJWT = Result.toMap()["aptToken"].toString();
 
@@ -475,7 +479,7 @@ private slots:
                 }
             );
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -493,7 +497,7 @@ private slots:
                             { "token", this->TokenJWT },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -531,7 +535,7 @@ private slots:
                             { "token", this->TokenJWT },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -551,7 +555,7 @@ private slots:
                             { "dir", "en2fa" },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -570,7 +574,7 @@ private slots:
                             { "dir", "fa2en" },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -589,7 +593,7 @@ private slots:
                             { "dir", "fa2ar" },
                         });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);

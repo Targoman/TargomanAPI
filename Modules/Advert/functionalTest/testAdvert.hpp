@@ -106,7 +106,7 @@ private:
 
         //            lastPreVoucher.fromJson(Result.toJsonObject());
 
-        //            QVERIFY(lastPreVoucher.Items.length() > ItemsCount);
+        //            QVERIFY_DUMP_RESULT(lastPreVoucher.Items.length() > ItemsCount);
 
         //        } QT_CATCH (const std::exception &exp) {
         //            QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -138,7 +138,7 @@ private:
         //                    QString("Advert/PaymentGateways/%1").arg(paymentGatewayID.toString())
         //                );
 
-        //                QVERIFY(Result == true);
+        //                QVERIFY_DUMP_RESULT(Result == true);
 
         //            } QT_CATCH (const std::exception &exp) {
         //                QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -213,7 +213,7 @@ private slots:
                     { "random", 1 },
                 });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
             this->LastRandomNumber = Result.toMap().value("Random").toString();
 
@@ -238,13 +238,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).actorID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).actorID() == gUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     void login_admin() {
@@ -257,13 +257,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
-        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).actorID() == gAdminUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     /***************************************************/
@@ -322,7 +322,7 @@ private slots:
         QString url = QString("http://www.%1.com").arg(SecurityHelper::UUIDtoMD5());
 
         QT_TRY {
-            this->LocationID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/Locations",
                 {},
@@ -332,7 +332,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->LocationID > 0);
+            this->LocationID = Result;
+
+            QVERIFY_DUMP_RESULT(this->LocationID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -343,7 +345,7 @@ private slots:
         this->BannerProductCode = QString("p%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
-            this->BannerProductID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountProducts",
                 {},
@@ -366,7 +368,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->BannerProductID > 0);
+            this->BannerProductID = Result;
+
+            QVERIFY_DUMP_RESULT(this->BannerProductID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -391,7 +395,7 @@ private slots:
                 }
             );
 
-            QVERIFY(Result > 0);
+            QVERIFY_DUMP_RESULT(Result > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -402,7 +406,7 @@ private slots:
         this->BannerSaleableCode = QString("%1-s%2").arg(this->BannerProductCode).arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
-            this->BannerSaleableID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountSaleables",
                 {},
@@ -426,7 +430,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->BannerSaleableID > 0);
+            this->BannerSaleableID = Result;
+
+            QVERIFY_DUMP_RESULT(this->BannerSaleableID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -484,7 +490,7 @@ private slots:
                         }
                     );
 
-                    QVERIFY(paymentGatewayID > 0);
+                    QVERIFY_DUMP_RESULT(paymentGatewayID > 0);
 
                 } QT_CATCH (const std::exception &exp) {
                     QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -515,12 +521,11 @@ private slots:
                 { "accept-language: fa" }
             );
 
-            QVERIFY(Result.isValid() == false);
+            QVERIFY_DUMP_RESULT(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
 //            QTest::qFail(exp.what(), __FILE__, __LINE__);
-            qDebug() << exp.what();
-            QVERIFY(true);
+            qDebug() << "OK" << exp.what();
         }
     }
 
@@ -543,12 +548,11 @@ private slots:
                 { "accept-language: fa" }
             );
 
-            QVERIFY(Result.isValid() == false);
+            QVERIFY_DUMP_RESULT(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
 //            QTest::qFail(exp.what(), __FILE__, __LINE__);
             qDebug() << exp.what();
-            QVERIFY(true);
         }
     }
 
@@ -571,12 +575,11 @@ private slots:
                 { "accept-language: fa" }
             );
 
-            QVERIFY(Result.isValid() == false);
+            QVERIFY_DUMP_RESULT(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
 //            QTest::qFail(exp.what(), __FILE__, __LINE__);
             qDebug() << exp.what();
-            QVERIFY(true);
         }
     }
 
@@ -584,7 +587,7 @@ private slots:
         this->CouponCode = QString("cpn-code-%1").arg(QRandomGenerator::global()->generate());
 
         QT_TRY {
-            this->CouponID = callAdminAPI(
+            QVariant Result = callAdminAPI(
                 RESTClientHelper::PUT,
                 "Advert/AccountCoupons",
                 {},
@@ -614,7 +617,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->CouponID > 0);
+            this->CouponID = Result;
+
+            QVERIFY_DUMP_RESULT(this->CouponID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -646,13 +651,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 200);
-            QVERIFY(this->LastPreVoucher.ToPay == 46'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 200);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 46'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 13'800);
-            QVERIFY(item.TotalPrice == 46'200);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 13'800);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 46'200);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -677,9 +682,9 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() < ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 0);
-            QVERIFY(this->LastPreVoucher.ToPay == 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() < ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -711,13 +716,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 920);
-            QVERIFY(this->LastPreVoucher.ToPay == 73'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 920);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 73'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 22'080);
-            QVERIFY(item.TotalPrice == 73'920);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 22'080);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 73'920);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -744,13 +749,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 400);
-            QVERIFY(this->LastPreVoucher.ToPay == 92'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 400);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 92'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 27'600);
-            QVERIFY(item.TotalPrice == 92'400);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 27'600);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 92'400);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -777,13 +782,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 0);
-            QVERIFY(this->LastPreVoucher.ToPay == 114'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 114'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 6'000);
-            QVERIFY(item.TotalPrice == 114'000);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 6'000);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 114'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -815,13 +820,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 360);
-            QVERIFY(this->LastPreVoucher.ToPay == 243'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 360);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 243'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 38'640);
-            QVERIFY(item.TotalPrice == 129'360);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 38'640);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 129'360);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -853,13 +858,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 600);
-            QVERIFY(this->LastPreVoucher.ToPay == 252'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 600);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 252'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 41'400);
-            QVERIFY(item.TotalPrice == 138'600);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 41'400);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 138'600);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -881,12 +886,11 @@ private slots:
                 }
             );
 
-            QVERIFY(Result.isValid() == false);
+            QVERIFY_DUMP_RESULT(Result.isValid() == false);
 
         } QT_CATCH (const std::exception &exp) {
 //            QTest::qFail(exp.what(), __FILE__, __LINE__);
             qDebug() << exp.what();
-            QVERIFY(true);
         }
     }
 
@@ -906,7 +910,7 @@ private slots:
                 }
             );
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -930,7 +934,7 @@ private slots:
 
 //            this->BasketVoucher.fromJson(Result.toJsonObject());
 
-//            QVERIFY(this->BasketVoucher.ID > 0);
+//            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             if (strcmp(exp.what(), "Permission to charge the wallet is not given") != 0)
@@ -960,8 +964,8 @@ private slots:
             this->BasketVoucher.fromJson(Result.toJsonObject());
             this->LastPreVoucher = this->BasketVoucher.Info;
 
-            QVERIFY(this->BasketVoucher.ID > 0);
-            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.VoucherID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -986,9 +990,9 @@ private slots:
 
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 100'000);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 152'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Payed == 100'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Remained == 152'000);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1015,8 +1019,8 @@ private slots:
             this->BasketVoucher.fromJson(Result.toJsonObject());
             this->LastPreVoucher = this->BasketVoucher.Info;
 
-            QVERIFY(this->BasketVoucher.ID > 0);
-            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.VoucherID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1041,9 +1045,9 @@ private slots:
 
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 200'000);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 52'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Payed == 200'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Remained == 52'000);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1084,8 +1088,8 @@ private slots:
             this->BasketVoucher.fromJson(Result.toJsonObject());
             this->LastPreVoucher = this->BasketVoucher.Info;
 
-            QVERIFY(this->BasketVoucher.ID > 0);
-            QVERIFY(this->LastPreVoucher.VoucherID > 0);
+            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.VoucherID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1110,9 +1114,9 @@ private slots:
 
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Payed == 252'000);
-                QVERIFY(this->ApproveOnlinePaymentVoucher.Remained == 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Payed == 252'000);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.Remained == 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1140,7 +1144,7 @@ private slots:
 
             this->Voucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->Voucher.PaymentKey.isEmpty() == false);
+            QVERIFY_DUMP_RESULT(this->Voucher.PaymentKey.isEmpty() == false);
 
         } catch (exTargomanBase &e) {
             QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
@@ -1166,7 +1170,7 @@ private slots:
 
                 this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
 
             } QT_CATCH (const std::exception &e) {
                 QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
@@ -1203,13 +1207,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() > ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 000);
-            QVERIFY(this->LastPreVoucher.ToPay == 230'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() > ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 230'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 10'000);
-            QVERIFY(item.TotalPrice == 230'000);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 10'000);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 230'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1240,13 +1244,13 @@ private slots:
             BasketActionResult.fromJson(Result.toJsonObject());
             this->LastPreVoucher = BasketActionResult.PreVoucher;
 
-            QVERIFY(this->LastPreVoucher.Items.length() == ItemsCount);
-            QVERIFY(this->LastPreVoucher.Round == 000);
-            QVERIFY(this->LastPreVoucher.ToPay == 530'000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Items.length() == ItemsCount);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.Round == 000);
+            QVERIFY_DUMP_RESULT(this->LastPreVoucher.ToPay == 530'000);
 
             auto item = this->LastPreVoucher.Items.last();
-            QVERIFY(item.DisAmount == 10'000);
-            QVERIFY(item.TotalPrice == 530'000);
+            QVERIFY_DUMP_RESULT(item.DisAmount == 10'000);
+            QVERIFY_DUMP_RESULT(item.TotalPrice == 530'000);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1272,7 +1276,7 @@ private slots:
 
             this->BasketVoucher.fromJson(Result.toJsonObject());
 
-            QVERIFY(this->BasketVoucher.ID > 0);
+            QVERIFY_DUMP_RESULT(this->BasketVoucher.ID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1299,7 +1303,7 @@ private slots:
 
 //            this->Voucher.fromJson(Result.toJsonObject());
 
-//            QVERIFY(this->Voucher.ID > 0);
+//            QVERIFY_DUMP_RESULT(this->Voucher.ID > 0);
 
 //        } QT_CATCH (const std::exception &exp) {
 //            QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1324,7 +1328,7 @@ private slots:
 
 //                this->ApproveOnlinePaymentVoucher.fromJson(Result.toJsonObject());
 
-////                QVERIFY(this->ApproveOnlinePaymentVoucher.ID > 0);
+////                QVERIFY_DUMP_RESULT(this->ApproveOnlinePaymentVoucher.ID > 0);
 
 //            } QT_CATCH (const std::exception &e) {
 //                QFAIL (QString("error(%1)").arg(e.what()).toStdString().c_str());
@@ -1336,7 +1340,7 @@ private slots:
 
     void claimOfflinePayment2() {
         QT_TRY {
-            this->OfflinePaymentClaimID = callUserAPI(
+            QVariant Result = callUserAPI(
                 RESTClientHelper::POST,
                 "Account/claimOfflinePayment",
                 {},
@@ -1350,7 +1354,9 @@ private slots:
                 }
             );
 
-            QVERIFY(this->OfflinePaymentClaimID > 0);
+            this->OfflinePaymentClaimID = Result;
+
+            QVERIFY_DUMP_RESULT(this->OfflinePaymentClaimID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1371,7 +1377,7 @@ private slots:
 
                 this->ApproveOfflinePaymentVoucher.fromJson(Result.toJsonObject());
 
-                QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
+                QVERIFY_DUMP_RESULT(this->ApproveOfflinePaymentVoucher.ID > 0);
 
             } QT_CATCH (const std::exception &exp) {
                 QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -1389,7 +1395,7 @@ private slots:
                 }
             );
 
-//            QVERIFY(this->ApproveOfflinePaymentVoucher.ID > 0);
+//            QVERIFY_DUMP_RESULT(this->ApproveOfflinePaymentVoucher.ID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);

@@ -42,7 +42,7 @@ RUN git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp && \
 
 COPY . .
 
-RUN qmake-qt5 QJsonRPC=0 && make -j 4
+RUN qmake-qt5 QJsonRPC=0 NOTEST=1 && make -j 4
 
 FROM opensuse/leap:15.3
 

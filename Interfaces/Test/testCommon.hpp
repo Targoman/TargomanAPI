@@ -32,6 +32,16 @@ using namespace Targoman::DBManager;
 #include "Interfaces/Helpers/RESTClientHelper.h"
 using namespace Targoman::API::Helpers;
 
+#define QVERIFY_DUMP_RESULT(statement) \
+do { \
+    if (!QTest::qVerify(static_cast<bool>(statement), #statement, "", __FILE__, __LINE__)) { \
+        QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }})); \
+        qDebug().noquote() << endl \
+                           << "  Result:" << Doc.toJson(); \
+        return; \
+    } \
+} while (false)
+
 constexpr quint64 UT_SystemUserID       = 1;
 constexpr quint32 UT_AdminRoleID        = 3;
 //all this constants must be begin with unit_test:
@@ -194,40 +204,43 @@ protected:
         QVariantMap *_outResponseHeaders = nullptr
     ) {
         QVariantMap ResponseHeaders;
+        QVariant Result;
 
-        QVariant Result = RESTClientHelper::callAPI(
-                              _JWT,
-                              _method,
-                              _api,
-                              _urlArgs,
-                              _postOrFormFields,
-                              _formFiles,
-                              APIURL,
-                              _requestHeaders,
-                              &ResponseHeaders
-                              );
+        try {
+            QVariant Result = RESTClientHelper::callAPI(
+                                  _JWT,
+                                  _method,
+                                  _api,
+                                  _urlArgs,
+                                  _postOrFormFields,
+                                  _formFiles,
+                                  APIURL,
+                                  _requestHeaders,
+                                  &ResponseHeaders
+                                  );
 
-        QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{"result", Result}}));
+            if (ResponseHeaders.contains("x-auth-new-token")) {
+    //            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
 
-        qDebug().noquote() << endl
-                 << "  Response Headers:" << ResponseHeaders << endl
-                 << "  Result:" << Doc.toJson();
+    //            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << endl << NewJWT;
 
-        if (ResponseHeaders.contains("x-auth-new-token")) {
-//            QString NewJWT = ResponseHeaders.value("x-auth-new-token").toString();
+    //            if (_useAdminJWT)
+    //                gEncodedAdminJWT = NewJWT;
+    //            else
+    //                gEncodedJWT = NewJWT;
+            }
 
-//            qDebug() << ">>>>>>>>>>>>>>>> JWT CHANGED TO" << endl << NewJWT;
+            if (_outResponseHeaders != nullptr)
+                *_outResponseHeaders = ResponseHeaders;
 
-//            if (_useAdminJWT)
-//                gEncodedAdminJWT = NewJWT;
-//            else
-//                gEncodedJWT = NewJWT;
+            return Result;
+        } catch(...) {
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                     << "  Response Headers:" << ResponseHeaders << endl
+                     << "  Result:" << Doc.toJson();
+            throw;
         }
-
-        if (_outResponseHeaders != nullptr)
-            *_outResponseHeaders = ResponseHeaders;
-
-        return Result;
     }
 
     QVariant callAPI(
