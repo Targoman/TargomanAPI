@@ -502,11 +502,12 @@ private slots:
 
     void paused_get_userassets() {
         QT_TRY {
-            this->callAPI(
-                        this->TokenJWT,
+            this->callUserAPI(
                         RESTClientHelper::enuHTTPMethod::GET,
                         "MT/AccountUserAssets",
-                        {},
+                        {
+                            { "apiToken", this->TokenJWT },
+                        },
                         {});
 
         } QT_CATCH (exTargomanBase &exp) {

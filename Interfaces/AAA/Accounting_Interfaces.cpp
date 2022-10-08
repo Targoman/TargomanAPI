@@ -26,9 +26,11 @@
 #include "Accounting_Interfaces.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Interfaces/Common/QtTypes.hpp"
+#include "Interfaces/Helpers/TokenHelper.h"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
+using namespace Targoman::API::Helpers;
 
 //TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuPreVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherType);
@@ -658,9 +660,55 @@ baseintfAccountUserAssets_API::baseintfAccountUserAssets_API(
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
 
-QVariant IMPL_ORMGET_API(baseintfAccountUserAssets_API) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+quint64 checkAPITokenOwner(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken
+) {
+    if (APICALLBOOM_PARAM.jwtActorType() != TAPI::enuTokenActorType::USER)
+        throw exAuthorization("JWT is not USER type");
+
+    _apiToken = _apiToken.trimmed();
+    if (_apiToken.isEmpty())
+        throw exHTTPInternalServerError("API Token not provided");
+
+    enuTokenBanType TokenBanType = TokenHelper::GetTokenBanType(_apiToken);
+    if (TokenBanType == enuTokenBanType::Block)
+        throw exAuthorization("This API Token is blocked");
+
+    TAPI::JWT_t APITokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
+
+    clsJWT APITokenJWT(APITokenJWTPayload);
+
+    if (APITokenJWT.actorType() != TAPI::enuTokenActorType::API)
+        throw exAuthorization("Just API Token is allowed");
+
+    if (APITokenJWT.ownerID() != APICALLBOOM_PARAM.getActorID())
+        throw exAuthorization("API Token is not yours");
+
+    quint64 APITokenID = APITokenJWT.actorID();
+
+    return APITokenID;
+}
+
+QVariant IMPL_REST_GET(baseintfAccountUserAssets_API, , (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken,
+    TAPI::PKsByPath_t   _pksByPath,
+    quint64             _pageIndex,
+    quint16             _pageSize,
+    TAPI::Cols_t        _cols,
+    TAPI::Filter_t      _filters,
+    TAPI::OrderBy_t     _orderBy,
+    TAPI::GroupBy_t     _groupBy,
+    bool                _reportCount
+)) {
+    bool _translate = true;
+
+    quint64 APITokenID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APITokenID }}, _filters);
 
     auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
         if (_cols.isEmpty())
@@ -904,9 +952,24 @@ baseintfAccountAssetUsage_API::baseintfAccountAssetUsage_API(
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
 
-QVariant IMPL_ORMGET_API(baseintfAccountAssetUsage_API) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+QVariant IMPL_REST_GET(baseintfAccountAssetUsage_API, , (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken,
+    TAPI::PKsByPath_t   _pksByPath,
+    quint64             _pageIndex,
+    quint16             _pageSize,
+    TAPI::Cols_t        _cols,
+    TAPI::Filter_t      _filters,
+    TAPI::OrderBy_t     _orderBy,
+    TAPI::GroupBy_t     _groupBy,
+    bool                _reportCount
+)) {
+    bool _translate = true;
+
+    quint64 APITokenID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APITokenID }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }

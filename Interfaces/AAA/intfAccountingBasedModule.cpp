@@ -124,7 +124,6 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 ) :
     intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
-//    IsTokenBase(_isTokenBase),
     AccountUnits(_units),
     AccountProducts(_products),
     AccountSaleables(_saleables),
@@ -209,8 +208,8 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
         return;
 
     for (auto UsageIter = _requestedUsage.begin();
-        UsageIter != _requestedUsage.end();
-        UsageIter++
+         UsageIter != _requestedUsage.end();
+         UsageIter++
     ) {
         if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
             continue;

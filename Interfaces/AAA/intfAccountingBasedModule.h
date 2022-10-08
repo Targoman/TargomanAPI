@@ -65,7 +65,6 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-protected:
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const ServiceUsage_t& _requestedUsage
@@ -73,6 +72,7 @@ protected:
 
     stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
+protected:
     //-- used by addToBasket: ----------------------------------------
     virtual void processItemForBasket(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
