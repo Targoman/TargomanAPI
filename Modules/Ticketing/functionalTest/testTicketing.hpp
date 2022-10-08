@@ -88,7 +88,7 @@ private slots:
                 { "random", 1 },
             });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
             this->LastRandomNumber = Result.toMap().value("Random").toString();
 
@@ -111,13 +111,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedJWT = Result.toMap().value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gJWT).actorID() == gUserID);
-        QVERIFY(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).actorID() == gUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     void login_admin() {
@@ -128,13 +128,13 @@ private slots:
                                     { "pass", "5d12d36cd5f66fe3e72f7b03cbb75333" },
                                     { "salt", "1234" },
                                 });
-        QVERIFY(Result.isValid());
+        QVERIFY_DUMP_RESULT(Result.isValid());
 
         gEncodedAdminJWT = Result.toMap().value("token").toString();
         gAdminJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedAdminJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY(clsJWT(gAdminJWT).actorID() == gAdminUserID);
-        QVERIFY(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).actorID() == gAdminUserID);
+        QVERIFY_DUMP_RESULT(clsJWT(gAdminJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 
     /***************************************************************************************/
@@ -177,7 +177,7 @@ private slots:
 
             this->MainTicketID = Result.toMap().value("id").toUInt();
 
-            QVERIFY(this->MainTicketID > 0);
+            QVERIFY_DUMP_RESULT(this->MainTicketID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -206,7 +206,7 @@ private slots:
 
             this->Reply1TicketID = Result.toMap().value("id").toUInt();
 
-            QVERIFY(this->Reply1TicketID > 0);
+            QVERIFY_DUMP_RESULT(this->Reply1TicketID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -235,7 +235,7 @@ private slots:
 
             this->Reply2TicketID = Result.toMap().value("id").toUInt();
 
-            QVERIFY(this->Reply2TicketID > 0);
+            QVERIFY_DUMP_RESULT(this->Reply2TicketID > 0);
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -253,7 +253,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -270,7 +270,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -288,7 +288,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -306,7 +306,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -326,7 +326,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -346,7 +346,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -366,7 +366,7 @@ private slots:
 
             qDebug() << Result;
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
@@ -457,7 +457,7 @@ private:
                     { "random", this->LastRandomNumber },
                 });
 
-            QVERIFY(Result.isValid());
+            QVERIFY_DUMP_RESULT(Result.isValid());
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);

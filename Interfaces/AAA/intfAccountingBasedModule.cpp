@@ -355,18 +355,19 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 /******************************************************************\
 |** basket ********************************************************|
 \******************************************************************/
-Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, addToBasket, (
+Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::internalAddToBasket(
     APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
-    TAPI::SaleableCode_t                    _saleableCode,
-    Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
-    qreal                                   _qty,
-    TAPI::CouponCode_t                      _discountCode,
-    QString                                 _referrer,
-    TAPI::JSON_t                            _referrerParams,
-//    NULLABLE_TYPE(quint64)                  _tokenID, // = NULLABLE_NULL_VALUE
-    QString                                 _apiToken,
-    Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
-)) {
+    stuAssetItem                            &_assetItem,
+    TAPI::SaleableCode_t                    &_saleableCode,
+    Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
+    qreal                                   &_qty,
+    TAPI::CouponCode_t                      &_discountCode,
+    QString                                 &_referrer,
+    TAPI::JSON_t                            &_referrerParams,
+//    QString                                 &_apiToken,
+    NULLABLE_TYPE(quint64)                  _apiTokenID,
+    Targoman::API::AAA::stuPreVoucher       &_lastPreVoucher
+) {
     /**
      1: validate preVoucher and owner
      2: find duplicates
@@ -381,32 +382,8 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     checkPreVoucherSanity(_lastPreVoucher);
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
-    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
 
-    stuAssetItem AssetItem;
-    AssetItem.AssetActorID = CurrentUserID;
-
-    //-- --------------------------------
-    _apiToken = _apiToken.trimmed();
-    if (this->IsTokenBase()) {
-        if (_apiToken.isEmpty())
-            throw exHTTPInternalServerError("This product IS token base");
-
-        TAPI::JWT_t APITokenJWTPayload;
-        QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
-        AssetItem.APITokenPayload = APITokenJWTPayload;
-
-        clsJWT APITokenJWT(APITokenJWTPayload);
-
-        APITokenID =
-            AssetItem.AssetActorID = APITokenJWT.actorID();
-
-        if (APITokenJWT.ownerID() != CurrentUserID)
-            throw exAuthorization("API Token is not yours");
-    }
-
-    if ((this->IsTokenBase() == false) && (_apiToken.isEmpty() == false))
-        throw exHTTPInternalServerError("This product IS NOT token base");
+    _assetItem.AssetActorID = CurrentUserID;
 
     //-- --------------------------------
     if (_lastPreVoucher.Items.isEmpty())
@@ -431,7 +408,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
         if (it->Referrer != _referrer)
             continue;
 
-        if (it->APITokenID != APITokenID)
+        if (it->APITokenID != _apiTokenID)
             continue;
 
         /**
@@ -478,7 +455,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
         AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
         if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
-            || (AccountUserAssetsBaseDTO.uas_actorID != AssetItem.AssetActorID) //CurrentUserID)
+            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID) //CurrentUserID)
             || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
@@ -511,20 +488,20 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 
     QJsonObject JsonSaleableInfo = QJsonObject::fromVariantMap(SaleableInfo);
 
-    AssetItem.fromJson(JsonSaleableInfo, false);
-    AssetItem.Product.fromJson(JsonSaleableInfo);
-    AssetItem.Unit.fromJson(JsonSaleableInfo);
-    AssetItem.Saleable.fromJson(JsonSaleableInfo);
+    _assetItem.fromJson(JsonSaleableInfo, false);
+    _assetItem.Product.fromJson(JsonSaleableInfo);
+    _assetItem.Unit.fromJson(JsonSaleableInfo);
+    _assetItem.Saleable.fromJson(JsonSaleableInfo);
 
     //-- --------------------------------
-    AssetItem.DiscountCode      = _discountCode;
-    AssetItem.OrderAdditives    = _orderAdditives;
-    AssetItem.Referrer          = _referrer;
-    AssetItem.ReferrerParams    = _referrerParams;
+    _assetItem.DiscountCode      = _discountCode;
+    _assetItem.OrderAdditives    = _orderAdditives;
+    _assetItem.Referrer          = _referrer;
+    _assetItem.ReferrerParams    = _referrerParams;
 
-    AssetItem.Qty               = _qty;
-    AssetItem.UnitPrice         = AssetItem.Saleable.slbBasePrice;
-    AssetItem.Discount          = 0;
+    _assetItem.Qty               = _qty;
+    _assetItem.UnitPrice         = _assetItem.Saleable.slbBasePrice;
+    _assetItem.Discount          = 0;
 
     //-- --------------------------------
     UsageLimits_t SaleableUsageLimits;
@@ -539,42 +516,42 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
             NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
         });
     }
-    AssetItem.Digested.Limits = SaleableUsageLimits;
+    _assetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processItemForBasket(APICALLBOOM_PARAM, AssetItem);
+    this->processItemForBasket(APICALLBOOM_PARAM, _assetItem);
 
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
 
     QJsonDocument JSDPendingVouchers = QJsonDocument();
-    JSDPendingVouchers.setObject(AssetItem.Private.toJson());
+    JSDPendingVouchers.setObject(_assetItem.Private.toJson());
     PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
     PreVoucherItem.Service          = this->ServiceName;
     PreVoucherItem.UUID             = SecurityHelper::UUIDtoMD5();
-    PreVoucherItem.Desc             = AssetItem.Saleable.slbName;
-    PreVoucherItem.Qty              = AssetItem.Qty; //_qty;
-    PreVoucherItem.Unit             = AssetItem.Unit.untName;
-    PreVoucherItem.UnitPrice        = AssetItem.UnitPrice;
-    PreVoucherItem.SubTotal         = AssetItem.SubTotal;
+    PreVoucherItem.Desc             = _assetItem.Saleable.slbName;
+    PreVoucherItem.Qty              = _assetItem.Qty; //_qty;
+    PreVoucherItem.Unit             = _assetItem.Unit.untName;
+    PreVoucherItem.UnitPrice        = _assetItem.UnitPrice;
+    PreVoucherItem.SubTotal         = _assetItem.SubTotal;
 
     //store multiple discounts (system (multi) + coupon (one))
-    PreVoucherItem.SystemDiscounts  = AssetItem.SystemDiscounts;
-    PreVoucherItem.CouponDiscount   = AssetItem.CouponDiscount;
+    PreVoucherItem.SystemDiscounts  = _assetItem.SystemDiscounts;
+    PreVoucherItem.CouponDiscount   = _assetItem.CouponDiscount;
 
-    PreVoucherItem.DisAmount        = AssetItem.Discount;
-    PreVoucherItem.AfterDiscount    = AssetItem.AfterDiscount;
+    PreVoucherItem.DisAmount        = _assetItem.Discount;
+    PreVoucherItem.AfterDiscount    = _assetItem.AfterDiscount;
 
-    PreVoucherItem.VATPercent       = AssetItem.VATPercent;
-    PreVoucherItem.VATAmount        = AssetItem.VAT;
+    PreVoucherItem.VATPercent       = _assetItem.VATPercent;
+    PreVoucherItem.VATAmount        = _assetItem.VAT;
 
-    PreVoucherItem.TotalPrice       = AssetItem.TotalPrice;
+    PreVoucherItem.TotalPrice       = _assetItem.TotalPrice;
 
-    PreVoucherItem.Additives        = AssetItem.OrderAdditives;
-    PreVoucherItem.Referrer         = AssetItem.Referrer;
-    PreVoucherItem.ReferrerParams   = AssetItem.ReferrerParams;
-    PreVoucherItem.APITokenID       = APITokenID;
+    PreVoucherItem.Additives        = _assetItem.OrderAdditives;
+    PreVoucherItem.Referrer         = _assetItem.Referrer;
+    PreVoucherItem.ReferrerParams   = _assetItem.ReferrerParams;
+    PreVoucherItem.APITokenID       = _apiTokenID;
 
     ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(APICALLBOOM_PARAM)
         .addCols({
@@ -592,8 +569,8 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::Fields::uas_actorID, AssetItem.AssetActorID }, //CurrentUserID },
-        { tblAccountUserAssetsBase::Fields::uas_slbID, AssetItem.Saleable.slbID },
+        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID }, //CurrentUserID },
+        { tblAccountUserAssetsBase::Fields::uas_slbID, _assetItem.Saleable.slbID },
         { tblAccountUserAssetsBase::Fields::uasQty, _qty },
 //        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
         { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
@@ -610,19 +587,19 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 //    }
 
     //-- discount
-    if (AssetItem.CouponDiscount.ID > 0) {
+    if (_assetItem.CouponDiscount.ID > 0) {
         qry.addCols({
                         tblAccountUserAssetsBase::Fields::uas_cpnID,
                         tblAccountUserAssetsBase::Fields::uasDiscountAmount,
                     })
         ;
 
-        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, AssetItem.CouponDiscount.ID);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, AssetItem.Discount); //CouponDiscount.Amount);
+        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, _assetItem.CouponDiscount.ID);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, _assetItem.Discount); //CouponDiscount.Amount);
     }
 
     //-- CustomUserAssetFields
-    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, AssetItem);
+    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, _assetItem);
     for (QVariantMap::const_iterator it = CustomFields.constBegin();
          it != CustomFields.constEnd();
          it++
@@ -668,7 +645,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 
         this->AccountSaleables->callSP(APICALLBOOM_PARAM,
                                        "spSaleable_unReserve", {
-                                           { "iSaleableID", AssetItem.Saleable.slbID },
+                                           { "iSaleableID", _assetItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
                                            { "iQty", PreVoucherItem.Qty },
                                        });
@@ -1593,6 +1570,149 @@ bool IMPL_REST_POST(baseintfAccountingBasedModule, cancelVoucherItem, (
 }
 
 /***************************************************************************************************\
+|** baseintfAccountingBasedModule_USER *************************************************************|
+\***************************************************************************************************/
+baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
+    const QString                   &_module,
+    const QString                   &_schema,
+    AssetUsageLimitsCols_t          _AssetUsageLimitsCols,
+    intfAccountUnits                *_units,
+    intfAccountProducts             *_products,
+    intfAccountSaleables            *_saleables,
+    intfAccountSaleablesFiles       *_saleablesFiles,
+    intfAccountUserAssets<false>    *_userAssets,
+    intfAccountUserAssetsFiles      *_userAssetsFiles,
+    intfAccountAssetUsage<false>    *_assetUsages,
+    intfAccountCoupons              *_discounts,
+    intfAccountPrizes               *_prizes
+) :
+    baseintfAccountingBasedModule(
+        _module,
+        _schema,
+        _AssetUsageLimitsCols,
+        _units,
+        _products,
+        _saleables,
+        _saleablesFiles,
+        _userAssets,
+        _userAssetsFiles,
+        _assetUsages,
+        _discounts,
+        _prizes
+) { ; }
+
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule_USER, addToBasket, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
+    TAPI::SaleableCode_t                    _saleableCode,
+    Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
+    qreal                                   _qty,
+    TAPI::CouponCode_t                      _discountCode,
+    QString                                 _referrer,
+    TAPI::JSON_t                            _referrerParams,
+    Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
+)) {
+    stuAssetItem AssetItem;
+
+    return this->internalAddToBasket(
+        APICALLBOOM_PARAM,
+        AssetItem,
+        _saleableCode,
+        _orderAdditives,
+        _qty,
+        _discountCode,
+        _referrer,
+        _referrerParams,
+//        "",
+        NULLABLE_NULL_VALUE,
+        _lastPreVoucher
+    );
+}
+
+/***************************************************************************************************\
+|** baseintfAccountingBasedModule_API **************************************************************|
+\***************************************************************************************************/
+baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
+    const QString                   &_module,
+    const QString                   &_schema,
+    AssetUsageLimitsCols_t          _AssetUsageLimitsCols,
+    intfAccountUnits                *_units,
+    intfAccountProducts             *_products,
+    intfAccountSaleables            *_saleables,
+    intfAccountSaleablesFiles       *_saleablesFiles,
+    intfAccountUserAssets<true>     *_userAssets,
+    intfAccountUserAssetsFiles      *_userAssetsFiles,
+    intfAccountAssetUsage<true>     *_assetUsages,
+    intfAccountCoupons              *_discounts,
+    intfAccountPrizes               *_prizes
+) :
+    baseintfAccountingBasedModule(
+        _module,
+        _schema,
+        _AssetUsageLimitsCols,
+        _units,
+        _products,
+        _saleables,
+        _saleablesFiles,
+        _userAssets,
+        _userAssetsFiles,
+        _assetUsages,
+        _discounts,
+        _prizes
+) { ; }
+
+Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule_API, addToBasket, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
+    QString                                 _apiToken,
+    TAPI::SaleableCode_t                    _saleableCode,
+    Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
+    qreal                                   _qty,
+    TAPI::CouponCode_t                      _discountCode,
+    QString                                 _referrer,
+    TAPI::JSON_t                            _referrerParams,
+    Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
+)) {
+    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    stuAssetItem AssetItem;
+
+    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
+
+    _apiToken = _apiToken.trimmed();
+    if (this->IsTokenBase()) {
+        if (_apiToken.isEmpty())
+            throw exHTTPInternalServerError("This product IS token base");
+
+        TAPI::JWT_t APITokenJWTPayload;
+        QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
+        AssetItem.APITokenPayload = APITokenJWTPayload;
+
+        clsJWT APITokenJWT(APITokenJWTPayload);
+
+        APITokenID =
+            AssetItem.AssetActorID = APITokenJWT.actorID();
+
+        if (APITokenJWT.ownerID() != CurrentUserID)
+            throw exAuthorization("API Token is not yours");
+    }
+
+    if ((this->IsTokenBase() == false) && (_apiToken.isEmpty() == false))
+        throw exHTTPInternalServerError("This product IS NOT token base");
+
+    return this->internalAddToBasket(
+        APICALLBOOM_PARAM,
+        AssetItem,
+        _saleableCode,
+        _orderAdditives,
+        _qty,
+        _discountCode,
+        _referrer,
+        _referrerParams,
+//        _apiToken,
+        APITokenID,
+        _lastPreVoucher
+    );
+}
+
+/***************************************************************************************************\
 |** intfAccountingBasedModule **********************************************************************|
 \***************************************************************************************************/
 template <bool _itmplIsTokenBase>
@@ -1611,7 +1731,7 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
     intfAccountCoupons          *_discounts,
     intfAccountPrizes           *_prizes
 ) :
-    baseintfAccountingBasedModule(
+    std::conditional<_itmplIsTokenBase, baseintfAccountingBasedModule_API, baseintfAccountingBasedModule_USER>::type(
         _module,
         _schema,
         _AssetUsageLimitsCols,

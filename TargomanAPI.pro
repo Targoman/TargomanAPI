@@ -12,7 +12,9 @@ addSubdirs(Interfaces, Dependencies)
 addSubdirs(App, Interfaces)
 addSubdirs(ModuleHelpers, Interfaces)
 addSubdirs(Modules, App)
-addSubdirs(unitTest, Modules)
+!defined(NOTEST, var) {
+    addSubdirs(unitTest, Modules)
+}
 
 # +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-#
 OTHER_FILES += \

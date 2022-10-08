@@ -184,6 +184,20 @@ protected:
 
 
 protected:
+    Targoman::API::AAA::stuBasketActionResult internalAddToBasket(
+        APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+        stuAssetItem                            &_assetItem,
+        TAPI::SaleableCode_t                    &_saleableCode,
+        Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
+        qreal                                   &_qty,
+        TAPI::CouponCode_t                      &_discountCode,
+        QString                                 &_referrer,
+        TAPI::JSON_t                            &_referrerParams,
+//        QString                                 &_apiToken,
+        NULLABLE_TYPE(quint64)                  _apiTokenID,
+        Targoman::API::AAA::stuPreVoucher       &_lastPreVoucher
+    );
+
     Targoman::API::AAA::stuBasketActionResult internalUpdateBasketItem(
         INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
         Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
@@ -193,24 +207,6 @@ protected:
     );
 
 protected slots:
-    Targoman::API::AAA::stuBasketActionResult REST_POST(
-        addToBasket,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
-            TAPI::SaleableCode_t                    _saleableCode,
-            Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
-            qreal                                   _qty = 1,
-            TAPI::CouponCode_t                      _discountCode = {},
-            QString                                 _referrer = {},
-            TAPI::JSON_t                            _referrerParams = {},
-//            NULLABLE_TYPE(quint64)                  _tokenID = NULLABLE_NULL_VALUE,
-            QString                                 _apiToken = {},
-            Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
-//            TAPI::MD5_t                             _parentItemUUID = {}
-        ),
-        "add an item to the basket and return updated pre-Voucher"
-    )
-
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
@@ -282,8 +278,95 @@ protected:
 };
 
 /******************************************************/
+class baseintfAccountingBasedModule_USER : public baseintfAccountingBasedModule
+{
+    Q_OBJECT
+
+protected:
+    baseintfAccountingBasedModule_USER(
+        const QString                       &_module,
+        const QString                       &_schema,
+        AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+        intfAccountUnits                    *_units,
+        intfAccountProducts                 *_products,
+        intfAccountSaleables                *_saleables,
+        intfAccountSaleablesFiles           *_saleablesFiles,
+        intfAccountUserAssets<false>        *_userAssets,
+        intfAccountUserAssetsFiles          *_userAssetsFiles,
+        intfAccountAssetUsage<false>        *_assetUsages,
+        intfAccountCoupons                  *_discounts = nullptr,
+        intfAccountPrizes                   *_prizes = nullptr
+    );
+
+protected:
+    inline bool IsTokenBase() {
+        return false;
+    }
+
+protected slots:
+    Targoman::API::AAA::stuBasketActionResult REST_POST(
+        addToBasket,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+            TAPI::SaleableCode_t                    _saleableCode,
+            Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
+            qreal                                   _qty = 1,
+            TAPI::CouponCode_t                      _discountCode = {},
+            QString                                 _referrer = {},
+            TAPI::JSON_t                            _referrerParams = {},
+            Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
+        ),
+        "add an item to the basket and return updated pre-Voucher"
+    )
+};
+
+/******************************************************/
+class baseintfAccountingBasedModule_API : public baseintfAccountingBasedModule
+{
+    Q_OBJECT
+
+protected:
+    baseintfAccountingBasedModule_API(
+        const QString                       &_module,
+        const QString                       &_schema,
+        AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+        intfAccountUnits                    *_units,
+        intfAccountProducts                 *_products,
+        intfAccountSaleables                *_saleables,
+        intfAccountSaleablesFiles           *_saleablesFiles,
+        intfAccountUserAssets<true>         *_userAssets,
+        intfAccountUserAssetsFiles          *_userAssetsFiles,
+        intfAccountAssetUsage<true>         *_assetUsages,
+        intfAccountCoupons                  *_discounts = nullptr,
+        intfAccountPrizes                   *_prizes = nullptr
+    );
+
+protected:
+    inline bool IsTokenBase() {
+        return true;
+    }
+
+protected slots:
+    Targoman::API::AAA::stuBasketActionResult REST_POST(
+        addToBasket,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+            QString                                 _apiToken,
+            TAPI::SaleableCode_t                    _saleableCode,
+            Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
+            qreal                                   _qty = 1,
+            TAPI::CouponCode_t                      _discountCode = {},
+            QString                                 _referrer = {},
+            TAPI::JSON_t                            _referrerParams = {},
+            Targoman::API::AAA::stuPreVoucher       _lastPreVoucher = {}
+        ),
+        "add an item to the basket and return updated pre-Voucher"
+    )
+};
+
+/******************************************************/
 template <bool _itmplIsTokenBase>
-class intfAccountingBasedModule : public baseintfAccountingBasedModule
+class intfAccountingBasedModule : public std::conditional<_itmplIsTokenBase, baseintfAccountingBasedModule_API, baseintfAccountingBasedModule_USER>::type
 {
 protected:
     intfAccountingBasedModule(
@@ -300,12 +383,6 @@ protected:
         intfAccountCoupons                          *_discounts = nullptr,
         intfAccountPrizes                           *_prizes = nullptr
     );
-//    virtual ~intfAccountingBasedModule();
-
-protected:
-    inline bool IsTokenBase() {
-        return _itmplIsTokenBase;
-    }
 };
 
 extern baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName);
