@@ -397,7 +397,9 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
-    _assetItem.AssetActorID = CurrentUserID;
+    _assetItem.AssetActorID = this->IsTokenBase()
+                              ? NULLABLE_VALUE(_apiTokenID)
+                              : CurrentUserID;
 
     //-- --------------------------------
     if (_lastPreVoucher.Items.isEmpty())
@@ -457,9 +459,6 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
                         })
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
             .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->OrderID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, AssetItem.Saleable.slbID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, it->UUID })
             .one();
 
         tblAccountUserAssetsBase::DTO AccountUserAssetsBaseDTO;
@@ -469,7 +468,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
         if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
-            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID) //CurrentUserID)
+            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID)
             || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
@@ -583,7 +582,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID }, //CurrentUserID },
+        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID },
         { tblAccountUserAssetsBase::Fields::uas_slbID, _assetItem.Saleable.slbID },
         { tblAccountUserAssetsBase::Fields::uasQty, _qty },
 //        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
@@ -1688,10 +1687,11 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
     stuAssetItem AssetItem;
 
-    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
+//    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
+    quint64 APITokenID = 0;
 
     _apiToken = _apiToken.trimmed();
-    if (this->IsTokenBase()) {
+//    if (this->IsTokenBase()) {
         if (_apiToken.isEmpty())
             throw exHTTPInternalServerError("This product IS token base");
 
@@ -1706,7 +1706,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 
         if (APITokenJWT.ownerID() != CurrentUserID)
             throw exAuthorization("API Token is not yours");
-    }
+//    }
 
     if ((this->IsTokenBase() == false) && (_apiToken.isEmpty() == false))
         throw exHTTPInternalServerError("This product IS NOT token base");
