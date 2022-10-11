@@ -292,7 +292,7 @@ namespace tblPaymentGateways {
 /******************************************************/
 class PaymentGatewayTypesI18N : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypesI18N)
 };
 

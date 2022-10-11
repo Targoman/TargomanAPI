@@ -32,11 +32,11 @@ namespace Targoman::API::AAA::Authorization {
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
             const QString& _ip);
 
-    extern QJsonObject retrieveTokenInfo(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-            const QString& _token,
-            const QString& _ip,
-            const QStringList& _requiredPrivs = {});
+//    extern QJsonObject retrieveTokenInfo(
+//            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            const QString& _token,
+//            const QString& _ip,
+//            const QStringList& _requiredPrivs = {});
 
     extern bool hasPriv(
             INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,

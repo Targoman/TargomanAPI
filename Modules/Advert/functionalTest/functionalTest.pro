@@ -6,7 +6,7 @@
 #   Redistribution and use in source and binary forms are allowed under the
 #   terms of BSD License 2.0.
 ################################################################################
-TEST_NAME = advertFunctionalTest
+TEST_NAME=advertFunctionalTest
 
 HEADERS += \
     ORM/actionLogs.hpp \
@@ -23,3 +23,5 @@ include($$BASE_TEST_PATH/Test.pri)
 ################################################################################
 include($$QBUILD_PATH/templates/unitTestConfigs.pri)
 LIBS -= -lTargomanAPI
+
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)

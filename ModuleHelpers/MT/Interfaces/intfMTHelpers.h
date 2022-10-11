@@ -440,7 +440,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTCorrectionRules : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTCorrectionRules(const QString& _schema,
@@ -453,7 +453,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTDigestedTranslationLogs : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTDigestedTranslationLogs(const QString& _schema,
@@ -466,7 +466,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTMultiDic : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTMultiDic(const QString& _schema,
@@ -479,7 +479,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTTokenStats : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTTokenStats(const QString& _schema,
@@ -492,7 +492,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTTranslatedPhrases : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTTranslatedPhrases(const QString& _schema,
@@ -505,7 +505,7 @@ public:
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 class intfMTTranslationLogs : public intfSQLBasedModule, public intfMTHelperORMBase<_itmplTokenActorType>
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfMTTranslationLogs(const QString& _schema,

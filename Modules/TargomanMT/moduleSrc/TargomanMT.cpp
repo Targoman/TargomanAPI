@@ -126,26 +126,6 @@ void TargomanMT::initializeModule() {
     MTHelper::instance().initialize();
 }
 
-stuServiceCreditsInfo TargomanMT::retrieveServiceCreditsInfo(quint64 _usrID) {
-    ///@TODO: complete this
-    return stuServiceCreditsInfo(
-                {},
-                NULLABLE_NULL_VALUE,
-                NULLABLE_NULL_VALUE,
-                {},
-                {}
-                );
-}
-
-void TargomanMT::breakCredit(quint64 _slbID) {
-}
-
-bool TargomanMT::isUnlimited(const UsageLimits_t& _limits) const {
-}
-
-bool TargomanMT::isEmpty(const UsageLimits_t& _limits) const {
-}
-
 void TargomanMT::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,

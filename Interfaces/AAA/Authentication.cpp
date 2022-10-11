@@ -33,7 +33,7 @@ stuActiveAccount login(
     const QString&     _login,
     const QString&     _pass,
     const QString&     _salt,
-    const QStringList& _requiredServices,
+//    const QStringList& _services,
     bool               _rememberMe,
     const QJsonObject& _info,
     const QString&     _fingerPrint
@@ -54,11 +54,11 @@ stuActiveAccount login(
                            .toJson(true)
                            .object();
 
-    return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices);
+    return PrivHelpers::processUserObject(UserInfo, {}/*, _services*/);
 }
 
 /*
-stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _requiredServices) {
+stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QString& _services) {
     makeAAADAC(DAC);
 
     QJsonObject UserInfo = DAC.callSP({},
@@ -67,7 +67,7 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
                                           {"iSSID", _ssid},
                                       }).toJson(true).object();
 
-    return PrivHelpers::processUserObject(UserInfo, {}, _requiredServices.split(',', QString::SkipEmptyParts));
+    return PrivHelpers::processUserObject(UserInfo, {}, _services.split(',', QString::SkipEmptyParts));
 }
 */
 
@@ -139,7 +139,7 @@ QString renewExpiredJWT(
     }
 
     //-- else: renew -----
-    QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
+//    QStringList Services = JWT.privatePart().value("svc").toString().split(',', QString::SkipEmptyParts);
     _isRenewed = true;
     quint32 Duration = JWT.expireAt() - JWT.issuedAt();
     QJsonObject UserInfo = DAC.callSP({},
@@ -149,7 +149,7 @@ QString renewExpiredJWT(
                                           { "iIssuance", JWT.issuedAt() },
                                       }).toJson(true).object();
 
-    stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(UserInfo, {}, Services);
+    stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(UserInfo, {}/*, Services*/);
 
     _JWTPayload["iat"] = ActiveAccount.Privs["Issuance"];
     _JWTPayload["privs"] = ActiveAccount.Privs["privs"];

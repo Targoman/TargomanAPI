@@ -38,7 +38,7 @@ class clsRequestHandler;
 
 class clsUpdateAndPruneThread : public QThread
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 private:
     void run() Q_DECL_FINAL;
@@ -87,6 +87,7 @@ private:
 class clsRequestHandler : public QObject
 {
     Q_OBJECT
+
     struct stuResult
     {
         qhttp::TStatusCode StatusCode;

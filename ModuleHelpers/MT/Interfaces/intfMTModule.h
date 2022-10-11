@@ -76,6 +76,12 @@ public:
         intfMTTranslationLogs_Type                  *_translationLogs
     );
 
+protected:
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
+    virtual void breakCredit(quint64 _slbID);
+    virtual bool isUnlimited(const UsageLimits_t& _limits) const;
+    virtual bool isEmpty(const UsageLimits_t& _limits) const;
+
 public:
     QScopedPointer<intfMTCorrectionRules_Type>         MTCorrectionRules;
     QScopedPointer<intfMTDigestedTranslationLogs_Type> MTDigestedTranslationLogs;

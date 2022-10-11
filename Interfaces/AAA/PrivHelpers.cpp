@@ -33,19 +33,30 @@ namespace Targoman::API::AAA {
 
 using namespace DBManager;
 
-stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services) {
+stuActiveAccount PrivHelpers::digestPrivileges(
+    const QJsonArray& _privs,
+    quint64 _usrID
+//    const QStringList& _services
+) {
     QJsonObject Privs;
 
-    foreach (auto Service, _services)
-        if (serviceAccounting(Service) == nullptr)
-            throw exHTTPBadRequest("Service " + Service + " was not registered.");
+//    foreach (auto Service, _services)
+//        if (serviceAccounting(Service) == nullptr)
+//            throw exHTTPBadRequest("Service " + Service + " was not registered.");
 
     qint64 MinTTL = LLONG_MAX;
     foreach (auto Priv, _privs) {
         QJsonObject PrivObj = Priv.toObject();
-        for (auto PrivIter = PrivObj.begin(); PrivIter != PrivObj.end(); ++PrivIter)
-            if (PrivIter.key() == "ALL" || _services.contains("ALL") || _services.contains(PrivIter.key())) {
+        for (auto PrivIter = PrivObj.begin();
+             PrivIter != PrivObj.end();
+             ++PrivIter
+        ) {
+            if (PrivIter.key() == "ALL"
+//                    || _services.contains("ALL")
+//                    || _services.contains(PrivIter.key())
+            ) {
                 Privs = Targoman::Common::mergeJsonObjects(Privs, PrivIter);
+
                 if (PrivIter.key() != "ALL") {
                     Targoman::API::AAA::stuActiveCredit ActiveAccount = serviceAccounting(PrivIter.key())->activeAccountObject(_usrID);
                     if (ActiveAccount.TTL) {
@@ -62,12 +73,14 @@ stuActiveAccount PrivHelpers::digestPrivileges(const QJsonArray& _privs, quint64
                     }
                 }
             }
+        }
     }
 
-    if (Privs.contains("ALL") == false)
-        foreach (auto Service, _services)
-            if (Privs.contains(Service) == false)
-                throw exAuthorization("Not enough privileges to access <"+Service+">");
+    if (Privs.contains("ALL") == false) {
+//        foreach (auto Service, _services)
+//            if (Privs.contains(Service) == false)
+//                throw exAuthorization("Not enough privileges to access <"+Service+">");
+    }
 
     return  { MinTTL, Privs };
 }
@@ -162,8 +175,8 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
 
 stuActiveAccount PrivHelpers::processUserObject(
     QJsonObject& _userObj,
-    const QStringList& _requiredAccess,
-    const QStringList& _services
+    const QStringList& _requiredAccess
+//    const QStringList& _services
 ) {
     if (_userObj.contains(DBM_SPRESULT_ROWS))
         _userObj = _userObj[DBM_SPRESULT_ROWS].toArray().at(0).toObject();
@@ -172,8 +185,9 @@ stuActiveAccount PrivHelpers::processUserObject(
         stuActiveAccount ActiveAccount =
                 PrivHelpers::digestPrivileges(
                     _userObj[AAACommonItems::privs].toArray(),
-                    static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble()),
-                    _services);
+                    static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble())
+//                    _services
+                );
 
         _userObj[AAACommonItems::privs] = PrivHelpers::confirmPrivilegeBase(ActiveAccount.Privs, _requiredAccess);
 

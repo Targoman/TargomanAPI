@@ -120,26 +120,6 @@ void MT::initializeModule() {
     MTHelper::instance().initialize();
 }
 
-stuServiceCreditsInfo MT::retrieveServiceCreditsInfo(quint64 _usrID) {
-    ///@TODO: complete this
-    return stuServiceCreditsInfo(
-                {},
-                NULLABLE_NULL_VALUE,
-                NULLABLE_NULL_VALUE,
-                {},
-                {}
-                );
-}
-
-void MT::breakCredit(quint64 _slbID) {
-}
-
-bool MT::isUnlimited(const UsageLimits_t& _limits) const {
-}
-
-bool MT::isEmpty(const UsageLimits_t& _limits) const {
-}
-
 void MT::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuAssetItem      &_assetItem,
@@ -306,6 +286,21 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
 
+    //check credit
+    //-----------------------------------------
+//    ServiceUsage_t RequestedUsage = {
+//        { QString("%1::%2").arg(_engine).arg(_dir), SourceWordCount },
+//        { "dic", _dic ? 1 : 0 },
+////        { "sample", },
+//    };
+
+//    this->checkUsageIsAllowed(
+//                APICALLBOOM_PARAM,
+//                RequestedUsage,
+//                "translate"
+//                );
+
+    //-----------------------------------------
     PreprocessTime += Timer.elapsed();
 
     try {

@@ -68,12 +68,6 @@ public:
     virtual void initializeModule();
 
 protected:
-    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
-
-    virtual void breakCredit(quint64 _slbID);
-    virtual bool isUnlimited(const UsageLimits_t& _limits) const;
-    virtual bool isEmpty(const UsageLimits_t& _limits) const;
-
     virtual void computeAdditives(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
         INOUT stuAssetItem      &_assetItem,

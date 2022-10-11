@@ -259,12 +259,12 @@ QVariantMap MTHelper::doTranslation(
     //check credit
     //-----------------------------------------
     if (APICALLBOOM_PARAM.isAnonymouse() == false) {
-        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
-                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
-                                                                 clsCondition(tblAccountUserAssetsBase::Fields::uas_actorID,
-                                                                              enuConditionOperator::Equal,
-                                                                              APICALLBOOM_PARAM.getActorID())/*,
-                                                                 3600*/);
+//        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
+//                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
+//                                                                 clsCondition(tblAccountUserAssetsBase::Fields::uas_actorID,
+//                                                                              enuConditionOperator::Equal,
+//                                                                              APICALLBOOM_PARAM.getActorID())/*,
+//                                                                 3600*/);
 
 
 //        $SPResult = $this->DB['MT']->call("sp_READ_usedCredit", array($this->Privs["tokID"], $EngineSQLName));
@@ -277,6 +277,20 @@ QVariantMap MTHelper::doTranslation(
 //            $this->checkCredit('MaxPerMonth', $SPResult['rows'][1]['tstMonthWordCount'] + $SourceWordCount);
 //            $this->checkCredit('MaxTotal', $SPResult['rows'][1]['tstTotalWordCount'] + $SourceWordCount);
 //        }
+
+        //check credit
+        //-----------------------------------------
+        ServiceUsage_t RequestedUsage = {
+            { QString("%1::%22%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+            { "dic", _dic ? 1 : 0 },
+    //        { "sample", },
+        };
+
+        _mtModule->checkUsageIsAllowed(
+                    APICALLBOOM_PARAM,
+                    RequestedUsage,
+                    "translate"
+                    );
     }
 
     //-----------------------------------------

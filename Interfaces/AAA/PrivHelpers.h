@@ -47,12 +47,21 @@ public:
     static QJsonObject confirmPrivilegeBase(const QJsonObject& _privs, const QStringList& _requiredAccess);
     static void validateToken(const QString& _token);
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector, const QVariant &_defIfNotFoundAndAllIsDefined = {});
-    static stuActiveAccount processUserObject(QJsonObject& _userObj, const QStringList& _requiredAccess = {}, const QStringList& _services = {});
+
+    static stuActiveAccount processUserObject(
+        QJsonObject& _userObj,
+        const QStringList& _requiredAccess = {}
+//        const QStringList& _services = {}
+    );
 
     static QByteArray getURL(const QString& _url);
 
 private:
-    static stuActiveAccount digestPrivileges(const QJsonArray& _privs, quint64 _usrID, const QStringList& _services);
+    static stuActiveAccount digestPrivileges(
+        const QJsonArray& _privs,
+        quint64 _usrID
+//        const QStringList& _services
+    );
 };
 
 } // namespace Targoman::API::AAA

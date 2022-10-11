@@ -159,7 +159,8 @@ stuActiveCredit baseintfAccountingBasedModule::activeAccountObject(quint64 _usrI
 
 void baseintfAccountingBasedModule::checkUsageIsAllowed(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const ServiceUsage_t &_requestedUsage
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
 ) {
     QJsonObject Privs = APICALLBOOM_PARAM.getJWTPrivsObject();
 
@@ -171,7 +172,7 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
-    auto CheckCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
+    auto FnCheckCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
         if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
 
@@ -189,16 +190,28 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
 
     if (BestMatchedCredit.IsFromParent) {
         for (auto UsageIter = _requestedUsage.begin();
-            UsageIter != _requestedUsage.end();
-            UsageIter++
+             UsageIter != _requestedUsage.end();
+             UsageIter++
         ) {
+
+            /*
+             1/ NMT::en2fa::kooft
+             2/ NMT::en2fa
+             3/ NMT
+            */
+
+
+
+
+
+
             if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
                 continue;
 
             if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
-                CheckCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
+                FnCheckCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
 
-            CheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+            FnCheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
         }
 
         return;
@@ -214,7 +227,7 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
         if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
             continue;
 
-        CheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+        FnCheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
     }
 }
 
@@ -228,13 +241,13 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
     QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
 
-    auto EffectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto FnEffectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
         return _assetItem.Product.prdValidFromHour //.isNull() == fasle
             ? QDateTime(Now.date()).addSecs(*_assetItem.Product.prdValidFromHour * 3600)
             : QDateTime(Now.date());
     };
 
-    auto EffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto FnEffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
         if (NULLABLE_IS_NULL(_assetItem.Product.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.Product.prdValidToHour))
             QDateTime(Now.date().addDays(1));
 
@@ -245,19 +258,20 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.Product.prdValidToHour * 3600);
     };
 
-    auto IsInvalidPackage = [this, Now, EffectiveStartDateTime, EffectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
+    auto FnIsInvalidPackage = [this, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
         if ((_assetItem.Product.prdValidFromDate.isValid() && _assetItem.Product.prdValidFromDate > Now.date())
                || (_assetItem.Product.prdValidToDate.isValid() && _assetItem.Product.prdValidToDate < Now.date())
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidFromHour) && Now < EffectiveStartDateTime(_assetItem))
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidToHour) && Now > EffectiveEndDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidFromHour) && Now < FnEffectiveStartDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidToHour) && Now > FnEffectiveEndDateTime(_assetItem))
                || this->isEmpty(_assetItem.Digested.Limits)
             )
             return false;
 
         if (_requestedUsage.size()) {
             for (auto UsageIter = _requestedUsage.begin();
-                UsageIter != _requestedUsage.end();
-                UsageIter++) {
+                 UsageIter != _requestedUsage.end();
+                 UsageIter++
+            ) {
                 if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
 
@@ -275,13 +289,13 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
         return true;
     };
 
-    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && IsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && FnIsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
         return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
                                NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
                                ServiceCreditsInfo.MyLimitsOnParent,
                                -1);
 
-    auto ComparePackages = [this, &EffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+    auto FnComparePackages = [this, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() == false) return -1;
         if (a.Product.prdValidToDate.isValid() == false && b.Product.prdValidToDate.isValid()) return 1;
         if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
@@ -289,8 +303,8 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
         if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_IS_NULL(b.Product.prdValidToHour)) return -1;
         if (NULLABLE_IS_NULL(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) return 1;
         if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) {
-            if (EffectiveEndDateTime(a) < EffectiveEndDateTime(b)) return -1;
-            if (EffectiveEndDateTime(a) > EffectiveEndDateTime(b)) return 1;
+            if (FnEffectiveEndDateTime(a) < FnEffectiveEndDateTime(b)) return -1;
+            if (FnEffectiveEndDateTime(a) > FnEffectiveEndDateTime(b)) return 1;
         }
         if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() && a.Product.prdValidToDate != b.Product.prdValidToDate)
             return b.Product.prdValidToDate > a.Product.prdValidToDate ? -1 : 1;
@@ -300,12 +314,12 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     QList<stuAssetItem> CandidateCredit;
 
     for (auto AccountIter = ServiceCreditsInfo.ActiveCredits.begin();
-        AccountIter != ServiceCreditsInfo.ActiveCredits.end();
-        AccountIter++
+         AccountIter != ServiceCreditsInfo.ActiveCredits.end();
+         AccountIter++
     ) {
         const stuAssetItem& Item = AccountIter.value();
 
-        if (IsInvalidPackage(Item))
+        if (FnIsInvalidPackage(Item))
             continue;
 
         if (CandidateCredit.isEmpty()) {
@@ -315,10 +329,10 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
         bool Inserted = false;
         for (auto CandidateIter = CandidateCredit.begin();
-            CandidateIter != CandidateCredit.end();
-            CandidateIter++
+             CandidateIter != CandidateCredit.end();
+             CandidateIter++
         ) {
-            if (ComparePackages(Item, *CandidateIter) < 0) {
+            if (FnComparePackages(Item, *CandidateIter) < 0) {
                 this->breakCredit(CandidateIter->Saleable.slbID);
                 CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
@@ -340,11 +354,11 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     QDateTime NextDigestTime;
     if (ActivePackage.Product.prdValidToDate.isNull() == false) {
         if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
-            NextDigestTime = EffectiveEndDateTime(ActivePackage);
+            NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
         else
             NextDigestTime = QDateTime(ActivePackage.Product.prdValidToDate.addDays(1));
     } else if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
-        NextDigestTime = EffectiveEndDateTime(ActivePackage);
+        NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
                            NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
@@ -383,7 +397,9 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
-    _assetItem.AssetActorID = CurrentUserID;
+    _assetItem.AssetActorID = this->IsTokenBase()
+                              ? NULLABLE_VALUE(_apiTokenID)
+                              : CurrentUserID;
 
     //-- --------------------------------
     if (_lastPreVoucher.Items.isEmpty())
@@ -443,9 +459,6 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
                         })
             .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
             .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, it->OrderID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uas_slbID, enuConditionOperator::Equal, AssetItem.Saleable.slbID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uas_usrID, enuConditionOperator::Equal, CurrentUserID })
-//            .andWhere({ tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, enuConditionOperator::Equal, it->UUID })
             .one();
 
         tblAccountUserAssetsBase::DTO AccountUserAssetsBaseDTO;
@@ -455,7 +468,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
         if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
-            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID) //CurrentUserID)
+            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID)
             || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
@@ -569,7 +582,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID }, //CurrentUserID },
+        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID },
         { tblAccountUserAssetsBase::Fields::uas_slbID, _assetItem.Saleable.slbID },
         { tblAccountUserAssetsBase::Fields::uasQty, _qty },
 //        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
@@ -1674,10 +1687,11 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
     stuAssetItem AssetItem;
 
-    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
+//    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
+    quint64 APITokenID = 0;
 
     _apiToken = _apiToken.trimmed();
-    if (this->IsTokenBase()) {
+//    if (this->IsTokenBase()) {
         if (_apiToken.isEmpty())
             throw exHTTPInternalServerError("This product IS token base");
 
@@ -1692,7 +1706,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 
         if (APITokenJWT.ownerID() != CurrentUserID)
             throw exAuthorization("API Token is not yours");
-    }
+//    }
 
     if ((this->IsTokenBase() == false) && (_apiToken.isEmpty() == false))
         throw exHTTPInternalServerError("This product IS NOT token base");

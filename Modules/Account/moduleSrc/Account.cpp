@@ -202,8 +202,8 @@ void Account::initializeModule() {
 TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const QString _login,
-    const stuActiveAccount& _activeAccount,
-    const QString& _services
+    const stuActiveAccount& _activeAccount
+//    const QString& _services
 ) {
     auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("jwt", "create");
 
@@ -224,7 +224,8 @@ TAPI::EncodedJWT_t Account::createJWTAndSaveToActiveSession(
     TAPI::EncodedJWT_t JWT = QJWT::createSigned(
         Payload,
         enuTokenActorType::USER,
-        QJsonObject({ { "svc", _services } }),
+//        QJsonObject({ { "svc", _services } }),
+        {},
         _activeAccount.TTL,
         _activeAccount.Privs["ssnKey"].toString()
     );
@@ -313,7 +314,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     QString _email,
     TAPI::MD5_t _code,
     bool _autoLogin,
-    TAPI::CommaSeparatedStringList_t _services,
+//    TAPI::CommaSeparatedStringList_t _services,
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
@@ -346,11 +347,11 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     if (_autoLogin) {
         auto LoginInfo = PrivHelpers::processUserObject(
                              UserInfo,
-                             {},
-                             _services.split(",", QString::SkipEmptyParts)
+                             {}
+//                             _services.split(",", QString::SkipEmptyParts)
                              );
 
-        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _email, LoginInfo, _services));
+        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _email, LoginInfo/*, _services*/));
     }
 
     return Result;
@@ -365,7 +366,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     TAPI::Mobile_t _mobile,
     quint32 _code,
     bool _autoLogin,
-    TAPI::CommaSeparatedStringList_t _services,
+//    TAPI::CommaSeparatedStringList_t _services,
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
@@ -399,11 +400,11 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     if (_autoLogin) {
         auto LoginInfo = PrivHelpers::processUserObject(
                              UserInfo,
-                             {},
-                             _services.split(",", QString::SkipEmptyParts)
+                             {}
+//                             _services.split(",", QString::SkipEmptyParts)
                              );
 
-        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _mobile, LoginInfo, _services));
+        Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _mobile, LoginInfo/*, _services*/));
     }
 
     return Result;
@@ -418,7 +419,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
     QString _emailOrMobile,
     TAPI::MD5_t _pass,
     QString _salt,
-    TAPI::CommaSeparatedStringList_t _services,
+//    TAPI::CommaSeparatedStringList_t _services,
     bool _rememberMe,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
@@ -433,7 +434,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
                                                        _emailOrMobile,
                                                        _pass,
                                                        _salt,
-                                                       _services.split(",", QString::SkipEmptyParts),
+                                                       //_services.split(",", QString::SkipEmptyParts),
                                                        _rememberMe,
                                                        _sessionInfo.object(),
                                                        _fingerprint
@@ -443,7 +444,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 //        { "userID", UserInfo["usrID"].toInt() },
     });
 
-    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _emailOrMobile, LoginInfo, _services));
+    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, _emailOrMobile, LoginInfo/*, _services*/));
 
     return Result;
 
@@ -523,7 +524,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     TAPI::enuOAuthType::Type _type,
     QString _oAuthToken,
-    TAPI::CommaSeparatedStringList_t _services,
+//    TAPI::CommaSeparatedStringList_t _services,
     TAPI::JSON_t _sessionInfo,
     TAPI::MD5_t _fingerprint
 )) {
@@ -560,7 +561,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
                          OAuthInfo.Email,
                          nullptr,
                          nullptr,
-                         _services.split(","),
+                         //_services.split(","),
                          true,
                          _sessionInfo.object(),
                          _fingerprint
@@ -570,7 +571,7 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 //        { "userID", UserInfo["usrID"].toInt() },
     });
 
-    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, OAuthInfo.Email, LoginInfo, _services));
+    Result.insert("token", this->createJWTAndSaveToActiveSession(APICALLBOOM_PARAM, OAuthInfo.Email, LoginInfo/*, _services*/));
 
     return Result;
 

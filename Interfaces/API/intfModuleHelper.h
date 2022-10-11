@@ -81,7 +81,7 @@ namespace Targoman::API::API {
 
 class intfModuleHelper : public QObject
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfModuleHelper();

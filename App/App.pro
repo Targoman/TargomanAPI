@@ -53,3 +53,5 @@ LIBS += -lTargomanAPIInterface
 DISTFILES += \
     conf/test.conf \
     conf/api.server.conf
+
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)

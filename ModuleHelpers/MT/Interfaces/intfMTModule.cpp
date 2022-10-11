@@ -70,6 +70,34 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
     MTTranslationLogs(_translationLogs)
 { ; }
 
+/*********************************************************************\
+|** accounting *******************************************************|
+\*********************************************************************/
+template <bool _itmplIsTokenBase>
+stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(quint64 _usrID) {
+    ///@TODO: complete this
+    return stuServiceCreditsInfo(
+                {},
+                NULLABLE_NULL_VALUE,
+                NULLABLE_NULL_VALUE,
+                {},
+                {}
+                );
+}
+
+template <bool _itmplIsTokenBase>
+void intfMTModule<_itmplIsTokenBase>::breakCredit(quint64 _slbID) {
+}
+
+template <bool _itmplIsTokenBase>
+bool intfMTModule<_itmplIsTokenBase>::isUnlimited(const UsageLimits_t& _limits) const {
+}
+
+template <bool _itmplIsTokenBase>
+bool intfMTModule<_itmplIsTokenBase>::isEmpty(const UsageLimits_t& _limits) const {
+}
+
+/*********************************************************************/
 template class intfMTModule<false>;
 template class intfMTModule<true>;
 
