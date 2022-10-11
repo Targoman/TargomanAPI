@@ -208,42 +208,42 @@ namespace tblMTTranslationLogs {
 /******************************************************/
 class MTCorrectionRules : public intfMTCorrectionRules<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTCorrectionRules)
 };
 
 /******************************************************/
 class MTDigestedTranslationLogs : public intfMTDigestedTranslationLogs<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTDigestedTranslationLogs)
 };
 
 /******************************************************/
 class MTMultiDic : public intfMTMultiDic<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTMultiDic)
 };
 
 /******************************************************/
 class MTTokenStats : public intfMTTokenStats<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTokenStats)
 };
 
 /******************************************************/
 class MTTranslatedPhrases : public intfMTTranslatedPhrases<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTranslatedPhrases)
 };
 
 /******************************************************/
 class MTTranslationLogs : public intfMTTranslationLogs<TAPI::enuTokenActorType::API>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, MTTranslationLogs)
 };
 

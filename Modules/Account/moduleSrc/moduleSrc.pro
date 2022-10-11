@@ -69,4 +69,4 @@ OTHER_FILES +=
 ################################################################################
 include($$QBUILD_PATH/templates/moduleConfigs.pri)
 
-DISTFILES +=
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)

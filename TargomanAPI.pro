@@ -45,4 +45,5 @@ OTHER_FILES += \
     migrations/MT/db/* \
     migrations/MT/local/* \
     migrations/MT/local/.migrations \
-    temp/sql-change-scripts.txt
+    temp/sql-change-scripts.txt \
+    pch/precompiledHeader.h \

@@ -140,3 +140,5 @@ INCLUDEPATH += \
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)
+
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)

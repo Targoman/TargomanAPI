@@ -133,7 +133,7 @@ AccountPrizes     | ANONY | USER  | API   |
 /******************************************************/
 class intfAccountUnitsI18N : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountUnitsI18N(const QString& _schema,
@@ -175,7 +175,7 @@ private slots:
 /******************************************************/
 class intfAccountProductsI18N : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountProductsI18N(const QString& _schema,
@@ -217,7 +217,7 @@ private slots:
 /******************************************************/
 class intfAccountSaleablesI18N : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountSaleablesI18N(const QString& _schema,
@@ -416,15 +416,13 @@ private slots:
 /******************************************************/
 class baseintfAccountAssetUsage : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     baseintfAccountAssetUsage(const QString& _schema,
                               const QList<DBM::clsORMField>& _cols = {},
                               const QList<DBM::stuRelation>& _relations = {},
                               const QList<DBM::stuDBIndex>& _indexes = {});
-
-private slots:
 };
 
 /******************************************************/

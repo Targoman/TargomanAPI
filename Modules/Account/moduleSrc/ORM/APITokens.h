@@ -341,6 +341,7 @@ private slots:
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             const QString &_name,
+            //TAPI::CommaSeparatedStringList_t
             const QStringList &_services = {}
         ),
         "create new empty api token"
@@ -351,6 +352,7 @@ private slots:
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             const QString       &_token,
+            //TAPI::CommaSeparatedStringList_t
             const QStringList   &_services = {}
         ),
         "Add services to the token"

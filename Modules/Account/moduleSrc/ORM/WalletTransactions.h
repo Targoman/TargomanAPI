@@ -172,10 +172,8 @@ private slots:
 
 class WalletsBalanceHistory : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Account, WalletsBalanceHistory)
-
-private:
 };
 
 } //namespace ORM

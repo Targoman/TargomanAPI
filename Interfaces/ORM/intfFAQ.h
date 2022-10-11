@@ -153,11 +153,12 @@ private slots:
     class FaqQuestions; \
     class FaqAnswers;
 
+//Q _OBJECT
+//Q _OBJECT
 //put this macro after module class definition (.h)
 #define TARGOMAN_FAQ_POSTPARENT(_module, _schema) \
     class FaqQuestions : public Targoman::API::ORM::intfFaqQuestions \
     { \
-        Q_OBJECT \
         TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqQuestions) \
     public: \
         FaqQuestions() : \
@@ -169,7 +170,6 @@ private slots:
     }; \
     class FaqAnswers : public Targoman::API::ORM::intfFaqAnswers \
     { \
-        Q_OBJECT \
         TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, FaqAnswers) \
     public: \
         FaqAnswers() : \

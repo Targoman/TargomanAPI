@@ -445,7 +445,6 @@ private slots:
                 { "mobile", this->RandomPhoneNumber },
                 { "code", Code },
                 { "autoLogin", true },
-//                        { "services",  },
 //                        { "rememberMe",  },
 //                        { "sessionInfo",  },
 //                        { "fingerprint",  },

@@ -405,11 +405,13 @@ private slots:
     class UploadGateways; \
     class UploadQueue;
 
+//Q _OBJECT
+//Q _OBJECT
+//Q _OBJECT
 //put this macro after module class definition (.h)
 #define TARGOMAN_OBJECTSTORAGE_POSTPARENT(_module, _schema) \
 class UploadFiles : public Targoman::API::ObjectStorage::ORM::intfUploadFiles \
 { \
-    Q_OBJECT \
     TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadFiles) \
 public: \
     UploadFiles() : \
@@ -426,7 +428,6 @@ public: \
 }; \
 class UploadGateways : public Targoman::API::ObjectStorage::ORM::intfUploadGateways \
 { \
-    Q_OBJECT \
     TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadGateways) \
 public: \
     UploadGateways() : \
@@ -438,7 +439,6 @@ public: \
 }; \
 class UploadQueue : public Targoman::API::ObjectStorage::ORM::intfUploadQueue \
 { \
-    Q_OBJECT \
     TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, UploadQueue) \
 public: \
     UploadQueue() : \

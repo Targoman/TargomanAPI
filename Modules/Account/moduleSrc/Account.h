@@ -74,8 +74,8 @@ private:
     TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const QString _login,
-        const stuActiveAccount& _activeAccount,
-        const QString& _services = {}
+        const stuActiveAccount& _activeAccount
+//        const QString& _services = {}
     );
 
 private slots:
@@ -116,7 +116,7 @@ private slots:
             QString _email,
             TAPI::MD5_t _code,
             bool _autoLogin = false,
-            TAPI::CommaSeparatedStringList_t _services = {},
+//            TAPI::CommaSeparatedStringList_t _services = {},
             bool _rememberMe = false,
             TAPI::JSON_t _sessionInfo = {},
             TAPI::MD5_t _fingerprint = {}
@@ -131,7 +131,7 @@ private slots:
             TAPI::Mobile_t _mobile,
             quint32 _code,
             bool _autoLogin = false,
-            TAPI::CommaSeparatedStringList_t _services = {},
+//            TAPI::CommaSeparatedStringList_t _services = {},
             bool _rememberMe = false,
             TAPI::JSON_t _sessionInfo = {},
             TAPI::MD5_t _fingerprint = {}
@@ -146,7 +146,7 @@ private slots:
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _salt,
-            TAPI::CommaSeparatedStringList_t _services = {},
+//            TAPI::CommaSeparatedStringList_t _services = {},
             bool _rememberMe = false,
             TAPI::JSON_t _sessionInfo = {},
             TAPI::MD5_t _fingerprint = {}
@@ -209,7 +209,7 @@ private slots:
             APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
             TAPI::enuOAuthType::Type _type,
             QString _oAuthToken,
-            TAPI::CommaSeparatedStringList_t _services = {},
+//            TAPI::CommaSeparatedStringList_t _services = {},
             TAPI::JSON_t _sessionInfo = TAPI::JSON_t(),
             TAPI::MD5_t _fingerprint = {}
         ),

@@ -229,10 +229,10 @@ namespace tblUserExtraInfo {
 
 class UserExtraInfo : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Account, UserExtraInfo)
 
-private slots:
+//private slots:
 //    bool REST_UPDATE(
 //        birthDate,
 //        (

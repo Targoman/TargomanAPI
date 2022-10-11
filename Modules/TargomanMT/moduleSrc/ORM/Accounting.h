@@ -351,7 +351,7 @@ namespace tblAccountCoupons {
 /******************************************************/
 class AccountUnits : public intfAccountUnitsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountUnits)
 
 protected:
@@ -361,7 +361,7 @@ protected:
 /******************************************************/
 class AccountUnitsI18N : public intfAccountUnitsI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountUnitsI18N)
 
 public:
@@ -372,7 +372,7 @@ public:
 /******************************************************/
 class AccountProducts : public intfAccountProductsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountProducts)
 
 protected:
@@ -382,7 +382,7 @@ protected:
 /******************************************************/
 class AccountProductsI18N : public intfAccountProductsI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountProductsI18N)
 
 public:
@@ -393,7 +393,7 @@ public:
 /******************************************************/
 class AccountSaleables : public intfAccountSaleablesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountSaleables)
 
 protected:
@@ -403,7 +403,7 @@ protected:
 /******************************************************/
 class AccountSaleablesI18N : public intfAccountSaleablesI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountSaleablesI18N)
 
 //public:
@@ -412,7 +412,7 @@ class AccountSaleablesI18N : public intfAccountSaleablesI18NMT
 /******************************************************/
 class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountSaleablesFiles)
 };
 
@@ -421,7 +421,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
 /******************************************************/
 class AccountUserAssets : public intfAccountUserAssetsMT<false>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountUserAssets)
 
 //public:
@@ -430,7 +430,7 @@ class AccountUserAssets : public intfAccountUserAssetsMT<false>
 /******************************************************/
 class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountUserAssetsFiles)
 
 //public:
@@ -441,7 +441,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
 /******************************************************/
 class AccountAssetUsage : public intfAccountAssetUsageMT<false>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountAssetUsage)
 
 public:
@@ -452,7 +452,7 @@ public:
 /******************************************************/
 class AccountCoupons : public intfAccountCouponsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountCoupons)
 
 public:

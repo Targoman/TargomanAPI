@@ -218,7 +218,7 @@ private slots:
 
 class TicketRead : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Ticketing, TicketRead)
 };
 

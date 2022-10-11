@@ -398,7 +398,7 @@ namespace tblAccountCouponsMTBase {
 /******************************************************/
 class intfAccountUnitsMT : public intfAccountUnits
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountUnitsMT(const QString& _schema,
@@ -412,7 +412,7 @@ public:
 /******************************************************/
 class intfAccountUnitsI18NMT : public intfAccountUnitsI18N
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountUnitsI18NMT(const QString& _schema,
@@ -426,7 +426,7 @@ public:
 /******************************************************/
 class intfAccountProductsMT : public intfAccountProducts
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountProductsMT(const QString& _schema,
@@ -440,7 +440,7 @@ public:
 /******************************************************/
 class intfAccountProductsI18NMT : public intfAccountProductsI18N
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountProductsI18NMT(const QString& _schema,
@@ -454,7 +454,7 @@ public:
 /******************************************************/
 class intfAccountSaleablesMT : public intfAccountSaleables
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountSaleablesMT(const QString& _schema,
@@ -468,7 +468,7 @@ public:
 /******************************************************/
 class intfAccountSaleablesI18NMT : public intfAccountSaleablesI18N
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountSaleablesI18NMT(const QString& _schema,
@@ -482,7 +482,7 @@ public:
 /******************************************************/
 class intfAccountSaleablesFilesMT : public intfAccountSaleablesFiles
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountSaleablesFilesMT(const QString& _schema,
@@ -496,12 +496,12 @@ public:
 /******************************************************/
 class baseintfAccountUserAssetsMT //: private QObject
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     baseintfAccountUserAssetsMT();
 
-protected slots:
+//protected slots:
 //APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
 //APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
 };
@@ -509,7 +509,7 @@ protected slots:
 template <bool _itmplIsTokenBase>
 class intfAccountUserAssetsMT : public intfAccountUserAssets<_itmplIsTokenBase>, public baseintfAccountUserAssetsMT
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountUserAssetsMT(const QString& _schema,
@@ -521,7 +521,7 @@ public:
 /******************************************************/
 class intfAccountUserAssetsFilesMT : public intfAccountUserAssetsFiles
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountUserAssetsFilesMT(const QString& _schema,
@@ -535,12 +535,12 @@ public:
 /******************************************************/
 class baseintfAccountAssetUsageMT //: private QObject
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     baseintfAccountAssetUsageMT();
 
-protected slots:
+//protected slots:
 //APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
 //APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
 };
@@ -548,7 +548,7 @@ protected slots:
 template <bool _itmplIsTokenBase>
 class intfAccountAssetUsageMT : public intfAccountAssetUsage<_itmplIsTokenBase>, public baseintfAccountAssetUsageMT
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountAssetUsageMT(const QString& _schema,
@@ -562,7 +562,7 @@ public:
 /******************************************************/
 class intfAccountCouponsMT : public intfAccountCoupons
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountCouponsMT(const QString& _schema,
@@ -578,7 +578,7 @@ public:
 /*
 class intfAccountPrizesMT : public intfAccountPrizes
 {
-//    Q_OBJECT
+//    Q _OBJECT
 
 public:
     intfAccountPrizesMT();

@@ -53,7 +53,7 @@ extern Targoman::API::AAA::stuActiveAccount login(
     const QString &_login,
     const QString &_pass,
     const QString &_salt,
-    const QStringList &_requiredServices,
+//    const QStringList &_services,
     bool _rememberMe,
     const QJsonObject &_info,
     const QString &_fingerPrint

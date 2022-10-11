@@ -391,7 +391,7 @@ namespace Targoman::API::API {
 
 class intfPureModule : public Targoman::Common::Configuration::intfModule
 {
-    Q_OBJECT
+//    Q _OBJECT
 
 public:
     struct stuModuleMethod {
@@ -417,6 +417,7 @@ public:
 
 protected:
     virtual stuModuleDBInfo requiredDB() const { return {}; }
+
 public:
     virtual QMap<QString, stuModuleDBInfo> requiredDBs() const {
         QMap<QString, stuModuleDBInfo> RequiredDBs;

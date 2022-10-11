@@ -65,12 +65,14 @@ protected:
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+
+public:
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const ServiceUsage_t& _requestedUsage
+        const ServiceUsage_t& _requestedUsage,
+        const QString &_action = {}
     );
-
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
 
 protected:
     //-- used by addToBasket: ----------------------------------------

@@ -166,11 +166,11 @@
 /************************************************************/
 #define TAPI_VALIDATION_REQUIRED_TYPE_IMPL(_complexity, _namespace, _type, _validationRule, _toVariant, ...) \
     TAPI_REGISTER_METATYPE( \
-        _complexity, \
-        _namespace, \
-        _type, \
-        [](const _namespace::_type& _value) -> QVariant { return _toVariant; }, \
-        [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_type { \
+        /* complexity         */ _complexity, \
+        /* namespace          */ _namespace, \
+        /* type               */ _type, \
+        /* fnToVariant        */ [](const _namespace::_type& _value) -> QVariant { return _toVariant; }, \
+        /* fnFromVariant      */ [](const QVariant& _value, const QByteArray& _paramName) -> _namespace::_type { \
             static QFieldValidator Validator = QFieldValidator()._validationRule; \
             if (Validator.isValid(_value, _paramName) == false) \
                 throw exHTTPBadRequest(Validator.errorMessage()); \

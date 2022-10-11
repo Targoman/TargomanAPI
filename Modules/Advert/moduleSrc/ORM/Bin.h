@@ -145,7 +145,7 @@ namespace tblBin {
 
 class Banners : public intfSQLBasedModule
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, Banners)
 };
 

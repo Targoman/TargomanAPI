@@ -24,3 +24,5 @@ INCLUDEPATH += $$BASE_PROJECT_PATH/3rdParty/E4MT/
 
 ################################################################################
 include($$QBUILD_PATH/templates/libConfigs.pri)
+
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)

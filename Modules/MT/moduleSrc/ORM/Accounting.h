@@ -351,7 +351,7 @@ namespace tblAccountCoupons {
 /******************************************************/
 class AccountUnits : public intfAccountUnitsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnits)
 
 protected:
@@ -361,7 +361,7 @@ protected:
 /******************************************************/
 class AccountUnitsI18N : public intfAccountUnitsI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUnitsI18N)
 
 public:
@@ -372,7 +372,7 @@ public:
 /******************************************************/
 class AccountProducts : public intfAccountProductsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProducts)
 
 protected:
@@ -382,7 +382,7 @@ protected:
 /******************************************************/
 class AccountProductsI18N : public intfAccountProductsI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountProductsI18N)
 
 public:
@@ -393,7 +393,7 @@ public:
 /******************************************************/
 class AccountSaleables : public intfAccountSaleablesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleables)
 
 protected:
@@ -403,7 +403,7 @@ protected:
 /******************************************************/
 class AccountSaleablesI18N : public intfAccountSaleablesI18NMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesI18N)
 
 //public:
@@ -412,7 +412,7 @@ class AccountSaleablesI18N : public intfAccountSaleablesI18NMT
 /******************************************************/
 class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountSaleablesFiles)
 };
 
@@ -421,7 +421,7 @@ class AccountSaleablesFiles : public intfAccountSaleablesFilesMT
 /******************************************************/
 class AccountUserAssets : public intfAccountUserAssetsMT<true>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssets)
 
 //public:
@@ -430,7 +430,7 @@ class AccountUserAssets : public intfAccountUserAssetsMT<true>
 /******************************************************/
 class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountUserAssetsFiles)
 
 //public:
@@ -441,7 +441,7 @@ class AccountUserAssetsFiles : public intfAccountUserAssetsFilesMT
 /******************************************************/
 class AccountAssetUsage : public intfAccountAssetUsageMT<true>
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountAssetUsage)
 
 public:
@@ -452,7 +452,7 @@ public:
 /******************************************************/
 class AccountCoupons : public intfAccountCouponsMT
 {
-    Q_OBJECT
+//    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, AccountCoupons)
 
 public:

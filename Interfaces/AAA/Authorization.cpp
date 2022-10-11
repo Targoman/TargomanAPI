@@ -38,23 +38,23 @@ void validateIPAddress(
                });
 }
 
-QJsonObject retrieveTokenInfo(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const QString& _token,
-    const QString& _ip,
-    const QStringList& _requiredPrivs
-) {
-    PrivHelpers::validateToken(_token);
+//QJsonObject retrieveTokenInfo(
+//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    const QString& _token,
+//    const QString& _ip,
+//    const QStringList& _requiredPrivs
+//) {
+//    PrivHelpers::validateToken(_token);
 
-    makeAAADAC(DAC);
-    QJsonObject TokenInfo =  DAC.callSPCacheable(3600, {},
-                                                 "spToken_RetrieveInfo", {
-                                                     {"iToken", _token},
-                                                     {"iIP", _ip},
-                                                 }).toJson(true).object();
+//    makeAAADAC(DAC);
+//    QJsonObject TokenInfo =  DAC.callSPCacheable(3600, {},
+//                                                 "spToken_RetrieveInfo", {
+//                                                     {"iToken", _token},
+//                                                     {"iIP", _ip},
+//                                                 }).toJson(true).object();
 
-    return PrivHelpers::processUserObject(TokenInfo, _requiredPrivs).Privs;
-}
+//    return PrivHelpers::processUserObject(TokenInfo, _requiredPrivs).Privs;
+//}
 
 bool hasPriv(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,

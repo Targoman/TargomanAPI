@@ -100,11 +100,11 @@ protected slots:
 //put this macro before module class definition (.h)
 #define TARGOMAN_ACTIONLOG_PREPARENT class ActionLogs;
 
+//Q _OBJECT
 //put this macro after module class definition (.h)
 #define TARGOMAN_ACTIONLOG_POSTPARENT(_module, _schema) \
 class ActionLogs : public Targoman::API::ORM::intfActionLogs \
 { \
-    Q_OBJECT \
     TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, ActionLogs) \
 public: \
     ActionLogs() : \
