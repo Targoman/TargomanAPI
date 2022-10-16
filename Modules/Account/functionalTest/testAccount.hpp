@@ -544,12 +544,14 @@ private slots:
                                       {
                                           { "emailOrMobile", this->UserEmail },
                                       });
+
             QVERIFY_DUMP_RESULT(Result.isValid() == false);
+
 //        } catch (exTargomanBase &e) {
 //            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
         } catch (std::exception &e) {
 //            QFAIL (e.what());
-            qDebug() << e.what();
+            qDebug() << "OK:" << e.what();
         }
     }
 
@@ -565,11 +567,14 @@ private slots:
                                       {
                                           { "emailOrMobile", this->UserEmail },
                                       });
+
             QVERIFY_DUMP_RESULT(Result.isValid());
-        } catch (exTargomanBase &e) {
-            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
+
+//        } catch (exTargomanBase &e) {
+//            QFAIL (QString("error(%1):%2").arg(e.code()).arg(e.what()).toStdString().c_str());
         } catch (std::exception &e) {
-            QFAIL (e.what());
+//            QFAIL (e.what());
+            qDebug() << "OK:" << e.what();
         }
     }
 
@@ -1792,8 +1797,12 @@ private slots:
                             { "token", this->TokenJWT },
                         });
 
-            QVERIFY_DUMP_RESULT(Result.isValid());
-
+        } QT_CATCH (exTargomanBase &exp) {
+            QString Message = exp.what();
+                if (Message == "Services is empty")
+                qDebug() << "OK:" << Message;
+            else
+                QTest::qFail(Message.toStdString().c_str(), __FILE__, __LINE__);
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }

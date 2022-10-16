@@ -37,7 +37,7 @@ namespace Targoman::API::AccountModule::ORM {
 tmplConfigurable<quint32> ApprovalRequest::EmailResendApprovalCodeTTL(
     AAA::makeConfig("EmailResendApprovalCodeTTL"),
     "Time to live for the email resend approval code",
-    static_cast<quint16>(120),
+    static_cast<quint32>(120),
     ReturnTrueCrossValidator(),
     "",
     "",
@@ -48,7 +48,7 @@ tmplConfigurable<quint32> ApprovalRequest::EmailResendApprovalCodeTTL(
 tmplConfigurable<quint32> ApprovalRequest::MobileResendApprovalCodeTTL(
     AAA::makeConfig("MobileResendApprovalCodeTTL"),
     "Time to live for the mobile resend approval code",
-    static_cast<quint16>(120),
+    static_cast<quint32>(120),
     ReturnTrueCrossValidator(),
     "",
     "",
@@ -59,7 +59,7 @@ tmplConfigurable<quint32> ApprovalRequest::MobileResendApprovalCodeTTL(
 tmplConfigurable<quint32> ApprovalRequest::EmailExpireApprovalCodeTTL(
     AAA::makeConfig("EmailExpireApprovalCodeTTL"),
     "Time to live for the email expire approval code",
-    static_cast<quint16>(24*60*60), //one day
+    static_cast<quint32>(24*60*60), //one day
     ReturnTrueCrossValidator(),
     "",
     "",
@@ -70,7 +70,7 @@ tmplConfigurable<quint32> ApprovalRequest::EmailExpireApprovalCodeTTL(
 tmplConfigurable<quint32> ApprovalRequest::MobileExpireApprovalCodeTTL(
     AAA::makeConfig("MobileExpireApprovalCodeTTL"),
     "Time to live for the mobile expire approval code",
-    static_cast<quint16>(15*60), //15 minutes
+    static_cast<quint32>(15*60), //15 minutes
     ReturnTrueCrossValidator(),
     "",
     "",
