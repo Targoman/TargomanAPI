@@ -90,13 +90,6 @@ MT::MT() :
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(MT, MTSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MT, MTSchema);
 
-    this->addSubModule(&MTCorrectionRules::instance());
-    this->addSubModule(&MTDigestedTranslationLogs::instance());
-    this->addSubModule(&MTMultiDic::instance());
-    this->addSubModule(&MTTokenStats::instance());
-    this->addSubModule(&MTTranslatedPhrases::instance());
-    this->addSubModule(&MTTranslationLogs::instance());
-
     this->addSubModule(AccountUnits.data());
     this->addSubModule(AccountProducts.data());
     this->addSubModule(AccountSaleables.data());
@@ -105,7 +98,14 @@ MT::MT() :
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsages.data());
     this->addSubModule(AccountCoupons.data());
-    //this->addSubModule(AccountPrizes); // There is no prize in MTisement module
+    //this->addSubModule(AccountPrizes); // There is no prize in MT module
+
+    this->addSubModule(&MTCorrectionRules::instance());
+    this->addSubModule(&MTDigestedTranslationLogs::instance());
+    this->addSubModule(&MTMultiDic::instance());
+    this->addSubModule(&MTTokenStats::instance());
+    this->addSubModule(&MTTranslatedPhrases::instance());
+    this->addSubModule(&MTTranslationLogs::instance());
 }
 
 QMap<QString, stuModuleDBInfo> MT::requiredDBs() const {
