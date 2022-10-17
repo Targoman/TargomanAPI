@@ -235,15 +235,6 @@ private slots:
     )
 
     bool REST_GET_OR_POST(
-        createForgotPasswordLink,
-        (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
-            QString _emailOrMobile
-        ),
-        "Create a forgot password request returning a UUID for the request"
-    )
-
-    bool REST_GET_OR_POST(
         changePass,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
@@ -253,6 +244,15 @@ private slots:
         ),
         "Changes password of the logged-in user. "
         "Do not set oldPass to set a new password when the current password is empty."
+    )
+
+    bool REST_GET_OR_POST(
+        createForgotPasswordLink,
+        (
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            QString _emailOrMobile
+        ),
+        "Create a forgot password request returning a UUID for the request"
     )
 
     bool REST_GET_OR_POST(
