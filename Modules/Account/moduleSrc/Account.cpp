@@ -615,23 +615,6 @@ bool IMPL_REST_GET_OR_POST(Account, logout, (
     return true;
 }
 
-bool IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
-    QString _emailOrMobile
-)) {
-    Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
-
-    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
-
-    this->callSP(APICALLBOOM_PARAM,
-                 "spForgotPass_Request", {
-                     { "iLogin", _emailOrMobile },
-                     { "iBy", Type },
-                 });
-
-    return true; //(Type == "E" ? "email" : "mobile");
-}
-
 bool IMPL_REST_GET_OR_POST(Account, changePass, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     TAPI::MD5_t _newPass,
@@ -655,6 +638,23 @@ bool IMPL_REST_GET_OR_POST(Account, changePass, (
     return true;
 }
 
+bool IMPL_REST_GET_OR_POST(Account, createForgotPasswordLink, (
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    QString _emailOrMobile
+)) {
+    Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
+
+    QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+
+    this->callSP(APICALLBOOM_PARAM,
+                 "spForgotPass_Request", {
+                     { "iLogin", _emailOrMobile },
+                     { "iBy", Type },
+                 });
+
+    return true; //(Type == "E" ? "email" : "mobile");
+}
+
 bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
     APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
     QString _emailOrMobile,
@@ -664,6 +664,12 @@ bool IMPL_REST_GET_OR_POST(Account, changePassByUUID, (
     Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
 
     QString Type = PhoneHelper::ValidateAndNormalizeEmailOrPhoneNumber(_emailOrMobile);
+
+    if (_uuid.isEmpty())
+        throw exHTTPBadRequest("UUID is empty");
+
+    if (_newPass.isEmpty())
+        throw exHTTPBadRequest("New password is empty");
 
     this->callSP(APICALLBOOM_PARAM,
                  "spPassword_ChangeByCode", {
