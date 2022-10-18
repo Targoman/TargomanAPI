@@ -26,7 +26,7 @@ INCLUDEPATH += $$BASE_TEST_PATH
 include($$BASE_TEST_PATH/Test.pri)
 
 ################################################################################
+include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)
+
 include($$QBUILD_PATH/templates/unitTestConfigs.pri)
 LIBS -= -lTargomanAPI
-
-include($$BASE_PROJECT_PATH/pch/precompiledHeader.pri)
