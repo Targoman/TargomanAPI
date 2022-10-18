@@ -169,7 +169,7 @@ private slots:
                     { "body", "this is ticket body" },
                 },
                 {
-                    { "file_1", "../../README.md" },
+                    { "file_1", "../../temp/معماری-تانوما.jpg" },
                 }
             );
 
@@ -183,7 +183,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-
+private:
     void Ticket_newFeedback_1() {
         QT_TRY {
             QVariant Result = callUserAPI(
