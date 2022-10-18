@@ -73,8 +73,8 @@ class Advert : public intfAccountingBasedModule<false>
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
-
-    virtual void breakCredit(quint64 _slbID);
+    virtual void breakCredit(quint64 _slbID,
+                             const QString &_action = {});
     virtual bool isUnlimited(const UsageLimits_t& _limits) const;
     virtual bool isEmpty(const UsageLimits_t& _limits) const;
 

@@ -232,8 +232,8 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
         TARGOMAN_CREATE_CONSTEXPR(uasDiscountAmount);
         TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
-        TARGOMAN_CREATE_CONSTEXPR(uasOrderDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uasStatus);
+        TARGOMAN_CREATE_CONSTEXPR(uasCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
     }
 }
@@ -677,9 +677,9 @@ namespace tblAccountUserAssetsBase {
             { Fields::uas_cpnID,            S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
             { Fields::uasDiscountAmount,    S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
             { Fields::uasPrefered,          S(bool),                    QFV,                        false,      UPOwner },
-            { Fields::uasOrderDateTime,     S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
             { Fields::uasStatus,            ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
             { ORM_INVALIDATED_AT_FIELD },
+            { Fields::uasCreationDateTime,  ORM_CREATED_ON }, //S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
             { Fields::uasUpdatedBy_usrID,   ORM_UPDATED_BY },
         };
 
@@ -705,8 +705,8 @@ namespace tblAccountUserAssetsBase {
             { Fields::uas_vchID },
             { Fields::uasVoucherItemUUID },
             { Fields::uas_cpnID },
-            { Fields::uasOrderDateTime },
             { Fields::uasStatus },
+            { Fields::uasCreationDateTime },
             { Fields::uasUpdatedBy_usrID },
         };
 
@@ -723,8 +723,8 @@ namespace tblAccountUserAssetsBase {
     SF_NULLABLE_quint32         (uas_cpnID), \
     SF_NULLABLE_quint32         (uasDiscountAmount), \
     SF_bool                     (uasPrefered), \
-    SF_DateTime_t               (uasOrderDateTime), \
     SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
+    SF_DateTime_t               (uasCreationDateTime), \
     SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
 
     TAPI_DEFINE_STRUCT(DTO,

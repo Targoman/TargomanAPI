@@ -167,7 +167,7 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
     if (Privs.contains(this->ServiceName) == false)
         throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getActorID(), _requestedUsage);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getActorID(), _requestedUsage, _action);
 
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
@@ -233,7 +233,8 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
 
 stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     quint64 _usrID,
-    const ServiceUsage_t& _requestedUsage
+    const ServiceUsage_t& _requestedUsage,
+    const QString &_action
 ) {
     stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
     if (ServiceCreditsInfo.ActiveCredits.isEmpty())
@@ -333,7 +334,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
              CandidateIter++
         ) {
             if (FnComparePackages(Item, *CandidateIter) < 0) {
-                this->breakCredit(CandidateIter->Saleable.slbID);
+                this->breakCredit(CandidateIter->Saleable.slbID, _action);
                 CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
                 break;
@@ -575,8 +576,8 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
                      tblAccountUserAssetsBase::Fields::uasVoucherItemUUID,
                      tblAccountUserAssetsBase::Fields::uasVoucherItemInfo,
 //                     tblAccountUserAssetsBase::Fields::uasPrefered,
-//                     tblAccountUserAssetsBase::Fields::uasOrderDateTime,
 //                     tblAccountUserAssetsBase::Fields::uasStatus,
+//                     tblAccountUserAssetsBase::Fields::uasCreationDateTime,
                  })
     ;
 
@@ -589,8 +590,8 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
         { tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, PreVoucherItem.toJson().toVariantMap() },
 //            { tblAccountUserAssetsBase::Fields::uasPrefered, ??? },
-//        { tblAccountUserAssetsBase::Fields::uasOrderDateTime, DBExpression::NOW() },
 //            { tblAccountUserAssetsBase::Fields::uasStatus, },
+//        { tblAccountUserAssetsBase::Fields::uasCreationDateTime, DBExpression::NOW() },
     };
 
 //    if (NULLABLE_HAS_VALUE(_tokenID)) {

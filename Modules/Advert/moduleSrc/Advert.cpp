@@ -126,7 +126,10 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
                 );
 }
 
-void Advert::breakCredit(quint64 _slbID) {
+void Advert::breakCredit(
+    quint64 _slbID,
+    const QString &_action
+) {
 }
 
 bool Advert::isUnlimited(const UsageLimits_t& _limits) const {

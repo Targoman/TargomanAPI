@@ -61,16 +61,19 @@ public:
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
-    virtual void breakCredit(quint64 _slbID) = 0;
+    virtual void breakCredit(quint64 _slbID,
+                             const QString &_action = {}) = 0;
     virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
     virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
 
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+    stuActiveCredit findBestMatchedCredit(quint64 _usrID,
+                                          const ServiceUsage_t &_requestedUsage = {},
+                                          const QString &_action = {});
 
 public:
     void checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const ServiceUsage_t& _requestedUsage,
+        const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
     );
 
