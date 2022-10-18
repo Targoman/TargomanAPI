@@ -138,7 +138,7 @@ quint64 ObjectStorageManager::saveFile(
     //save to tblUploadFiles
     quint64 UploadedFileID = 0;
     quint16 QueueRowsCount = 0;
-    QString FullFileName;
+//    QString FullFileName;
 
     try {
         QVariantMap SpOutVars = _uploadFiles.callSP(APICALLBOOM_PARAM,
@@ -163,7 +163,9 @@ quint64 ObjectStorageManager::saveFile(
         //move from temp to persistance location
 //        QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
         QString oStoredFileName = SpOutVars.value("oStoredFileName").toString();
-        FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName);
+        QByteArray FullFileName = QFile::encodeName(QString("%1/%2").arg(FullTempPath).arg(oStoredFileName));
+
+        TargomanDebug(5) << "moving file [" << _file.TempName << "] to [" << FullFileName << "]";
         QFile::rename(_file.TempName, FullFileName);
 
         //read and write by all
