@@ -163,9 +163,19 @@ quint64 ObjectStorageManager::saveFile(
         //move from temp to persistance location
 //        QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
         QString oStoredFileName = SpOutVars.value("oStoredFileName").toString();
-        QByteArray FullFileName = QFile::encodeName(QString("%1/%2").arg(FullTempPath).arg(oStoredFileName));
+        TargomanDebug(5) << "***********************" << endl
+                         << "oStoredFileName" << oStoredFileName << endl
+                         << "QFile::encodeName()" << QFile::encodeName(oStoredFileName) << endl
+                         << "QString::toUtf8()" << oStoredFileName.toUtf8() << endl
+                         << "QString::toLatin1()" << oStoredFileName.toLatin1() << endl
+                         << "QString::toLocal8Bit()" << oStoredFileName.toLocal8Bit() << endl
+                         ;
 
-        TargomanDebug(5) << "moving file [" << _file.TempName << "] to [" << FullFileName << "]";
+//        QString FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName);
+//        QByteArray FullFileName = QFile::encodeName(QString("%1/%2").arg(FullTempPath).arg(oStoredFileName));
+        QByteArray FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName).toUtf8();
+
+        TargomanDebug(5) << "***********************" << "moving file [" << _file.TempName << "] to [" << FullFileName << "]";
         QFile::rename(_file.TempName, FullFileName);
 
         //read and write by all
