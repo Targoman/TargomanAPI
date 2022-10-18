@@ -143,14 +143,15 @@ quint64 ObjectStorageManager::saveFile(
     try {
         QVariantMap SpOutVars = _uploadFiles.callSP(APICALLBOOM_PARAM,
                                                     "spUploadedFile_Create", {
-                                                        { "iPath",              _path },
-                                                        { "iOriginalFileName",  _file.Name },
-                                                        { "iFullTempPath",      FullTempPath },
-                                                        { "iFileSize",          _file.Size },
-                                                        { "iFileType",          FileType },
-                                                        { "iMimeType",          MimeType },
-                                                        { "iCreatorUserID",     APICALLBOOM_PARAM.getActorID() },
-                                                        { "iLockedBy",          ServerCommonConfigs::InstanceID.value() },
+                                                        { "iPath",                  _path },
+                                                        { "iOriginalFileName",      _file.Name },
+                                                        { "iFullTempPath",          FullTempPath },
+                                                        { "iSetTempFileNameToMD5",  1 },
+                                                        { "iFileSize",              _file.Size },
+                                                        { "iFileType",              FileType },
+                                                        { "iMimeType",              MimeType },
+                                                        { "iCreatorUserID",         APICALLBOOM_PARAM.getActorID() },
+                                                        { "iLockedBy",              ServerCommonConfigs::InstanceID.value() },
                                                     })
                                                     .spDirectOutputs();
 
@@ -163,6 +164,9 @@ quint64 ObjectStorageManager::saveFile(
         //move from temp to persistance location
 //        QString FileUUID = QUuid::createUuid().toString(QUuid::Id128);
         QString oStoredFileName = SpOutVars.value("oStoredFileName").toString();
+        QString oTempFileName = SpOutVars.value("oTempFileName").toString();
+
+
         TargomanDebug(5) << "***********************" << endl
                          << "oStoredFileName" << oStoredFileName << endl
                          << "QFile::encodeName()" << QFile::encodeName(oStoredFileName) << endl
@@ -171,11 +175,11 @@ quint64 ObjectStorageManager::saveFile(
                          << "QString::toLocal8Bit()" << oStoredFileName.toLocal8Bit() << endl
                          ;
 
-//        QString FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName);
-//        QByteArray FullFileName = QFile::encodeName(QString("%1/%2").arg(FullTempPath).arg(oStoredFileName));
-        QByteArray FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName).toUtf8();
 
-        TargomanDebug(5) << "***********************" << "moving file [" << _file.TempName << "] to [" << FullFileName << "]";
+//        QString FullFileName = QString("%1/%2").arg(FullTempPath).arg(oStoredFileName);
+        QByteArray FullFileName = QString("%1/%2").arg(FullTempPath).arg(oTempFileName).toUtf8();
+
+        TargomanDebug(5) << "moving file [" << _file.TempName << "] to [" << FullFileName << "]";
         QFile::rename(_file.TempName, FullFileName);
 
         //read and write by all
