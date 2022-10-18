@@ -183,6 +183,9 @@ namespace tblAccountSaleablesBase {
         // slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
 
         TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
+        TARGOMAN_CREATE_CONSTEXPR(slbDurationDays);
+        TARGOMAN_CREATE_CONSTEXPR(slbStartAtFirstUse);
+
         TARGOMAN_CREATE_CONSTEXPR(slbStatus);
         TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
@@ -232,6 +235,10 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uas_cpnID);
         TARGOMAN_CREATE_CONSTEXPR(uasDiscountAmount);
         TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
+        TARGOMAN_CREATE_CONSTEXPR(uasSplittedFrom_uasID);
+        TARGOMAN_CREATE_CONSTEXPR(uasDurationDays);
+        TARGOMAN_CREATE_CONSTEXPR(uasBeginAt);
+        TARGOMAN_CREATE_CONSTEXPR(uasEndAt);
         TARGOMAN_CREATE_CONSTEXPR(uasStatus);
         TARGOMAN_CREATE_CONSTEXPR(uasCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
@@ -496,23 +503,25 @@ namespace tblAccountSaleablesBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //ColName                           Type                                Validation                       Default     UpBy      Sort  Filter Self  Virt   PK
+            //ColName                           Type                                Validation                      Default     UpBy      Sort  Filter Self  Virt   PK
             { Fields::slbID,                    ORM_PRIMARYKEY_32 },
-            { Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),       QRequired,  UPOwner },
-            { Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                             QRequired,  UPOwner },
+            { Fields::slb_prdID,                S(quint32),                         QFV.integer().minValue(1),      QRequired,  UPOwner },
+            { Fields::slbCode,                  S(TAPI::SaleableCode_t),            QFV,                            QRequired,  UPOwner },
             ORM_MULTILANGUAGE(Fields::slbName, QRequired,  UPOwner),
             ORM_MULTILANGUAGE(Fields::slbDesc, QNull,      UPOwner),
-            { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                             TAPI::enuSaleableType::Normal, UPOwner },
-            { Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                             QNow,       UPOwner },
-            { Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                             QNull,      UPOwner },
-            { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                             QNull,      UPOwner },
-            { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),          QRequired,  UPOwner },
-            { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                             QNull,      UPOwner },
-            { Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                             QNull,      UPOwner },
-            { Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),       QRequired,  UPAdmin },
-            { Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
-            { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                             QNull,      UPAdmin },
-            { Fields::slbVoucherTemplate,       S(QString),                         QFV,                             QNull,      UPOwner },
+            { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                            TAPI::enuSaleableType::Normal, UPOwner },
+            { Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                            QNow,       UPOwner },
+            { Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
+            { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                            QNull,      UPOwner },
+            { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),         QRequired,  UPOwner },
+            { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                            QNull,      UPOwner },
+            { Fields::slbMaxSaleCountPerUser,   S(NULLABLE_TYPE(quint32)),          QFV,                            QNull,      UPOwner },
+            { Fields::slbInStockQty,            S(double),                          QFV.integer().minValue(0),      QRequired,  UPAdmin },
+            { Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                            QNull,      UPAdmin },
+            { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                            QNull,      UPAdmin },
+            { Fields::slbVoucherTemplate,       S(QString),                         QFV,                            QNull,      UPOwner },
+            { Fields::slbDurationDays,          S(NULLABLE_TYPE(quint32)),          QFV,                            QNull,      UPOwner },
+            { Fields::slbStartAtFirstUse,       S(bool),                            QFV,                            false,      UPOwner },
             { Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::slbCreationDateTime,      ORM_CREATED_ON },
@@ -566,6 +575,8 @@ namespace tblAccountSaleablesBase {
     SF_NULLABLE_qreal           (slbOrderedQty), \
     SF_NULLABLE_qreal           (slbReturnedQty), \
     SF_QString                  (slbVoucherTemplate), \
+    SF_NULLABLE_quint32         (slbDurationDays), \
+    SF_bool                     (slbStartAtFirstUse), \
     SF_ORM_STATUS_FIELD         (slbStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active), \
     SF_ORM_CREATED_ON           (slbCreationDateTime), \
     SF_ORM_CREATED_BY           (slbCreatedBy_usrID), \
@@ -666,17 +677,21 @@ namespace tblAccountUserAssetsBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            //Col                           Type                        Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
-            { Fields::uasID,                ORM_PRIMARYKEY_64 },
-            { Fields::uas_actorID,          S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
-            { Fields::uas_slbID,            S(quint64),                 QFV.integer().minValue(1),  QRequired,  UPNone },
-            { Fields::uasQty,               S(double),                  QFV,                        QRequired,  UPAdmin },
-            { Fields::uas_vchID,            S(NULLABLE_TYPE(quint64)),  QFV.integer().minValue(1),  QNull,      UPAdmin },
-            { Fields::uasVoucherItemUUID,   S(TAPI::MD5_t),             QFV,                        QRequired,  UPNone },
-            { Fields::uasVoucherItemInfo,   S(TAPI::JSON_t),            QFV,                        QRequired,  UPAdmin },
-            { Fields::uas_cpnID,            S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
-            { Fields::uasDiscountAmount,    S(NULLABLE_TYPE(quint32)),  QFV,                        QNull,      UPAdmin },
-            { Fields::uasPrefered,          S(bool),                    QFV,                        false,      UPOwner },
+            //Col                               Type                                Validation                  Default     UpBy   Sort  Filter Self  Virt   PK
+            { Fields::uasID,                    ORM_PRIMARYKEY_64 },
+            { Fields::uas_actorID,              S(quint64),                         QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::uas_slbID,                S(quint64),                         QFV.integer().minValue(1),  QRequired,  UPNone },
+            { Fields::uasQty,                   S(double),                          QFV,                        QRequired,  UPAdmin },
+            { Fields::uas_vchID,                S(NULLABLE_TYPE(quint64)),          QFV.integer().minValue(1),  QNull,      UPAdmin },
+            { Fields::uasVoucherItemUUID,       S(TAPI::MD5_t),                     QFV,                        QRequired,  UPNone },
+            { Fields::uasVoucherItemInfo,       S(TAPI::JSON_t),                    QFV,                        QRequired,  UPAdmin },
+            { Fields::uas_cpnID,                S(NULLABLE_TYPE(quint32)),          QFV,                        QNull,      UPAdmin },
+            { Fields::uasDiscountAmount,        S(NULLABLE_TYPE(quint32)),          QFV,                        QNull,      UPAdmin },
+            { Fields::uasPrefered,              S(bool),                            QFV,                        false,      UPOwner },
+            { Fields::uasSplittedFrom_uasID,    S(NULLABLE_TYPE(quint64)),          QFV,                        QNull,      UPOwner },
+            { Fields::uasDurationDays,          S(NULLABLE_TYPE(quint32)),          QFV,                        QNull,      UPOwner },
+            { Fields::uasBeginAt,               S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                        QNull,      UPOwner },
+            { Fields::uasEndAt,                 S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                        QNull,      UPOwner },
             { Fields::uasStatus,            ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::uasCreationDateTime,  ORM_CREATED_ON }, //S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
@@ -723,6 +738,10 @@ namespace tblAccountUserAssetsBase {
     SF_NULLABLE_quint32         (uas_cpnID), \
     SF_NULLABLE_quint32         (uasDiscountAmount), \
     SF_bool                     (uasPrefered), \
+    SF_NULLABLE_quint64         (uasSplittedFrom_uasID), \
+    SF_NULLABLE_quint32         (uasDurationDays), \
+    SF_DateTime_t               (uasBeginAt), \
+    SF_DateTime_t               (uasEndAt), \
     SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
     SF_DateTime_t               (uasCreationDateTime), \
     SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)

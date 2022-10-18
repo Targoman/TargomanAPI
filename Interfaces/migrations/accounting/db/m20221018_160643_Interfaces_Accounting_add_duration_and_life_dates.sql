@@ -8,7 +8,7 @@ USE `{{dbprefix}}{{Schema}}`;
 
 ALTER TABLE `tblAccountSaleables`
     ADD COLUMN `slbDurationDays` INT UNSIGNED NULL DEFAULT NULL AFTER `slbVoucherTemplate`,
-    ADD COLUMN `slbStartAtFirstUse` BIT NULL DEFAULT NULL AFTER `slbDurationDays`;
+    ADD COLUMN `slbStartAtFirstUse` BIT NOT NULL DEFAULT 0 AFTER `slbDurationDays`;
 
 ALTER TABLE `tblAccountUserAssets`
     ADD COLUMN `uasBeginAt` DATETIME NULL DEFAULT NULL AFTER `uasPrefered`,

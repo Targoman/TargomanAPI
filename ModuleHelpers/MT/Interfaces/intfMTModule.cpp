@@ -86,7 +86,10 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 }
 
 template <bool _itmplIsTokenBase>
-void intfMTModule<_itmplIsTokenBase>::breakCredit(quint64 _slbID) {
+void intfMTModule<_itmplIsTokenBase>::breakCredit(
+    quint64 _slbID,
+    const QString &_action
+) {
 }
 
 template <bool _itmplIsTokenBase>

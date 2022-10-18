@@ -576,6 +576,10 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
                      tblAccountUserAssetsBase::Fields::uasVoucherItemUUID,
                      tblAccountUserAssetsBase::Fields::uasVoucherItemInfo,
 //                     tblAccountUserAssetsBase::Fields::uasPrefered,
+//                     tblAccountUserAssetsBase::Fields::uasSplittedFrom_uasID,
+//                     tblAccountUserAssetsBase::Fields::uasDurationDays,
+//                     tblAccountUserAssetsBase::Fields::uasBeginAt,
+//                     tblAccountUserAssetsBase::Fields::uasEndAt,
 //                     tblAccountUserAssetsBase::Fields::uasStatus,
 //                     tblAccountUserAssetsBase::Fields::uasCreationDateTime,
                  })
@@ -590,6 +594,10 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
         { tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, PreVoucherItem.toJson().toVariantMap() },
 //            { tblAccountUserAssetsBase::Fields::uasPrefered, ??? },
+//                    { tblAccountUserAssetsBase::Fields::uasSplittedFrom_uasID, ??? },
+//        { tblAccountUserAssetsBase::Fields::uasDurationDays, ??? },
+//                    { tblAccountUserAssetsBase::Fields::uasBeginAt, ??? },
+//                    { tblAccountUserAssetsBase::Fields::uasEndAt, ??? },
 //            { tblAccountUserAssetsBase::Fields::uasStatus, },
 //        { tblAccountUserAssetsBase::Fields::uasCreationDateTime, DBExpression::NOW() },
     };
@@ -610,6 +618,26 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
         values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, _assetItem.CouponDiscount.ID);
         values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, _assetItem.Discount); //CouponDiscount.Amount);
+    }
+
+    //-- duration
+    if (NULLABLE_HAS_VALUE(_assetItem.Saleable.slbDurationDays)) {
+        qry.addCol(tblAccountUserAssetsBase::Fields::uasDurationDays);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDurationDays, NULLABLE_VALUE(_assetItem.Saleable.slbDurationDays));
+
+        if (_assetItem.Saleable.slbStartAtFirstUse == false) {
+            qry.addCols({
+                            tblAccountUserAssetsBase::Fields::uasBeginAt,
+                            tblAccountUserAssetsBase::Fields::uasEndAt,
+                        })
+            ;
+            values.insert(tblAccountUserAssetsBase::Fields::uasBeginAt, DBExpression::NOW());
+            values.insert(tblAccountUserAssetsBase::Fields::uasEndAt, DBExpression::DATE_ADD(
+                              DBExpression::NOW(),
+                              NULLABLE_VALUE(_assetItem.Saleable.slbDurationDays),
+                              enuDBExpressionIntervalUnit::DAY
+                              ));
+        }
     }
 
     //-- CustomUserAssetFields
