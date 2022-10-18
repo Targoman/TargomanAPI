@@ -69,7 +69,6 @@ Advert::Advert() :
     intfAccountingBasedModule(
         AdvertDomain,
         AdvertSchema,
-//        false,
         {
             { "show", {
                 /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
@@ -85,11 +84,8 @@ Advert::Advert() :
             }},
         },
         &AccountUnits::instance(),
-//        &AccountUnitsI18N::instance(),
         &AccountProducts::instance(),
-//        &AccountProductsI18N::instance(),
         &AccountSaleables::instance(),
-//        &AccountSaleablesI18N::instance(),
         &AccountSaleablesFiles::instance(),
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
@@ -102,11 +98,8 @@ Advert::Advert() :
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Advert, AdvertSchema)
 
     this->addSubModule(AccountUnits.data());
-//    this->addSubModule(AccountUnitsI18N.data());
     this->addSubModule(AccountProducts.data());
-//    this->addSubModule(AccountProductsI18N.data());
     this->addSubModule(AccountSaleables.data());
-//    this->addSubModule(AccountSaleablesI18N.data());
     this->addSubModule(AccountSaleablesFiles.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
