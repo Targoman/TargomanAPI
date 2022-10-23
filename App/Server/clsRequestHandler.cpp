@@ -447,10 +447,11 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
                         bool IsRenewed = false;
                         QString NewToken = Authentication::renewExpiredJWT(
-                                    JWT,
-                                    RemoteIP,
-                                    IsRenewed
-                                    );
+                                               *APICALLBOOM,
+                                               JWT,
+                                               RemoteIP,
+                                               IsRenewed
+                                               );
 
                         BearerToken = NewToken;
 

@@ -123,10 +123,8 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(prdDesc);
         TARGOMAN_CREATE_CONSTEXPR(prdDescI18N);
-        TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
-        TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
-        TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
-        TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
+//        TARGOMAN_CREATE_CONSTEXPR(prdCanUseFromHour);
+//        TARGOMAN_CREATE_CONSTEXPR(prdCanUseToHour);
         TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
         TARGOMAN_CREATE_CONSTEXPR(prdVAT);
         TARGOMAN_CREATE_CONSTEXPR(prd_untID);
@@ -168,8 +166,8 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slbDesc);
         TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbType);
-        TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
-        TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
+        TARGOMAN_CREATE_CONSTEXPR(slbSaleFromDate);
+        TARGOMAN_CREATE_CONSTEXPR(slbSaleToDate);
         TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
         TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
         TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
@@ -180,10 +178,13 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slbInStockQty);
         TARGOMAN_CREATE_CONSTEXPR(slbOrderedQty);
         TARGOMAN_CREATE_CONSTEXPR(slbReturnedQty);
-        // slbRemainingCount = slbInStockQty - (slbOrderedQty - slbReturnedQty)
+        // slbRemainingQty = slbInStockQty - (slbOrderedQty - slbReturnedQty)
 
         TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
+
         TARGOMAN_CREATE_CONSTEXPR(slbDurationDays);
+        TARGOMAN_CREATE_CONSTEXPR(slbCanUseFromHour);
+        TARGOMAN_CREATE_CONSTEXPR(slbCanUseToHour);
         TARGOMAN_CREATE_CONSTEXPR(slbStartAtFirstUse);
 
         TARGOMAN_CREATE_CONSTEXPR(slbStatus);
@@ -237,8 +238,10 @@ namespace tblAccountUserAssetsBase {
         TARGOMAN_CREATE_CONSTEXPR(uasPrefered);
         TARGOMAN_CREATE_CONSTEXPR(uasSplittedFrom_uasID);
         TARGOMAN_CREATE_CONSTEXPR(uasDurationDays);
-        TARGOMAN_CREATE_CONSTEXPR(uasBeginAt);
-        TARGOMAN_CREATE_CONSTEXPR(uasEndAt);
+        TARGOMAN_CREATE_CONSTEXPR(uasCanUseFromDate);
+        TARGOMAN_CREATE_CONSTEXPR(uasCanUseToDate);
+        TARGOMAN_CREATE_CONSTEXPR(uasCanUseFromHour);
+        TARGOMAN_CREATE_CONSTEXPR(uasCanUseToHour);
         TARGOMAN_CREATE_CONSTEXPR(uasStatus);
         TARGOMAN_CREATE_CONSTEXPR(uasCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(uasUpdatedBy_usrID);
@@ -388,10 +391,8 @@ namespace tblAccountProductsBase {
             { Fields::prdCode,              S(TAPI::ProductCode_t),         QFV,                                    QRequired,  UPOwner },
             ORM_MULTILANGUAGE(Fields::prdName, QRequired,  UPOwner),
             ORM_MULTILANGUAGE(Fields::prdDesc, QNull,      UPOwner),
-            { Fields::prdValidFromDate,     S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
-            { Fields::prdValidToDate,       S(TAPI::Date_t),                QFV,                                    QNull,      UPOwner },
-            { Fields::prdValidFromHour,     S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
-            { Fields::prdValidToHour,       S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+//            { Fields::prdCanUseFromHour,    S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
+//            { Fields::prdCanUseToHour,      S(NULLABLE_TYPE(quint8)),       QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
             { Fields::prdPrivs,             S(TAPI::PrivObject_t),          QFV,                                    QNull,      UPOwner },
             { Fields::prdVAT,               S(NULLABLE_TYPE(double)),       QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
             { Fields::prd_untID,            S(NULLABLE_TYPE(quint16)),      QFV,                                    QNull,      UPOwner },
@@ -424,10 +425,8 @@ namespace tblAccountProductsBase {
                 Fields::prdCode,
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
-            { Fields::prdValidFromDate },
-            { Fields::prdValidToDate },
-            { Fields::prdValidFromHour },
-            { Fields::prdValidToHour },
+//            { Fields::prdCanUseFromHour },
+//            { Fields::prdCanUseToHour },
             { Fields::prdStatus },
             { Fields::prdCreatedBy_usrID },
             { Fields::prdCreationDateTime },
@@ -436,15 +435,14 @@ namespace tblAccountProductsBase {
 
     } //namespace Private
 
+//    SF_NULLABLE_quint8          (prdCanUseFromHour),
+//    SF_NULLABLE_quint8          (prdCanUseToHour),
+
 #define SF_tblAccountProductsBase_DTO \
     SF_ORM_PRIMARYKEY_32        (prdID), \
     SF_QString                  (prdCode), \
     SF_QString                  (prdName), \
     SF_QString                  (prdDesc), \
-    SF_Date_t                   (prdValidFromDate), \
-    SF_Date_t                   (prdValidToDate), \
-    SF_NULLABLE_quint8          (prdValidFromHour), \
-    SF_NULLABLE_quint8          (prdValidToHour), \
     SF_JSON_t                   (prdPrivs), \
     SF_NULLABLE_qreal           (prdVAT), \
     SF_NULLABLE_quint16         (prd_untID), \
@@ -510,8 +508,8 @@ namespace tblAccountSaleablesBase {
             ORM_MULTILANGUAGE(Fields::slbName, QRequired,  UPOwner),
             ORM_MULTILANGUAGE(Fields::slbDesc, QNull,      UPOwner),
             { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                            TAPI::enuSaleableType::Normal, UPOwner },
-            { Fields::slbAvailableFromDate,     S(TAPI::DateTime_t),                QFV,                            QNow,       UPOwner },
-            { Fields::slbAvailableToDate,       S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
+            { Fields::slbSaleFromDate,          S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
+            { Fields::slbSaleToDate,            S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
             { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                            QNull,      UPOwner },
             { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),         QRequired,  UPOwner },
             { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                            QNull,      UPOwner },
@@ -521,6 +519,8 @@ namespace tblAccountSaleablesBase {
             { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                            QNull,      UPAdmin },
             { Fields::slbVoucherTemplate,       S(QString),                         QFV,                            QNull,      UPOwner },
             { Fields::slbDurationDays,          S(NULLABLE_TYPE(quint32)),          QFV,                            QNull,      UPOwner },
+            { Fields::slbCanUseFromHour,        S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
+            { Fields::slbCanUseToHour,          S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
             { Fields::slbStartAtFirstUse,       S(bool),                            QFV,                            false,      UPOwner },
             { Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
@@ -548,8 +548,8 @@ namespace tblAccountSaleablesBase {
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { Fields::slbType },
-            { Fields::slbAvailableFromDate },
-            { Fields::slbAvailableToDate },
+            { Fields::slbSaleFromDate },
+            { Fields::slbSaleToDate },
             { Fields::slbStatus },
             { Fields::slbCreatedBy_usrID },
             { Fields::slbCreationDateTime },
@@ -565,8 +565,8 @@ namespace tblAccountSaleablesBase {
     SF_QString                  (slbName), \
     SF_QString                  (slbDesc), \
     SF_Enum                     (slbType, TAPI::enuSaleableType, TAPI::enuSaleableType::Normal), \
-    SF_DateTime_t               (slbAvailableFromDate), \
-    SF_DateTime_t               (slbAvailableToDate), \
+    SF_DateTime_t               (slbSaleFromDate), \
+    SF_DateTime_t               (slbSaleToDate), \
     SF_JSON_t                   (slbPrivs), \
     SF_qreal                    (slbBasePrice), \
     SF_JSON_t                   (slbAdditives), \
@@ -576,6 +576,8 @@ namespace tblAccountSaleablesBase {
     SF_NULLABLE_qreal           (slbReturnedQty), \
     SF_QString                  (slbVoucherTemplate), \
     SF_NULLABLE_quint32         (slbDurationDays), \
+    SF_NULLABLE_quint8          (slbCanUseFromHour), \
+    SF_NULLABLE_quint8          (slbCanUseToHour), \
     SF_bool                     (slbStartAtFirstUse), \
     SF_ORM_STATUS_FIELD         (slbStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active), \
     SF_ORM_CREATED_ON           (slbCreationDateTime), \
@@ -673,6 +675,7 @@ namespace tblAccountSaleablesFilesBase {
 namespace tblAccountUserAssetsBase {
     namespace Relation {
         constexpr char Saleable[] = "Saleable";
+        constexpr char Usage[] = "Usage";
     }
 
     namespace Private {
@@ -690,12 +693,14 @@ namespace tblAccountUserAssetsBase {
             { Fields::uasPrefered,              S(bool),                            QFV,                        false,      UPOwner },
             { Fields::uasSplittedFrom_uasID,    S(NULLABLE_TYPE(quint64)),          QFV,                        QNull,      UPOwner },
             { Fields::uasDurationDays,          S(NULLABLE_TYPE(quint32)),          QFV,                        QNull,      UPOwner },
-            { Fields::uasBeginAt,               S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                        QNull,      UPOwner },
-            { Fields::uasEndAt,                 S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                        QNull,      UPOwner },
-            { Fields::uasStatus,            ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
+            { Fields::uasCanUseFromDate,        S(NULLABLE_TYPE(TAPI::Date_t)),     QFV,                        QNull,      UPOwner },
+            { Fields::uasCanUseToDate,          S(NULLABLE_TYPE(TAPI::Date_t)),     QFV,                        QNull,      UPOwner },
+            { Fields::uasCanUseFromHour,        S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
+            { Fields::uasCanUseToHour,          S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
+            { Fields::uasStatus,                ORM_STATUS_FIELD(TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending) },
             { ORM_INVALIDATED_AT_FIELD },
-            { Fields::uasCreationDateTime,  ORM_CREATED_ON }, //S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
-            { Fields::uasUpdatedBy_usrID,   ORM_UPDATED_BY },
+            { Fields::uasCreationDateTime,      ORM_CREATED_ON }, //S(TAPI::DateTime_t),        QFV,                        QNow,       UPNone },
+            { Fields::uasUpdatedBy_usrID,       ORM_UPDATED_BY },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -706,6 +711,8 @@ namespace tblAccountUserAssetsBase {
                     { Fields::uas_slbID,    R(_schema, tblAccountSaleablesBase::Name),  tblAccountSaleablesBase::Fields::slbID, "",         true } },
                 { Fields::uas_cpnID,        R(_schema, tblAccountCouponsBase::Name),    tblAccountCouponsBase::Fields::cpnID,   "",         true },
 //                { Fields::uas_vchID,        R(AAASchema, tblVoucher::Name),             tblVoucher::Fields::vchID,              "",         true},
+                { Relation::Usage,
+                    { Fields::uasID,        R(_schema, tblAccountAssetUsageBase::Name),  tblAccountAssetUsageBase::Fields::usg_uasID } },
             };
         };
 
@@ -740,8 +747,10 @@ namespace tblAccountUserAssetsBase {
     SF_bool                     (uasPrefered), \
     SF_NULLABLE_quint64         (uasSplittedFrom_uasID), \
     SF_NULLABLE_quint32         (uasDurationDays), \
-    SF_DateTime_t               (uasBeginAt), \
-    SF_DateTime_t               (uasEndAt), \
+    SF_Date_t                   (uasCanUseFromDate), \
+    SF_Date_t                   (uasCanUseToDate), \
+    SF_NULLABLE_quint8          (uasCanUseFromHour), \
+    SF_NULLABLE_quint8          (uasCanUseToHour), \
     SF_ORM_STATUS_FIELD         (uasStatus, TAPI::enuAuditableStatus, TAPI::enuAuditableStatus::Pending), \
     SF_DateTime_t               (uasCreationDateTime), \
     SF_ORM_UPDATED_BY           (uasUpdatedBy_usrID)
@@ -954,8 +963,8 @@ namespace tblAccountReferralsBase {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(ref_usrID);
-        TARGOMAN_CREATE_CONSTEXPR(refValidFromDateTime);
-        TARGOMAN_CREATE_CONSTEXPR(refValidToDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(refCanUseFromDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(refCanUseToDateTime);
         TARGOMAN_CREATE_CONSTEXPR(refPrizeInfo);
         TARGOMAN_CREATE_CONSTEXPR(refStatus);
         TARGOMAN_CREATE_CONSTEXPR(refCreationDateTime);
@@ -1024,39 +1033,6 @@ TAPI_DEFINE_STRUCT(stuCouponDiscount,
 );
 
 /*****************************************************************************/
-TAPI_DEFINE_STRUCT(stuUsage,
-    SF_NULLABLE_quint32 (PerDay),
-    SF_NULLABLE_quint32 (PerWeek),
-    SF_NULLABLE_quint32 (PerMonth),
-    SF_NULLABLE_quint64 (Total)
-);
-
-typedef QMap<QString, stuUsage> UsageLimits_t;
-
-struct stuUsageColDefinition {
-    QString PerDay;
-    QString PerWeek;
-    QString PerMonth;
-    QString Total;
-
-    stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
-        PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
-    { ; }
-};
-
-typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
-
-typedef QMap<QString, QString> OrderAdditives_t;
-
-TAPI_DEFINE_STRUCT(stuDigested,
-//    QJsonObject   Additives;
-
-//    UsageLimits_t Limits;
-    SF_QMapOfVarStruct  (Limits, stuUsage, UsageLimits_t)
-
-//    QJsonObject   Privs;
-);
-
 TAPI_DEFINE_STRUCT(stuPendingVoucher,
     SF_QString          (Name),
     SF_Enum             (Type, enuVoucherType, enuVoucherType::Credit),
@@ -1068,9 +1044,9 @@ TAPI_DEFINE_STRUCT(stuVoucherItemPrivate,
     SF_QListOfVarStruct (PendingVouchers, stuPendingVoucher)
 );
 
-TAPI_DEFINE_STRUCT(stuAssetItem,
-    SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
+TAPI_DEFINE_STRUCT(stuBasketItem,
     SF_Struct           (Unit, tblAccountUnitsBase::DTO, v.untID),
+    SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
 
     SF_qreal            (prdQtyInHand),
@@ -1098,14 +1074,59 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_qreal            (VAT),
     SF_qreal            (TotalPrice),
 
-    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v)),
+//    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v)),
 
     SF_QJsonObject      (AdditionalInfo), //per service
 
     SF_Struct           (Private, stuVoucherItemPrivate, [](Q_DECL_UNUSED auto v) { return true; } (v))
 );
 
-typedef QMap<QString, stuAssetItem> ActiveCredits_t;
+/*****************************************************************************/
+TAPI_DEFINE_STRUCT(stuUsage,
+    SF_NULLABLE_quint32 (PerDay),
+    SF_NULLABLE_quint32 (PerWeek),
+    SF_NULLABLE_quint32 (PerMonth),
+    SF_NULLABLE_quint64 (Total)
+);
+
+//Key: ???
+typedef QMap<QString, stuUsage> UsageLimits_t;
+
+struct stuUsageColDefinition {
+    QString PerDay;
+    QString PerWeek;
+    QString PerMonth;
+    QString Total;
+
+    stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
+        PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
+    { ; }
+};
+
+///key : action
+typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
+
+typedef QMap<QString, QString> OrderAdditives_t;
+
+TAPI_DEFINE_STRUCT(stuDigested,
+//    QJsonObject   Additives;
+
+//    UsageLimits_t Limits;
+    SF_QMapOfVarStruct  (Limits, stuUsage, UsageLimits_t)
+
+//    QJsonObject   Privs;
+);
+
+TAPI_DEFINE_STRUCT(stuAssetItem,
+    SF_Struct           (UserAsset, tblAccountUserAssetsBase::DTO, v.uasID),
+    SF_Struct           (AssetUsage, tblAccountAssetUsageBase::DTO, v.usg_uasID),
+
+    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v))
+);
+
+///@TODO: key : ???
+//typedef QMap<QString, stuAssetItem> ActiveCredits_t;
+typedef QList<stuAssetItem> ActiveCredits_t;
 
 struct stuServiceCreditsInfo {
     ActiveCredits_t             ActiveCredits;
@@ -1139,7 +1160,7 @@ struct stuActiveCredit {
 */
 
 TAPI_DEFINE_STRUCT(stuActiveCredit,
-    SF_Struct           (Credit, stuAssetItem, v.Product.prdID),
+    SF_Struct           (Credit, stuAssetItem, v.UserAsset.uasID),
     SF_bool             (IsFromParent),
     SF_QMapOfVarStruct  (MyLimitsOnParent, stuUsage, UsageLimits_t),
     SF_qint64           (TTL)
@@ -1233,7 +1254,14 @@ TAPI_DEFINE_STRUCT(stuVoucherItemForTrustedAction,
 
 //bool KKKKKKKKKKKKKKKKKK() {return true;}
 
-typedef QMap<QString, qint32> ServiceUsage_t;
+
+namespace RequestedUsage {
+    constexpr char CREDIT[] = "credit";
+}
+
+//key: request param
+typedef QVariantMap ServiceUsage_t;
+//typedef QMap<QString, qint32> ServiceUsage_t;
 
 extern void checkPreVoucherSanity(stuPreVoucher _preVoucher);
 

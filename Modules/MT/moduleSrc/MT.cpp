@@ -61,11 +61,11 @@ MT::MT() :
         MTDomain,
         MTSchema,
         {
-            { "words", {
+            { MTAction::TRANSLATE, {
                 /* day   */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerDay,
                 /* week  */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerWeek,
                 /* month */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerMonth,
-                /* total */ tblAccountSaleablesMTBase::ExtraFields::slbValidityWords
+                /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords
             }},
         },
         &AccountUnits::instance(),
@@ -122,7 +122,7 @@ void MT::initializeModule() {
 
 void MT::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
@@ -132,7 +132,7 @@ void MT::computeAdditives(
 
 void MT::computeReferrer(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
@@ -142,14 +142,14 @@ void MT::computeReferrer(
 
     //1: add, modify or remove credit voucher for fp.com
     if (_oldVoucherItem != nullptr) {
-        if (_oldVoucherItem->Qty != _assetItem.Qty) {
+        if (_oldVoucherItem->Qty != _basketItem.Qty) {
             //remove old
-            QList<stuPendingVoucher>::iterator it = _assetItem.Private.PendingVouchers.begin();
-            while (it != _assetItem.Private.PendingVouchers.end()) {
+            QList<stuPendingVoucher>::iterator it = _basketItem.Private.PendingVouchers.begin();
+            while (it != _basketItem.Private.PendingVouchers.end()) {
                 if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
                     && (it->Info.contains("referrer"))
                 ) {
-                    it = _assetItem.Private.PendingVouchers.erase(it);
+                    it = _basketItem.Private.PendingVouchers.erase(it);
                     continue;
                 }
 
@@ -158,19 +158,19 @@ void MT::computeReferrer(
         }
     }
 
-    if (_assetItem.Qty > 0) {
-        _assetItem.Private.PendingVouchers.append({
+    if (_basketItem.Qty > 0) {
+        _basketItem.Private.PendingVouchers.append({
             /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
             /* Type     */ enuVoucherType::Prize, //Credit,
-            /* Amount   */ 2000 * _assetItem.Qty,
+            /* Amount   */ 2000 * _basketItem.Qty,
             /* Info     */ {
-                               { "referrer", _assetItem.Referrer },
+                               { "referrer", _basketItem.Referrer },
                            },
         });
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -180,31 +180,31 @@ void MT::computeReferrer(
 
     //3: inc translate words max limit (30'000 -> 35'000)
 //    int IncAmount = 5'000;
-//    if (_assetItem.AdditionalInfo.contains("plus-max-words"))
-//        _assetItem.AdditionalInfo["plus-max-words"] = IncAmount + _assetItem.AdditionalInfo["plus-max-words"].toInt();
+//    if (_basketItem.AdditionalInfo.contains("plus-max-words"))
+//        _basketItem.AdditionalInfo["plus-max-words"] = IncAmount + _basketItem.AdditionalInfo["plus-max-words"].toInt();
 //    else
-//        _assetItem.AdditionalInfo.insert("plus-max-words", IncAmount);
+//        _basketItem.AdditionalInfo.insert("plus-max-words", IncAmount);
 
     //4: inc days (30 -> 40)
     int IncDays = 10;
-    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
+    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
     else
-        _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
+        _basketItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
 #endif
 };
 
 QVariantMap MT::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 
     QVariantMap Result;
 
-//    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-//        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+//    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+//        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
 
     return Result;
 }
@@ -297,7 +297,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 //    this->checkUsageIsAllowed(
 //                APICALLBOOM_PARAM,
 //                RequestedUsage,
-//                "translate"
+//                MTAction::TRANSLATE
 //                );
 
     //-----------------------------------------

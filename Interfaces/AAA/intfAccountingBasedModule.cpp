@@ -153,118 +153,170 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 /******************************************************************\
 |** credit ********************************************************|
 \******************************************************************/
-stuActiveCredit baseintfAccountingBasedModule::activeAccountObject(quint64 _usrID) {
-    return this->findBestMatchedCredit(_usrID);
-}
+//stuActiveCredit baseintfAccountingBasedModule::activeAccountObject(
+//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    quint64 _actorID
+//) {
+//    return this->findBestMatchedCredit(APICALLBOOM_PARAM, _actorID);
+//}
 
 void baseintfAccountingBasedModule::checkUsageIsAllowed(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
-    QJsonObject Privs = APICALLBOOM_PARAM.getJWTPrivsObject();
+//    QJsonObject Privs = APICALLBOOM_PARAM.getJWTPrivsObject();
+//    if (Privs.contains(this->ServiceName) == false)
+//        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
-    if (Privs.contains(this->ServiceName) == false)
-        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
-
-    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(APICALLBOOM_PARAM.getActorID(), _requestedUsage, _action);
+    stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(
+                                            APICALLBOOM_PARAM,
+                                            APICALLBOOM_PARAM.getActorID(),
+                                            _requestedUsage,
+                                            _action);
 
     if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
         throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
-    auto FnCheckCredit = [](auto _usageIter, stuUsage _remaining, auto _type) {
-        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_usageIter.key()));
+    auto FnCheckCredit = [](const QString &_creditKey, qint64 &_creditValue, stuUsage _remaining, auto _type) {
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _creditValue <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_usageIter.key()));
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _creditValue <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_usageIter.key()));
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _creditValue <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _usageIter.value() <= 0)
-            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_usageIter.key()));
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _creditValue <= 0)
+            throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_creditKey));
     };
 
-    const stuAssetItem& ActiveCredit = BestMatchedCredit.Credit;
+    auto FnCheckUsageIterCredit = [](auto _usageIter, std::function<bool(const QString CreditKey, qint64 CreditValue)> _function) {
+        if (_usageIter.key() != RequestedUsage::CREDIT)
+            return;
+
+        /*
+        SAMPLE:
+        ServiceUsage_t RequestedUsage = {
+            { RequestedUsage::CREDIT, QVariantMap({
+                  { QString("%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+            }) },
+            { MTRequestedUsage::DIC, _dic ? 1 : 0 },
+        };
+        */
+
+        QVariantMap CreditValues = _usageIter.value().toMap();
+        QString CreditKey = CreditValues.firstKey();
+        qint64 CreditValue = CreditValues.first().toLongLong();
+
+        /*
+         1/ translate::NMT::en2fa::kooft
+         2/ translate::NMT::en2fa
+         3/ translate::NMT
+         4/ translate
+        */
+
+        while (CreditKey.isEmpty() == false) {
+            if (_function(CreditKey, CreditValue))
+                return;
+
+            int idx = CreditKey.lastIndexOf("::");
+            if (idx < 0)
+                return;
+
+            CreditKey = CreditKey.left(idx);
+        }
+    };
+
+    const stuAssetItem &ActiveCredit = BestMatchedCredit.Credit;
 
     if (BestMatchedCredit.IsFromParent) {
         for (auto UsageIter = _requestedUsage.begin();
              UsageIter != _requestedUsage.end();
              UsageIter++
         ) {
+            FnCheckUsageIterCredit(
+                UsageIter,
+                [this, &APICALLBOOM_PARAM, &FnCheckCredit, &ActiveCredit, &BestMatchedCredit]
+                (const QString CreditKey, qint64 CreditValue) -> bool {
+                    if (ActiveCredit.Digested.Limits.contains(CreditKey) == false)
+                        return false;
 
-            /*
-             1/ NMT::en2fa::kooft
-             2/ NMT::en2fa
-             3/ NMT
-            */
+                    if (this->isUnlimited(APICALLBOOM_PARAM, BestMatchedCredit.MyLimitsOnParent) == false)
+                        FnCheckCredit(CreditKey, CreditValue, BestMatchedCredit.MyLimitsOnParent.value(CreditKey), "Own");
 
+                    FnCheckCredit(CreditKey, CreditValue, ActiveCredit.Digested.Limits.value(CreditKey), "Parent");
 
-
-
-
-
-            if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-                continue;
-
-            if (this->isUnlimited(BestMatchedCredit.MyLimitsOnParent) == false)
-                FnCheckCredit(UsageIter, BestMatchedCredit.MyLimitsOnParent.value(UsageIter.key()), "Own");
-
-            FnCheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Parent");
+                    return true;
+                });
         }
 
         return;
     }
 
-    if (this->isUnlimited(ActiveCredit.Digested.Limits))
+    if (this->isUnlimited(APICALLBOOM_PARAM, ActiveCredit.Digested.Limits))
         return;
 
     for (auto UsageIter = _requestedUsage.begin();
          UsageIter != _requestedUsage.end();
          UsageIter++
     ) {
-        if (ActiveCredit.Digested.Limits.contains(UsageIter.key()) == false)
-            continue;
+        FnCheckUsageIterCredit(
+            UsageIter,
+            [&FnCheckCredit, &ActiveCredit](const QString CreditKey, qint64 CreditValue) -> bool {
+                if (ActiveCredit.Digested.Limits.contains(CreditKey) == false)
+                    return false;
 
-        FnCheckCredit(UsageIter, ActiveCredit.Digested.Limits.value(UsageIter.key()), "Self");
+                FnCheckCredit(CreditKey, CreditValue, ActiveCredit.Digested.Limits.value(CreditKey), "Self");
+
+                return true;
+            });
     }
 }
 
 stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
-    quint64 _usrID,
-    const ServiceUsage_t& _requestedUsage,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _actorID,
+    const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
-    stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(_usrID);
+    stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(
+                                                   APICALLBOOM_PARAM,
+                                                   _actorID,
+                                                   _requestedUsage,
+                                                   _action);
+
     if (ServiceCreditsInfo.ActiveCredits.isEmpty())
         return stuActiveCredit();
 
     QDateTime Now = ServiceCreditsInfo.DBCurrentDateTime;
 
-    auto FnEffectiveStartDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        return _assetItem.Product.prdValidFromHour //.isNull() == fasle
-            ? QDateTime(Now.date()).addSecs(*_assetItem.Product.prdValidFromHour * 3600)
+    auto FnEffectiveStartDateTime = [Now](const stuAssetItem &_assetItem) -> QDateTime {
+        return NULLABLE_HAS_VALUE(_assetItem.UserAsset.uasCanUseFromHour)
+            ? QDateTime(Now.date()).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasCanUseFromHour) * 3600)
             : QDateTime(Now.date());
     };
 
     auto FnEffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
-        if (NULLABLE_IS_NULL(_assetItem.Product.prdValidFromHour) || NULLABLE_IS_NULL(_assetItem.Product.prdValidToHour))
+        if (NULLABLE_IS_NULL(_assetItem.UserAsset.uasCanUseFromHour) || NULLABLE_IS_NULL(_assetItem.UserAsset.uasCanUseToHour))
             QDateTime(Now.date().addDays(1));
 
-        return _assetItem.Product.prdValidFromHour < _assetItem.Product.prdValidToHour
-            ? QDateTime(Now.date()).addSecs(*_assetItem.Product.prdValidToHour * 3600)
-            : _assetItem.Product.prdValidToDate == Now.date()
+        return _assetItem.UserAsset.uasCanUseFromHour < _assetItem.UserAsset.uasCanUseToHour
+            ? QDateTime(Now.date()).addSecs(*_assetItem.UserAsset.uasCanUseToHour * 3600)
+            : _assetItem.UserAsset.uasCanUseToDate == Now.date()
                 ? QDateTime(Now.date().addDays(1))
-                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.Product.prdValidToHour * 3600);
+                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.UserAsset.uasCanUseToHour * 3600);
     };
 
-    auto FnIsInvalidPackage = [this, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage](const stuAssetItem& _assetItem) -> bool {
-        if ((_assetItem.Product.prdValidFromDate.isValid() && _assetItem.Product.prdValidFromDate > Now.date())
-               || (_assetItem.Product.prdValidToDate.isValid() && _assetItem.Product.prdValidToDate < Now.date())
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidFromHour) && Now < FnEffectiveStartDateTime(_assetItem))
-               || (NULLABLE_HAS_VALUE(_assetItem.Product.prdValidToHour) && Now > FnEffectiveEndDateTime(_assetItem))
-               || this->isEmpty(_assetItem.Digested.Limits)
+    auto FnIsInvalidPackage = [this, &APICALLBOOM_PARAM, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
+                              (const stuAssetItem& _assetItem)
+                              -> bool {
+        if ((_assetItem.UserAsset.uasCanUseFromDate.isValid() && _assetItem.UserAsset.uasCanUseFromDate > Now.date())
+               || (_assetItem.UserAsset.uasCanUseToDate.isValid() && _assetItem.UserAsset.uasCanUseToDate < Now.date())
+               || (NULLABLE_HAS_VALUE(_assetItem.UserAsset.uasCanUseFromHour) && Now < FnEffectiveStartDateTime(_assetItem))
+               || (NULLABLE_HAS_VALUE(_assetItem.UserAsset.uasCanUseToHour) && Now > FnEffectiveEndDateTime(_assetItem))
+               || this->isEmpty(APICALLBOOM_PARAM, _assetItem.Digested.Limits)
             )
             return false;
 
@@ -276,15 +328,30 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
 
-                if (this->isUnlimited(_assetItem.Digested.Limits) == false) {
-                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
-                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - UsageIter.value() <= 0)
-                        )
-                        return false;
-                }
+
+
+
+                //uncommewnt and use long credit count
+
+
+//                if (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false) {
+//                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+//                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
+//                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
+//                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
+//                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - UsageIter.value() <= 0)
+//                        )
+//                        return false;
+//                }
+
+
+
+
+
+
+
+
+
             }
         }
         return true;
@@ -296,19 +363,26 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                                ServiceCreditsInfo.MyLimitsOnParent,
                                -1);
 
-    auto FnComparePackages = [this, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
-        if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() == false) return -1;
-        if (a.Product.prdValidToDate.isValid() == false && b.Product.prdValidToDate.isValid()) return 1;
-        if (this->isUnlimited(a.Digested.Limits) && this->isUnlimited(b.Digested.Limits) == false) return -1;
-        if (this->isUnlimited(a.Digested.Limits) == false && this->isUnlimited(b.Digested.Limits)) return 1;
-        if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_IS_NULL(b.Product.prdValidToHour)) return -1;
-        if (NULLABLE_IS_NULL(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) return 1;
-        if (NULLABLE_HAS_VALUE(a.Product.prdValidToHour) && NULLABLE_HAS_VALUE(b.Product.prdValidToHour)) {
+    auto FnComparePackages = [this, &APICALLBOOM_PARAM, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+        if (a.UserAsset.uasCanUseToDate.isValid() && b.UserAsset.uasCanUseToDate.isValid() == false) return -1;
+        if (a.UserAsset.uasCanUseToDate.isValid() == false && b.UserAsset.uasCanUseToDate.isValid()) return 1;
+
+        if (this->isUnlimited(APICALLBOOM_PARAM, a.Digested.Limits) && this->isUnlimited(APICALLBOOM_PARAM, b.Digested.Limits) == false) return -1;
+        if (this->isUnlimited(APICALLBOOM_PARAM, a.Digested.Limits) == false && this->isUnlimited(APICALLBOOM_PARAM, b.Digested.Limits)) return 1;
+
+        if (NULLABLE_HAS_VALUE(a.UserAsset.uasCanUseToHour) && NULLABLE_IS_NULL(b.UserAsset.uasCanUseToHour)) return -1;
+        if (NULLABLE_IS_NULL(a.UserAsset.uasCanUseToHour) && NULLABLE_HAS_VALUE(b.UserAsset.uasCanUseToHour)) return 1;
+
+        if (NULLABLE_HAS_VALUE(a.UserAsset.uasCanUseToHour) && NULLABLE_HAS_VALUE(b.UserAsset.uasCanUseToHour)) {
             if (FnEffectiveEndDateTime(a) < FnEffectiveEndDateTime(b)) return -1;
             if (FnEffectiveEndDateTime(a) > FnEffectiveEndDateTime(b)) return 1;
         }
-        if (a.Product.prdValidToDate.isValid() && b.Product.prdValidToDate.isValid() && a.Product.prdValidToDate != b.Product.prdValidToDate)
-            return b.Product.prdValidToDate > a.Product.prdValidToDate ? -1 : 1;
+
+        if (a.UserAsset.uasCanUseToDate.isValid()
+                && b.UserAsset.uasCanUseToDate.isValid()
+                && a.UserAsset.uasCanUseToDate != b.UserAsset.uasCanUseToDate)
+            return b.UserAsset.uasCanUseToDate > a.UserAsset.uasCanUseToDate ? -1 : 1;
+
         return 0;
     };
 
@@ -318,7 +392,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
          AccountIter != ServiceCreditsInfo.ActiveCredits.end();
          AccountIter++
     ) {
-        const stuAssetItem& Item = AccountIter.value();
+        const stuAssetItem &Item = *AccountIter; //.value();
 
         if (FnIsInvalidPackage(Item))
             continue;
@@ -334,12 +408,17 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
              CandidateIter++
         ) {
             if (FnComparePackages(Item, *CandidateIter) < 0) {
-                this->breakCredit(CandidateIter->Saleable.slbID, _action);
+
+                this->breakCredit(APICALLBOOM_PARAM,
+                                  *CandidateIter,
+                                  _action);
+
                 CandidateCredit.insert(CandidateIter, Item);
                 Inserted = true;
                 break;
             }
         }
+
         if (Inserted == false)
             CandidateCredit.append(Item);
     }
@@ -353,12 +432,12 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
     const stuAssetItem& ActivePackage = CandidateCredit.first();
     QDateTime NextDigestTime;
-    if (ActivePackage.Product.prdValidToDate.isNull() == false) {
-        if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
+    if (ActivePackage.UserAsset.uasCanUseToDate.isNull() == false) {
+        if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasCanUseToHour))
             NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
         else
-            NextDigestTime = QDateTime(ActivePackage.Product.prdValidToDate.addDays(1));
-    } else if (NULLABLE_HAS_VALUE(ActivePackage.Product.prdValidToHour))
+            NextDigestTime = QDateTime(ActivePackage.UserAsset.uasCanUseToDate.addDays(1));
+    } else if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasCanUseToHour))
         NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
@@ -372,7 +451,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 \******************************************************************/
 Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::internalAddToBasket(
     APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
-    stuAssetItem                            &_assetItem,
+    stuBasketItem                           &_basketItem,
     TAPI::SaleableCode_t                    &_saleableCode,
     Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
     qreal                                   &_qty,
@@ -398,7 +477,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
-    _assetItem.AssetActorID = this->IsTokenBase()
+    _basketItem.AssetActorID = this->IsTokenBase()
                               ? NULLABLE_VALUE(_apiTokenID)
                               : CurrentUserID;
 
@@ -469,7 +548,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         AccountSaleablesBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
         if ((AccountSaleablesBaseDTO.slbCode != _saleableCode)
-            || (AccountUserAssetsBaseDTO.uas_actorID != _assetItem.AssetActorID)
+            || (AccountUserAssetsBaseDTO.uas_actorID != _basketItem.AssetActorID)
             || (AccountUserAssetsBaseDTO.uasVoucherItemUUID != it->UUID)
         )
             continue;
@@ -491,80 +570,84 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
         .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
         .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _saleableCode })
-        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::LessEqual,
+                DBExpression::NOW() })
+        )
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::GreaterEqual,
                 DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
         .one();
 
-    TargomanDebug(5) << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
+//    TargomanDebug(5) << "intfAccountingBasedModule::addToBasket : SaleableInfo" << SaleableInfo;
 
     QJsonObject JsonSaleableInfo = QJsonObject::fromVariantMap(SaleableInfo);
 
-    _assetItem.fromJson(JsonSaleableInfo, false);
-    _assetItem.Product.fromJson(JsonSaleableInfo);
-    _assetItem.Unit.fromJson(JsonSaleableInfo);
-    _assetItem.Saleable.fromJson(JsonSaleableInfo);
+    _basketItem.fromJson(JsonSaleableInfo, false);
+    _basketItem.Unit.fromJson(JsonSaleableInfo);
+    _basketItem.Product.fromJson(JsonSaleableInfo);
+    _basketItem.Saleable.fromJson(JsonSaleableInfo);
 
     //-- --------------------------------
-    _assetItem.DiscountCode      = _discountCode;
-    _assetItem.OrderAdditives    = _orderAdditives;
-    _assetItem.Referrer          = _referrer;
-    _assetItem.ReferrerParams    = _referrerParams;
+    _basketItem.DiscountCode      = _discountCode;
+    _basketItem.OrderAdditives    = _orderAdditives;
+    _basketItem.Referrer          = _referrer;
+    _basketItem.ReferrerParams    = _referrerParams;
 
-    _assetItem.Qty               = _qty;
-    _assetItem.UnitPrice         = _assetItem.Saleable.slbBasePrice;
-    _assetItem.Discount          = 0;
-
-    //-- --------------------------------
-    UsageLimits_t SaleableUsageLimits;
-    for (auto Iter = this->AssetUsageLimitsCols.begin();
-        Iter != this->AssetUsageLimitsCols.end();
-        Iter++
-    ) {
-        SaleableUsageLimits.insert(Iter.key(), {
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerDay)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerWeek)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerMonth)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
-        });
-    }
-    _assetItem.Digested.Limits = SaleableUsageLimits;
+    _basketItem.Qty               = _qty;
+    _basketItem.UnitPrice         = _basketItem.Saleable.slbBasePrice;
+    _basketItem.Discount          = 0;
 
     //-- --------------------------------
-    this->processItemForBasket(APICALLBOOM_PARAM, _assetItem);
+//    UsageLimits_t SaleableUsageLimits;
+//    for (auto Iter = this->AssetUsageLimitsCols.begin();
+//        Iter != this->AssetUsageLimitsCols.end();
+//        Iter++
+//    ) {
+//        SaleableUsageLimits.insert(Iter.key(), {
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerDay)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerWeek)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, SaleableInfo.value(Iter->PerMonth)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, SaleableInfo.value(Iter->Total))
+//        });
+//    }
+//    _basketItem.Digested.Limits = SaleableUsageLimits;
+
+    //-- --------------------------------
+    this->processItemForBasket(APICALLBOOM_PARAM, _basketItem);
 
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
 
     QJsonDocument JSDPendingVouchers = QJsonDocument();
-    JSDPendingVouchers.setObject(_assetItem.Private.toJson());
+    JSDPendingVouchers.setObject(_basketItem.Private.toJson());
     PreVoucherItem.Private = simpleCryptInstance()->encryptToString(JSDPendingVouchers.toJson(QJsonDocument::Compact));
 
     PreVoucherItem.Service          = this->ServiceName;
     PreVoucherItem.UUID             = SecurityHelper::UUIDtoMD5();
-    PreVoucherItem.Desc             = _assetItem.Saleable.slbName;
-    PreVoucherItem.Qty              = _assetItem.Qty; //_qty;
-    PreVoucherItem.Unit             = _assetItem.Unit.untName;
-    PreVoucherItem.UnitPrice        = _assetItem.UnitPrice;
-    PreVoucherItem.SubTotal         = _assetItem.SubTotal;
+    PreVoucherItem.Desc             = _basketItem.Saleable.slbName;
+    PreVoucherItem.Qty              = _basketItem.Qty; //_qty;
+    PreVoucherItem.Unit             = _basketItem.Unit.untName;
+    PreVoucherItem.UnitPrice        = _basketItem.UnitPrice;
+    PreVoucherItem.SubTotal         = _basketItem.SubTotal;
 
     //store multiple discounts (system (multi) + coupon (one))
-    PreVoucherItem.SystemDiscounts  = _assetItem.SystemDiscounts;
-    PreVoucherItem.CouponDiscount   = _assetItem.CouponDiscount;
+    PreVoucherItem.SystemDiscounts  = _basketItem.SystemDiscounts;
+    PreVoucherItem.CouponDiscount   = _basketItem.CouponDiscount;
 
-    PreVoucherItem.DisAmount        = _assetItem.Discount;
-    PreVoucherItem.AfterDiscount    = _assetItem.AfterDiscount;
+    PreVoucherItem.DisAmount        = _basketItem.Discount;
+    PreVoucherItem.AfterDiscount    = _basketItem.AfterDiscount;
 
-    PreVoucherItem.VATPercent       = _assetItem.VATPercent;
-    PreVoucherItem.VATAmount        = _assetItem.VAT;
+    PreVoucherItem.VATPercent       = _basketItem.VATPercent;
+    PreVoucherItem.VATAmount        = _basketItem.VAT;
 
-    PreVoucherItem.TotalPrice       = _assetItem.TotalPrice;
+    PreVoucherItem.TotalPrice       = _basketItem.TotalPrice;
 
-    PreVoucherItem.Additives        = _assetItem.OrderAdditives;
-    PreVoucherItem.Referrer         = _assetItem.Referrer;
-    PreVoucherItem.ReferrerParams   = _assetItem.ReferrerParams;
+    PreVoucherItem.Additives        = _basketItem.OrderAdditives;
+    PreVoucherItem.Referrer         = _basketItem.Referrer;
+    PreVoucherItem.ReferrerParams   = _basketItem.ReferrerParams;
     PreVoucherItem.APITokenID       = _apiTokenID;
 
     ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(APICALLBOOM_PARAM)
@@ -578,8 +661,8 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 //                     tblAccountUserAssetsBase::Fields::uasPrefered,
 //                     tblAccountUserAssetsBase::Fields::uasSplittedFrom_uasID,
 //                     tblAccountUserAssetsBase::Fields::uasDurationDays,
-//                     tblAccountUserAssetsBase::Fields::uasBeginAt,
-//                     tblAccountUserAssetsBase::Fields::uasEndAt,
+//                     tblAccountUserAssetsBase::Fields::uasCanUseFromDate,
+//                     tblAccountUserAssetsBase::Fields::uasCanUseToDate,
 //                     tblAccountUserAssetsBase::Fields::uasStatus,
 //                     tblAccountUserAssetsBase::Fields::uasCreationDateTime,
                  })
@@ -587,8 +670,8 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     QVariantMap values;
     values = {
-        { tblAccountUserAssetsBase::Fields::uas_actorID, _assetItem.AssetActorID },
-        { tblAccountUserAssetsBase::Fields::uas_slbID, _assetItem.Saleable.slbID },
+        { tblAccountUserAssetsBase::Fields::uas_actorID, _basketItem.AssetActorID },
+        { tblAccountUserAssetsBase::Fields::uas_slbID, _basketItem.Saleable.slbID },
         { tblAccountUserAssetsBase::Fields::uasQty, _qty },
 //        { tblAccountUserAssetsBase::Fields::uas_vchID, ??? },
         { tblAccountUserAssetsBase::Fields::uasVoucherItemUUID, PreVoucherItem.UUID },
@@ -596,8 +679,8 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 //            { tblAccountUserAssetsBase::Fields::uasPrefered, ??? },
 //                    { tblAccountUserAssetsBase::Fields::uasSplittedFrom_uasID, ??? },
 //        { tblAccountUserAssetsBase::Fields::uasDurationDays, ??? },
-//                    { tblAccountUserAssetsBase::Fields::uasBeginAt, ??? },
-//                    { tblAccountUserAssetsBase::Fields::uasEndAt, ??? },
+//                    { tblAccountUserAssetsBase::Fields::uasCanUseFromDate, ??? },
+//                    { tblAccountUserAssetsBase::Fields::uasCanUseToDate, ??? },
 //            { tblAccountUserAssetsBase::Fields::uasStatus, },
 //        { tblAccountUserAssetsBase::Fields::uasCreationDateTime, DBExpression::NOW() },
     };
@@ -609,39 +692,49 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 //    }
 
     //-- discount
-    if (_assetItem.CouponDiscount.ID > 0) {
+    if (_basketItem.CouponDiscount.ID > 0) {
         qry.addCols({
                         tblAccountUserAssetsBase::Fields::uas_cpnID,
                         tblAccountUserAssetsBase::Fields::uasDiscountAmount,
                     })
         ;
 
-        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, _assetItem.CouponDiscount.ID);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, _assetItem.Discount); //CouponDiscount.Amount);
+        values.insert(tblAccountUserAssetsBase::Fields::uas_cpnID, _basketItem.CouponDiscount.ID);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDiscountAmount, _basketItem.Discount); //CouponDiscount.Amount);
     }
 
     //-- duration
-    if (NULLABLE_HAS_VALUE(_assetItem.Saleable.slbDurationDays)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationDays)) {
         qry.addCol(tblAccountUserAssetsBase::Fields::uasDurationDays);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDurationDays, NULLABLE_VALUE(_assetItem.Saleable.slbDurationDays));
+        values.insert(tblAccountUserAssetsBase::Fields::uasDurationDays, NULLABLE_VALUE(_basketItem.Saleable.slbDurationDays));
 
-        if (_assetItem.Saleable.slbStartAtFirstUse == false) {
+        if (_basketItem.Saleable.slbStartAtFirstUse == false) {
             qry.addCols({
-                            tblAccountUserAssetsBase::Fields::uasBeginAt,
-                            tblAccountUserAssetsBase::Fields::uasEndAt,
+                            tblAccountUserAssetsBase::Fields::uasCanUseFromDate,
+                            tblAccountUserAssetsBase::Fields::uasCanUseToDate,
                         })
             ;
-            values.insert(tblAccountUserAssetsBase::Fields::uasBeginAt, DBExpression::NOW());
-            values.insert(tblAccountUserAssetsBase::Fields::uasEndAt, DBExpression::DATE_ADD(
+            values.insert(tblAccountUserAssetsBase::Fields::uasCanUseFromDate, DBExpression::NOW());
+            values.insert(tblAccountUserAssetsBase::Fields::uasCanUseToDate, DBExpression::DATE_ADD(
                               DBExpression::NOW(),
-                              NULLABLE_VALUE(_assetItem.Saleable.slbDurationDays),
+                              NULLABLE_VALUE(_basketItem.Saleable.slbDurationDays),
                               enuDBExpressionIntervalUnit::DAY
                               ));
+        }
+
+        if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbCanUseFromHour)) {
+            qry.addCol(tblAccountUserAssetsBase::Fields::uasCanUseFromHour);
+            values.insert(tblAccountUserAssetsBase::Fields::uasCanUseFromHour, NULLABLE_VALUE(_basketItem.Saleable.slbCanUseFromHour));
+        }
+
+        if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbCanUseToHour)) {
+            qry.addCol(tblAccountUserAssetsBase::Fields::uasCanUseToHour);
+            values.insert(tblAccountUserAssetsBase::Fields::uasCanUseToHour, NULLABLE_VALUE(_basketItem.Saleable.slbCanUseToHour));
         }
     }
 
     //-- CustomUserAssetFields
-    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, _assetItem);
+    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, _basketItem);
     for (QVariantMap::const_iterator it = CustomFields.constBegin();
          it != CustomFields.constEnd();
          it++
@@ -687,7 +780,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
         this->AccountSaleables->callSP(APICALLBOOM_PARAM,
                                        "spSaleable_unReserve", {
-                                           { "iSaleableID", _assetItem.Saleable.slbID },
+                                           { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
                                            { "iQty", PreVoucherItem.Qty },
                                        });
@@ -817,11 +910,15 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         .addCols(this->AccountUserAssets->selectableColumnNames())
         .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 
-        .andWhere({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::LessEqual,
+                DBExpression::NOW() })
+        )
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::GreaterEqual,
                 DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
+
         .one();
 
     TargomanDebug(5) << "intfAccountingBasedModule::internalUpdateBasketItem : UserAssetInfo" << UserAssetInfo;
@@ -829,7 +926,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     tblAccountUserAssetsBase::DTO AccountUserAssetsBaseDTO;
     AccountUserAssetsBaseDTO.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
 
-    stuAssetItem AssetItem;
+    stuBasketItem AssetItem;
 
     AssetItem.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
     AssetItem.Product.fromJson(QJsonObject::fromVariantMap(UserAssetInfo));
@@ -852,19 +949,19 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     AssetItem.Discount          = _voucherItem.DisAmount;
 
     //-- --------------------------------
-    UsageLimits_t SaleableUsageLimits;
-    for (auto Iter = this->AssetUsageLimitsCols.begin();
-        Iter != this->AssetUsageLimitsCols.end();
-        Iter++
-    ) {
-        SaleableUsageLimits.insert(Iter.key(), {
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
-            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
-        });
-    }
-    AssetItem.Digested.Limits = SaleableUsageLimits;
+//    UsageLimits_t SaleableUsageLimits;
+//    for (auto Iter = this->AssetUsageLimitsCols.begin();
+//        Iter != this->AssetUsageLimitsCols.end();
+//        Iter++
+//    ) {
+//        SaleableUsageLimits.insert(Iter.key(), {
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
+//            NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
+//        });
+//    }
+//    AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
     this->processItemForBasket(APICALLBOOM_PARAM, AssetItem, &_voucherItem);
@@ -987,7 +1084,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
   */
 void baseintfAccountingBasedModule::processItemForBasket(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     /**
@@ -1007,46 +1104,46 @@ void baseintfAccountingBasedModule::processItemForBasket(
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
     //-- --------------------------------
-    if ((_oldVoucherItem == nullptr) && (_assetItem.Qty == 0))
+    if ((_oldVoucherItem == nullptr) && (_basketItem.Qty == 0))
         throw exHTTPBadRequest("qty is zero and old item not specified.");
 
-    qreal DeltaQty = _assetItem.Qty;
+    qreal DeltaQty = _basketItem.Qty;
     if (_oldVoucherItem != nullptr)
         DeltaQty -= _oldVoucherItem->Qty;
 
     //-- check available count --------------------------------
     if (DeltaQty > 0) {
-        if ((_assetItem.slbQtyInHand < 0) || (_assetItem.prdQtyInHand < 0))
+        if ((_basketItem.slbQtyInHand < 0) || (_basketItem.prdQtyInHand < 0))
             throw exHTTPInternalServerError(QString("Available Saleable Qty(%1) or Available Product Qty(%2) < 0")
-                                            .arg(_assetItem.slbQtyInHand).arg(_assetItem.prdQtyInHand));
+                                            .arg(_basketItem.slbQtyInHand).arg(_basketItem.prdQtyInHand));
 
-        if (_assetItem.slbQtyInHand > _assetItem.prdQtyInHand)
+        if (_basketItem.slbQtyInHand > _basketItem.prdQtyInHand)
             throw exHTTPInternalServerError(QString("Available Saleable Qty(%1) > Available Product Qty(%2)")
-                                            .arg(_assetItem.slbQtyInHand).arg(_assetItem.prdQtyInHand));
+                                            .arg(_basketItem.slbQtyInHand).arg(_basketItem.prdQtyInHand));
 
-        if (_assetItem.slbQtyInHand < DeltaQty)
+        if (_basketItem.slbQtyInHand < DeltaQty)
             throw exHTTPBadRequest(QString("Not enough %1 available in store. Available Qty(%2) Requested Qty(%3)")
-                                   .arg(_assetItem.Saleable.slbCode).arg(_assetItem.slbQtyInHand).arg(DeltaQty));
+                                   .arg(_basketItem.Saleable.slbCode).arg(_basketItem.slbQtyInHand).arg(DeltaQty));
     }
 
     //-- --------------------------------
-    auto fnComputeTotalPrice = [&_assetItem](const QString &_label) {
-        _assetItem.SubTotal = _assetItem.UnitPrice * _assetItem.Qty;
-        _assetItem.AfterDiscount = _assetItem.SubTotal - _assetItem.Discount;
+    auto fnComputeTotalPrice = [&_basketItem](const QString &_label) {
+        _basketItem.SubTotal = _basketItem.UnitPrice * _basketItem.Qty;
+        _basketItem.AfterDiscount = _basketItem.SubTotal - _basketItem.Discount;
 
-        _assetItem.VATPercent = NULLABLE_GET_OR_DEFAULT(_assetItem.Product.prdVAT, 0); // * 100;
-        _assetItem.VAT = _assetItem.AfterDiscount * _assetItem.VATPercent / 100.0;
+        _basketItem.VATPercent = NULLABLE_GET_OR_DEFAULT(_basketItem.Product.prdVAT, 0); // * 100;
+        _basketItem.VAT = _basketItem.AfterDiscount * _basketItem.VATPercent / 100.0;
 
-        _assetItem.TotalPrice = _assetItem.AfterDiscount - _assetItem.VAT;
+        _basketItem.TotalPrice = _basketItem.AfterDiscount - _basketItem.VAT;
 
         TargomanDebug(5) << "[" << _label << "]:" << endl
-                         << "    Qty:           (" << _assetItem.Qty << ")" << endl
-                         << "    UnitPrice:     (" << _assetItem.UnitPrice << ")" << endl
-                         << "    SubTotal:      (" << _assetItem.SubTotal << ")" << endl
-                         << "    Discount:      (" << _assetItem.Discount << ")" << endl
-                         << "    AfterDiscount: (" << _assetItem.AfterDiscount << ")" << endl
-                         << "    VAT:           (" << _assetItem.VAT << ")" << endl
-                         << "    TotalPrice:    (" << _assetItem.TotalPrice << ")" << endl
+                         << "    Qty:           (" << _basketItem.Qty << ")" << endl
+                         << "    UnitPrice:     (" << _basketItem.UnitPrice << ")" << endl
+                         << "    SubTotal:      (" << _basketItem.SubTotal << ")" << endl
+                         << "    Discount:      (" << _basketItem.Discount << ")" << endl
+                         << "    AfterDiscount: (" << _basketItem.AfterDiscount << ")" << endl
+                         << "    VAT:           (" << _basketItem.VAT << ")" << endl
+                         << "    TotalPrice:    (" << _basketItem.TotalPrice << ")" << endl
                         ;
     };
 
@@ -1061,11 +1158,11 @@ void baseintfAccountingBasedModule::processItemForBasket(
     ///@TODO: 2 ta bekhar 3 ta bebar:
 
     //-- --------------------------------
-    this->computeAdditives(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
+    this->computeAdditives(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeAdditives");
 
     //-- --------------------------------
-    this->computeReferrer(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
+    this->computeReferrer(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeReferrer");
 
     //-- --------------------------------
@@ -1074,14 +1171,14 @@ void baseintfAccountingBasedModule::processItemForBasket(
     //-- discount --------------------------------
     ///@TODO: what if some one uses discount code and at the same time will pay by prize credit
 
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {}, _oldVoucherItem);
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {}, _oldVoucherItem);
     fnComputeTotalPrice("after computeSystemDiscount");
 
-    this->computeCouponDiscount(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
+    this->computeCouponDiscount(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after applyCouponBasedDiscount");
 
-    //-- --------------------------------
-    this->digestPrivs(APICALLBOOM_PARAM, _assetItem, _oldVoucherItem);
+//    //-- --------------------------------
+//    this->digestPrivs(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
 
     //-- reserve and un-reserve saleable and product ------------------------------------
     ///@TODO: call spSaleable_unReserve by cron
@@ -1089,14 +1186,14 @@ void baseintfAccountingBasedModule::processItemForBasket(
     if (DeltaQty > 0) {
         this->AccountSaleables->callSP(APICALLBOOM_PARAM,
                                        "spSaleable_Reserve", {
-                                           { "iSaleableID", _assetItem.Saleable.slbID },
+                                           { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
                                            { "iQty", DeltaQty },
                                        });
     } else if (DeltaQty < 0) {
         this->AccountSaleables->callSP(APICALLBOOM_PARAM,
                                        "spSaleable_unReserve", {
-                                           { "iSaleableID", _assetItem.Saleable.slbID },
+                                           { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
                                            { "iQty", abs(DeltaQty) },
                                        });
@@ -1110,15 +1207,15 @@ void baseintfAccountingBasedModule::processItemForBasket(
 
 void baseintfAccountingBasedModule::digestPrivs(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
-    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+    INOUT stuAssetItem      &_assetItem
+//    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: What should I do here?
 }
 
 void baseintfAccountingBasedModule::computeSystemDiscount(
     INTFAPICALLBOOM_IMPL            &APICALLBOOM_PARAM,
-    INOUT stuAssetItem              &_assetItem,
+    INOUT stuBasketItem             &_basketItem,
     const stuPendingSystemDiscount  &_pendingSystemDiscount /*= {}*/,
     const stuVoucherItem            *_oldVoucherItem /*= nullptr*/
 ) {
@@ -1131,9 +1228,9 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
             && _oldVoucherItem->SystemDiscounts.contains(_pendingSystemDiscount.Key)
         ) {
             stuSystemDiscount OldSystemDiscount = _oldVoucherItem->SystemDiscounts[_pendingSystemDiscount.Key];
-            _assetItem.Discount -= OldSystemDiscount.Amount;
+            _basketItem.Discount -= OldSystemDiscount.Amount;
 
-            if (_assetItem.Qty == 0) {
+            if (_basketItem.Qty == 0) {
                 return;
             }
         };
@@ -1145,7 +1242,7 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
         if (_pendingSystemDiscount.AmountType == enuDiscountType::Percent) {
             SystemDiscount.Info.insert("amount", QString::number(_pendingSystemDiscount.Amount) + "%");
 
-            SystemDiscount.Amount = _assetItem.SubTotal * _pendingSystemDiscount.Amount / 100.0;
+            SystemDiscount.Amount = _basketItem.SubTotal * _pendingSystemDiscount.Amount / 100.0;
 
             //Amount is %, Max is $
             if (_pendingSystemDiscount.Max > 0)
@@ -1158,7 +1255,7 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
 
             //Amount is $, Max is %
             if (_pendingSystemDiscount.Max > 0) {
-                qreal Max = _assetItem.SubTotal * _pendingSystemDiscount.Max / 100.0;
+                qreal Max = _basketItem.SubTotal * _pendingSystemDiscount.Max / 100.0;
                 SystemDiscount.Amount = qMin(SystemDiscount.Amount, Max);
             }
         }
@@ -1167,9 +1264,9 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
             SystemDiscount.Info.insert("applied-amount", SystemDiscount.Amount);
 
         //
-        _assetItem.SystemDiscounts[_pendingSystemDiscount.Key] = SystemDiscount;
-//            _assetItem.SystemDiscounts.insert(_pendingSystemDiscount.Key, SystemDiscount);
-        _assetItem.Discount += SystemDiscount.Amount;
+        _basketItem.SystemDiscounts[_pendingSystemDiscount.Key] = SystemDiscount;
+//            _basketItem.SystemDiscounts.insert(_pendingSystemDiscount.Key, SystemDiscount);
+        _basketItem.Discount += SystemDiscount.Amount;
 
         return;
     }
@@ -1179,7 +1276,7 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
 
 void baseintfAccountingBasedModule::computeCouponDiscount(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
 //    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
@@ -1196,36 +1293,36 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
     = * 5   |  x  |  y  |     | remove (x) + compute (y)
       */
 
-    _assetItem.DiscountCode = _assetItem.DiscountCode.trimmed();
+    _basketItem.DiscountCode = _basketItem.DiscountCode.trimmed();
 
     //C1:
     if (((_oldVoucherItem == nullptr) || (_oldVoucherItem->CouponDiscount.Code.isEmpty()))
-            && _assetItem.DiscountCode.isEmpty())
+            && _basketItem.DiscountCode.isEmpty())
         return;
 
     //C4.1: qty not changed
     if ((_oldVoucherItem != nullptr)
             && (_oldVoucherItem->CouponDiscount.Code.isEmpty() == false)
-            && (_assetItem.DiscountCode.isEmpty() == false)
-            && (_assetItem.DiscountCode == _oldVoucherItem->CouponDiscount.Code)
-            && (_assetItem.Qty == _oldVoucherItem->Qty))
+            && (_basketItem.DiscountCode.isEmpty() == false)
+            && (_basketItem.DiscountCode == _oldVoucherItem->CouponDiscount.Code)
+            && (_basketItem.Qty == _oldVoucherItem->Qty))
         return;
 
     //C3, 4.2, 5: remove
     if ((_oldVoucherItem != nullptr)
             && (_oldVoucherItem->CouponDiscount.Code.isEmpty() == false)
-//            && (_assetItem.DiscountCode != _oldVoucherItem->CouponDiscount.Code)
+//            && (_basketItem.DiscountCode != _oldVoucherItem->CouponDiscount.Code)
     ) {
-        _assetItem.Discount -= _oldVoucherItem->CouponDiscount.Amount;
-        _assetItem.CouponDiscount = {};
+        _basketItem.Discount -= _oldVoucherItem->CouponDiscount.Amount;
+        _basketItem.CouponDiscount = {};
 
         //C3:
-        if (_assetItem.DiscountCode.isEmpty())
+        if (_basketItem.DiscountCode.isEmpty())
             return;
     }
 
     //C2, 4.2, 5:
-    if (_assetItem.Qty == 0)
+    if (_basketItem.Qty == 0)
         return;
 
     clsCondition OmmitOldCondition;
@@ -1247,7 +1344,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
                                tblAccountUserAssetsBase::Fields::uas_vchID,
                            })
                   .addCol(enuAggregation::COUNT, tblAccountUserAssetsBase::Fields::uasID, "_discountUsedCount")
-                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _assetItem.AssetActorID}) //CurrentUserID })
+                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _basketItem.AssetActorID}) //CurrentUserID })
                   .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                               .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                   .andWhere(OmmitOldCondition)
@@ -1263,7 +1360,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
         .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
-                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _assetItem.AssetActorID}) //CurrentUserID })
+                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _basketItem.AssetActorID}) //CurrentUserID })
                   .andWhere({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::In, QString("'%1','%2'")
                               .arg(QChar(enuAuditableStatus::Active)).arg(QChar(enuAuditableStatus::Banned)) })
                   .andWhere(OmmitOldCondition)
@@ -1275,7 +1372,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
         )
         .addCol("tmp_cpn_amount._discountUsedAmount")
 
-        .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _assetItem.DiscountCode })
+        .where({ tblAccountCouponsBase::Fields::cpnCode, enuConditionOperator::Equal, _basketItem.DiscountCode })
         .andWhere({ tblAccountCouponsBase::Fields::cpnValidFrom, enuConditionOperator::LessEqual, DBExpression::NOW() })
         .andWhere(clsCondition({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::Null })
             .orCond({ tblAccountCouponsBase::Fields::cpnExpiryTime, enuConditionOperator::GreaterEqual,
@@ -1334,8 +1431,8 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
 
             qreal MinQty = NULLABLE_GET_OR_DEFAULT(cur.MinQty, -1);
 
-            if ((cur.SaleableCode == _assetItem.Saleable.slbCode)
-                    && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _assetItem.Qty)
+            if ((cur.SaleableCode == _basketItem.Saleable.slbCode)
+                    && (NULLABLE_GET_OR_DEFAULT(cur.MinQty, 0) <= _basketItem.Qty)
             ) {
                 if ((multiplier.Multiplier == 0)
                         || (NULLABLE_GET_OR_DEFAULT(multiplier.MinQty, 0) < MinQty))
@@ -1359,7 +1456,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
     TargomanDebug(5) << "1 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
     if (DiscountDTO.cpnAmountType == enuDiscountType::Percent)
-        Discount.Amount = _assetItem.SubTotal * Discount.Amount / 100.0;
+        Discount.Amount = _basketItem.SubTotal * Discount.Amount / 100.0;
 
     TargomanDebug(5) << "2 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
@@ -1369,7 +1466,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
         if (DiscountDTO.cpnAmountType == enuDiscountType::Percent)
             Discount.Amount = fmin(Discount.Amount, NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnMaxAmount, 0));
         else {
-            quint32 _max = /*ceil*/(_assetItem.SubTotal * NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnMaxAmount, 0) / 100.0);
+            quint32 _max = /*ceil*/(_basketItem.SubTotal * NULLABLE_GET_OR_DEFAULT(DiscountDTO.cpnMaxAmount, 0) / 100.0);
             Discount.Amount = fmin(Discount.Amount, _max);
         }
         TargomanDebug(5) << "3 Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
@@ -1397,8 +1494,8 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
     TargomanDebug(5) << "Discount:" << "ID(" << Discount.ID << ")" << "Code(" << Discount.Code << ")" << "Amount(" << Discount.Amount << ")";
 
     if (Discount.Amount > 0) {
-        _assetItem.CouponDiscount = Discount;
-        _assetItem.Discount += Discount.Amount;
+        _basketItem.CouponDiscount = Discount;
+        _basketItem.Discount += Discount.Amount;
 
         //@kambizzandi: Increase coupon statistics were moved to finalizeBasket,
         // because the customer may be angry about not being able to use the coupon again in same voucher
@@ -1653,7 +1750,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     TAPI::JSON_t                            _referrerParams,
     Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
-    stuAssetItem AssetItem;
+    stuBasketItem AssetItem;
 
     return this->internalAddToBasket(
         APICALLBOOM_PARAM,
@@ -1714,7 +1811,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
-    stuAssetItem AssetItem;
+    stuBasketItem AssetItem;
 
 //    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
     quint64 APITokenID = 0;

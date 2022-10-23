@@ -219,7 +219,7 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
 //                    { tblAccountSaleablesBase::Fields::slbDurationDays,     60 },
-//                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords,             1000 },
+//                    { tblAccountSaleablesMTBase::ExtraFields::slbTotalWords,             1000 },
                 }
             );
         } QT_CATCH (exTargomanBase &exp) {
@@ -248,7 +248,7 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,      "test mt Saleable 456 vt" },
                     { tblAccountSaleablesBase::Fields::slbDurationDays,         60 },
                     { tblAccountSaleablesBase::Fields::slbStartAtFirstUse,      true },
-                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords, 1000 },
+                    { tblAccountSaleablesMTBase::ExtraFields::slbTotalWords,    1000 },
                 }
             );
 

@@ -77,11 +77,31 @@ public:
     );
 
 protected:
-    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID);
-    virtual void breakCredit(quint64 _slbID,
-                             const QString &_action = {});
-    virtual bool isUnlimited(const UsageLimits_t& _limits) const;
-    virtual bool isEmpty(const UsageLimits_t& _limits) const;
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _actorID,
+        const ServiceUsage_t &_requestedUsage = {},
+        const QString &_action = {});
+
+    virtual void breakCredit(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const stuAssetItem &_assetItem,
+        const QString &_action = {});
+
+    virtual bool isUnlimited(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const UsageLimits_t& _limits) const;
+
+    virtual bool isEmpty(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const UsageLimits_t& _limits) const;
+
+protected:
+    virtual QVariantMap getCustomUserAssetFieldsForQuery(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INOUT stuBasketItem     &_basketItem,
+        const stuVoucherItem    *_oldVoucherItem = nullptr
+    );
 
 public:
     QScopedPointer<intfMTCorrectionRules_Type>         MTCorrectionRules;

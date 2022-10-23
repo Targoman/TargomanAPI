@@ -14,3 +14,15 @@ UPDATE tblAccountSaleables
 
 ALTER TABLE `tblAccountSaleables`
     DROP COLUMN `slbValidityDurationInDays`;
+
+ALTER TABLE `tblAccountSaleables`
+    CHANGE COLUMN `slbValidityWords` `slbTotalWords` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `slbUpdatedBy_usrID`;
+
+
+ALTER TABLE `tblAccountUserAssets`
+    ADD COLUMN `uasTotalWords` INT UNSIGNED NULL DEFAULT NULL AFTER `uasUpdatedBy_usrID`;
+
+
+ALTER TABLE `tblAccountAssetUsage`
+    ADD COLUMN `usgRemainingTotalWords` INT UNSIGNED NULL DEFAULT NULL AFTER `usg_uasID`;
+

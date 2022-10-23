@@ -402,7 +402,7 @@ private slots:
     }
 
     void LoginByMobileOnly() {
-        QVariant Result = callUserAPI(
+        QVariant Result = callGuestAPI(
                               RESTClientHelper::POST,
                               "Account/loginByMobileOnly",
                               {},
@@ -433,8 +433,8 @@ private slots:
         QString Code = Result.toMap().value("aprApprovalCode").toString();
         QVERIFY_DUMP_RESULT(Code.isEmpty() == false);
 
-        quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
-        QVERIFY_DUMP_RESULT(UserID > 0);
+//        quint64 UserID = Result.toMap().value("apr_usrID").toULongLong();
+//        QVERIFY_DUMP_RESULT(UserID > 0);
 
         //------------------
         Result = callUserAPI(
@@ -458,7 +458,7 @@ private slots:
         gEncodedJWT = ResultAsMap.value("token").toString();
         gJWT = QJsonDocument::fromJson(QByteArray::fromBase64(gEncodedJWT.split('.').at(1).toLatin1())).object();
 
-        QVERIFY_DUMP_RESULT(clsJWT(gJWT).actorID() == UserID);
+//        QVERIFY_DUMP_RESULT(clsJWT(gJWT).actorID() == UserID);
         QVERIFY_DUMP_RESULT(clsJWT(gJWT).usrStatus() == TAPI::enuUserStatus::Active);
     }
 

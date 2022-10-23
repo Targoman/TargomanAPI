@@ -281,15 +281,21 @@ QVariantMap MTHelper::doTranslation(
         //check credit
         //-----------------------------------------
         ServiceUsage_t RequestedUsage = {
-            { QString("%1::%22%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
-            { "dic", _dic ? 1 : 0 },
-    //        { "sample", },
+//            { QString("%1=%2::%3-%4").arg(RequestedUsage::CREDIT).arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+            { RequestedUsage::CREDIT, QVariantMap({
+                  { QString("translate::%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+            }) },
+//            { MTRequestedUsage::ENGINE,     _engine },
+//            { MTRequestedUsage::DIR,        QString("%1-%2").arg(_dir.first).arg(_dir.second) },
+//            { RequestedUsage::CREDIT,       SourceWordCount },
+            { MTRequestedUsage::DIC,        _dic ? 1 : 0 },
+//            { MTRequestedUsage::SAMPLE,      },
         };
 
         _mtModule->checkUsageIsAllowed(
                     APICALLBOOM_PARAM,
                     RequestedUsage,
-                    "translate"
+                    MTAction::TRANSLATE
                     );
     }
 

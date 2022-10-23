@@ -346,6 +346,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 
     if (_autoLogin) {
         auto LoginInfo = PrivHelpers::processUserObject(
+                             APICALLBOOM_PARAM,
                              UserInfo,
                              {}
 //                             _services.split(",", QString::SkipEmptyParts)
@@ -399,6 +400,7 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 
     if (_autoLogin) {
         auto LoginInfo = PrivHelpers::processUserObject(
+                             APICALLBOOM_PARAM,
                              UserInfo,
                              {}
 //                             _services.split(",", QString::SkipEmptyParts)
@@ -430,7 +432,8 @@ QVariantMap IMPL_REST_PUT(Account, signup, (
 
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    stuActiveAccount LoginInfo = Authentication::login(APICALLBOOM_PARAM.getIP(),
+    stuActiveAccount LoginInfo = Authentication::login(APICALLBOOM_PARAM,
+                                                       APICALLBOOM_PARAM.getIP(),
                                                        _emailOrMobile,
                                                        _pass,
                                                        _salt,
@@ -556,16 +559,16 @@ bool IMPL_REST_GET_OR_POST(Account, resendApprovalCode, (
 //            throw exHTTPNotImplemented("Invalid oAuth type");
     }
 
-    auto LoginInfo = Authentication::login(
-                         APICALLBOOM_PARAM.getIP(),
-                         OAuthInfo.Email,
-                         nullptr,
-                         nullptr,
-                         //_services.split(","),
-                         true,
-                         _sessionInfo.object(),
-                         _fingerprint
-                         );
+    auto LoginInfo = Authentication::login(APICALLBOOM_PARAM,
+                                           APICALLBOOM_PARAM.getIP(),
+                                           OAuthInfo.Email,
+                                           nullptr,
+                                           nullptr,
+                                           //_services.split(","),
+                                           true,
+                                           _sessionInfo.object(),
+                                           _fingerprint
+                                           );
 
     QVariantMap Result({
 //        { "userID", UserInfo["usrID"].toInt() },

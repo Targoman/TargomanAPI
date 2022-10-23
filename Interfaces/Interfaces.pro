@@ -52,6 +52,7 @@ HEADERS += \
     Server/QJWT.h \
     Common/base.h \
     Common/APIArgHelperMacrosPrivate.h \
+    Common/tmplNullable.hpp \
     Helpers/FixtureHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \

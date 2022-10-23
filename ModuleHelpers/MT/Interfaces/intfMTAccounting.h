@@ -164,8 +164,7 @@ namespace tblAccountProductsI18NMTBase {
 namespace tblAccountSaleablesMTBase {
 
     namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(slbValidityDurationInDays);
-        TARGOMAN_CREATE_CONSTEXPR(slbValidityWords);
+        TARGOMAN_CREATE_CONSTEXPR(slbTotalWords);
     }
 
     namespace ExtraRelation {
@@ -174,9 +173,8 @@ namespace tblAccountSaleablesMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                                   Type        Validation      Default     UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::slbValidityDurationInDays,   S(quint32), QFV.integer(),  QRequired,  UPOwner },
-            { ExtraFields::slbValidityWords,            S(quint32), QFV.integer(),  QRequired,  UPOwner },
+            //ColName                       Type                        Validation      Default     UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::slbTotalWords,   S(NULLABLE_TYPE(quint32)),  QFV.integer(),  QNull,      UPOwner },
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -195,8 +193,7 @@ namespace tblAccountSaleablesMTBase {
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesMTBase_DTO,
 
-        SF_quint32                  (slbValidityDurationInDays),
-        SF_quint32                  (slbValidityWords)
+        SF_NULLABLE_quint32         (slbTotalWords)
     );
 }
 
@@ -266,6 +263,7 @@ namespace tblAccountSaleablesFilesMTBase {
 namespace tblAccountUserAssetsMTBase {
 
     namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(uasTotalWords);
     }
 
     namespace ExtraRelation {
@@ -274,7 +272,8 @@ namespace tblAccountUserAssetsMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            //ColName                       Type                        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::uasTotalWords,   S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(0),  QNull,      UPAdmin }
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -291,7 +290,9 @@ namespace tblAccountUserAssetsMTBase {
     SF_tblAccountUserAssetsBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountUserAssetsMTBase_DTO
+        SF_tblAccountUserAssetsMTBase_DTO,
+
+        SF_NULLABLE_quint32         (uasTotalWords)
     );
 }
 
@@ -329,7 +330,7 @@ namespace tblAccountUserAssetsFilesMTBase {
 namespace tblAccountAssetUsageMTBase {
 
     namespace ExtraFields {
-        //usgRemainingDays
+        TARGOMAN_CREATE_CONSTEXPR(usgRemainingTotalWords);
     }
 
     namespace ExtraRelation {
@@ -338,7 +339,8 @@ namespace tblAccountAssetUsageMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            //ColName                               Type                        Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
+            { ExtraFields::usgRemainingTotalWords,  S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(0),  QNull,      UPAdmin }
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -355,7 +357,9 @@ namespace tblAccountAssetUsageMTBase {
     SF_tblAccountAssetUsageBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountAssetUsageMTBase_DTO
+        SF_tblAccountAssetUsageMTBase_DTO,
+
+        SF_NULLABLE_quint32         (usgRemainingTotalWords)
     );
 }
 

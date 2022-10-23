@@ -22,6 +22,8 @@
  */
 
 #include "intfMTModule.h"
+#include "MTDefs.hpp"
+#include "intfMTAccounting.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
@@ -74,33 +76,182 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
 |** accounting *******************************************************|
 \*********************************************************************/
 template <bool _itmplIsTokenBase>
-stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(quint64 _usrID) {
-    ///@TODO: complete this
+stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _actorID,
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
+) {
+    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM);
+    SelectQuery
+        .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+
+        .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
+
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseFromDate, enuConditionOperator::LessEqual,
+                DBExpression::CURDATE() })
+        )
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseToDate, enuConditionOperator::GreaterEqual,
+                DBExpression::CURDATE() })
+        )
+
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseFromHour, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseFromHour, enuConditionOperator::LessEqual,
+                DBExpression::VALUE("HOUR(NOW())") })
+        )
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseToHour, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseToHour, enuConditionOperator::GreaterEqual,
+                DBExpression::VALUE("HOUR(NOW())") })
+        )
+    ;
+
+    ///check remaining credit
+    SelectQuery.andWhere(clsCondition({ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords, enuConditionOperator::Null })
+                         .orCond({ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords,
+                                 enuConditionOperator::Greater,
+                                 0 }));
+
+//    for (auto _usageIter = _requestedUsage.constBegin();
+//         _usageIter != _requestedUsage.constEnd();
+//         _usageIter++
+//    ) {
+//        if (_usageIter.key() != RequestedUsage::CREDIT)
+//            continue;
+
+//        QVariantMap CreditValues = _usageIter.value().toMap();
+//        QString CreditKey = CreditValues.firstKey();
+//        qint64 CreditValue = CreditValues.first().toLongLong();
+
+//        SelectQuery.andWhere({  })
+//    }
+
+    //-------------------------------
+    TAPI::stuTable Table = SelectQuery.pageSize(0).all();
+
+    QDateTime DBCurrentDateTime;
+    ActiveCredits_t ActiveCredits;
+    NULLABLE_TYPE(stuAssetItem) PreferedCredit = NULLABLE_NULL_VALUE;
+
+    foreach (QVariant Row, Table.Rows) {
+        QVariantMap UserAssetInfo = Row.toMap();
+        QJsonObject JsonUserAssetInfo = QJsonObject::fromVariantMap(UserAssetInfo);
+
+        stuAssetItem AssetItem;
+
+        AssetItem.fromJson(JsonUserAssetInfo); // -> for save _lastFromJsonSource
+        AssetItem.UserAsset.fromJson(JsonUserAssetInfo);
+        AssetItem.AssetUsage.fromJson(JsonUserAssetInfo);
+
+        if (DBCurrentDateTime.isNull())
+            TAPI::setFromVariant(DBCurrentDateTime, UserAssetInfo.value(Targoman::API::CURRENT_TIMESTAMP));
+
+        //-- --------------------------------
+        UsageLimits_t SaleableUsageLimits;
+        for (auto Iter = this->AssetUsageLimitsCols.begin();
+            Iter != this->AssetUsageLimitsCols.end();
+            Iter++
+        ) {
+            if (_action.isEmpty() || Iter.key() == _action) {
+                //Key: action
+                SaleableUsageLimits.insert(Iter.key(), {
+                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
+                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
+                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
+                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
+                });
+            }
+        }
+        AssetItem.Digested.Limits = SaleableUsageLimits;
+
+        this->digestPrivs(APICALLBOOM_PARAM, AssetItem);
+
+        //-- --------------------------------
+        ActiveCredits.append(AssetItem);
+
+        if (AssetItem.UserAsset.uasPrefered)
+            PreferedCredit = AssetItem;
+    }
+
     return stuServiceCreditsInfo(
-                {},
-                NULLABLE_NULL_VALUE,
-                NULLABLE_NULL_VALUE,
-                {},
-                {}
-                );
+        /* activeCredits     */ ActiveCredits,
+        /* preferedCredit    */ PreferedCredit,
+        /* parentID          */ NULLABLE_NULL_VALUE,
+        /* myLimitsOnParent  */ {},
+        /* dbCurrentDateTime */ DBCurrentDateTime
+    );
 }
 
 template <bool _itmplIsTokenBase>
 void intfMTModule<_itmplIsTokenBase>::breakCredit(
-    quint64 _slbID,
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const stuAssetItem &_assetItem,
     const QString &_action
 ) {
+    /*
+                         1         2         3
+        days : 0         0         0         0
+        now  :           |
+     -- before break:
+        a    : |-----------------------------|  total: 100 words / remaining: 30 words / Duration: 30 Days
+     -- after break:
+        a    : |---------|                      total: 70 words  / remaining: 0 words  / Duration: 10 Days / End date: NOW
+        b    :           ?-------------------?  total: 30 words  / remaining: 30 words / Duration: 20 Days / Start & End date: NULL
+    */
+
+    tblAccountUserAssetsMTBase::DTO AccountUserAssetsMTBaseDTO;
+    AccountUserAssetsMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
+
+    //is unlimited?
+    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasTotalWords))
+        return;
+
+    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasDurationDays))
+        return;
+
+    tblAccountAssetUsageMTBase::DTO AccountAssetUsageMTBaseDTO;
+    AccountAssetUsageMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
+
+
+
+
 }
 
 template <bool _itmplIsTokenBase>
-bool intfMTModule<_itmplIsTokenBase>::isUnlimited(const UsageLimits_t& _limits) const {
+bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const UsageLimits_t &_limits
+) const {
 }
 
 template <bool _itmplIsTokenBase>
-bool intfMTModule<_itmplIsTokenBase>::isEmpty(const UsageLimits_t& _limits) const {
+bool intfMTModule<_itmplIsTokenBase>::isEmpty(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const UsageLimits_t &_limits
+) const {
 }
 
+template <bool _itmplIsTokenBase>
+QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuBasketItem     &_basketItem,
+    Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    QVariantMap Result;
+
+    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
+    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
+    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasTotalWords,
+                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbTotalWords)
+                      );
+
+    return Result;
+}
 /*********************************************************************/
+
 template class intfMTModule<false>;
 template class intfMTModule<true>;
 

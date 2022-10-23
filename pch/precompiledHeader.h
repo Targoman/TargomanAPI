@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QMap>
+#include <QList>
 #include <QVector>
 #include <QStringList>
 #include <QDir>
@@ -33,6 +34,7 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include <optional>
 
 #include "libTargomanCommon/CmdIO.h"
 #include "libTargomanCommon/Logger.h"
