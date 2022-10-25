@@ -74,3 +74,47 @@ ALTER TABLE `tblAccountSaleables`
 
 ALTER TABLE `tblAccountUserAssets`
     CHANGE COLUMN `uasPrefered` `uasPrefered` BIT(1) NOT NULL DEFAULT 0 AFTER `uasDiscountAmount`;
+
+
+
+
+
+
+
+ALTER TABLE `tblAccountProducts`
+    ADD COLUMN `prdValidFromDate` DATETIME NULL DEFAULT NULL AFTER `prdDesc`,
+    ADD COLUMN `prdValidToDate` DATETIME NULL DEFAULT NULL AFTER `prdValidFromDate`,
+    ADD COLUMN `prdValidFromHour` TINYINT UNSIGNED NULL DEFAULT NULL AFTER `prdValidToDate`,
+    ADD COLUMN `prdValidToHour` TINYINT UNSIGNED NULL DEFAULT NULL AFTER `prdValidFromHour`,
+    ADD COLUMN `prdDurationDays` INT UNSIGNED NULL DEFAULT NULL AFTER `prdValidToHour`;
+
+ALTER TABLE `tblAccountSaleables`
+    ADD COLUMN `slbValidFromDate` DATETIME NULL DEFAULT NULL AFTER `slbVoucherTemplate`,
+    ADD COLUMN `slbValidToDate` DATETIME NULL DEFAULT NULL AFTER `slbValidFromDate`,
+    CHANGE COLUMN `slbCanUseFromHour` `slbValidFromHour` TINYINT(3) UNSIGNED NULL DEFAULT NULL AFTER `slbValidToDate`,
+    CHANGE COLUMN `slbCanUseToHour` `slbValidToHour` TINYINT(3) UNSIGNED NULL DEFAULT NULL AFTER `slbValidFromHour`,
+    CHANGE COLUMN `slbDurationDays` `slbDurationDays` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `slbValidToHour`;
+
+ALTER TABLE `tblAccountUserAssets`
+    CHANGE COLUMN `uasCanUseFromDate` `uasValidFromDate` DATETIME NULL DEFAULT NULL AFTER `uasSplittedFrom_uasID`,
+    CHANGE COLUMN `uasCanUseToDate` `uasValidToDate` DATETIME NULL DEFAULT NULL AFTER `uasValidFromDate`,
+    CHANGE COLUMN `uasCanUseFromHour` `uasValidFromHour` TINYINT(3) UNSIGNED NULL DEFAULT NULL AFTER `uasValidToDate`,
+    CHANGE COLUMN `uasCanUseToHour` `uasValidToHour` TINYINT(3) UNSIGNED NULL DEFAULT NULL AFTER `uasValidFromHour`,
+    CHANGE COLUMN `uasDurationDays` `uasDurationDays` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `uasValidToHour`;
+
+ALTER TABLE `tblAccountUserAssets`
+    ADD COLUMN `uasBreakedAt` DATETIME NULL DEFAULT NULL AFTER `uasDurationDays`,
+    DROP COLUMN `uasSplittedFrom_uasID`;
+
+
+
+
+
+ALTER TABLE `tblAccountProducts`
+    CHANGE COLUMN `prdDurationDays` `prdDurationMinutes` MEDIUMINT UNSIGNED NULL DEFAULT NULL AFTER `prdValidToHour`;
+
+ALTER TABLE `tblAccountSaleables`
+    CHANGE COLUMN `slbDurationDays` `slbDurationMinutes` MEDIUMINT UNSIGNED NULL DEFAULT NULL AFTER `slbValidToHour`;
+
+ALTER TABLE `tblAccountUserAssets`
+    CHANGE COLUMN `uasDurationDays` `uasDurationMinutes` MEDIUMINT UNSIGNED NULL DEFAULT NULL AFTER `uasValidToHour`;

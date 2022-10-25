@@ -65,7 +65,7 @@ MT::MT() :
                 /* day   */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerDay,
                 /* week  */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerWeek,
                 /* month */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerMonth,
-                /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords
+                /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
             }},
         },
         &AccountUnits::instance(),

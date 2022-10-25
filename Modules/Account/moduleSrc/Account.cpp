@@ -1131,7 +1131,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_POST(Account, finalizeBasket, (
                                                { "iUserID",     CurrentUserID },
                                                { "iWalletID",   _walID },
                                                { "iVoucherID",  _preVoucher.VoucherID },
-                                               { "iAomount",    MustFreeze },
+                                               { "ioAmount",    MustFreeze },
                                            });
     }
 

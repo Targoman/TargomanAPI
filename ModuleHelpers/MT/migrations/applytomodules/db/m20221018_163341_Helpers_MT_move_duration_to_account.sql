@@ -6,6 +6,9 @@ ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
 
 USE `{{dbprefix}}{{Schema}}`;
 
+ALTER TABLE `tblAccountProducts`
+    ADD COLUMN `prdCreditTotalWords` INT UNSIGNED NULL DEFAULT NULL AFTER `prdUpdatedBy_usrID`;
+
 UPDATE tblAccountSaleables
     SET slbDurationDays = slbValidityDurationInDays
     WHERE slbDurationDays IS NULL
@@ -18,11 +21,22 @@ ALTER TABLE `tblAccountSaleables`
 ALTER TABLE `tblAccountSaleables`
     CHANGE COLUMN `slbValidityWords` `slbTotalWords` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `slbUpdatedBy_usrID`;
 
+ALTER TABLE `tblAccountSaleables`
+    CHANGE COLUMN `slbTotalWords` `slbCreditTotalWords` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `slbUpdatedBy_usrID`;
+
+
 
 ALTER TABLE `tblAccountUserAssets`
     ADD COLUMN `uasTotalWords` INT UNSIGNED NULL DEFAULT NULL AFTER `uasUpdatedBy_usrID`;
+
+ALTER TABLE `tblAccountUserAssets`
+    CHANGE COLUMN `uasTotalWords` `uasCreditTotalWords` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `uasUpdatedBy_usrID`;
+
+
 
 
 ALTER TABLE `tblAccountAssetUsage`
     ADD COLUMN `usgRemainingTotalWords` INT UNSIGNED NULL DEFAULT NULL AFTER `usg_uasID`;
 
+ALTER TABLE `tblAccountAssetUsage`
+    CHANGE COLUMN `usgRemainingTotalWords` `usgUsedTotalWords` INT(10) UNSIGNED NULL DEFAULT NULL AFTER `usg_uasID`;

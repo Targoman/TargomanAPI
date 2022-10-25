@@ -83,35 +83,54 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     const QString &_action
 ) {
     ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM);
+
     SelectQuery
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+        .leftJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
 
         .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
-        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseFromDate, enuConditionOperator::Null })
-            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseFromDate, enuConditionOperator::LessEqual,
-                DBExpression::CURDATE() })
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::LessEqual,
+                DBExpression::NOW() })
         )
-        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseToDate, enuConditionOperator::GreaterEqual,
-                DBExpression::CURDATE() })
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::GreaterEqual,
+                DBExpression::NOW() })
         )
 
-        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseFromHour, enuConditionOperator::Null })
-            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseFromHour, enuConditionOperator::LessEqual,
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromHour, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromHour, enuConditionOperator::LessEqual,
                 DBExpression::VALUE("HOUR(NOW())") })
         )
-        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasCanUseToHour, enuConditionOperator::Null })
-            .orCond({ tblAccountUserAssetsBase::Fields::uasCanUseToHour, enuConditionOperator::GreaterEqual,
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidToHour, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidToHour, enuConditionOperator::GreaterEqual,
                 DBExpression::VALUE("HOUR(NOW())") })
         )
     ;
 
     ///check remaining credit
-    SelectQuery.andWhere(clsCondition({ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords, enuConditionOperator::Null })
-                         .orCond({ tblAccountAssetUsageMTBase::ExtraFields::usgRemainingTotalWords,
-                                 enuConditionOperator::Greater,
-                                 0 }));
+//    QString CoalescePart = QString("COALESCE(%1,%2,%3)")
+//                           .arg(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords)
+//                           .arg(tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords)
+//                           .arg(tblAccountProductsMTBase::ExtraFields::prdCreditTotalWords)
+//                           ;
+
+    SelectQuery.andWhere(clsCondition({ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords, enuConditionOperator::Null })
+                         .orCond({ tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords, enuConditionOperator::Null })
+                         .orCond({ DBExpression::VALUE(QString("%1-%2")
+                                        .arg(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords)
+                                        .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
+                                   ),
+                                   enuConditionOperator::Greater,
+                                   0 }));
+//                         .orCond({ DBExpression::VALUE(CoalescePart), enuConditionOperator::Null })
+//                         .orCond({ DBExpression::VALUE(QString("%1-%2")
+//                                        .arg(CoalescePart)
+//                                        .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
+//                                   ),
+//                                   enuConditionOperator::Greater,
+//                                   0 }));
 
 //    for (auto _usageIter = _requestedUsage.constBegin();
 //         _usageIter != _requestedUsage.constEnd();
@@ -141,6 +160,8 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
         stuAssetItem AssetItem;
 
         AssetItem.fromJson(JsonUserAssetInfo); // -> for save _lastFromJsonSource
+        AssetItem.Product.fromJson(JsonUserAssetInfo);
+        AssetItem.Saleable.fromJson(JsonUserAssetInfo);
         AssetItem.UserAsset.fromJson(JsonUserAssetInfo);
         AssetItem.AssetUsage.fromJson(JsonUserAssetInfo);
 
@@ -187,35 +208,58 @@ template <bool _itmplIsTokenBase>
 void intfMTModule<_itmplIsTokenBase>::breakCredit(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const stuAssetItem &_assetItem,
-    const QString &_action
+    Q_DECL_UNUSED const QString &_action
 ) {
     /*
-                         1         2         3
-        days : 0         0         0         0
-        now  :           |
-     -- before break:
-        a    : |-----------------------------|  total: 100 words / remaining: 30 words / Duration: 30 Days
-     -- after break:
-        a    : |---------|                      total: 70 words  / remaining: 0 words  / Duration: 10 Days / End date: NOW
-        b    :           ?-------------------?  total: 30 words  / remaining: 30 words / Duration: 20 Days / Start & End date: NULL
+                        1         2         3
+     days   : 0         0         0         0
+     before : |-----------------------------|  total: 100 words / used: 30 words / Duration: 30 Days
+     now    :           |
+     after  :           ?-------------------?  total: 100 words / used: 30 words / Duration: 20 Days / Start & End date: NULL
     */
+
+//    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
+//    AccountProductsMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
+
+//    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
+//    AccountSaleablesMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
 
     tblAccountUserAssetsMTBase::DTO AccountUserAssetsMTBaseDTO;
     AccountUserAssetsMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
 
-    //is unlimited?
-    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasTotalWords))
+//    tblAccountAssetUsageMTBase::DTO AccountAssetUsageMTBaseDTO;
+//    AccountAssetUsageMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
+
+    if (AccountUserAssetsMTBaseDTO.uasValidFromDate.isValid() == false)
         return;
 
-    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasDurationDays))
+    if (AccountUserAssetsMTBaseDTO.uasValidToDate.isValid() == false)
         return;
 
-    tblAccountAssetUsageMTBase::DTO AccountAssetUsageMTBaseDTO;
-    AccountAssetUsageMTBaseDTO.fromJson(_assetItem._lastFromJsonSource);
+    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasDurationMinutes))
+        return;
 
+    QDateTime DBCurrentDateTime;
+    TAPI::setFromVariant(DBCurrentDateTime, _assetItem._lastFromJsonSource.value(Targoman::API::CURRENT_TIMESTAMP));
 
+    quint32 MinutesElapsed = abs(AccountUserAssetsMTBaseDTO.uasValidFromDate.secsTo(DBCurrentDateTime)) / 60;
+    quint32 MinutesRemained = NULLABLE_VALUE(AccountUserAssetsMTBaseDTO.uasDurationMinutes) - MinutesElapsed;
 
+//    if (NULLABLE_IS_NULL(AccountUserAssetsMTBaseDTO.uasCreditTotalWords))
+//        return;
 
+    //-------------
+    ORMUpdateQuery UpdateQuery = this->accountUserAssets()->makeUpdateQuery(APICALLBOOM_PARAM);
+
+    UpdateQuery
+            .set(tblAccountUserAssetsBase::Fields::uasValidFromDate, DBExpression::NIL())
+            .set(tblAccountUserAssetsBase::Fields::uasValidToDate, DBExpression::NIL())
+            .set(tblAccountUserAssetsBase::Fields::uasDurationMinutes, MinutesRemained)
+            .set(tblAccountUserAssetsBase::Fields::uasBreakedAt, DBExpression::NOW())
+            .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, AccountUserAssetsMTBaseDTO.uasID })
+            ;
+
+    UpdateQuery.execute(APICALLBOOM_PARAM.getActorID());
 }
 
 template <bool _itmplIsTokenBase>
@@ -240,13 +284,21 @@ QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
 ) {
     QVariantMap Result;
 
+    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
+    AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
     tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
     AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
 
-    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasTotalWords,
-                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbTotalWords)
+    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
                       );
+    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
+                      );
+    //else leave uasCreditTotalWords as null
 
     return Result;
 }
