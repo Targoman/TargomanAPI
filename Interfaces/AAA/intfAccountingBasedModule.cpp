@@ -579,12 +579,12 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
         .where({ tblAccountSaleablesBase::Fields::slbCode, enuConditionOperator::Equal, _saleableCode })
 
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::LessEqual,
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual,
                 DBExpression::NOW() })
         )
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::GreaterEqual,
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
                 DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
         .one();
@@ -925,12 +925,12 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         .addCols(this->AccountUserAssets->selectableColumnNames())
         .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
 
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::LessEqual,
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual,
                 DBExpression::NOW() })
         )
-        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::Null })
-            .orCond({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::GreaterEqual,
+        .andWhere(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
                 DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
         )
 

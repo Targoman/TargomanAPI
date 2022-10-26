@@ -169,8 +169,8 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slbDesc);
         TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbType);
-        TARGOMAN_CREATE_CONSTEXPR(slbSaleFromDate);
-        TARGOMAN_CREATE_CONSTEXPR(slbSaleToDate);
+        TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
+        TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
         TARGOMAN_CREATE_CONSTEXPR(slbPrivs);
         TARGOMAN_CREATE_CONSTEXPR(slbBasePrice);
         TARGOMAN_CREATE_CONSTEXPR(slbAdditives);
@@ -520,8 +520,8 @@ namespace tblAccountSaleablesBase {
             ORM_MULTILANGUAGE(Fields::slbName, QRequired,  UPOwner),
             ORM_MULTILANGUAGE(Fields::slbDesc, QNull,      UPOwner),
             { Fields::slbType,                  S(TAPI::enuSaleableType::Type),     QFV,                            TAPI::enuSaleableType::Normal, UPOwner },
-            { Fields::slbSaleFromDate,          S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
-            { Fields::slbSaleToDate,            S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
+            { Fields::slbAvailableFromDate,          S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
+            { Fields::slbAvailableToDate,            S(TAPI::DateTime_t),                QFV,                            QNull,      UPOwner },
             { Fields::slbPrivs,                 S(TAPI::JSON_t),                    QFV,                            QNull,      UPOwner },
             { Fields::slbBasePrice,             S(qreal),                           QFV.real().minValue(0),         QRequired,  UPOwner },
             { Fields::slbAdditives,             S(TAPI::SaleableAdditive_t),        QFV,                            QNull,      UPOwner },
@@ -562,8 +562,8 @@ namespace tblAccountSaleablesBase {
                 ORM_INVALIDATED_AT_FIELD_NAME,
               }, enuDBIndex::Unique },
             { Fields::slbType },
-            { Fields::slbSaleFromDate },
-            { Fields::slbSaleToDate },
+            { Fields::slbAvailableFromDate },
+            { Fields::slbAvailableToDate },
             { Fields::slbStatus },
             { Fields::slbCreatedBy_usrID },
             { Fields::slbCreationDateTime },
@@ -579,8 +579,8 @@ namespace tblAccountSaleablesBase {
     SF_QString                  (slbName), \
     SF_QString                  (slbDesc), \
     SF_Enum                     (slbType, TAPI::enuSaleableType, TAPI::enuSaleableType::Normal), \
-    SF_DateTime_t               (slbSaleFromDate), \
-    SF_DateTime_t               (slbSaleToDate), \
+    SF_DateTime_t               (slbAvailableFromDate), \
+    SF_DateTime_t               (slbAvailableToDate), \
     SF_JSON_t                   (slbPrivs), \
     SF_qreal                    (slbBasePrice), \
     SF_JSON_t                   (slbAdditives), \

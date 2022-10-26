@@ -455,12 +455,12 @@ QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleables) {
     clsCondition ExtraFilters = {};
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::Null })
-                .orCond({ tblAccountSaleablesBase::Fields::slbSaleFromDate, enuConditionOperator::LessEqual,
+            .setCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual,
                           DBExpression::NOW() })
             )
-            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::Null })
-                .orCond({ tblAccountSaleablesBase::Fields::slbSaleToDate, enuConditionOperator::GreaterEqual,
+            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
                           DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
             );
 
