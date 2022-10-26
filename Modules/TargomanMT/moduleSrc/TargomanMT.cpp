@@ -60,20 +60,7 @@ TargomanMT::TargomanMT() :
     intfMTModule( //intfAccountingBasedModule(
         TargomanMTDomain,
         TargomanMTSchema,
-        {
-//            { "show", {
-//                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
-//                /* week  */ {},
-//                /* month */ {},
-//                /* total */ tblAccountSaleables::ExtraFields::slbShowTotal
-//            }},
-//            { "click", {
-//                /* day   */ tblAccountSaleables::ExtraFields::slbClicksPerDay,
-//                /* week  */ {},
-//                /* month */ tblAccountSaleables::ExtraFields::slbClicksPerMonth,
-//                /* total */ tblAccountSaleables::ExtraFields::slbClicksTotal
-//            }},
-        },
+        {},
         &AccountUnits::instance(),
         &AccountProducts::instance(),
         &AccountSaleables::instance(),

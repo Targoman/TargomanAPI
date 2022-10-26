@@ -1114,6 +1114,13 @@ struct stuUsageColDefinition {
     QString PerMonth;
     QString Total;
 
+    stuUsageColDefinition()
+    { ; }
+
+    stuUsageColDefinition(const stuUsageColDefinition &_other) :
+        PerDay(_other.PerDay), PerWeek(_other.PerWeek), PerMonth(_other.PerMonth), Total(_other.Total)
+    { ; }
+
     stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
         PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
     { ; }
@@ -1121,6 +1128,29 @@ struct stuUsageColDefinition {
 
 ///key : action
 typedef QMap<QString, stuUsageColDefinition> AssetUsageLimitsCols_t;
+
+inline AssetUsageLimitsCols_t mergeAssetUsageLimitsCols(const AssetUsageLimitsCols_t &_a, const AssetUsageLimitsCols_t &_b) {
+
+    AssetUsageLimitsCols_t Result = _a;
+
+    for (auto it = _b.constBegin();
+         it != _b.constEnd();
+         it++
+    ) {
+        if (Result.contains(it.key()) == false) {
+            Result.insert(it.key(), it.value());
+//            Result.insert(it.key(), stuUsageColDefinition(it.value()));
+//            Result.insert(it.key(), stuUsageColDefinition(it->PerDay, it->PerWeek, it->PerMonth, it->Total));
+        } else {
+            if (it->PerDay.isEmpty() == false)      Result[it.key()].PerDay = it->PerDay;
+            if (it->PerWeek.isEmpty() == false)     Result[it.key()].PerWeek = it->PerWeek;
+            if (it->PerMonth.isEmpty() == false)    Result[it.key()].PerMonth = it->PerMonth;
+            if (it->Total.isEmpty() == false)       Result[it.key()].Total = it->Total;
+        }
+    }
+
+    return Result;
+}
 
 typedef QMap<QString, QString> OrderAdditives_t;
 
@@ -1180,8 +1210,8 @@ struct stuActiveCredit {
 TAPI_DEFINE_STRUCT(stuActiveCredit,
     SF_Struct           (Credit, stuAssetItem, v.UserAsset.uasID),
     SF_bool             (IsFromParent),
-    SF_QMapOfVarStruct  (MyLimitsOnParent, stuUsage, UsageLimits_t),
-    SF_qint64           (TTL)
+    SF_QMapOfVarStruct  (MyLimitsOnParent, stuUsage, UsageLimits_t)
+//    SF_qint64           (TTL)
 );
 
 //constexpr char DISCOUNT_TYPE_SYSTEM[]   = "SYSTEM";

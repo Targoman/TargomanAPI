@@ -57,7 +57,7 @@ public:
         const QString                               &_module,
         const QString                               &_schema,
         //Account --
-        AssetUsageLimitsCols_t                      _AssetUsageLimitsCols,
+        AssetUsageLimitsCols_t                      _exclusiveAssetUsageLimitsCols,
         intfAccountUnits                            *_units,
         intfAccountProducts                         *_products,
         intfAccountSaleables                        *_saleables,

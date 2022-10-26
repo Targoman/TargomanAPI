@@ -24,15 +24,18 @@
 #include "intfMTModule.h"
 #include "MTDefs.hpp"
 #include "intfMTAccounting.h"
+//#include "Interfaces/Helpers/JSonHelper.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
+
+//using namespace Helpers;
 
 template <bool _itmplIsTokenBase>
 intfMTModule<_itmplIsTokenBase>::intfMTModule(
         const QString                               &_module,
         const QString                               &_schema,
         //Account --
-        AssetUsageLimitsCols_t                      _AssetUsageLimitsCols,
+        AssetUsageLimitsCols_t                      _exclusiveAssetUsageLimitsCols,
         intfAccountUnits                            *_units,
         intfAccountProducts                         *_products,
         intfAccountSaleables                        *_saleables,
@@ -53,7 +56,14 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
     intfAccountingBasedModule<_itmplIsTokenBase>(
         _module,
         _schema,
-        _AssetUsageLimitsCols,
+        mergeAssetUsageLimitsCols({
+                { MTAction::TRANSLATE, {
+                    /* day   */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerDay,
+                    /* week  */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerWeek,
+                    /* month */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerMonth,
+                    /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
+                }},
+            }, _exclusiveAssetUsageLimitsCols),
         _units,
         _products,
         _saleables,
@@ -145,6 +155,9 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 
 //        SelectQuery.andWhere({  })
 //    }
+
+    //-------------------------------
+    SelectQuery.orderBy(tblAccountUserAssetsBase::Fields::uasDurationMinutes);
 
     //-------------------------------
     TAPI::stuTable Table = SelectQuery.pageSize(0).all();
@@ -276,6 +289,8 @@ bool intfMTModule<_itmplIsTokenBase>::isEmpty(
 ) const {
 }
 
+// basket
+/*********************************************************************/
 template <bool _itmplIsTokenBase>
 QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
@@ -302,8 +317,9 @@ QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
 
     return Result;
 }
-/*********************************************************************/
 
+// expose
+/*********************************************************************/
 template class intfMTModule<false>;
 template class intfMTModule<true>;
 

@@ -175,8 +175,8 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
                                             _requestedUsage,
                                             _action);
 
-    if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
-        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
+//    if (BestMatchedCredit.TTL == 0) ///@TODO: TTL must be checked
+//        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
     auto FnCheckCredit = [](const QString &_creditKey, qint64 &_creditValue, stuUsage _remaining, auto _type) {
         if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _creditValue <= 0)
@@ -304,8 +304,8 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
         return _assetItem.UserAsset.uasValidFromHour < _assetItem.UserAsset.uasValidToHour
             ? QDateTime(Now.date()).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600)
-            : _assetItem.UserAsset.uasValidToDate == Now/*.date()*/
-                ? Now //QDateTime(Now.date().addDays(1))
+//            : _assetItem.UserAsset.uasValidToDate == Now/*.date()*/
+//                ? Now //QDateTime(Now.date().addDays(1))
                 : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600);
     };
 
@@ -360,8 +360,9 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && FnIsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
         return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
                                NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
-                               ServiceCreditsInfo.MyLimitsOnParent,
-                               -1);
+                               ServiceCreditsInfo.MyLimitsOnParent
+//                               -1
+                               );
 
     auto FnComparePackages = [this, &APICALLBOOM_PARAM, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.UserAsset.uasValidToDate.isValid() && b.UserAsset.uasValidToDate.isValid() == false) return -1;
@@ -430,20 +431,21 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
         return stuActiveCredit();
     }
 
-    const stuAssetItem& ActivePackage = CandidateCredit.first();
-    QDateTime NextDigestTime;
-    if (ActivePackage.UserAsset.uasValidToDate.isNull() == false) {
-        if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasValidToHour))
-            NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
-        else
-            NextDigestTime = QDateTime(ActivePackage.UserAsset.uasValidToDate.addDays(1));
-    } else if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasValidToHour))
-        NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
+    const stuAssetItem &ActivePackage = CandidateCredit.first();
+//    QDateTime NextDigestTime;
+//    if (ActivePackage.UserAsset.uasValidToDate.isNull() == false) {
+//        if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasValidToHour))
+//            NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
+//        else
+//            NextDigestTime = QDateTime(ActivePackage.UserAsset.uasValidToDate.addDays(1));
+//    } else if (NULLABLE_HAS_VALUE(ActivePackage.UserAsset.uasValidToHour))
+//        NextDigestTime = FnEffectiveEndDateTime(ActivePackage);
 
     return stuActiveCredit(ActivePackage,
                            NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
-                           ServiceCreditsInfo.MyLimitsOnParent,
-                           NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1);
+                           ServiceCreditsInfo.MyLimitsOnParent
+//                           NextDigestTime.isValid() ? (Now.msecsTo(NextDigestTime) / 1000) : -1)
+                           );
 }
 
 /******************************************************************\
@@ -702,9 +704,15 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     }
 
     //-- duration
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
+            || NULLABLE_HAS_VALUE(_basketItem.Product.prdDurationMinutes)
+    ) {
+        quint32 DurationMinutes = NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
+                                  ? NULLABLE_VALUE(_basketItem.Saleable.slbDurationMinutes)
+                                  : NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes);
+
         qry.addCol(tblAccountUserAssetsBase::Fields::uasDurationMinutes);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, NULLABLE_VALUE(_basketItem.Saleable.slbDurationMinutes));
+        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, DurationMinutes);
 
         if (_basketItem.Saleable.slbStartAtFirstUse == false) {
             qry.addCols({
@@ -714,21 +722,24 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
             ;
             values.insert(tblAccountUserAssetsBase::Fields::uasValidFromDate, DBExpression::NOW());
             values.insert(tblAccountUserAssetsBase::Fields::uasValidToDate, DBExpression::DATE_ADD(
-                              DBExpression::NOW(),
-                              NULLABLE_VALUE(_basketItem.Saleable.slbDurationMinutes),
-                              enuDBExpressionIntervalUnit::MINUTE
-                              ));
+                              DBExpression::NOW(), DurationMinutes, enuDBExpressionIntervalUnit::MINUTE));
         }
+    }
 
-        if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidFromHour)) {
-            qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
-            values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidFromHour));
-        }
+    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidFromHour)) {
+        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
+        values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidFromHour));
+    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidFromHour)) {
+        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
+        values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Product.prdValidFromHour));
+    }
 
-        if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidToHour)) {
-            qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
-            values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidToHour));
-        }
+    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidToHour)) {
+        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
+        values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidToHour));
+    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidToHour)) {
+        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
+        values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Product.prdValidToHour));
     }
 
     //-- CustomUserAssetFields

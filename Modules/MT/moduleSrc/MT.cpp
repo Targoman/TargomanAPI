@@ -60,14 +60,7 @@ MT::MT() :
     intfMTModule( //intfAccountingBasedModule(
         MTDomain,
         MTSchema,
-        {
-            { MTAction::TRANSLATE, {
-                /* day   */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerDay,
-                /* week  */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerWeek,
-                /* month */ {}, //tblAccountSaleables::ExtraFields::slbWordsPerMonth,
-                /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
-            }},
-        },
+        {},
         &AccountUnits::instance(),
         &AccountProducts::instance(),
         &AccountSaleables::instance(),
