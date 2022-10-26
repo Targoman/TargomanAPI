@@ -1105,24 +1105,39 @@ TAPI_DEFINE_STRUCT(stuUsage,
     SF_NULLABLE_quint64 (Total)
 );
 
-//Key: ???
+///key : action
 typedef QMap<QString, stuUsage> UsageLimits_t;
 
 struct stuUsageColDefinition {
-    QString PerDay;
-    QString PerWeek;
-    QString PerMonth;
-    QString Total;
+    QString AssetPerDay;
+    QString UsagePerDay;
+    QString AssetPerWeek;
+    QString UsagePerWeek;
+    QString AssetPerMonth;
+    QString UsagePerMonth;
+    QString AssetTotal;
+    QString UsageTotal;
 
     stuUsageColDefinition()
     { ; }
 
     stuUsageColDefinition(const stuUsageColDefinition &_other) :
-        PerDay(_other.PerDay), PerWeek(_other.PerWeek), PerMonth(_other.PerMonth), Total(_other.Total)
+        AssetPerDay(_other.AssetPerDay),     UsagePerDay(_other.UsagePerDay),
+        AssetPerWeek(_other.AssetPerWeek),   UsagePerWeek(_other.UsagePerWeek),
+        AssetPerMonth(_other.AssetPerMonth), UsagePerMonth(_other.UsagePerMonth),
+        AssetTotal(_other.AssetTotal),       UsageTotal(_other.UsageTotal)
     { ; }
 
-    stuUsageColDefinition(const QString& _perDay, const QString& _perWeek, const QString& _perMonth, const QString& _total) :
-        PerDay(_perDay), PerWeek(_perWeek), PerMonth(_perMonth), Total(_total)
+    stuUsageColDefinition(
+        const QString &_assetPerDay,    const QString &_usagePerDay,
+        const QString &_assetPerWeek,   const QString &_usagePerWeek,
+        const QString &_assetPerMonth,  const QString &_usagePerMonth,
+        const QString &_assetTotal,     const QString &_usageTotal
+    ) :
+        AssetPerDay(_assetPerDay),      UsagePerDay(_usagePerDay),
+        AssetPerWeek(_assetPerWeek),    UsagePerWeek(_usagePerWeek),
+        AssetPerMonth(_assetPerMonth),  UsagePerMonth(_usagePerMonth),
+        AssetTotal(_assetTotal),        UsageTotal(_usageTotal)
     { ; }
 };
 
@@ -1139,13 +1154,16 @@ inline AssetUsageLimitsCols_t mergeAssetUsageLimitsCols(const AssetUsageLimitsCo
     ) {
         if (Result.contains(it.key()) == false) {
             Result.insert(it.key(), it.value());
-//            Result.insert(it.key(), stuUsageColDefinition(it.value()));
-//            Result.insert(it.key(), stuUsageColDefinition(it->PerDay, it->PerWeek, it->PerMonth, it->Total));
         } else {
-            if (it->PerDay.isEmpty() == false)      Result[it.key()].PerDay = it->PerDay;
-            if (it->PerWeek.isEmpty() == false)     Result[it.key()].PerWeek = it->PerWeek;
-            if (it->PerMonth.isEmpty() == false)    Result[it.key()].PerMonth = it->PerMonth;
-            if (it->Total.isEmpty() == false)       Result[it.key()].Total = it->Total;
+            if (it->AssetPerDay.isEmpty() == false)      Result[it.key()].AssetPerDay   = it->AssetPerDay;
+            if (it->AssetPerWeek.isEmpty() == false)     Result[it.key()].AssetPerWeek  = it->AssetPerWeek;
+            if (it->AssetPerMonth.isEmpty() == false)    Result[it.key()].AssetPerMonth = it->AssetPerMonth;
+            if (it->AssetTotal.isEmpty() == false)       Result[it.key()].AssetTotal    = it->AssetTotal;
+
+            if (it->UsagePerDay.isEmpty() == false)      Result[it.key()].UsagePerDay   = it->UsagePerDay;
+            if (it->UsagePerWeek.isEmpty() == false)     Result[it.key()].UsagePerWeek  = it->UsagePerWeek;
+            if (it->UsagePerMonth.isEmpty() == false)    Result[it.key()].UsagePerMonth = it->UsagePerMonth;
+            if (it->UsageTotal.isEmpty() == false)       Result[it.key()].UsageTotal    = it->UsageTotal;
         }
     }
 

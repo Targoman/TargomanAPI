@@ -71,16 +71,24 @@ Advert::Advert() :
         AdvertSchema,
         {
             { "show", {
-                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
-                /* week  */ {},
-                /* month */ {},
-                /* total */ tblAccountSaleables::ExtraFields::slbShowTotal
+                /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayShow,
+                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
+                /* asset-week  */ {},
+                /* usage-week  */ {},
+                /* asset-month */ {},
+                /* usage-month */ {},
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow,
+                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
             }},
             { "click", {
-                /* day   */ tblAccountSaleables::ExtraFields::slbClicksPerDay,
-                /* week  */ {},
-                /* month */ tblAccountSaleables::ExtraFields::slbClicksPerMonth,
-                /* total */ tblAccountSaleables::ExtraFields::slbClicksTotal
+                /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayClicks,
+                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
+                /* asset-week  */ {},
+                /* usage-week  */ {},
+                /* asset-month */ tblAccountUserAssets::ExtraFields::uasMonthClicks,
+                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks,
+                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
             }},
         },
         &AccountUnits::instance(),

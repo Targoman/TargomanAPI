@@ -58,10 +58,14 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         _schema,
         mergeAssetUsageLimitsCols({
                 { MTAction::TRANSLATE, {
-                    /* day   */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerDay,
-                    /* week  */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerWeek,
-                    /* month */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerMonth,
-                    /* total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
+                    /* asset-day   */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerDay,
+                    /* usage-day   */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerDay,
+                    /* asset-week  */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerWeek,
+                    /* usage-week  */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerWeek,
+                    /* asset-month */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerMonth,
+                    /* usage-month */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerMonth,
+                    /* asset-total */ tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                    /* usage-total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
                 }},
             }, _exclusiveAssetUsageLimitsCols),
         _units,
@@ -188,13 +192,41 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
             Iter++
         ) {
             if (_action.isEmpty() || Iter.key() == _action) {
+
+                stuUsage Usage;
+
+                if (Iter->AssetPerDay.isEmpty() == false)
+                    Usage.PerDay = UserAssetInfo.value(Iter->AssetPerDay).toUInt()
+                                   - (UserAssetInfo.value(Iter->UsagePerDay).isValid()
+                                      ? UserAssetInfo.value(Iter->UsagePerDay).toUInt()
+                                      : 0);
+
+                if (Iter->AssetPerWeek.isEmpty() == false)
+                    Usage.PerWeek = UserAssetInfo.value(Iter->AssetPerWeek).toUInt()
+                                   - (UserAssetInfo.value(Iter->UsagePerWeek).isValid()
+                                      ? UserAssetInfo.value(Iter->UsagePerWeek).toUInt()
+                                      : 0);
+
+                if (Iter->AssetPerMonth.isEmpty() == false)
+                    Usage.PerMonth = UserAssetInfo.value(Iter->AssetPerMonth).toUInt()
+                                   - (UserAssetInfo.value(Iter->UsagePerMonth).isValid()
+                                      ? UserAssetInfo.value(Iter->UsagePerMonth).toUInt()
+                                      : 0);
+
+                if (Iter->AssetTotal.isEmpty() == false)
+                    Usage.Total = UserAssetInfo.value(Iter->AssetTotal).toUInt()
+                                   - (UserAssetInfo.value(Iter->UsageTotal).isValid()
+                                      ? UserAssetInfo.value(Iter->UsageTotal).toUInt()
+                                      : 0);
+
                 //Key: action
-                SaleableUsageLimits.insert(Iter.key(), {
-                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
-                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
-                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
-                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
-                });
+                SaleableUsageLimits.insert(Iter.key(), Usage);
+//                {
+//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
+//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
+//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
+//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
+//                });
             }
         }
         AssetItem.Digested.Limits = SaleableUsageLimits;

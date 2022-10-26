@@ -136,17 +136,22 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
     foreach (auto Col, this->AssetUsageLimitsCols) {
-        if (Col.PerDay.size())
-            this->AssetUsageLimitsColsName.append(Col.PerDay);
+        Q_ASSERT(Col.AssetPerDay.isEmpty()      == Col.UsagePerDay.isEmpty());
+        Q_ASSERT(Col.AssetPerWeek.isEmpty()     == Col.UsagePerWeek.isEmpty());
+        Q_ASSERT(Col.AssetPerMonth.isEmpty()    == Col.UsagePerMonth.isEmpty());
+        Q_ASSERT(Col.AssetTotal.isEmpty()       == Col.UsageTotal.isEmpty());
 
-        if (Col.PerWeek.size())
-            this->AssetUsageLimitsColsName.append(Col.PerWeek);
+//        if (Col.UsagePerDay.size())
+//            this->AssetUsageLimitsColsName.append(Col.UsagePerDay);
 
-        if (Col.PerMonth.size())
-            this->AssetUsageLimitsColsName.append(Col.PerMonth);
+//        if (Col.UsagePerWeek.size())
+//            this->AssetUsageLimitsColsName.append(Col.UsagePerWeek);
 
-        if (Col.Total.size())
-            this->AssetUsageLimitsColsName.append(Col.Total);
+//        if (Col.UsagePerMonth.size())
+//            this->AssetUsageLimitsColsName.append(Col.UsagePerMonth);
+
+//        if (Col.UsageTotal.size())
+//            this->AssetUsageLimitsColsName.append(Col.UsageTotal);
     }
 }
 
@@ -193,18 +198,19 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
     };
 
     auto FnCheckUsageIterCredit = [](auto _usageIter, std::function<bool(const QString CreditKey, qint64 CreditValue)> _function) {
-        if (_usageIter.key() != RequestedUsage::CREDIT)
-            return;
 
         /*
-        SAMPLE:
-        ServiceUsage_t RequestedUsage = {
-            { RequestedUsage::CREDIT, QVariantMap({
-                  { QString("%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
-            }) },
-            { MTRequestedUsage::DIC, _dic ? 1 : 0 },
-        };
+            SAMPLE:
+            ServiceUsage_t RequestedUsage = {
+                { RequestedUsage::CREDIT, QVariantMap({
+                      { QString("%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+                }) },
+                { MTRequestedUsage::DIC, _dic ? 1 : 0 },
+            };
         */
+
+        if (_usageIter.key() != RequestedUsage::CREDIT)
+            return;
 
         QVariantMap CreditValues = _usageIter.value().toMap();
         QString CreditKey = CreditValues.firstKey();
@@ -567,7 +573,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     QVariantMap SaleableInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
 //        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
-        .addCols(this->AssetUsageLimitsColsName)
+//        .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
         .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
         .innerJoinWith(tblAccountSaleablesBase::Relation::Product)
@@ -910,7 +916,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     QVariantMap UserAssetInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
 //        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
-        .addCols(this->AssetUsageLimitsColsName)
+//        .addCols(this->AssetUsageLimitsColsName)
         .addCol(DBExpression::VALUE("prdInStockQty - IFNULL(prdOrderedQty,0) + IFNULL(prdReturnedQty,0)"), "prdQtyInHand")
         .addCol(DBExpression::VALUE("slbInStockQty - IFNULL(slbOrderedQty,0) + IFNULL(slbReturnedQty,0)"), "slbQtyInHand")
         .innerJoinWith(tblAccountSaleablesBase::Relation::Product)

@@ -297,7 +297,7 @@ protected:
     QScopedPointer<intfAccountPrizes>           AccountPrizes;
 
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
-    QStringList AssetUsageLimitsColsName;
+//    QStringList AssetUsageLimitsColsName;
 };
 
 /******************************************************/
