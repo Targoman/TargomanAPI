@@ -400,6 +400,52 @@ namespace tblAccountAssetUsage {
     );
 }
 
+namespace tblAccountAssetUsageHistory {
+
+    namespace ExtraFields {
+        TARGOMAN_CREATE_CONSTEXPR(ushSumDays);
+        TARGOMAN_CREATE_CONSTEXPR(ushSumDayShow);
+        TARGOMAN_CREATE_CONSTEXPR(ushSumTotalShow);
+        TARGOMAN_CREATE_CONSTEXPR(ushSumDayClicks);
+        TARGOMAN_CREATE_CONSTEXPR(ushSumMonthClicks);
+        TARGOMAN_CREATE_CONSTEXPR(ushSumTotalClicks);
+    }
+
+    namespace ExtraRelation {
+    //        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ExtraORMFields = {
+            //ColName                               Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::ushSumDays,              S(qint16),  QFV.integer().minValue(-1), 0,          UPAdmin, false,  false },
+            { ExtraFields::ushSumDayShow,           S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::ushSumTotalShow,         S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::ushSumDayClicks,         S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::ushSumMonthClicks,       S(quint32), QFV.integer().minValue(0),  0,          UPAdmin, false,  false },
+            { ExtraFields::ushSumTotalClicks,       S(quint64), QFV.integer().minValue(0),  0,          UPAdmin, false,  false }
+        };
+
+        const QList<stuRelation> ExtraRelations = {
+        };
+
+        const QList<stuDBIndex> ExtraIndexes = {
+        };
+
+    } //namespace Private
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountAssetUsageHistoryBase_DTO,
+
+        SF_qint16                   (ushSumDays),
+        SF_quint32                  (ushSumDayShow),
+        SF_quint64                  (ushSumTotalShow),
+        SF_quint32                  (ushSumDayClicks),
+        SF_quint32                  (ushSumMonthClicks),
+        SF_quint64                  (ushSumTotalClicks)
+    );
+}
+
 namespace tblAccountCoupons {
 
     namespace ExtraFields {
@@ -526,6 +572,17 @@ class AccountAssetUsage : public intfAccountAssetUsage<false>
 {
 //    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountAssetUsage)
+
+public:
+};
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
+class AccountAssetUsageHistory : public intfAccountAssetUsageHistory<false>
+{
+//    Q _OBJECT
+    TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountAssetUsageHistory)
 
 public:
 };

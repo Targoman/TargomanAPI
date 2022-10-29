@@ -34,26 +34,27 @@ using namespace DBManager;
 
 template <bool _itmplIsTokenBase>
 intfMTModule<_itmplIsTokenBase>::intfMTModule(
-        const QString                               &_module,
-        const QString                               &_schema,
+        const QString                                   &_module,
+        const QString                                   &_schema,
         //Account --
-        AssetUsageLimitsCols_t                      _exclusiveAssetUsageLimitsCols,
-        intfAccountUnits                            *_units,
-        intfAccountProducts                         *_products,
-        intfAccountSaleables                        *_saleables,
-        intfAccountSaleablesFiles                   *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
-        intfAccountUserAssetsFiles                  *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
-        intfAccountCoupons                          *_discounts,
-        intfAccountPrizes                           *_prizes,
+        AssetUsageLimitsCols_t                          _exclusiveAssetUsageLimitsCols,
+        intfAccountUnits                                *_units,
+        intfAccountProducts                             *_products,
+        intfAccountSaleables                            *_saleables,
+        intfAccountSaleablesFiles                       *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
+        intfAccountUserAssetsFiles                      *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
+        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
+        intfAccountCoupons                              *_discounts,
+        intfAccountPrizes                               *_prizes,
         //MT --
-        intfMTCorrectionRules_Type                  *_correctionRules,
-        intfMTDigestedTranslationLogs_Type          *_digestedTranslationLogs,
-        intfMTMultiDic_Type                         *_multiDic,
-        intfMTTokenStats_Type                       *_tokenStats,
-        intfMTTranslatedPhrases_Type                *_translatedPhrases,
-        intfMTTranslationLogs_Type                  *_translationLogs
+        intfMTCorrectionRules_Type                      *_correctionRules,
+        intfMTDigestedTranslationLogs_Type              *_digestedTranslationLogs,
+        intfMTMultiDic_Type                             *_multiDic,
+        intfMTTokenStats_Type                           *_tokenStats,
+        intfMTTranslatedPhrases_Type                    *_translatedPhrases,
+        intfMTTranslationLogs_Type                      *_translationLogs
     ) :
     intfAccountingBasedModule<_itmplIsTokenBase>(
         _module,
@@ -76,7 +77,8 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         _saleablesFiles,
         _userAssets,
         _userAssetsFiles,
-        _assetUsages,
+        _assetUsage,
+        _assetUsageHistory,
         _discounts,
         _prizes
     ),
@@ -417,6 +419,9 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
 //        QString CreditKey = CreditValues.firstKey();
         qint64 UsedWordCount = CreditValues.first().toLongLong();
 
+        //---------------------------------------------
+
+        //---------------------------------------------
         QString QueryString = QString(R"(
             INSERT INTO %1
                SET %2 = ?
@@ -429,7 +434,7 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
         ;
 
-        clsDACResult Result = this->accountAssetUsages()->execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
                                                                     QueryString,
                                                                     {
                                                                         _activeCredit.Credit.UserAsset.uasID,

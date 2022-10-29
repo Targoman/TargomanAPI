@@ -997,6 +997,103 @@ intfAccountAssetUsage<_itmplIsTokenBase>::intfAccountAssetUsage(
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+baseintfAccountAssetUsageHistory::baseintfAccountAssetUsageHistory(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountAssetUsageHistoryBase::Name,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+/******************************************************************/
+baseintfAccountAssetUsageHistory_USER::baseintfAccountAssetUsageHistory_USER(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    baseintfAccountAssetUsageHistory(
+        _schema,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+QVariant IMPL_ORMGET_USER(baseintfAccountAssetUsageHistory_USER) {
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+/******************************************************************/
+baseintfAccountAssetUsageHistory_API::baseintfAccountAssetUsageHistory_API(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    baseintfAccountAssetUsageHistory(
+        _schema,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+QVariant IMPL_REST_GET(baseintfAccountAssetUsageHistory_API, , (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken,
+    TAPI::PKsByPath_t   _pksByPath,
+    quint64             _pageIndex,
+    quint16             _pageSize,
+    TAPI::Cols_t        _cols,
+    TAPI::Filter_t      _filters,
+    TAPI::OrderBy_t     _orderBy,
+    TAPI::GroupBy_t     _groupBy,
+    bool                _reportCount
+)) {
+    bool _translate = true;
+
+    quint64 APITokenID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APITokenID }}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+/******************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountAssetUsageHistory<_itmplIsTokenBase>::intfAccountAssetUsageHistory(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    std::conditional<_itmplIsTokenBase, baseintfAccountAssetUsageHistory_API, baseintfAccountAssetUsageHistory_USER>::type(
+        _schema,
+        tblAccountAssetUsageHistoryBase::Private::ORMFields + _exclusiveCols,
+        tblAccountAssetUsageHistoryBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountAssetUsageHistoryBase::Private::Indexes + _exclusiveIndexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
@@ -1209,6 +1306,7 @@ stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const 
 template class intfAccountUserAssets<false>;
 //template class intfAccountUserAssetsFiles<false>;
 template class intfAccountAssetUsage<false>;
+template class intfAccountAssetUsageHistory<false>;
 //template class intfAccountCoupons<false>;
 //template class intfAccountPrizes<false>;
 
@@ -1222,6 +1320,7 @@ template class intfAccountAssetUsage<false>;
 template class intfAccountUserAssets<true>;
 //template class intfAccountUserAssetsFiles<true>;
 template class intfAccountAssetUsage<true>;
+template class intfAccountAssetUsageHistory<true>;
 //template class intfAccountCoupons<true>;
 //template class intfAccountPrizes<true>;
 

@@ -42,16 +42,17 @@ public:
     baseintfAccountingBasedModule(
         const QString &_module,
         const QString &_schema,
-        AssetUsageLimitsCols_t     _AssetUsageLimitsCols,
-        intfAccountUnits           *_units,
-        intfAccountProducts        *_products,
-        intfAccountSaleables       *_saleables,
-        intfAccountSaleablesFiles  *_saleablesFiles,
-        baseintfAccountUserAssets  *_userAssets,
-        intfAccountUserAssetsFiles *_userAssetsFiles,
-        baseintfAccountAssetUsage  *_assetUsages,
-        intfAccountCoupons         *_discounts = nullptr,
-        intfAccountPrizes          *_prizes = nullptr
+        AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+        intfAccountUnits                    *_units,
+        intfAccountProducts                 *_products,
+        intfAccountSaleables                *_saleables,
+        intfAccountSaleablesFiles           *_saleablesFiles,
+        baseintfAccountUserAssets           *_userAssets,
+        intfAccountUserAssetsFiles          *_userAssetsFiles,
+        baseintfAccountAssetUsage           *_assetUsage,
+        baseintfAccountAssetUsageHistory    *_assetUsageHistory,
+        intfAccountCoupons                  *_discounts = nullptr,
+        intfAccountPrizes                   *_prizes = nullptr
     );
 
 public:
@@ -283,28 +284,30 @@ protected slots:
     )
 
 public:
-    intfAccountUnits*            accountUnits()             { return this->AccountUnits.data(); }
-    intfAccountProducts*         accountProducts()          { return this->AccountProducts.data(); }
-    intfAccountSaleables*        accountSaleables()         { return this->AccountSaleables.data(); }
-    intfAccountSaleablesFiles*   accountSaleablesFiles()    { return this->AccountSaleablesFiles.data(); }
-    baseintfAccountUserAssets*   accountUserAssets()        { return this->AccountUserAssets.data(); }
-    intfAccountUserAssetsFiles*  accountUserAssetsFiles()   { return this->AccountUserAssetsFiles.data(); }
-    baseintfAccountAssetUsage*   accountAssetUsages()       { return this->AccountAssetUsages.data(); }
-    intfAccountCoupons*          accountCoupons()           { return this->AccountCoupons.data(); }
-    intfAccountPrizes*           accountPrizes()            { return this->AccountPrizes.data(); }
+    intfAccountUnits*                   accountUnits()              { return this->AccountUnits.data(); }
+    intfAccountProducts*                accountProducts()           { return this->AccountProducts.data(); }
+    intfAccountSaleables*               accountSaleables()          { return this->AccountSaleables.data(); }
+    intfAccountSaleablesFiles*          accountSaleablesFiles()     { return this->AccountSaleablesFiles.data(); }
+    baseintfAccountUserAssets*          accountUserAssets()         { return this->AccountUserAssets.data(); }
+    intfAccountUserAssetsFiles*         accountUserAssetsFiles()    { return this->AccountUserAssetsFiles.data(); }
+    baseintfAccountAssetUsage*          accountAssetUsage()        { return this->AccountAssetUsage.data(); }
+    baseintfAccountAssetUsageHistory*   accountAssetUsageHistory() { return this->AccountAssetUsageHistory.data(); }
+    intfAccountCoupons*                 accountCoupons()            { return this->AccountCoupons.data(); }
+    intfAccountPrizes*                  accountPrizes()             { return this->AccountPrizes.data(); }
 
 protected:
     QString ServiceName;
 
-    QScopedPointer<intfAccountUnits>            AccountUnits;
-    QScopedPointer<intfAccountProducts>         AccountProducts;
-    QScopedPointer<intfAccountSaleables>        AccountSaleables;
-    QScopedPointer<intfAccountSaleablesFiles>   AccountSaleablesFiles;
-    QScopedPointer<baseintfAccountUserAssets>   AccountUserAssets;
-    QScopedPointer<intfAccountUserAssetsFiles>  AccountUserAssetsFiles;
-    QScopedPointer<baseintfAccountAssetUsage>   AccountAssetUsages;
-    QScopedPointer<intfAccountCoupons>          AccountCoupons;
-    QScopedPointer<intfAccountPrizes>           AccountPrizes;
+    QScopedPointer<intfAccountUnits>                    AccountUnits;
+    QScopedPointer<intfAccountProducts>                 AccountProducts;
+    QScopedPointer<intfAccountSaleables>                AccountSaleables;
+    QScopedPointer<intfAccountSaleablesFiles>           AccountSaleablesFiles;
+    QScopedPointer<baseintfAccountUserAssets>           AccountUserAssets;
+    QScopedPointer<intfAccountUserAssetsFiles>          AccountUserAssetsFiles;
+    QScopedPointer<baseintfAccountAssetUsage>           AccountAssetUsage;
+    QScopedPointer<baseintfAccountAssetUsageHistory>    AccountAssetUsageHistory;
+    QScopedPointer<intfAccountCoupons>                  AccountCoupons;
+    QScopedPointer<intfAccountPrizes>                   AccountPrizes;
 
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
 //    QStringList AssetUsageLimitsColsName;
@@ -326,7 +329,8 @@ protected:
         intfAccountSaleablesFiles           *_saleablesFiles,
         intfAccountUserAssets<false>        *_userAssets,
         intfAccountUserAssetsFiles          *_userAssetsFiles,
-        intfAccountAssetUsage<false>        *_assetUsages,
+        intfAccountAssetUsage<false>        *_assetUsage,
+        intfAccountAssetUsageHistory<false> *_assetUsageHistory,
         intfAccountCoupons                  *_discounts = nullptr,
         intfAccountPrizes                   *_prizes = nullptr
     );
@@ -369,7 +373,8 @@ protected:
         intfAccountSaleablesFiles           *_saleablesFiles,
         intfAccountUserAssets<true>         *_userAssets,
         intfAccountUserAssetsFiles          *_userAssetsFiles,
-        intfAccountAssetUsage<true>         *_assetUsages,
+        intfAccountAssetUsage<true>         *_assetUsage,
+        intfAccountAssetUsageHistory<true>  *_assetUsageHistory,
         intfAccountCoupons                  *_discounts = nullptr,
         intfAccountPrizes                   *_prizes = nullptr
     );
@@ -403,18 +408,19 @@ class intfAccountingBasedModule : public std::conditional<_itmplIsTokenBase, bas
 {
 protected:
     intfAccountingBasedModule(
-        const QString                               &_module,
-        const QString                               &_schema,
-        AssetUsageLimitsCols_t                      _AssetUsageLimitsCols,
-        intfAccountUnits                            *_units,
-        intfAccountProducts                         *_products,
-        intfAccountSaleables                        *_saleables,
-        intfAccountSaleablesFiles                   *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
-        intfAccountUserAssetsFiles                  *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
-        intfAccountCoupons                          *_discounts = nullptr,
-        intfAccountPrizes                           *_prizes = nullptr
+        const QString                                   &_module,
+        const QString                                   &_schema,
+        AssetUsageLimitsCols_t                          _AssetUsageLimitsCols,
+        intfAccountUnits                                *_units,
+        intfAccountProducts                             *_products,
+        intfAccountSaleables                            *_saleables,
+        intfAccountSaleablesFiles                       *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
+        intfAccountUserAssetsFiles                      *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
+        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
+        intfAccountCoupons                              *_discounts = nullptr,
+        intfAccountPrizes                               *_prizes = nullptr
     );
 };
 

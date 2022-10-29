@@ -54,26 +54,27 @@ typedef intfMTTranslationLogs<_itmplIsTokenBase ? TAPI::enuTokenActorType::API :
 
 public:
     intfMTModule(
-        const QString                               &_module,
-        const QString                               &_schema,
+        const QString                                   &_module,
+        const QString                                   &_schema,
         //Account --
-        AssetUsageLimitsCols_t                      _exclusiveAssetUsageLimitsCols,
-        intfAccountUnits                            *_units,
-        intfAccountProducts                         *_products,
-        intfAccountSaleables                        *_saleables,
-        intfAccountSaleablesFiles                   *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
-        intfAccountUserAssetsFiles                  *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
-        intfAccountCoupons                          *_discounts,
-        intfAccountPrizes                           *_prizes,
+        AssetUsageLimitsCols_t                          _exclusiveAssetUsageLimitsCols,
+        intfAccountUnits                                *_units,
+        intfAccountProducts                             *_products,
+        intfAccountSaleables                            *_saleables,
+        intfAccountSaleablesFiles                       *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
+        intfAccountUserAssetsFiles                      *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
+        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
+        intfAccountCoupons                              *_discounts,
+        intfAccountPrizes                               *_prizes,
         //MT --
-        intfMTCorrectionRules_Type                  *_correctionRules,
-        intfMTDigestedTranslationLogs_Type          *_digestedTranslationLogs,
-        intfMTMultiDic_Type                         *_multiDic,
-        intfMTTokenStats_Type                       *_tokenStats,
-        intfMTTranslatedPhrases_Type                *_translatedPhrases,
-        intfMTTranslationLogs_Type                  *_translationLogs
+        intfMTCorrectionRules_Type                      *_correctionRules,
+        intfMTDigestedTranslationLogs_Type              *_digestedTranslationLogs,
+        intfMTMultiDic_Type                             *_multiDic,
+        intfMTTokenStats_Type                           *_tokenStats,
+        intfMTTranslatedPhrases_Type                    *_translatedPhrases,
+        intfMTTranslationLogs_Type                      *_translationLogs
     );
 
 protected:
