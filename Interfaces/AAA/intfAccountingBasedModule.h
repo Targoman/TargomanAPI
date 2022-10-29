@@ -66,21 +66,24 @@ protected:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         const ServiceUsage_t &_requestedUsage = {},
-        const QString &_action = {}) = 0;
+        const QString &_action = {}
+    ) = 0;
 
     virtual void breakCredit(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const stuAssetItem &_assetItem,
-        const QString &_action = {}) = 0;
+        const QString &_action = {}
+    ) = 0;
 
     virtual bool isUnlimited(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const UsageLimits_t &_limits) const = 0;
+        const UsageLimits_t &_limits
+    ) const = 0;
 
     virtual bool isEmpty(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const UsageLimits_t &_limits) const = 0;
-
+        const UsageLimits_t &_limits
+    ) const = 0;
 
     stuActiveCredit findBestMatchedCredit(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
@@ -89,11 +92,18 @@ protected:
         const QString &_action = {});
 
 public:
-    void checkUsageIsAllowed(
+    stuActiveCredit checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
     );
+
+    virtual void saveAccountUsage(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        stuActiveCredit &_activeCredit,
+        const ServiceUsage_t &_requestedUsage,
+        const QString &_action = {}
+    ) = 0;
 
 protected:
     //-- used by addToBasket: ----------------------------------------

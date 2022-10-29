@@ -258,6 +258,20 @@ QVariantMap MTHelper::doTranslation(
 
     //check credit
     //-----------------------------------------
+    ServiceUsage_t RequestedUsage = {
+//            { QString("%1=%2::%3-%4").arg(RequestedUsage::CREDIT).arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+        { RequestedUsage::CREDIT, QVariantMap({
+              { QString("translate::%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+        }) },
+//            { MTRequestedUsage::ENGINE,     _engine },
+//            { MTRequestedUsage::DIR,        QString("%1-%2").arg(_dir.first).arg(_dir.second) },
+//            { RequestedUsage::CREDIT,       SourceWordCount },
+        { MTRequestedUsage::DIC,        _dic ? 1 : 0 },
+//            { MTRequestedUsage::SAMPLE,      },
+    };
+
+    stuActiveCredit ActiveCredit;
+
     if (APICALLBOOM_PARAM.isAnonymouse() == false) {
 //        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
 //                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
@@ -280,23 +294,15 @@ QVariantMap MTHelper::doTranslation(
 
         //check credit
         //-----------------------------------------
-        ServiceUsage_t RequestedUsage = {
-//            { QString("%1=%2::%3-%4").arg(RequestedUsage::CREDIT).arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
-            { RequestedUsage::CREDIT, QVariantMap({
-                  { QString("translate::%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
-            }) },
-//            { MTRequestedUsage::ENGINE,     _engine },
-//            { MTRequestedUsage::DIR,        QString("%1-%2").arg(_dir.first).arg(_dir.second) },
-//            { RequestedUsage::CREDIT,       SourceWordCount },
-            { MTRequestedUsage::DIC,        _dic ? 1 : 0 },
-//            { MTRequestedUsage::SAMPLE,      },
-        };
+        ActiveCredit = _mtModule->checkUsageIsAllowed(
+            APICALLBOOM_PARAM,
+            RequestedUsage,
+            MTAction::TRANSLATE
+            );
 
-        _mtModule->checkUsageIsAllowed(
-                    APICALLBOOM_PARAM,
-                    RequestedUsage,
-                    MTAction::TRANSLATE
-                    );
+        TargomanDebug(5).noquote() << "Action:" << MTAction::TRANSLATE << endl
+                                   << "RequestedUsage:" << QJsonDocument(QJsonObject::fromVariantMap(RequestedUsage)).toJson() << endl
+                                   << "ActiveCredit:" << QJsonDocument(ActiveCredit.toJson()).toJson();
     }
 
     //-----------------------------------------
@@ -377,6 +383,13 @@ QVariantMap MTHelper::doTranslation(
         if (TranslationResult.value(RESULTItems::ERRNO, 0).toInt() == 0)
             this->TranslationCache.insert(CacheKey, TranslationResult);
 
+        _mtModule->saveAccountUsage(
+            APICALLBOOM_PARAM,
+            ActiveCredit,
+            RequestedUsage,
+            MTAction::TRANSLATE
+            );
+
         return TranslationResult;
     }
 
@@ -443,6 +456,13 @@ QVariantMap MTHelper::doTranslation(
     //result
     if (PostTranslationResult.value(RESULTItems::ERRNO, 0).toInt() == 0)
         this->TranslationCache.insert(CacheKey, PostTranslationResult);
+
+    _mtModule->saveAccountUsage(
+        APICALLBOOM_PARAM,
+        ActiveCredit,
+        RequestedUsage,
+        MTAction::TRANSLATE
+        );
 
     return PostTranslationResult;
 }

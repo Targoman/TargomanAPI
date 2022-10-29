@@ -123,6 +123,8 @@ Advert::Advert() :
     this->addSubModule(&Props::instance());
 }
 
+// accounting
+/*********************************************************************/
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
@@ -148,16 +150,46 @@ void Advert::breakCredit(
 
 bool Advert::isUnlimited(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const UsageLimits_t& _limits
+    const UsageLimits_t &_limits
 ) const {
 }
 
 bool Advert::isEmpty(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    const UsageLimits_t& _limits
+    const UsageLimits_t &_limits
 ) const {
 }
 
+void Advert::saveAccountUsage(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    stuActiveCredit &_activeCredit,
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
+) {
+    if (_activeCredit.Credit.UserAsset.uasID == 0)
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+// basket
+/*********************************************************************/
 void Advert::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
     INOUT stuBasketItem     &_basketItem,

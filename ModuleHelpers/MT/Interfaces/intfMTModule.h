@@ -81,20 +81,32 @@ protected:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         const ServiceUsage_t &_requestedUsage = {},
-        const QString &_action = {});
+        const QString &_action = {}
+    );
 
     virtual void breakCredit(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         const stuAssetItem &_assetItem,
-        const QString &_action = {});
+        const QString &_action = {}
+    );
 
     virtual bool isUnlimited(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const UsageLimits_t& _limits) const;
+        const UsageLimits_t &_limits
+    ) const;
 
     virtual bool isEmpty(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const UsageLimits_t& _limits) const;
+        const UsageLimits_t &_limits
+    ) const;
+
+public:
+    virtual void saveAccountUsage(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        stuActiveCredit &_activeCredit,
+        const ServiceUsage_t &_requestedUsage,
+        const QString &_action = {}
+    );
 
 protected:
     virtual QVariantMap getCustomUserAssetFieldsForQuery(

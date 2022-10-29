@@ -201,7 +201,7 @@ bool IMPL_REST_UPDATE(User, photo, (
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
-    QString qry = QString()
+    QString QueryString = QString()
           + "INSERT INTO"
           + " " + tblUserExtraInfo::Name
           + " SET ueiPhoto=?"
@@ -212,7 +212,7 @@ bool IMPL_REST_UPDATE(User, photo, (
           ;
 
     clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
-                                                              qry, {
+                                                              QueryString, {
                                                                   _image,
                                                                   CurrentUserID,
                                                                   _image,
@@ -232,7 +232,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
 )) {
     quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
 
-    QString qry = QString()
+    QString QueryString = QString()
           + "UPDATE"
           + " " + tblUserExtraInfo::Name
           + " SET ueiPhoto=NULL"
@@ -241,7 +241,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
           ;
 
     clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
-                                                              qry, {
+                                                              QueryString, {
                                                                   CurrentUserID,
                                                                   CurrentUserID,
                                                               });
@@ -388,7 +388,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
     }
 
     if (ToUpdate.size()) {
-        QString qry = QString()
+        QString QueryString = QString()
               + "INSERT INTO"
               + " " + tblUserExtraInfo::Name
               + " SET"
@@ -402,7 +402,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
         Params.append(CurrentUserID);
 
         clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
-                                                                  qry,
+                                                                  QueryString,
                                                                   Params + Params
                                                                   );
     }
@@ -457,26 +457,26 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
             ToUpdateJson.insert(enuUserExtraInfoJsonKey::toStr(enuUserExtraInfoJsonKey::Theme), _theme);
     }
 
-    QString jsonQry, updateQuery;
+    QString JsonQueryString, UpdateQueryString;
 
     if (ToUpdateJson.size())
-        updateQuery = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdateJson)).toJson(QJsonDocument::Compact) + "'";
+        UpdateQueryString = "'" + QJsonDocument(QJsonObject().fromVariantMap(ToUpdateJson)).toJson(QJsonDocument::Compact) + "'";
 
     if (ToRemoveJson.length()) {
         if (ToUpdateJson.size()) {
-            jsonQry = QString()
+            JsonQueryString = QString()
                   + "JSON_MERGE_PATCH("
                   + "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "'),"
-                  + updateQuery
+                  + UpdateQueryString
                   + ")";
         } else {
-            jsonQry = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "')";
+            JsonQueryString = "JSON_REMOVE(COALESCE(ueiExtraInfo, '{}'), '$." + ToRemoveJson.join("', '$.") + "')";
         }
 
     } else if (ToUpdateJson.size()) {
-        jsonQry = QString()
+        JsonQueryString = QString()
               + "JSON_MERGE_PATCH(COALESCE(ueiExtraInfo, '{}'),"
-              + updateQuery
+              + UpdateQueryString
               + ")";
     }
 
@@ -498,35 +498,36 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 
     //--------------------------------------
     Params.append(CurrentUserID);
-    if ((ToUpdate.isEmpty() == false) || (jsonQry.isEmpty() == false)) {
-        QString qry = QString("INSERT INTO %1 SET").arg(tblUserExtraInfo::Name);
+
+    if ((ToUpdate.isEmpty() == false) || (JsonQueryString.isEmpty() == false)) {
+        QString QueryString = QString("INSERT INTO %1 SET").arg(tblUserExtraInfo::Name);
 
         if (ToUpdate.isEmpty() == false) {
-            qry += " " + ToUpdate.join("=? ,") + "=?";
-            if (jsonQry.isEmpty() == false)
-                qry += ",";
+            QueryString += " " + ToUpdate.join("=? ,") + "=?";
+            if (JsonQueryString.isEmpty() == false)
+                QueryString += ",";
         }
-        if (jsonQry.isEmpty() == false)
-            qry += " ueiExtraInfo=" + (ToUpdateJson.size() ? updateQuery : "NULL");
+        if (JsonQueryString.isEmpty() == false)
+            QueryString += " ueiExtraInfo=" + (ToUpdateJson.size() ? UpdateQueryString : "NULL");
 
-        qry += QString()
+        QueryString += QString()
               + ", uei_usrID=?"
               + " ON DUPLICATE KEY UPDATE";
 
         if (ToUpdate.isEmpty() == false) {
-            qry += " " + ToUpdate.join("=? ,") + "=?";
-            if (jsonQry.isEmpty() == false)
-                qry += ",";
+            QueryString += " " + ToUpdate.join("=? ,") + "=?";
+            if (JsonQueryString.isEmpty() == false)
+                QueryString += ",";
         }
-        if (jsonQry.isEmpty() == false)
-            qry += " ueiExtraInfo=" + jsonQry;
+        if (JsonQueryString.isEmpty() == false)
+            QueryString += " ueiExtraInfo=" + JsonQueryString;
 
-        qry += ", ueiUpdatedBy_usrID=?";
+        QueryString += ", ueiUpdatedBy_usrID=?";
 
-        qDebug() << "******************************" << qry;
+        qDebug() << "******************************" << QueryString;
 
         clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
-                                                                  qry,
+                                                                  QueryString,
                                                                   Params + Params
                                                                   );
     }

@@ -165,7 +165,7 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 //    return this->findBestMatchedCredit(APICALLBOOM_PARAM, _actorID);
 //}
 
-void baseintfAccountingBasedModule::checkUsageIsAllowed(
+stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
@@ -258,11 +258,11 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
                 });
         }
 
-        return;
+        return BestMatchedCredit;
     }
 
     if (this->isUnlimited(APICALLBOOM_PARAM, ActiveCredit.Digested.Limits))
-        return;
+        return BestMatchedCredit;
 
     for (auto UsageIter = _requestedUsage.begin();
          UsageIter != _requestedUsage.end();
@@ -279,6 +279,8 @@ void baseintfAccountingBasedModule::checkUsageIsAllowed(
                 return true;
             });
     }
+
+    return BestMatchedCredit;
 }
 
 stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(

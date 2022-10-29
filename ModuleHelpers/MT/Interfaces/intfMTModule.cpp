@@ -25,10 +25,12 @@
 #include "MTDefs.hpp"
 #include "intfMTAccounting.h"
 //#include "Interfaces/Helpers/JSonHelper.h"
+#include "libTargomanDBM/Definitions.h"
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 //using namespace Helpers;
+using namespace DBManager;
 
 template <bool _itmplIsTokenBase>
 intfMTModule<_itmplIsTokenBase>::intfMTModule(
@@ -86,9 +88,8 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
     MTTranslationLogs(_translationLogs)
 { ; }
 
-/*********************************************************************\
-|** accounting *******************************************************|
-\*********************************************************************/
+// accounting
+/*********************************************************************/
 template <bool _itmplIsTokenBase>
 stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
@@ -101,6 +102,13 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     SelectQuery
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+        .inlineLeftJoin(tblAccountProductsBase::Name/*, tblAccountProductsBase::Name*/, clsCondition(
+                        tblAccountProductsBase::Name,
+                        tblAccountProductsBase::Fields::prdID,
+                        enuConditionOperator::Equal,
+                        tblAccountSaleablesBase::Name,
+                        tblAccountSaleablesBase::Fields::slb_prdID
+                        ))
 
         .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
@@ -312,6 +320,16 @@ bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const UsageLimits_t &_limits
 ) const {
+
+
+
+
+
+
+
+
+
+
 }
 
 template <bool _itmplIsTokenBase>
@@ -319,6 +337,58 @@ bool intfMTModule<_itmplIsTokenBase>::isEmpty(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     const UsageLimits_t &_limits
 ) const {
+
+
+
+
+
+
+
+
+
+}
+
+template <bool _itmplIsTokenBase>
+void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    stuActiveCredit &_activeCredit,
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
+) {
+    if (_activeCredit.Credit.UserAsset.uasID == 0)
+        return;
+
+    for (auto UsageIter = _requestedUsage.begin();
+         UsageIter != _requestedUsage.end();
+         UsageIter++
+    ) {
+        if (UsageIter.key() != RequestedUsage::CREDIT)
+            return;
+
+        QVariantMap CreditValues = UsageIter.value().toMap();
+//        QString CreditKey = CreditValues.firstKey();
+        qint64 UsedWordCount = CreditValues.first().toLongLong();
+
+        QString QueryString = QString(R"(
+            INSERT INTO %1
+               SET %2 = ?
+                 , %3 = ?
+            ON DUPLICATE KEY
+            UPDATE %3 = %3 + ?
+)")
+            .arg(tblAccountAssetUsageBase::Name)
+            .arg(tblAccountAssetUsageBase::Fields::usg_uasID)
+            .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
+        ;
+
+        clsDACResult Result = this->accountAssetUsages()->execQuery(APICALLBOOM_PARAM,
+                                                                    QueryString,
+                                                                    {
+                                                                        _activeCredit.Credit.UserAsset.uasID,
+                                                                        UsedWordCount,
+                                                                        UsedWordCount,
+                                                                    });
+    }
 }
 
 // basket
