@@ -553,6 +553,7 @@ private slots:
                         {},
                         {
                             { "text", "This is a sample text for testing." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "en2fa" },
                         });
 
@@ -572,6 +573,7 @@ private slots:
                         {},
                         {
                             { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "fa2en" },
                         });
 
@@ -591,6 +593,7 @@ private slots:
                         {},
                         {
                             { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "fa2ar" },
                         });
 

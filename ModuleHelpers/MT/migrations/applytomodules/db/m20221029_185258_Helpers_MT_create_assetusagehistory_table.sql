@@ -4,4 +4,4 @@
 USE `{{dbprefix}}{{Schema}}`;
 
 ALTER TABLE `tblAccountAssetUsageHistory`
-    ADD COLUMN `ushSumUsedTotalWords` INT UNSIGNED NOT NULL AFTER `ushLastDateTime`;
+    ADD COLUMN `ushSumUsedTotalWords` INT UNSIGNED NOT NULL AFTER `ushUniqueMD5`;

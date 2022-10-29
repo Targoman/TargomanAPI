@@ -419,10 +419,34 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
 //        QString CreditKey = CreditValues.firstKey();
         qint64 UsedWordCount = CreditValues.first().toLongLong();
 
-        //---------------------------------------------
-
+        // usage history
         //---------------------------------------------
         QString QueryString = QString(R"(
+            INSERT INTO %1
+               SET %2 = ?
+                 , %3 = NOW()
+                 , %4 = ?
+            ON DUPLICATE KEY
+            UPDATE %3 = NOW()
+                 , %4 = %4 + ?
+)")
+            .arg(tblAccountAssetUsageHistoryBase::Name)
+            .arg(tblAccountAssetUsageHistoryBase::Fields::ush_uasID)
+            .arg(tblAccountAssetUsageHistoryBase::Fields::ushLastDateTime)
+            .arg(tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords)
+        ;
+
+        clsDACResult Result1 = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
+                                                                           QueryString,
+                                                                           {
+                                                                               _activeCredit.Credit.UserAsset.uasID,
+                                                                               UsedWordCount,
+                                                                               UsedWordCount,
+                                                                           });
+
+        // usage
+        //---------------------------------------------
+        QueryString = QString(R"(
             INSERT INTO %1
                SET %2 = ?
                  , %3 = ?
@@ -434,7 +458,7 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
         ;
 
-        clsDACResult Result = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result2 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
                                                                     QueryString,
                                                                     {
                                                                         _activeCredit.Credit.UserAsset.uasID,

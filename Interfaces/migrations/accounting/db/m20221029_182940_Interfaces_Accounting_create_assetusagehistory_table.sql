@@ -6,7 +6,9 @@ USE `{{dbprefix}}{{Schema}}`;
 CREATE TABLE `tblAccountAssetUsageHistory` (
     `ush_uasID` BIGINT(20) UNSIGNED NOT NULL,
     `ushLastDateTime` DATETIME NOT NULL,
-    PRIMARY KEY (`ush_uasID`) USING BTREE,
+    `ushUniqueMD5` CHAR(32) AS (md5(concat_ws(_utf8mb4\'X\',`ush_uasID`,date_format(`ushLastDateTime`,_utf8mb4\'%Y-%m-%d %H:%i:00\')))) virtual,
+    UNIQUE INDEX `ushUniqueMD5` (`ushUniqueMD5`) USING BTREE,
+    INDEX `ush_uasID` (`ush_uasID`) USING BTREE,
     CONSTRAINT `FK_tblAccountAssetUsageHistory_tblAccountUserAssets` FOREIGN KEY (`ush_uasID`) REFERENCES `tblAccountUserAssets` (`uasID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 COLLATE='utf8mb4_general_ci'
