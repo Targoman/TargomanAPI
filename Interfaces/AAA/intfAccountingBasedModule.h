@@ -57,65 +57,96 @@ public:
 public:
     virtual bool IsTokenBase() = 0;
 
-    virtual stuActiveCredit activeAccountObject(quint64 _usrID);
+//    virtual stuActiveCredit activeAccountObject(
+//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        quint64 _actorID);
 
 protected:
-    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(quint64 _usrID) = 0;
-    virtual void breakCredit(quint64 _slbID) = 0;
-    virtual bool isUnlimited(const UsageLimits_t& _limits) const = 0;
-    virtual bool isEmpty(const UsageLimits_t& _limits) const = 0;
+    virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _actorID,
+        const ServiceUsage_t &_requestedUsage = {},
+        const QString &_action = {}
+    ) = 0;
 
-    stuActiveCredit findBestMatchedCredit(quint64 _usrID, const ServiceUsage_t& _requestedUsage = {});
+    virtual void breakCredit(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const stuAssetItem &_assetItem,
+        const QString &_action = {}
+    ) = 0;
+
+    virtual bool isUnlimited(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const UsageLimits_t &_limits
+    ) const = 0;
+
+    virtual bool isEmpty(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        const UsageLimits_t &_limits
+    ) const = 0;
+
+    stuActiveCredit findBestMatchedCredit(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _actorID,
+        const ServiceUsage_t &_requestedUsage = {},
+        const QString &_action = {});
 
 public:
-    void checkUsageIsAllowed(
+    stuActiveCredit checkUsageIsAllowed(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        const ServiceUsage_t& _requestedUsage,
+        const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
     );
+
+    virtual void saveAccountUsage(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        stuActiveCredit &_activeCredit,
+        const ServiceUsage_t &_requestedUsage,
+        const QString &_action = {}
+    ) = 0;
 
 protected:
     //-- used by addToBasket: ----------------------------------------
     virtual void processItemForBasket(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
+        INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void digestPrivs(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
-        const stuVoucherItem    *_oldVoucherItem = nullptr
+        INOUT stuAssetItem      &_assetItem
+//        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void computeAdditives(
                       INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
     virtual void computeReferrer(
                       INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
     virtual void computeSystemDiscount(
         INTFAPICALLBOOM_DECL            &APICALLBOOM_PARAM,
-        INOUT stuAssetItem              &_assetItem,
+        INOUT stuBasketItem             &_basketItem,
         const stuPendingSystemDiscount  &_pendingSystemDiscount = {},
         const stuVoucherItem            *_oldVoucherItem = nullptr
     );
 
     virtual void computeCouponDiscount(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
+        INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
                       INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
-        Q_DECL_UNUSED INOUT stuAssetItem    &_assetItem,
+        Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { return {}; }
 
@@ -188,7 +219,7 @@ protected:
 protected:
     Targoman::API::AAA::stuBasketActionResult internalAddToBasket(
         APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
-        stuAssetItem                            &_assetItem,
+        stuBasketItem                           &_basketItem,
         TAPI::SaleableCode_t                    &_saleableCode,
         Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
         qreal                                   &_qty,
@@ -276,7 +307,7 @@ protected:
     QScopedPointer<intfAccountPrizes>           AccountPrizes;
 
     AssetUsageLimitsCols_t AssetUsageLimitsCols;
-    QStringList AssetUsageLimitsColsName;
+//    QStringList AssetUsageLimitsColsName;
 };
 
 /******************************************************/

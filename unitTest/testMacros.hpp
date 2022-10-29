@@ -20,6 +20,20 @@ class testMacros: public QObject
     Q_OBJECT
 
 private slots:
+    void testmap() {
+        QVariantMap m = QVariantMap({
+            { "CREDIT", QVariantMap({
+                  { "a::b::c", 12 },
+            }) },
+        });
+
+        auto a = m.first();
+        auto b = a.toMap();
+        auto c = b.first();
+
+        int i = 0;
+    }
+
     void testOptional() {
         optional<quint32> a;
         a = 1234;

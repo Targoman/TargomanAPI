@@ -183,7 +183,7 @@ private slots:
             QTest::qFail(exp.what(), __FILE__, __LINE__);
         }
     }
-private:
+//private:
     void Ticket_newFeedback_1() {
         QT_TRY {
             QVariant Result = callUserAPI(

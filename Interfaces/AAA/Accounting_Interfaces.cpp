@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "intfAccountingBasedModule.h"
+//#include "intfAccountingBasedModule.h"
 #include "PrivHelpers.h"
 #include "Accounting_Interfaces.h"
 #include "Interfaces/AAA/Authorization.h"
@@ -453,13 +453,16 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleables) {
     clsCondition ExtraFilters = {};
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        ExtraFilters
-//            .setCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual, DBExpression::NOW() })
-//            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
-//                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
-//                          DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
-//            );
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        ExtraFilters
+            .setCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual,
+                          DBExpression::NOW() })
+            )
+            .andCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::Null })
+                .orCond({ tblAccountSaleablesBase::Fields::slbAvailableToDate, enuConditionOperator::GreaterEqual,
+                          DBExpression::DATE_ADD(DBExpression::NOW(), 15, enuDBExpressionIntervalUnit::MINUTE) })
+            );
 
     constexpr quint16 CACHE_TIME = 0; //15 * 60;
 

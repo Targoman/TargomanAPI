@@ -71,16 +71,24 @@ Advert::Advert() :
         AdvertSchema,
         {
             { "show", {
-                /* day   */ tblAccountSaleables::ExtraFields::slbShowPerDay,
-                /* week  */ {},
-                /* month */ {},
-                /* total */ tblAccountSaleables::ExtraFields::slbShowTotal
+                /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayShow,
+                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
+                /* asset-week  */ {},
+                /* usage-week  */ {},
+                /* asset-month */ {},
+                /* usage-month */ {},
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow,
+                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
             }},
             { "click", {
-                /* day   */ tblAccountSaleables::ExtraFields::slbClicksPerDay,
-                /* week  */ {},
-                /* month */ tblAccountSaleables::ExtraFields::slbClicksPerMonth,
-                /* total */ tblAccountSaleables::ExtraFields::slbClicksTotal
+                /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayClicks,
+                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
+                /* asset-week  */ {},
+                /* usage-week  */ {},
+                /* asset-month */ tblAccountUserAssets::ExtraFields::uasMonthClicks,
+                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks,
+                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
             }},
         },
         &AccountUnits::instance(),
@@ -115,29 +123,76 @@ Advert::Advert() :
     this->addSubModule(&Props::instance());
 }
 
-stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(quint64 _usrID) {
+// accounting
+/*********************************************************************/
+stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _actorID,
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
+) {
     ///@TODO: complete this
     return stuServiceCreditsInfo(
-                {},
-                NULLABLE_NULL_VALUE,
-                NULLABLE_NULL_VALUE,
-                {},
-                {}
-                );
+        /* activeCredits     */ {},
+        /* preferedCredit    */ NULLABLE_NULL_VALUE,
+        /* parentID          */ NULLABLE_NULL_VALUE,
+        /* myLimitsOnParent  */ {},
+        /* dbCurrentDateTime */ {}
+    );
 }
 
-void Advert::breakCredit(quint64 _slbID) {
+void Advert::breakCredit(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const stuAssetItem &_assetItem,
+    const QString &_action
+) {
 }
 
-bool Advert::isUnlimited(const UsageLimits_t& _limits) const {
+bool Advert::isUnlimited(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const UsageLimits_t &_limits
+) const {
 }
 
-bool Advert::isEmpty(const UsageLimits_t& _limits) const {
+bool Advert::isEmpty(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const UsageLimits_t &_limits
+) const {
 }
 
+void Advert::saveAccountUsage(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    stuActiveCredit &_activeCredit,
+    const ServiceUsage_t &_requestedUsage,
+    const QString &_action
+) {
+    if (_activeCredit.Credit.UserAsset.uasID == 0)
+        return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+// basket
+/*********************************************************************/
 void Advert::computeAdditives(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
@@ -147,7 +202,7 @@ void Advert::computeAdditives(
 
 void Advert::computeReferrer(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
@@ -157,14 +212,14 @@ void Advert::computeReferrer(
 
     //1: add, modify or remove credit voucher for fp.com
     if (_oldVoucherItem != nullptr) {
-        if (_oldVoucherItem->Qty != _assetItem.Qty) {
+        if (_oldVoucherItem->Qty != _basketItem.Qty) {
             //remove old
-            QList<stuPendingVoucher>::iterator it = _assetItem.Private.PendingVouchers.begin();
-            while (it != _assetItem.Private.PendingVouchers.end()) {
+            QList<stuPendingVoucher>::iterator it = _basketItem.Private.PendingVouchers.begin();
+            while (it != _basketItem.Private.PendingVouchers.end()) {
                 if ((it->Name == PENDING_VOUCHER_NAME_REFERRER_PRIZE)
                     && (it->Info.contains("referrer"))
                 ) {
-                    it = _assetItem.Private.PendingVouchers.erase(it);
+                    it = _basketItem.Private.PendingVouchers.erase(it);
                     continue;
                 }
 
@@ -173,19 +228,19 @@ void Advert::computeReferrer(
         }
     }
 
-    if (_assetItem.Qty > 0) {
-        _assetItem.Private.PendingVouchers.append({
+    if (_basketItem.Qty > 0) {
+        _basketItem.Private.PendingVouchers.append({
             /* Name     */ PENDING_VOUCHER_NAME_REFERRER_PRIZE,
             /* Type     */ enuVoucherType::Prize, //Credit,
-            /* Amount   */ 2000 * _assetItem.Qty,
+            /* Amount   */ 2000 * _basketItem.Qty,
             /* Info     */ {
-                               { "referrer", _assetItem.Referrer },
+                               { "referrer", _basketItem.Referrer },
                            },
         });
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _assetItem, {
+    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -195,31 +250,31 @@ void Advert::computeReferrer(
 
     //3: inc translate words max limit (30'000 -> 35'000)
 //    int IncAmount = 5'000;
-//    if (_assetItem.AdditionalInfo.contains("plus-max-words"))
-//        _assetItem.AdditionalInfo["plus-max-words"] = IncAmount + _assetItem.AdditionalInfo["plus-max-words"].toInt();
+//    if (_basketItem.AdditionalInfo.contains("plus-max-words"))
+//        _basketItem.AdditionalInfo["plus-max-words"] = IncAmount + _basketItem.AdditionalInfo["plus-max-words"].toInt();
 //    else
-//        _assetItem.AdditionalInfo.insert("plus-max-words", IncAmount);
+//        _basketItem.AdditionalInfo.insert("plus-max-words", IncAmount);
 
     //4: inc days (30 -> 40)
     int IncDays = 10;
-    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
+    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS] = IncDays + _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt();
     else
-        _assetItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
+        _basketItem.AdditionalInfo.insert(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS, IncDays);
 #endif
 };
 
 QVariantMap Advert::getCustomUserAssetFieldsForQuery(
     INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuAssetItem      &_assetItem,
+    INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 
     QVariantMap Result;
 
-    if (_assetItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
-        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _assetItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
+    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
+        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());
 
     return Result;
 }

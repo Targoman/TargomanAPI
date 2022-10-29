@@ -70,19 +70,19 @@ public:
 protected:
     virtual void computeAdditives(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
+        INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void computeReferrer(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
+        INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
         INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        INOUT stuAssetItem      &_assetItem,
+        INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 

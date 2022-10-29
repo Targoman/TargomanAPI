@@ -176,6 +176,7 @@ public:
     static DBExpression DATE_ADD(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
     static DBExpression DATE_SUB(const QString _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
     static DBExpression DATE_SUB(const DBExpression& _date, const QVariant _interval, enuDBExpressionIntervalUnit::Type _unit);
+    static DBExpression COALESCE(const QStringList &_cols);
 
 protected:
     QSharedDataPointer<DBExpressionData> Data;

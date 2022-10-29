@@ -26,6 +26,17 @@
 
 namespace Targoman::API::ModuleHelpers::MT {
 
+namespace MTRequestedUsage {
+//    constexpr char ENGINE[] = "engine";
+//    constexpr char DIR[]    = "dir";
+    constexpr char DIC[]    = "dic";
+    constexpr char SAMPE[]  = "sample";
+}
+
+namespace MTAction {
+    constexpr char TRANSLATE[]  = "translate";
+}
+
 namespace RESULTItems {
     constexpr char ERRNO[]          = "errno";
     constexpr char MESSAGE[]        = "message";

@@ -43,6 +43,7 @@ PRIVATE_HEADERS += \
 HEADERS += \
     API/intfModuleHelper.h \
     Helpers/IteratorHelper.hpp \
+    Helpers/JSonHelper.h \
     Helpers/TokenHelper.h \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
@@ -52,6 +53,7 @@ HEADERS += \
     Server/QJWT.h \
     Common/base.h \
     Common/APIArgHelperMacrosPrivate.h \
+    Common/tmplNullable.hpp \
     Helpers/FixtureHelper.h \
     Helpers/RESTClientHelper.h \
     Helpers/SecurityHelper.h \
@@ -80,6 +82,7 @@ HEADERS += \
 
 SOURCES += \
     API/intfModuleHelper.cpp \
+    Helpers/JSonHelper.cpp \
     Helpers/TokenHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \

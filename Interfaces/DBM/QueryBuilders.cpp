@@ -273,6 +273,12 @@ DBExpression DBExpression::DATE_SUB(const DBExpression& _date, const QVariant _i
     return DBExpression("DATE_SUB", enuDBExpressionType::Function, QStringList({ _date.toString(), "INTERVAL " + makeExpressionIntervalValue(_interval, _unit) }));
 }
 
+DBExpression DBExpression::COALESCE(const QStringList &_cols) {
+    if (_cols.isEmpty())
+        throw exQueryBuilder("COALESCE list is empty");
+
+    return DBExpression("COALESCE", enuDBExpressionType::Function, _cols);
+}
 /***************************************************************************************/
 /* DBExpressionCase ********************************************************************/
 /***************************************************************************************/

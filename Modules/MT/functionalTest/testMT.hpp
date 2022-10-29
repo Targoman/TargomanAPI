@@ -218,8 +218,8 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
-//                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityDurationInDays,    60 },
-//                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords,             1000 },
+//                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,     60 },
+//                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,             1000 },
                 }
             );
         } QT_CATCH (exTargomanBase &exp) {
@@ -238,16 +238,17 @@ private slots:
                 "MT/AccountSaleables",
                 {},
                 {
-                    { tblAccountSaleablesBase::Fields::slbCode,             this->MTSaleableCode },
-                    { tblAccountSaleablesBase::Fields::slbName,             "test mt Saleable 456 name" },
-                    { tblAccountSaleablesBase::Fields::slbDesc,             "test mt Saleable 456 desc" },
-                    { tblAccountSaleablesBase::Fields::slb_prdID,           this->MTProductID },
-                    { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
-                    { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
-                    { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
-                    { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
-                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityDurationInDays,    60 },
-                    { tblAccountSaleablesMTBase::ExtraFields::slbValidityWords,             1000 },
+                    { tblAccountSaleablesBase::Fields::slbCode,                 this->MTSaleableCode },
+                    { tblAccountSaleablesBase::Fields::slbName,                 "test mt Saleable 456 name" },
+                    { tblAccountSaleablesBase::Fields::slbDesc,                 "test mt Saleable 456 desc" },
+                    { tblAccountSaleablesBase::Fields::slb_prdID,               this->MTProductID },
+                    { tblAccountSaleablesBase::Fields::slbType,                 TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },
+                    { tblAccountSaleablesBase::Fields::slbBasePrice,            12'000 },
+                    { tblAccountSaleablesBase::Fields::slbInStockQty,           150 },
+                    { tblAccountSaleablesBase::Fields::slbVoucherTemplate,      "test mt Saleable 456 vt" },
+                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,         60 },
+                    { tblAccountSaleablesBase::Fields::slbStartAtFirstUse,      true },
+                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,    1000 },
                 }
             );
 
