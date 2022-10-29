@@ -24,8 +24,9 @@
 #ifndef TARGOMAN_API_ALERTS_H
 #define TARGOMAN_API_ALERTS_H
 
-#include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/AAA/AAADefs.hpp"
+#include "Interfaces/API/intfSQLBasedModule.h"
+//#include "Interfaces/DBM/clsTable.h"
 
 using namespace Targoman::API::DBM;
 
@@ -122,10 +123,13 @@ namespace tblAlerts {
 }
 #pragma GCC diagnostic pop
 
-class intfAlerts : public clsTable
+class intfAlerts : public intfSQLBasedModule
 {
 public:
-    intfAlerts();
+    intfAlerts(
+            const QString& _module,
+            const QString& _schema
+            );
 //    instanceGetter(intfAlerts)
 
 public:

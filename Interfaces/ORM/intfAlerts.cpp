@@ -30,10 +30,13 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::ORM, enuAlertStatus);
 
 namespace Targoman::API::ORM {
 
-intfAlerts::intfAlerts() :
-    clsTable(
-        "Common",
-        "Alert",
+intfAlerts::intfAlerts(
+    const QString& _module,
+    const QString& _schema
+) :
+    intfSQLBasedModule(
+        _module,
+        _schema,
         tblAlerts::Private::ORMFields,
         tblAlerts::Private::Relations,
         tblAlerts::Private::Indexes

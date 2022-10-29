@@ -88,6 +88,35 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
     MTTranslationLogs(_translationLogs)
 { ; }
 
+// basket
+/*********************************************************************/
+template <bool _itmplIsTokenBase>
+QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuBasketItem     &_basketItem,
+    Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    QVariantMap Result;
+
+    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
+    AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
+    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
+    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
+    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
+                      );
+    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
+                      );
+    //else leave uasCreditTotalWords as null
+
+    return Result;
+}
+
 // accounting
 /*********************************************************************/
 template <bool _itmplIsTokenBase>
@@ -321,15 +350,24 @@ bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
     const UsageLimits_t &_limits
 ) const {
 
+    for (auto it = _limits.constBegin();
+         it != _limits.constEnd();
+         it++
+    ) {
+        if (NULLABLE_HAS_VALUE(it->PerDay))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerWeek))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerMonth))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->Total))
+            return false;
+    }
 
-
-
-
-
-
+    return true;
 }
 
 template <bool _itmplIsTokenBase>
@@ -338,14 +376,24 @@ bool intfMTModule<_itmplIsTokenBase>::isEmpty(
     const UsageLimits_t &_limits
 ) const {
 
+    for (auto it = _limits.constBegin();
+         it != _limits.constEnd();
+         it++
+    ) {
+        if (NULLABLE_HAS_VALUE(it->PerDay) && NULLABLE_VALUE(it->PerDay) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerWeek) && NULLABLE_VALUE(it->PerWeek) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerMonth) && NULLABLE_VALUE(it->PerMonth) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->Total) && NULLABLE_VALUE(it->Total) > 0)
+            return false;
+    }
 
-
-
-
-
+    return true;
 }
 
 template <bool _itmplIsTokenBase>
@@ -391,39 +439,9 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
     }
 }
 
-// basket
-/*********************************************************************/
-template <bool _itmplIsTokenBase>
-QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuBasketItem     &_basketItem,
-    Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
-) {
-    QVariantMap Result;
-
-    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
-    AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
-    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
-    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
-    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
-                      );
-    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
-                      );
-    //else leave uasCreditTotalWords as null
-
-    return Result;
-}
-
 // expose
 /*********************************************************************/
 template class intfMTModule<false>;
 template class intfMTModule<true>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces
-
