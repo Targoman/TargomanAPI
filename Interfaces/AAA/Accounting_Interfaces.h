@@ -500,6 +500,22 @@ public:
                                      const QList<DBM::clsORMField>& _cols = {},
                                      const QList<DBM::stuRelation>& _relations = {},
                                      const QList<DBM::stuDBIndex>& _indexes = {});
+
+protected:
+    virtual QStringList creditFieldNames() = 0;
+
+    TAPI::stuTable report(
+        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        quint64                 _currentActorID,
+        quint64                 _pageIndex = 0,
+        quint16                 _pageSize = 100,
+        bool                    _reportCount = true,
+        quint64                 _assetID = 0,
+        TAPI::DateTime_t        _fromDate = {},
+        TAPI::DateTime_t        _toDate = {},
+        quint16                 _step = 1,
+        Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
+    );
 };
 
 /******************************************************/
@@ -516,7 +532,23 @@ public:
 
 private slots:
 //    QVariant ORMGET_TOKENBASE("Get User Asset Usage")
-    QVariant ORMGET_USER("Get User Asset Usage")
+    QVariant ORMGET_USER("Get User Asset Usage History")
+
+    QVariant REST_GET_OR_POST(
+        report,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
+            quint64                         _pageIndex = 0,
+            quint16                         _pageSize = 100,
+            bool                            _reportCount = true,
+            quint64                         _assetID = 0,
+            TAPI::DateTime_t                _fromDate = {},
+            TAPI::DateTime_t                _toDate = {},
+            quint16                         _step = 1,
+            Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
+        ),
+        "Get User Asset Usage History Report"
+    );
 };
 
 /******************************************************/
@@ -548,7 +580,24 @@ private slots:
             TAPI::GroupBy_t     _groupBy = {},
             bool                _reportCount = true
         ),
-        "Get User Asset Usage"
+        "Get User Asset Usage History"
+    );
+
+    QVariant REST_GET_OR_POST(
+        report,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
+            QString                         _apiToken,
+            quint64                         _pageIndex = 0,
+            quint16                         _pageSize = 100,
+            bool                            _reportCount = true,
+            quint64                         _assetID = 0,
+            TAPI::DateTime_t                _fromDate = {},
+            TAPI::DateTime_t                _toDate = {},
+            quint16                         _step = 1,
+            Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
+        ),
+        "Get User Asset Usage History Report"
     );
 };
 

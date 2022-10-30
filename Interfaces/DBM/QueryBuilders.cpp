@@ -3101,7 +3101,11 @@ TAPI::stuTable ORMSelectQuery::allWithCount(QVariantMap _args) { //, quint16 _ma
                   .toVariant()
                   .toList();
 
-    Result.PageCount = ceil((double)Result.TotalRows / this->Data->PageSize);
+    if (this->Data->PageSize > 0)
+        Result.PageCount = ceil((double)Result.TotalRows / this->Data->PageSize);
+    else
+        Result.PageCount = 1;
+
     Result.HasMore = (Result.PageCount > (this->Data->PageIndex + 1));
 
     return Result;

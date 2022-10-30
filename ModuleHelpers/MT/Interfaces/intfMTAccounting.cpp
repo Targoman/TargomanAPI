@@ -255,6 +255,13 @@ intfAccountAssetUsageHistoryMT<_itmplIsTokenBase>::intfAccountAssetUsageHistoryM
     baseintfAccountAssetUsageHistoryMT()
 { ; }
 
+template <bool _itmplIsTokenBase>
+QStringList intfAccountAssetUsageHistoryMT<_itmplIsTokenBase>::creditFieldNames() {
+    return {
+        tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords,
+    };
+}
+
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/

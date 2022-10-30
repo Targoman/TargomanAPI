@@ -626,6 +626,9 @@ public:
                                    const QList<DBM::clsORMField>& _exclusiveCols = {},
                                    const QList<DBM::stuRelation>& _exclusiveRelations = {},
                                    const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
+
+protected:
+    virtual QStringList creditFieldNames();
 };
 
 /******************************************************/

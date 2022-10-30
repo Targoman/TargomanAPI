@@ -74,12 +74,23 @@ TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
                      Removed    = 'R',
                      );
 
+TARGOMAN_DEFINE_ENUM(enuAssetHistoryReportStepUnit,
+                     Minute     = 'I',
+                     Hour       = 'H',
+                     Day        = 'D',
+//                     Week       = 'W',
+//                     Month      = 'M',
+//                     Year       = 'Y',
+                     );
+
 } //namespace Targoman::API::AAA
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus) // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+//TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp:
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuAssetHistoryReportStepUnit);
 
 namespace Targoman::API::AAA {
 

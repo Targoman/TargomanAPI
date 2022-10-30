@@ -584,7 +584,8 @@ class AccountAssetUsageHistory : public intfAccountAssetUsageHistory<false>
 //    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Advert, AccountAssetUsageHistory)
 
-public:
+protected:
+    virtual QStringList creditFieldNames();
 };
 
 /******************************************************/

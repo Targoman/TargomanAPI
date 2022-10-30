@@ -604,6 +604,29 @@ private slots:
         }
     }
 
+    void assetUsageHistory_1() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "MT/AccountAssetUsageHistory/report",
+                {},
+                {
+                    { "apiToken",   this->TokenJWT },
+//                    { "assetID",     },
+                    { "step",       15 },
+                    { "stepUnit",   "Minute" },
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
 };
 
 #endif // TEST_MT_HPP

@@ -169,6 +169,17 @@ AccountAssetUsageHistory::AccountAssetUsageHistory() :
         tblAccountAssetUsageHistory::Private::ExtraIndexes
 ) { ; }
 
+QStringList AccountAssetUsageHistory::creditFieldNames() {
+    return {
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDays,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDayShow,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalShow,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDayClicks,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumMonthClicks,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalClicks,
+    };
+}
+
 /******************************************************/
 /******************************************************/
 /******************************************************/
