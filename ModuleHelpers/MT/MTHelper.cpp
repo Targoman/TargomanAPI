@@ -177,15 +177,15 @@ QVariantMap MTHelper::doTranslation(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
-    const TranslationDir_t& _dir,
-    const QString& _engine,
+    const TranslationDir_t &_dir,
+    const QString &_engine,
     bool _useSpecialClass,
     bool _detailed,
     bool _detokenize,
     bool _dic,
     bool _dicFull,
-    int& _preprocessTime,
-    int& _translationTime
+    int &_preprocessTime,
+    int &_translationTime
 ) {
     APICALLBOOM_PARAM.createScopeTiming("translate");
 
@@ -304,6 +304,20 @@ QVariantMap MTHelper::doTranslation(
                                    << "RequestedUsage:" << QJsonDocument(QJsonObject::fromVariantMap(RequestedUsage)).toJson() << endl
                                    << "ActiveCredit:" << QJsonDocument(ActiveCredit.toJson()).toJson();
     }
+
+#ifdef QT_DEBUG
+    if (_engine == "TEST_AAA") {
+        _mtModule->saveAccountUsage(
+            APICALLBOOM_PARAM,
+            ActiveCredit,
+            RequestedUsage,
+            MTAction::TRANSLATE
+            );
+
+        QVariantMap TranslationResult;
+        return TranslationResult;
+    }
+#endif
 
     //-----------------------------------------
     auto FnFindClassAndEngine = [this](

@@ -164,15 +164,15 @@ public:
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         QString _text,
-        const TranslationDir_t& _dir,
-        const QString& _engine,
+        const TranslationDir_t &_dir,
+        const QString &_engine,
         bool _useSpecialClass,
         bool _detailed,
         bool _detokenize,
         bool _dic, // = false,
         bool _dicFull, // = false
-        int& _preprocessTime,
-        int& _translationTime
+        int &_preprocessTime,
+        int &_translationTime
     );
 
 protected:

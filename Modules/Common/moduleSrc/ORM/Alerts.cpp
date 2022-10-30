@@ -35,18 +35,17 @@ namespace Targoman::API::CommonModule::ORM {
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Common, Alerts)
 
 Alerts::Alerts() :
-    intfPureModule(
-        "Common"
-//        CommonSchema,
-//        ""
-    ),
-    intfAlerts() { ; }
+    intfAlerts(
+        CommonDomain,
+        CommonSchema
+    )
+{ ; }
 
 QVariant IMPL_ORMGET_USER(Alerts) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAlerts::Fields::alr_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
 
-//    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
-    return QVariant();
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 } //namespace Targoman::API::CommonModule::ORM

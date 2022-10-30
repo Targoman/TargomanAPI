@@ -34,26 +34,27 @@ using namespace DBManager;
 
 template <bool _itmplIsTokenBase>
 intfMTModule<_itmplIsTokenBase>::intfMTModule(
-        const QString                               &_module,
-        const QString                               &_schema,
+        const QString                                   &_module,
+        const QString                                   &_schema,
         //Account --
-        AssetUsageLimitsCols_t                      _exclusiveAssetUsageLimitsCols,
-        intfAccountUnits                            *_units,
-        intfAccountProducts                         *_products,
-        intfAccountSaleables                        *_saleables,
-        intfAccountSaleablesFiles                   *_saleablesFiles,
-        intfAccountUserAssets<_itmplIsTokenBase>    *_userAssets,
-        intfAccountUserAssetsFiles                  *_userAssetsFiles,
-        intfAccountAssetUsage<_itmplIsTokenBase>    *_assetUsages,
-        intfAccountCoupons                          *_discounts,
-        intfAccountPrizes                           *_prizes,
+        AssetUsageLimitsCols_t                          _exclusiveAssetUsageLimitsCols,
+        intfAccountUnits                                *_units,
+        intfAccountProducts                             *_products,
+        intfAccountSaleables                            *_saleables,
+        intfAccountSaleablesFiles                       *_saleablesFiles,
+        intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
+        intfAccountUserAssetsFiles                      *_userAssetsFiles,
+        intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
+        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
+        intfAccountCoupons                              *_discounts,
+        intfAccountPrizes                               *_prizes,
         //MT --
-        intfMTCorrectionRules_Type                  *_correctionRules,
-        intfMTDigestedTranslationLogs_Type          *_digestedTranslationLogs,
-        intfMTMultiDic_Type                         *_multiDic,
-        intfMTTokenStats_Type                       *_tokenStats,
-        intfMTTranslatedPhrases_Type                *_translatedPhrases,
-        intfMTTranslationLogs_Type                  *_translationLogs
+        intfMTCorrectionRules_Type                      *_correctionRules,
+        intfMTDigestedTranslationLogs_Type              *_digestedTranslationLogs,
+        intfMTMultiDic_Type                             *_multiDic,
+        intfMTTokenStats_Type                           *_tokenStats,
+        intfMTTranslatedPhrases_Type                    *_translatedPhrases,
+        intfMTTranslationLogs_Type                      *_translationLogs
     ) :
     intfAccountingBasedModule<_itmplIsTokenBase>(
         _module,
@@ -76,7 +77,8 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         _saleablesFiles,
         _userAssets,
         _userAssetsFiles,
-        _assetUsages,
+        _assetUsage,
+        _assetUsageHistory,
         _discounts,
         _prizes
     ),
@@ -87,6 +89,35 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
     MTTranslatedPhrases(_translatedPhrases),
     MTTranslationLogs(_translationLogs)
 { ; }
+
+// basket
+/*********************************************************************/
+template <bool _itmplIsTokenBase>
+QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INOUT stuBasketItem     &_basketItem,
+    Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
+) {
+    QVariantMap Result;
+
+    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
+    AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
+    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
+    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
+
+    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
+                      );
+    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
+                      );
+    //else leave uasCreditTotalWords as null
+
+    return Result;
+}
 
 // accounting
 /*********************************************************************/
@@ -321,15 +352,24 @@ bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
     const UsageLimits_t &_limits
 ) const {
 
+    for (auto it = _limits.constBegin();
+         it != _limits.constEnd();
+         it++
+    ) {
+        if (NULLABLE_HAS_VALUE(it->PerDay))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerWeek))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerMonth))
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->Total))
+            return false;
+    }
 
-
-
-
-
-
+    return true;
 }
 
 template <bool _itmplIsTokenBase>
@@ -338,14 +378,24 @@ bool intfMTModule<_itmplIsTokenBase>::isEmpty(
     const UsageLimits_t &_limits
 ) const {
 
+    for (auto it = _limits.constBegin();
+         it != _limits.constEnd();
+         it++
+    ) {
+        if (NULLABLE_HAS_VALUE(it->PerDay) && NULLABLE_VALUE(it->PerDay) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerWeek) && NULLABLE_VALUE(it->PerWeek) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->PerMonth) && NULLABLE_VALUE(it->PerMonth) > 0)
+            return false;
 
+        if (NULLABLE_HAS_VALUE(it->Total) && NULLABLE_VALUE(it->Total) > 0)
+            return false;
+    }
 
-
-
-
-
+    return true;
 }
 
 template <bool _itmplIsTokenBase>
@@ -369,7 +419,34 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
 //        QString CreditKey = CreditValues.firstKey();
         qint64 UsedWordCount = CreditValues.first().toLongLong();
 
+        // usage history
+        //---------------------------------------------
         QString QueryString = QString(R"(
+            INSERT INTO %1
+               SET %2 = ?
+                 , %3 = NOW()
+                 , %4 = ?
+            ON DUPLICATE KEY
+            UPDATE %3 = NOW()
+                 , %4 = %4 + ?
+)")
+            .arg(tblAccountAssetUsageHistoryBase::Name)
+            .arg(tblAccountAssetUsageHistoryBase::Fields::ush_uasID)
+            .arg(tblAccountAssetUsageHistoryBase::Fields::ushLastDateTime)
+            .arg(tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords)
+        ;
+
+        clsDACResult Result1 = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
+                                                                           QueryString,
+                                                                           {
+                                                                               _activeCredit.Credit.UserAsset.uasID,
+                                                                               UsedWordCount,
+                                                                               UsedWordCount,
+                                                                           });
+
+        // usage
+        //---------------------------------------------
+        QueryString = QString(R"(
             INSERT INTO %1
                SET %2 = ?
                  , %3 = ?
@@ -381,7 +458,7 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
         ;
 
-        clsDACResult Result = this->accountAssetUsages()->execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result2 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
                                                                     QueryString,
                                                                     {
                                                                         _activeCredit.Credit.UserAsset.uasID,
@@ -391,39 +468,9 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
     }
 }
 
-// basket
-/*********************************************************************/
-template <bool _itmplIsTokenBase>
-QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    INOUT stuBasketItem     &_basketItem,
-    Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
-) {
-    QVariantMap Result;
-
-    tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
-    AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
-    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
-    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
-    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
-                      );
-    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
-                      );
-    //else leave uasCreditTotalWords as null
-
-    return Result;
-}
-
 // expose
 /*********************************************************************/
 template class intfMTModule<false>;
 template class intfMTModule<true>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces
-

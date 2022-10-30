@@ -68,6 +68,7 @@ MT::MT() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
+        &AccountAssetUsageHistory::instance(),
         &AccountCoupons::instance(),
         nullptr,
         //---------------------
@@ -89,7 +90,8 @@ MT::MT() :
     this->addSubModule(AccountSaleablesFiles.data());
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
-    this->addSubModule(AccountAssetUsages.data());
+    this->addSubModule(AccountAssetUsage.data());
+    this->addSubModule(AccountAssetUsageHistory.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in MT module
 

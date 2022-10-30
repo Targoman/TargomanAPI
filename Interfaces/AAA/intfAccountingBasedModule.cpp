@@ -109,18 +109,19 @@ baseintfAccountingBasedModule* serviceAccounting(const QString& _serviceName) {
 |** baseintfAccountingBasedModule ******************************************************************|
 \***************************************************************************************************/
 baseintfAccountingBasedModule::baseintfAccountingBasedModule(
-    const QString               &_module,
-    const QString               &_schema,
-    AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
-    intfAccountUnits            *_units,
-    intfAccountProducts         *_products,
-    intfAccountSaleables        *_saleables,
-    intfAccountSaleablesFiles   *_saleablesFiles,
-    baseintfAccountUserAssets   *_userAssets,
-    intfAccountUserAssetsFiles  *_userAssetsFiles,
-    baseintfAccountAssetUsage   *_assetUsages,
-    intfAccountCoupons          *_discounts,
-    intfAccountPrizes           *_prizes
+    const QString                       &_module,
+    const QString                       &_schema,
+    AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+    intfAccountUnits                    *_units,
+    intfAccountProducts                 *_products,
+    intfAccountSaleables                *_saleables,
+    intfAccountSaleablesFiles           *_saleablesFiles,
+    baseintfAccountUserAssets           *_userAssets,
+    intfAccountUserAssetsFiles          *_userAssetsFiles,
+    baseintfAccountAssetUsage           *_assetUsage,
+    baseintfAccountAssetUsageHistory    *_assetUsageHistory,
+    intfAccountCoupons                  *_discounts,
+    intfAccountPrizes                   *_prizes
 ) :
     intfSQLBasedModule(_module, _schema),
     ServiceName(_schema),
@@ -130,7 +131,8 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     AccountSaleablesFiles(_saleablesFiles),
     AccountUserAssets(_userAssets),
     AccountUserAssetsFiles(_userAssetsFiles),
-    AccountAssetUsages(_assetUsages),
+    AccountAssetUsage(_assetUsage),
+    AccountAssetUsageHistory(_assetUsageHistory),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
@@ -1729,18 +1731,19 @@ bool IMPL_REST_POST(baseintfAccountingBasedModule, cancelVoucherItem, (
 |** baseintfAccountingBasedModule_USER *************************************************************|
 \***************************************************************************************************/
 baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
-    const QString                   &_module,
-    const QString                   &_schema,
-    AssetUsageLimitsCols_t          _AssetUsageLimitsCols,
-    intfAccountUnits                *_units,
-    intfAccountProducts             *_products,
-    intfAccountSaleables            *_saleables,
-    intfAccountSaleablesFiles       *_saleablesFiles,
-    intfAccountUserAssets<false>    *_userAssets,
-    intfAccountUserAssetsFiles      *_userAssetsFiles,
-    intfAccountAssetUsage<false>    *_assetUsages,
-    intfAccountCoupons              *_discounts,
-    intfAccountPrizes               *_prizes
+    const QString                       &_module,
+    const QString                       &_schema,
+    AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+    intfAccountUnits                    *_units,
+    intfAccountProducts                 *_products,
+    intfAccountSaleables                *_saleables,
+    intfAccountSaleablesFiles           *_saleablesFiles,
+    intfAccountUserAssets<false>        *_userAssets,
+    intfAccountUserAssetsFiles          *_userAssetsFiles,
+    intfAccountAssetUsage<false>        *_assetUsage,
+    intfAccountAssetUsageHistory<false> *_assetUsageHistory,
+    intfAccountCoupons                  *_discounts,
+    intfAccountPrizes                   *_prizes
 ) :
     baseintfAccountingBasedModule(
         _module,
@@ -1752,7 +1755,8 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
         _saleablesFiles,
         _userAssets,
         _userAssetsFiles,
-        _assetUsages,
+        _assetUsage,
+        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1788,18 +1792,19 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 |** baseintfAccountingBasedModule_API **************************************************************|
 \***************************************************************************************************/
 baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
-    const QString                   &_module,
-    const QString                   &_schema,
-    AssetUsageLimitsCols_t          _AssetUsageLimitsCols,
-    intfAccountUnits                *_units,
-    intfAccountProducts             *_products,
-    intfAccountSaleables            *_saleables,
-    intfAccountSaleablesFiles       *_saleablesFiles,
-    intfAccountUserAssets<true>     *_userAssets,
-    intfAccountUserAssetsFiles      *_userAssetsFiles,
-    intfAccountAssetUsage<true>     *_assetUsages,
-    intfAccountCoupons              *_discounts,
-    intfAccountPrizes               *_prizes
+    const QString                       &_module,
+    const QString                       &_schema,
+    AssetUsageLimitsCols_t              _AssetUsageLimitsCols,
+    intfAccountUnits                    *_units,
+    intfAccountProducts                 *_products,
+    intfAccountSaleables                *_saleables,
+    intfAccountSaleablesFiles           *_saleablesFiles,
+    intfAccountUserAssets<true>         *_userAssets,
+    intfAccountUserAssetsFiles          *_userAssetsFiles,
+    intfAccountAssetUsage<true>         *_assetUsage,
+    intfAccountAssetUsageHistory<true>  *_assetUsageHistory,
+    intfAccountCoupons                  *_discounts,
+    intfAccountPrizes                   *_prizes
 ) :
     baseintfAccountingBasedModule(
         _module,
@@ -1811,7 +1816,8 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
         _saleablesFiles,
         _userAssets,
         _userAssetsFiles,
-        _assetUsages,
+        _assetUsage,
+        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1874,19 +1880,19 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 \***************************************************************************************************/
 template <bool _itmplIsTokenBase>
 intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
-    const QString               &_module,
-    const QString               &_schema,
-//    bool                        _isTokenBase,
-    AssetUsageLimitsCols_t      _AssetUsageLimitsCols,
-    intfAccountUnits            *_units,
-    intfAccountProducts         *_products,
-    intfAccountSaleables        *_saleables,
-    intfAccountSaleablesFiles   *_saleablesFiles,
-    intfAccountUserAssets<_itmplIsTokenBase>       *_userAssets,
-    intfAccountUserAssetsFiles  *_userAssetsFiles,
-    intfAccountAssetUsage<_itmplIsTokenBase>       *_assetUsages,
-    intfAccountCoupons          *_discounts,
-    intfAccountPrizes           *_prizes
+    const QString                                   &_module,
+    const QString                                   &_schema,
+    AssetUsageLimitsCols_t                          _AssetUsageLimitsCols,
+    intfAccountUnits                                *_units,
+    intfAccountProducts                             *_products,
+    intfAccountSaleables                            *_saleables,
+    intfAccountSaleablesFiles                       *_saleablesFiles,
+    intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
+    intfAccountUserAssetsFiles                      *_userAssetsFiles,
+    intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
+    intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
+    intfAccountCoupons                              *_discounts,
+    intfAccountPrizes                               *_prizes
 ) :
     std::conditional<_itmplIsTokenBase, baseintfAccountingBasedModule_API, baseintfAccountingBasedModule_USER>::type(
         _module,
@@ -1898,7 +1904,8 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
         _saleablesFiles,
         _userAssets,
         _userAssetsFiles,
-        _assetUsages,
+        _assetUsage,
+        _assetUsageHistory,
         _discounts,
         _prizes
     )

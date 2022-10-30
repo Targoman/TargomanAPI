@@ -26,7 +26,7 @@
 
 //#include "Interfaces/AAA/AAA.hpp"
 #include "Interfaces/ORM/intfAlerts.h"
-#include "Interfaces/API/intfPureModule.h"
+//#include "Interfaces/API/intfSQLBasedModule.h"
 
 using namespace Targoman::API::ORM;
 
@@ -36,7 +36,7 @@ namespace Targoman::API::CommonModule {
 
 namespace ORM {
 
-class Alerts : public intfPureModule, public intfAlerts
+class Alerts : public intfAlerts
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(Common, Alerts)

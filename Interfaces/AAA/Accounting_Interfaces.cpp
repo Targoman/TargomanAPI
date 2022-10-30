@@ -37,6 +37,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuAssetHistoryReportStepUnit);
 
 TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
@@ -997,6 +998,315 @@ intfAccountAssetUsage<_itmplIsTokenBase>::intfAccountAssetUsage(
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+baseintfAccountAssetUsageHistory::baseintfAccountAssetUsageHistory(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    intfSQLBasedModule(
+        _schema,
+        tblAccountAssetUsageHistoryBase::Name,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+/*
+SELECT
+    1 + DATEDIFF(columnDate, @start_date) DIV 7  AS weekNumber
+  , @start_date + INTERVAL (DATEDIFF(columnDate, @start_date) DIV 7) WEEK
+      AS week_start_date
+  , MIN(columnDate) AS actual_first_date
+  , MAX(columnDate) AS actual_last_date
+  , SUM(otherColumn)
+  , AVG(otherColumn)
+  ---
+FROM
+    tableX
+WHERE
+    columnDate >= @start_date
+GROUP BY
+    DATEDIFF(columnDate, @start_date) DIV 7 ;
+*/
+TAPI::stuTable baseintfAccountAssetUsageHistory::report(
+    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    quint64                 _currentActorID,
+    quint64                 _pageIndex,
+    quint16                 _pageSize,
+    bool                    _reportCount,
+    quint64                 _assetID,
+    TAPI::DateTime_t        _fromDate,
+    TAPI::DateTime_t        _toDate,
+    quint16                 _step,
+    enuAssetHistoryReportStepUnit::Type _stepUnit
+) {
+    QStringList QueryStringParts;
+    QueryStringParts.append("SELECT");
+
+    //--
+    QString StrFromDate = _fromDate.isValid()
+                          ? _fromDate.toString("yyyy-MM-dd hh:mm:ss")
+                          : "";
+
+    QString StrToDate = _toDate.isValid()
+                        ? _toDate.toString("yyyy-MM-dd hh:mm:ss")
+                        : "";
+
+    QString DateDiffPart;
+    if (_stepUnit == enuAssetHistoryReportStepUnit::Minute) {
+        if (_fromDate.isValid())
+            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(ushLastDateTime, '%1')) DIV %2")
+                           .arg(StrFromDate)
+                           .arg(_step * 60);
+        else
+            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(NOW(), ushLastDateTime)) DIV %1")
+                           .arg(_step * 60);
+    } else if (_stepUnit == enuAssetHistoryReportStepUnit::Hour) {
+        if (_fromDate.isValid())
+            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(ushLastDateTime, '%1')) DIV %2")
+                           .arg(StrFromDate)
+                           .arg(_step * 60 * 60);
+        else
+            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(NOW(), ushLastDateTime)) DIV %1")
+                           .arg(_step * 60 * 60);
+    } else if (_stepUnit == enuAssetHistoryReportStepUnit::Day) {
+        if (_fromDate.isValid())
+            DateDiffPart = QString("1 + DATEDIFF(ushLastDateTime, '%1') DIV %2")
+                           .arg(StrFromDate)
+                           .arg(_step);
+        else
+            DateDiffPart = QString("1 + DATEDIFF(NOW(), ushLastDateTime) DIV %1")
+                           .arg(_step);
+    }
+    QueryStringParts.append(QString("%1 AS counter").arg(DateDiffPart));
+
+    //--
+    QueryStringParts.append(", COUNT(*) AS pointsCount");
+    QueryStringParts.append(", MIN(ushLastDateTime) AS minDate");
+    QueryStringParts.append(", MAX(ushLastDateTime) AS maxDate");
+
+    //--
+    foreach (auto CreditField, this->creditFieldNames()) {
+        QueryStringParts.append(QString(", SUM(%1) AS %1").arg(CreditField));
+    }
+
+    //--
+    QueryStringParts.append("FROM tblAccountAssetUsageHistory ush");
+    QueryStringParts.append("INNER JOIN tblAccountUserAssets uas");
+    QueryStringParts.append("ON uas.uasID = ush.ush_uasID");
+
+    //--
+    QStringList WhereParts;
+
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        WhereParts.append(QString("uas_actorID = %1").arg(_currentActorID));
+
+    if (_assetID > 0)
+        WhereParts.append(QString("ush_uasID = %1").arg(_assetID));
+
+    if (_fromDate.isValid())
+        WhereParts.append(QString("ushLastDateTime >= '%1'").arg(StrFromDate));
+
+    if (_toDate.isValid())
+        WhereParts.append(QString("ushLastDateTime <= '%1'").arg(StrToDate));
+
+    if (WhereParts.isEmpty() == false) {
+        QueryStringParts.append("WHERE");
+        QueryStringParts.append(WhereParts.join("\n AND "));
+    }
+
+    //--
+    QueryStringParts.append(QString("GROUP BY %1").arg(DateDiffPart));
+
+    //--
+    QueryStringParts.append("ORDER BY MIN(ushLastDateTime)");
+
+    //--
+    QString QueryString = QueryStringParts.join("\n");
+
+    TAPI::stuTable Result;
+    Result.HasCount = false;
+
+    if (_reportCount) {
+        QString CountingQueryString = QString("SELECT COUNT(*) AS cnt FROM (\n%1\n) qry").arg(QueryString);
+        QJsonDocument ResultTotalRows = this->execQuery(APICALLBOOM_PARAM, CountingQueryString).toJson(true);
+
+        Result.HasCount = true;
+        Result.TotalRows = ResultTotalRows
+                           .toVariant()
+                           .toMap()["cnt"]
+                           .toULongLong();
+
+    }
+
+    if ((_pageIndex > 0) || (_pageSize > 0)) {
+        if (_pageSize == 0)
+            _pageSize = 100;
+
+        QueryString += QString("\nLIMIT %1,%2").arg(_pageIndex * _pageSize).arg(_pageSize);
+    }
+
+    QJsonDocument ResultRows = this->execQuery(APICALLBOOM_PARAM, QueryString).toJson(false);
+
+    Result.Rows = ResultRows
+                  .toVariant()
+                  .toList();
+
+    if (_pageSize > 0)
+        Result.PageCount = ceil((double)Result.TotalRows / _pageSize);
+    else
+        Result.PageCount = 1;
+
+    Result.HasMore = (Result.PageCount > (_pageIndex + 1));
+
+    return Result;
+}
+
+/******************************************************************/
+baseintfAccountAssetUsageHistory_USER::baseintfAccountAssetUsageHistory_USER(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    baseintfAccountAssetUsageHistory(
+        _schema,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+QVariant IMPL_ORMGET_USER(baseintfAccountAssetUsageHistory_USER) {
+    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+
+    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+QVariant IMPL_REST_GET_OR_POST(baseintfAccountAssetUsageHistory_USER, report, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    quint64                         _pageIndex,
+    quint16                         _pageSize,
+    bool                            _reportCount,
+    quint64                         _assetID,
+    TAPI::DateTime_t                _fromDate,
+    TAPI::DateTime_t                _toDate,
+    quint16                         _step,
+    Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit
+)) {
+    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+
+    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->report(
+        APICALLBOOM_PARAM,
+        CurrentActorID,
+        _pageIndex,
+        _pageSize,
+        _reportCount,
+        _assetID,
+        _fromDate,
+        _toDate,
+        _step,
+        _stepUnit
+    ).toVariant(CompactList);
+}
+
+/******************************************************************/
+baseintfAccountAssetUsageHistory_API::baseintfAccountAssetUsageHistory_API(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _cols,
+    const QList<DBM::stuRelation>& _relations,
+    const QList<DBM::stuDBIndex>& _indexes
+) :
+    baseintfAccountAssetUsageHistory(
+        _schema,
+        _cols,
+        _relations,
+        _indexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+QVariant IMPL_REST_GET(baseintfAccountAssetUsageHistory_API, , (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken,
+    TAPI::PKsByPath_t   _pksByPath,
+    quint64             _pageIndex,
+    quint16             _pageSize,
+    TAPI::Cols_t        _cols,
+    TAPI::Filter_t      _filters,
+    TAPI::OrderBy_t     _orderBy,
+    TAPI::GroupBy_t     _groupBy,
+    bool                _reportCount
+)) {
+    bool _translate = true;
+
+    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
+
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
+}
+
+QVariant IMPL_REST_GET_OR_POST(baseintfAccountAssetUsageHistory_API, report, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    QString                         _apiToken,
+    quint64                         _pageIndex,
+    quint16                         _pageSize,
+    bool                            _reportCount,
+    quint64                         _assetID,
+    TAPI::DateTime_t                _fromDate,
+    TAPI::DateTime_t                _toDate,
+    quint16                         _step,
+    Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit
+)) {
+    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->report(
+        APICALLBOOM_PARAM,
+        CurrentActorID,
+        _pageIndex,
+        _pageSize,
+        _reportCount,
+        _assetID,
+        _fromDate,
+        _toDate,
+        _step,
+        _stepUnit
+    ).toVariant(CompactList);
+}
+
+/******************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountAssetUsageHistory<_itmplIsTokenBase>::intfAccountAssetUsageHistory(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+) :
+    std::conditional<_itmplIsTokenBase, baseintfAccountAssetUsageHistory_API, baseintfAccountAssetUsageHistory_USER>::type(
+        _schema,
+        tblAccountAssetUsageHistoryBase::Private::ORMFields + _exclusiveCols,
+        tblAccountAssetUsageHistoryBase::Private::Relations(_schema) + _exclusiveRelations,
+        tblAccountAssetUsageHistoryBase::Private::Indexes + _exclusiveIndexes
+    )
+    // , intfAccountORMBase<_itmplIsTokenBase>()
+{ ; }
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountCoupons::intfAccountCoupons(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
@@ -1209,6 +1519,7 @@ stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const 
 template class intfAccountUserAssets<false>;
 //template class intfAccountUserAssetsFiles<false>;
 template class intfAccountAssetUsage<false>;
+template class intfAccountAssetUsageHistory<false>;
 //template class intfAccountCoupons<false>;
 //template class intfAccountPrizes<false>;
 
@@ -1222,6 +1533,7 @@ template class intfAccountAssetUsage<false>;
 template class intfAccountUserAssets<true>;
 //template class intfAccountUserAssetsFiles<true>;
 template class intfAccountAssetUsage<true>;
+template class intfAccountAssetUsageHistory<true>;
 //template class intfAccountCoupons<true>;
 //template class intfAccountPrizes<true>;
 

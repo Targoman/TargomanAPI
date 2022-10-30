@@ -224,6 +224,47 @@ intfAccountAssetUsageMT<_itmplIsTokenBase>::intfAccountAssetUsageMT(
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+baseintfAccountAssetUsageHistoryMT::baseintfAccountAssetUsageHistoryMT(
+//    const QString& _schema,
+//    const QList<DBM::clsORMField>& _exclusiveCols,
+//    const QList<DBM::stuRelation>& _exclusiveRelations,
+//    const QList<DBM::stuDBIndex>& _exclusiveIndexes
+//) :
+//    baseintfAccountAssetUsageHistory(
+//        _schema,
+//        _exclusiveCols,
+//        _exclusiveRelations,
+//        _exclusiveIndexes
+    )
+{ ; }
+
+/******************************************************************/
+template <bool _itmplIsTokenBase>
+intfAccountAssetUsageHistoryMT<_itmplIsTokenBase>::intfAccountAssetUsageHistoryMT(
+    const QString& _schema,
+    const QList<DBM::clsORMField>& _exclusiveCols,
+    const QList<DBM::stuRelation>& _exclusiveRelations,
+    const QList<stuDBIndex>& _exclusiveIndexes
+) :
+    intfAccountAssetUsageHistory<_itmplIsTokenBase>(
+        _schema,
+        tblAccountAssetUsageHistoryMTBase::Private::ExtraORMFields + _exclusiveCols,
+        tblAccountAssetUsageHistoryMTBase::Private::ExtraRelations(_schema) + _exclusiveRelations,
+        tblAccountAssetUsageHistoryMTBase::Private::ExtraIndexes + _exclusiveIndexes
+    ),
+    baseintfAccountAssetUsageHistoryMT()
+{ ; }
+
+template <bool _itmplIsTokenBase>
+QStringList intfAccountAssetUsageHistoryMT<_itmplIsTokenBase>::creditFieldNames() {
+    return {
+        tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords,
+    };
+}
+
+/******************************************************************/
+/******************************************************************/
+/******************************************************************/
 intfAccountCouponsMT::intfAccountCouponsMT(
     const QString& _schema,
     const QList<DBM::clsORMField>& _exclusiveCols,
@@ -268,6 +309,7 @@ intfAccountCouponsMT::intfAccountCouponsMT(
 template class intfAccountUserAssetsMT<false>;
 //template class intfAccountUserAssetsFilesMT<false>;
 template class intfAccountAssetUsageMT<false>;
+template class intfAccountAssetUsageHistoryMT<false>;
 //template class intfAccountCouponsMT<false>;
 //template class intfAccountPrizesMT<false>;
 
@@ -281,6 +323,7 @@ template class intfAccountAssetUsageMT<false>;
 template class intfAccountUserAssetsMT<true>;
 //template class intfAccountUserAssetsFilesMT<true>;
 template class intfAccountAssetUsageMT<true>;
+template class intfAccountAssetUsageHistoryMT<true>;
 //template class intfAccountCouponsMT<true>;
 //template class intfAccountPrizesMT<true>;
 

@@ -159,6 +159,30 @@ AccountAssetUsage::AccountAssetUsage() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
+TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountAssetUsageHistory)
+
+AccountAssetUsageHistory::AccountAssetUsageHistory() :
+    intfAccountAssetUsageHistory(
+        AdvertSchema,
+        tblAccountAssetUsageHistory::Private::ExtraORMFields,
+        tblAccountAssetUsageHistory::Private::ExtraRelations,
+        tblAccountAssetUsageHistory::Private::ExtraIndexes
+) { ; }
+
+QStringList AccountAssetUsageHistory::creditFieldNames() {
+    return {
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDays,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDayShow,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalShow,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumDayClicks,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumMonthClicks,
+        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalClicks,
+    };
+}
+
+/******************************************************/
+/******************************************************/
+/******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountCoupons)
 
 AccountCoupons::AccountCoupons() :

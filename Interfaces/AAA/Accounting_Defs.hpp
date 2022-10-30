@@ -74,12 +74,23 @@ TARGOMAN_DEFINE_ENUM(enuVoucherItemProcessStatus,
                      Removed    = 'R',
                      );
 
+TARGOMAN_DEFINE_ENUM(enuAssetHistoryReportStepUnit,
+                     Minute     = 'I',
+                     Hour       = 'H',
+                     Day        = 'D',
+//                     Week       = 'W',
+//                     Month      = 'M',
+//                     Year       = 'Y',
+                     );
+
 } //namespace Targoman::API::AAA
 
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus)            // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType)             // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
-TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus) // -> TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp
+//TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp:
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuAssetHistoryReportStepUnit);
 
 namespace Targoman::API::AAA {
 
@@ -270,6 +281,15 @@ namespace tblAccountAssetUsageBase {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
+    }
+}
+
+namespace tblAccountAssetUsageHistoryBase {
+    constexpr char Name[] = "tblAccountAssetUsageHistory";
+
+    namespace Fields {
+        TARGOMAN_CREATE_CONSTEXPR(ush_uasID);
+        TARGOMAN_CREATE_CONSTEXPR(ushLastDateTime);
     }
 }
 
@@ -852,6 +872,39 @@ namespace tblAccountAssetUsageBase {
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageBase_DTO
+    );
+}
+
+namespace tblAccountAssetUsageHistoryBase {
+    namespace Relation {
+//        constexpr char AAA[] = "aaa";
+    }
+
+    namespace Private {
+        const QList<clsORMField> ORMFields = {
+            //ColName                   Type                    Validation  Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::ush_uasID,        ORM_PRIMARYKEY_64 },
+            { Fields::ushLastDateTime,  S(TAPI::DateTime_t),    QFV,        QRequired, UPAdmin },
+        };
+
+        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
+            return {
+                //Col                   Reference Table                             ForeignCol                                  Rename     LeftJoin
+                { Fields::ush_uasID,    R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID },
+            };
+        };
+
+        const QList<stuDBIndex> Indexes = {
+        };
+
+    } //namespace Private
+
+#define SF_tblAccountAssetUsageHistoryBase_DTO \
+    SF_ORM_PRIMARYKEY_64        (ush_uasID), \
+    SF_DateTime_t               (ushLastDateTime)
+
+    TAPI_DEFINE_STRUCT(DTO,
+        SF_tblAccountAssetUsageHistoryBase_DTO
     );
 }
 

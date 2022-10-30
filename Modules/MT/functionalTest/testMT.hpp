@@ -553,6 +553,7 @@ private slots:
                         {},
                         {
                             { "text", "This is a sample text for testing." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "en2fa" },
                         });
 
@@ -572,6 +573,7 @@ private slots:
                         {},
                         {
                             { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "fa2en" },
                         });
 
@@ -591,10 +593,34 @@ private slots:
                         {},
                         {
                             { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "engine", "TEST_AAA" },
                             { "dir", "fa2ar" },
                         });
 
             QVERIFY_DUMP_RESULT(Result.isValid());
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void assetUsageHistory_1() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::POST,
+                "MT/AccountAssetUsageHistory/report",
+                {},
+                {
+                    { "apiToken",   this->TokenJWT },
+//                    { "assetID",     },
+                    { "step",       15 },
+                    { "stepUnit",   "Minute" },
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
 
         } QT_CATCH (const std::exception &exp) {
             QTest::qFail(exp.what(), __FILE__, __LINE__);
