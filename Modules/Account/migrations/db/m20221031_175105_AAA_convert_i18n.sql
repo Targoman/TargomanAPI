@@ -1,9 +1,6 @@
 /* Migration File: m20221031_175105_AAA_convert_i18n.sql */
 /* CAUTION: don't forget to use {{dbprefix}} for schemas */
 
-/* The next line is to prevent this file from being committed. When done, delete this and next line: */
-ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
-
 USE `{{dbprefix}}{{Schema}}`;
 
 /* PaymentGatewayTypes */
@@ -29,6 +26,6 @@ INSERT INTO `tblPaymentGatewayTypesI18N` (i18nPID, i18nData)
            ) AS pgtName
       FROM tblPaymentGatewayTypesI18N_DELETED
   GROUP BY pid
-  ;
+;
 
 DROP TABLE tblPaymentGatewayTypesI18N_DELETED;
