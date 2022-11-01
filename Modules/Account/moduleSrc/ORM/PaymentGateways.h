@@ -91,10 +91,11 @@ namespace tblPaymentGatewayTypes {
         TARGOMAN_CREATE_CONSTEXPR(pgtID);
         TARGOMAN_CREATE_CONSTEXPR(pgtType);
         TARGOMAN_CREATE_CONSTEXPR(pgtName);
-        TARGOMAN_CREATE_CONSTEXPR(pgtNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(pgtMinRequestAmount);
         TARGOMAN_CREATE_CONSTEXPR(pgtMaxRequestAmount);
         TARGOMAN_CREATE_CONSTEXPR(pgtStatus);
+        //I18N
+        TARGOMAN_CREATE_CONSTEXPR(pgtI18NData);
     }
 }
 
@@ -102,9 +103,8 @@ namespace tblPaymentGatewayTypesI18N {
     constexpr char Name[] = "tblPaymentGatewayTypesI18N";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pid);
-        TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(pgtNameI18N);
+        TARGOMAN_CREATE_CONSTEXPR(i18nPID);
+        TARGOMAN_CREATE_CONSTEXPR(i18nData);
     }
 }
 
@@ -159,12 +159,13 @@ namespace tblPaymentGatewayTypes {
             { Fields::pgtMinRequestAmount,      S(qreal),                   QFV.minValue(1),                        1,          UPAdmin },
             { Fields::pgtMaxRequestAmount,      S(NULLABLE_TYPE(double)),   QFV,                                    QNull,      UPAdmin },
             { Fields::pgtStatus,                ORM_STATUS_FIELD(Targoman::API::AccountModule::enuPaymentGatewayTypeStatus, Targoman::API::AccountModule::enuPaymentGatewayTypeStatus::Active) },
+            ORM_I18N_VIRTUAL_FIELD(pgt)
         };
 
         const QList<stuRelation> Relations = {
             //Col                           Reference Table              ForeignCol       Rename     LeftJoin
             { Fields::pgtType,              R(AAASchema, tblPaymentGateways::Name), tblPaymentGateways::Fields::pgwType },
-            { Fields::pgtID,                R(AAASchema, tblPaymentGatewayTypesI18N::Name), tblPaymentGatewayTypesI18N::Fields::pid },
+            { Fields::pgtID,                R(AAASchema, tblPaymentGatewayTypesI18N::Name), tblPaymentGatewayTypesI18N::Fields::i18nPID },
         };
 
         const QList<stuDBIndex> Indexes = {
@@ -189,9 +190,8 @@ namespace tblPaymentGatewayTypesI18N {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
-            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::pgtNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::i18nPID,      S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::i18nData,     S(TAPI::JSON_t),    QFV,        QRequired,  UPOwner },
         };
 
         const QList<stuRelation> Relations = {
@@ -203,9 +203,8 @@ namespace tblPaymentGatewayTypesI18N {
     } //namespace Private
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_quint16                  (pid),
-        SF_QString                  (language),
-        SF_QString                  (pgtNameI18N)
+        SF_quint16                  (i18nPID),
+        SF_JSON_t                   (i18nData)
     );
 }
 

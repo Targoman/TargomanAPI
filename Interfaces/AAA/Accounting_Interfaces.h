@@ -423,6 +423,11 @@ public:
                               const QList<DBM::clsORMField>& _cols = {},
                               const QList<DBM::stuRelation>& _relations = {},
                               const QList<DBM::stuDBIndex>& _indexes = {});
+
+public:
+    //key: schema
+    static QMap<QString, baseintfAccountAssetUsage*> MyInstance;
+//    friend class intfAccountUserAssets;
 };
 
 /******************************************************/

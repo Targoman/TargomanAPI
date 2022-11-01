@@ -135,7 +135,11 @@ OTHER_FILES += \
     migrations/faq/.gitkeep \
     migrations/faq/db/*.sql \
     migrations/faq/local/*.sh \
-    migrations/faq/local/.migrations
+    migrations/faq/local/.migrations \
+    migrations/services/.gitkeep \
+    migrations/services/db/*.sql \
+    migrations/services/local/*.sh \
+    migrations/services/local/.migrations
 
 INCLUDEPATH += \
 #    $$BASE_PROJECT_PATH/App/ \

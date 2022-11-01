@@ -128,7 +128,8 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
-    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM);
+    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
+                                 .where({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::Equal, enuAuditableStatus::Active });
 
     SelectQuery
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
@@ -141,7 +142,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
                         tblAccountSaleablesBase::Fields::slb_prdID
                         ))
 
-        .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
+        .andWhere({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
         .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::Null })
             .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::LessEqual,
@@ -408,6 +409,36 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
     if (_activeCredit.Credit.UserAsset.uasID == 0)
         return;
 
+    QString QueryString;
+
+    // start and end dates
+    //---------------------------------------------
+    if ((_activeCredit.Credit.UserAsset.uasValidFromDate.isValid() == false)
+        && (_activeCredit.Credit.UserAsset.uasValidToDate.isValid() == false)
+        && _activeCredit.Credit.Saleable.slbStartAtFirstUse
+        && NULLABLE_HAS_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes)
+        && NULLABLE_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes) > 0
+    ) {
+        QueryString = QString(R"(
+            UPDATE %1
+               SET uasValidFromDate = NOW()
+                 , uasValidToDate = DATE_ADD(NOW(), INTERVAL uasDurationMinutes MINUTE)
+                 , uasUpdatedBy_usrID = ?
+             WHERE uasID = ?
+)")
+            .arg(tblAccountUserAssetsBase::Name)
+        ;
+
+        clsDACResult Result = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
+                                                                          QueryString,
+                                                                          {
+                                                                              APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID),
+                                                                              _activeCredit.Credit.UserAsset.uasID
+                                                                          });
+    }
+
+    // usage
+    //---------------------------------------------
     for (auto UsageIter = _requestedUsage.begin();
          UsageIter != _requestedUsage.end();
          UsageIter++
@@ -421,19 +452,16 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
 
         // usage history
         //---------------------------------------------
-        QString QueryString = QString(R"(
+        QueryString = QString(R"(
             INSERT INTO %1
-               SET %2 = ?
-                 , %3 = NOW()
-                 , %4 = ?
-            ON DUPLICATE KEY
-            UPDATE %3 = NOW()
-                 , %4 = %4 + ?
+               SET ush_uasID = ?
+                 , ushLastDateTime = NOW()
+                 , ushSumUsedTotalWords = ?
+                ON DUPLICATE KEY UPDATE
+                   ushLastDateTime = NOW()
+                 , ushSumUsedTotalWords = ushSumUsedTotalWords + ?
 )")
             .arg(tblAccountAssetUsageHistoryBase::Name)
-            .arg(tblAccountAssetUsageHistoryBase::Fields::ush_uasID)
-            .arg(tblAccountAssetUsageHistoryBase::Fields::ushLastDateTime)
-            .arg(tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords)
         ;
 
         clsDACResult Result1 = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
@@ -448,14 +476,12 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
         //---------------------------------------------
         QueryString = QString(R"(
             INSERT INTO %1
-               SET %2 = ?
-                 , %3 = ?
-            ON DUPLICATE KEY
-            UPDATE %3 = %3 + ?
+               SET usg_uasID = ?
+                 , usgUsedTotalWords = ?
+                ON DUPLICATE KEY UPDATE
+                   usgUsedTotalWords = usgUsedTotalWords + ?
 )")
             .arg(tblAccountAssetUsageBase::Name)
-            .arg(tblAccountAssetUsageBase::Fields::usg_uasID)
-            .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
         ;
 
         clsDACResult Result2 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,

@@ -375,8 +375,10 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
         { tblAccountProductsBase::Fields::prdCode,              ProductCode },
         { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
-        { tblAccountProductsBase::Fields::prdNameI18N,          QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+        { tblAccountProductsBase::Fields::prdI18NData,          QVariantMap({
+            { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+            }) },
         }) },
         { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
         { tblAccountProductsBase::Fields::prd_untID,            1 },
@@ -396,8 +398,10 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
         { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
-        { tblAccountSaleablesBase::Fields::slbNameI18N,         QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+        { tblAccountSaleablesBase::Fields::slbI18NData,         QVariantMap({
+            { tblAccountSaleablesBase::Fields::slbName, QVariantMap({
+                { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+            }) },
         }) },
         { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
         { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },

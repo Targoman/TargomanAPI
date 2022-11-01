@@ -152,36 +152,19 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountUnits"
-                      , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias, tblAccountUnitsBase::Fields::untName)),
-                    DBExpression::VALUE(R("lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N)),
+            .leftJoin(tblAccountUnitsI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.%2')), %3.untName)")
+                                        .arg(tblAccountUnitsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias)
+                                        ),
                     tblAccountUnitsBase::Fields::untName
-                   )
+                    )
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountUnitsI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountUnitsI18NBase::Fields::untNameI18N)),
-                                    tblAccountUnitsI18NBase::Fields::untNameI18N)
-                            .groupBy(tblAccountUnitsI18NBase::Fields::pid)
-                            , "lng_tblAccountUnits"
-                            , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
-                            }
-                           )
-            .addCol(R("lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N), tblAccountUnitsBase::Fields::untNameI18N)
+            .leftJoin(tblAccountUnitsI18NBase::Name, tblAccountUnitsI18NBase::Name)
+            .addCol(R(tblAccountUnitsI18NBase::Name, tblAccountUnitsI18NBase::Fields::i18nData), tblAccountUnitsBase::Fields::untI18NData)
         ;
     }
 
@@ -277,46 +260,26 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountProducts"
-                      , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdName)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N)),
+            .leftJoin(tblAccountProductsI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdName.%2')), %3.prdName)")
+                                        .arg(tblAccountProductsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
+                                        ),
                     tblAccountProductsBase::Fields::prdName
-                   )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N)),
+                    )
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdDesc.%2')), %3.prdDesc)")
+                                        .arg(tblAccountProductsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
+                                        ),
                     tblAccountProductsBase::Fields::prdDesc
-                   )
-        ;
+                    )
+            ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountProductsI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountProductsI18NBase::Fields::prdNameI18N)),
-                                    tblAccountProductsI18NBase::Fields::prdNameI18N)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountProductsI18NBase::Fields::prdDescI18N)),
-                                    tblAccountProductsI18NBase::Fields::prdDescI18N)
-                            .groupBy(tblAccountProductsI18NBase::Fields::pid)
-                            , "lng_tblAccountProducts"
-                            , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
-                            }
-                           )
-            .addCol(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N), tblAccountProductsBase::Fields::prdNameI18N)
-            .addCol(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N), tblAccountProductsBase::Fields::prdDescI18N)
+            .leftJoin(tblAccountProductsI18NBase::Name, tblAccountProductsI18NBase::Name)
+            .addCol(R(tblAccountProductsI18NBase::Name, tblAccountProductsI18NBase::Fields::i18nData), tblAccountProductsBase::Fields::prdI18NData)
         ;
     }
 
@@ -406,46 +369,26 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountSaleables"
-                      , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbName)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
+            .leftJoin(tblAccountSaleablesI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbName.%2')), %3.slbName)")
+                                        .arg(tblAccountSaleablesI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
+                                        ),
                     tblAccountSaleablesBase::Fields::slbName
-                   )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N)),
+                    )
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbDesc.%2')), %3.slbDesc)")
+                                        .arg(tblAccountSaleablesI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
+                                        ),
                     tblAccountSaleablesBase::Fields::slbDesc
-                   )
-        ;
+                    )
+            ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountSaleablesI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
-                                    tblAccountSaleablesI18NBase::Fields::slbNameI18N)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountSaleablesI18NBase::Fields::slbDescI18N)),
-                                    tblAccountSaleablesI18NBase::Fields::slbDescI18N)
-                            .groupBy(tblAccountSaleablesI18NBase::Fields::pid)
-                            , "lng_tblAccountSaleables"
-                            , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID
-                            }
-                           )
-            .addCol(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N), tblAccountSaleablesBase::Fields::slbNameI18N)
-            .addCol(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N), tblAccountSaleablesBase::Fields::slbDescI18N)
+            .leftJoin(tblAccountSaleablesI18NBase::Name, tblAccountSaleablesI18NBase::Name)
+            .addCol(R(tblAccountSaleablesI18NBase::Name, tblAccountSaleablesI18NBase::Fields::i18nData), tblAccountSaleablesBase::Fields::slbI18NData)
         ;
     }
 
@@ -640,8 +583,12 @@ QVariant IMPL_ORMGET_USER(baseintfAccountUserAssets_USER) {
             _cols = {};
         }
 
-        _query.innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+        _query
+                .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
                 .addCols(intfAccountSaleables::MyInstance[this->Schema]->selectableColumnNames())
+
+                .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+                .addCols(baseintfAccountAssetUsage::MyInstance[this->Schema]->selectableColumnNames())
                 ;
     };
 
@@ -901,6 +848,9 @@ QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+//key: schema
+QMap<QString, baseintfAccountAssetUsage*> baseintfAccountAssetUsage::MyInstance;
+
 baseintfAccountAssetUsage::baseintfAccountAssetUsage(
     const QString& _schema,
     const QList<DBM::clsORMField>& _cols,
@@ -915,7 +865,9 @@ baseintfAccountAssetUsage::baseintfAccountAssetUsage(
         _indexes
     )
     // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
+{
+    baseintfAccountAssetUsage::MyInstance[_schema] = this;
+}
 
 /******************************************************************/
 baseintfAccountAssetUsage_USER::baseintfAccountAssetUsage_USER(

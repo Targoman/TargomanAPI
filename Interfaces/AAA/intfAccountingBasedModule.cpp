@@ -308,7 +308,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
             : Now; //QDateTime(Now.date());
     };
 
-    auto FnEffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto FnEffectiveEndDateTime = [Now](const stuAssetItem &_assetItem) -> QDateTime {
         if (NULLABLE_IS_NULL(_assetItem.UserAsset.uasValidFromHour) || NULLABLE_IS_NULL(_assetItem.UserAsset.uasValidToHour))
             return Now; //QDateTime(Now.date().addDays(1));
 
@@ -320,7 +320,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
     };
 
     auto FnIsInvalidPackage = [this, &APICALLBOOM_PARAM, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
-                              (const stuAssetItem& _assetItem)
+                              (const stuAssetItem &_assetItem)
                               -> bool {
         if ((_assetItem.UserAsset.uasValidFromDate.isValid() && _assetItem.UserAsset.uasValidFromDate > Now/*.date()*/)
                || (_assetItem.UserAsset.uasValidToDate.isValid() && _assetItem.UserAsset.uasValidToDate < Now/*.date()*/)
@@ -330,7 +330,9 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
             )
             return false;
 
-        if (_requestedUsage.size()) {
+        if (_requestedUsage.size()
+                && (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false)
+        ) {
             for (auto UsageIter = _requestedUsage.begin();
                  UsageIter != _requestedUsage.end();
                  UsageIter++
@@ -338,14 +340,55 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
                     continue;
 
+                if (UsageIter.key() != RequestedUsage::CREDIT)
+                    continue;
+
+                QVariantMap CreditValues = UsageIter.value().toMap();
+                QString CreditKey = CreditValues.firstKey();
+                qint64 CreditValue = CreditValues.first().toLongLong();
+
+                /*
+                 1/ translate::NMT::en2fa::kooft
+                 2/ translate::NMT::en2fa
+                 3/ translate::NMT
+                 4/ translate
+                */
+
+                while (CreditKey.isEmpty() == false) {
+                    // check
+                    //----------------
+                    if (_assetItem.Digested.Limits.contains(CreditKey) == false)
+                        continue;
+
+                    stuUsage Remaining = _assetItem.Digested.Limits.value(CreditKey);
+
+                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - CreditValue <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - CreditValue <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - CreditValue <= 0)
+                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - CreditValue <= 0)
+                        )
+                        return false;
+
+                    // next
+                    //----------------
+                    int idx = CreditKey.lastIndexOf("::");
+                    if (idx < 0)
+                        break;
+
+                    CreditKey = CreditKey.left(idx);
+                }
+
+
+
 
 
 
                 //uncommewnt and use long credit count
 
-
 //                if (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false) {
+
 //                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+
 //                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
 //                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
 //                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
@@ -353,15 +396,6 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 //                        )
 //                        return false;
 //                }
-
-
-
-
-
-
-
-
-
             }
         }
         return true;

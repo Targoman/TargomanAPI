@@ -110,7 +110,8 @@ namespace tblAccountUnitsBase {
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(untID);
         TARGOMAN_CREATE_CONSTEXPR(untName);
-        TARGOMAN_CREATE_CONSTEXPR(untNameI18N);
+        //I18N
+        TARGOMAN_CREATE_CONSTEXPR(untI18NData);
     } //namespace Fields
 }
 
@@ -118,9 +119,8 @@ namespace tblAccountUnitsI18NBase {
     constexpr char Name[] = "tblAccountUnitsI18N";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pid);
-        TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(untNameI18N);
+        TARGOMAN_CREATE_CONSTEXPR(i18nPID);
+        TARGOMAN_CREATE_CONSTEXPR(i18nData);
     } //namespace Fields
 }
 
@@ -131,9 +131,7 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdID);
         TARGOMAN_CREATE_CONSTEXPR(prdCode);
         TARGOMAN_CREATE_CONSTEXPR(prdName);
-        TARGOMAN_CREATE_CONSTEXPR(prdNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(prdDesc);
-        TARGOMAN_CREATE_CONSTEXPR(prdDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidToDate);
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
@@ -154,6 +152,8 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(prdCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(prdUpdatedBy_usrID);
+        //I18N
+        TARGOMAN_CREATE_CONSTEXPR(prdI18NData);
     } //namespace Fields
 }
 
@@ -161,10 +161,8 @@ namespace tblAccountProductsI18NBase {
     constexpr char Name[] = "tblAccountProductsI18N";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pid);
-        TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(prdNameI18N);
-        TARGOMAN_CREATE_CONSTEXPR(prdDescI18N);
+        TARGOMAN_CREATE_CONSTEXPR(i18nPID);
+        TARGOMAN_CREATE_CONSTEXPR(i18nData);
     } //namespace Fields
 }
 
@@ -176,9 +174,7 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slb_prdID);
         TARGOMAN_CREATE_CONSTEXPR(slbCode);
         TARGOMAN_CREATE_CONSTEXPR(slbName);
-        TARGOMAN_CREATE_CONSTEXPR(slbNameI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbDesc);
-        TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
         TARGOMAN_CREATE_CONSTEXPR(slbType);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableFromDate);
         TARGOMAN_CREATE_CONSTEXPR(slbAvailableToDate);
@@ -206,6 +202,8 @@ namespace tblAccountSaleablesBase {
         TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
         TARGOMAN_CREATE_CONSTEXPR(slbCreationDateTime);
         TARGOMAN_CREATE_CONSTEXPR(slbUpdatedBy_usrID);
+        //I18N
+        TARGOMAN_CREATE_CONSTEXPR(slbI18NData);
     }
 }
 
@@ -213,10 +211,8 @@ namespace tblAccountSaleablesI18NBase {
     constexpr char Name[] = "tblAccountSaleablesI18N";
 
     namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(pid);
-        TARGOMAN_CREATE_CONSTEXPR(language);
-        TARGOMAN_CREATE_CONSTEXPR(slbNameI18N);
-        TARGOMAN_CREATE_CONSTEXPR(slbDescI18N);
+        TARGOMAN_CREATE_CONSTEXPR(i18nPID);
+        TARGOMAN_CREATE_CONSTEXPR(i18nData);
     } //namespace Fields
 }
 
@@ -349,11 +345,12 @@ namespace tblAccountUnitsBase {
             //ColName               Type                Validation  Default     UpBy   Sort  Filter Self  Virt   PK
             { Fields::untID,        ORM_PRIMARYKEY_16 },
             ORM_MULTILANGUAGE(Fields::untName, QRequired,  UPOwner),
+            ORM_I18N_VIRTUAL_FIELD(unt)
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
-                { Fields::untID, R(_schema, tblAccountUnitsI18NBase::Name), tblAccountUnitsI18NBase::Fields::pid },
+                { Fields::untID, R(_schema, tblAccountUnitsI18NBase::Name), tblAccountUnitsI18NBase::Fields::i18nPID },
             };
         };
 
@@ -378,9 +375,8 @@ namespace tblAccountUnitsI18NBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
-            { Fields::pid,          S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::untNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
+            { Fields::i18nPID,      S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::i18nData,     S(TAPI::JSON_t),    QFV,        QRequired,  UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -393,9 +389,8 @@ namespace tblAccountUnitsI18NBase {
     } //namespace Private
 
 #define SF_tblAccountUnitsI18NBase_DTO \
-    SF_quint16                  (pid), \
-    SF_QString                  (language), \
-    SF_QString                  (untNameI18N)
+    SF_quint16                  (i18nPID), \
+    SF_JSON_t                   (i18nData)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUnitsI18NBase_DTO
@@ -432,6 +427,7 @@ namespace tblAccountProductsBase {
             { Fields::prdCreationDateTime,      ORM_CREATED_ON },
             { Fields::prdCreatedBy_usrID,       ORM_CREATED_BY },
             { Fields::prdUpdatedBy_usrID,       ORM_UPDATED_BY },
+            ORM_I18N_VIRTUAL_FIELD(prd)
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -441,7 +437,7 @@ namespace tblAccountProductsBase {
                     { Fields::prdID, R(_schema, tblAccountSaleablesBase::Name), tblAccountSaleablesBase::Fields::slb_prdID } },
                 ORM_RELATION_OF_CREATOR(Fields::prdCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::prdUpdatedBy_usrID),
-                { Fields::prdID, R(_schema, tblAccountProductsI18NBase::Name), tblAccountProductsI18NBase::Fields::pid },
+                { Fields::prdID, R(_schema, tblAccountProductsI18NBase::Name), tblAccountProductsI18NBase::Fields::i18nPID },
                 { Relation::Unit,
                     { Fields::prd_untID, R(_schema, tblAccountUnitsBase::Name), tblAccountUnitsBase::Fields::untID } },
             };
@@ -499,10 +495,8 @@ namespace tblAccountProductsI18NBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
-            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::prdNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
-            { Fields::prdDescI18N,  S(QString),         QFV,        QNull,      UPOwner },
+            { Fields::i18nPID,      S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::i18nData,     S(TAPI::JSON_t),    QFV,        QRequired,  UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -515,10 +509,8 @@ namespace tblAccountProductsI18NBase {
     } //namespace Private
 
 #define SF_tblAccountProductsI18NBase_DTO \
-    SF_quint32                  (pid), \
-    SF_QString                  (language), \
-    SF_QString                  (prdNameI18N), \
-    SF_QString                  (prdDescI18N)
+    SF_quint16                  (i18nPID), \
+    SF_JSON_t                   (i18nData)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsI18NBase_DTO
@@ -561,6 +553,7 @@ namespace tblAccountSaleablesBase {
             { Fields::slbCreationDateTime,      ORM_CREATED_ON },
             { Fields::slbCreatedBy_usrID,       ORM_CREATED_BY },
             { Fields::slbUpdatedBy_usrID,       ORM_UPDATED_BY },
+            ORM_I18N_VIRTUAL_FIELD(slb)
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -572,7 +565,7 @@ namespace tblAccountSaleablesBase {
                     { Fields::slbID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uas_slbID } },
                 ORM_RELATION_OF_CREATOR(Fields::slbCreatedBy_usrID),
                 ORM_RELATION_OF_UPDATER(Fields::slbUpdatedBy_usrID),
-                { Fields::slbID, R(_schema, tblAccountSaleablesI18NBase::Name), tblAccountSaleablesI18NBase::Fields::pid },
+                { Fields::slbID, R(_schema, tblAccountSaleablesI18NBase::Name), tblAccountSaleablesI18NBase::Fields::i18nPID },
             };
         };
 
@@ -632,10 +625,8 @@ namespace tblAccountSaleablesI18NBase {
     namespace Private {
         const QList<clsORMField> ORMFields = {
             //ColName               Type                Validation  Default     UpBy    Sort  Filter Self   Virt   PK
-            { Fields::pid,          S(quint32),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::language,     S(QString),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
-            { Fields::slbNameI18N,  S(QString),         QFV,        QRequired,  UPOwner },
-            { Fields::slbDescI18N,  S(QString),         QFV,        QNull,      UPOwner },
+            { Fields::i18nPID,      S(quint16),         QFV,        QRequired,  UPNone, true, true,  false, false, true },
+            { Fields::i18nData,     S(TAPI::JSON_t),    QFV,        QRequired,  UPOwner },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
@@ -650,10 +641,8 @@ namespace tblAccountSaleablesI18NBase {
     } //namespace Private
 
 #define SF_tblAccountSaleablesI18NBase_DTO \
-    SF_quint32                  (pid), \
-    SF_QString                  (language), \
-    SF_QString                  (slbNameI18N), \
-    SF_QString                  (slbDescI18N)
+    SF_quint16                  (i18nPID), \
+    SF_JSON_t                   (i18nData)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountSaleablesI18NBase_DTO
