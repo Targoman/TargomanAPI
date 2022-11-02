@@ -26,6 +26,8 @@
 
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ORM/intfConfigurations.h"
+#include "Interfaces/ORM/intfI18N.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 //#include "Interfaces/AAA/intfAccountingBasedModule.h"
@@ -44,6 +46,8 @@ namespace Targoman::API::TargomanMTModule {
 constexpr char ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS[] = "plus-max-days";
 
 TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_CONFIGURATIONS_PREPARENT;
+TARGOMAN_I18N_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
@@ -59,6 +63,8 @@ class TargomanMT : public intfMTModule<false> //intfAccountingBasedModule<false>
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(TargomanMT);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_DEFINE_CONFIGURATIONS(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_DEFINE_I18N(TargomanMT, TargomanMTSchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(TargomanMT, TargomanMTSchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(TargomanMT, TargomanMTSchema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(TargomanMT, TargomanMTSchema);
@@ -103,6 +109,8 @@ private slots:
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(TargomanMT, TargomanMTSchema);
+TARGOMAN_CONFIGURATIONS_POSTPARENT(TargomanMT, TargomanMTSchema);
+TARGOMAN_I18N_POSTPARENT(TargomanMT, TargomanMTSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(TargomanMT, TargomanMTSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(TargomanMT, TargomanMTSchema);
 TARGOMAN_FAQ_POSTPARENT(TargomanMT, TargomanMTSchema);

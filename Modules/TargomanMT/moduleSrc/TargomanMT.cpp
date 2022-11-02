@@ -52,6 +52,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(TargomanMT)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(TargomanMT, TargomanMTSchema)
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(TargomanMT, TargomanMTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(TargomanMT, TargomanMTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(TargomanMT, TargomanMTSchema);
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(TargomanMT, TargomanMTSchema);
@@ -79,10 +81,12 @@ TargomanMT::TargomanMT() :
         &MTTranslatedPhrases::instance(),
         &MTTranslationLogs::instance()
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Targoman, TargomanMTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Targoman, TargomanMTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Targoman, TargomanMTSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Targoman, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(TargomanMT, TargomanMTSchema);
 
     this->addSubModule(&MTCorrectionRules::instance());
     this->addSubModule(&MTDigestedTranslationLogs::instance());

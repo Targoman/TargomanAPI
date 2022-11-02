@@ -26,6 +26,8 @@
 
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ORM/intfConfigurations.h"
+#include "Interfaces/ORM/intfI18N.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
@@ -52,6 +54,8 @@ struct stuAdvertBill {
 };
 
 TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_CONFIGURATIONS_PREPARENT;
+TARGOMAN_I18N_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
@@ -67,6 +71,8 @@ class Advert : public intfAccountingBasedModule<false>
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Advert);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE_CONFIGURATIONS(Advert, AdvertSchema);
+    TARGOMAN_API_MODULE_DEFINE_I18N(Advert, AdvertSchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Advert, AdvertSchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Advert, AdvertSchema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(Advert, AdvertSchema);
@@ -203,6 +209,8 @@ protected slots:
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(Advert, AdvertSchema);
+TARGOMAN_CONFIGURATIONS_POSTPARENT(Advert, AdvertSchema);
+TARGOMAN_I18N_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Advert, AdvertSchema);
 TARGOMAN_FAQ_POSTPARENT(Advert, AdvertSchema);

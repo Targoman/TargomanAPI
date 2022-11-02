@@ -21,34 +21,30 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "Common.h"
-#include "ORM/Alerts.h"
-#include "ORM/AlertTemplates.h"
+#include "intfI18N.h"
+#include "Interfaces/AAA/Authorization.h"
+#include "Interfaces/AAA/AAADefs.hpp"
+#include "Interfaces/AAA/clsJWT.hpp"
 
-namespace Targoman::API::CommonModule {
+using namespace Targoman::API::AAA;
 
-using namespace ORM;
+namespace Targoman::API::ORM {
 
-TARGOMAN_API_MODULE_IMPLEMENT(Common)
-//---------------------------------------------------------
-TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Common, CommonSchema);
-//---------------------------------------------------------
-TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(Common, CommonSchema)
-TARGOMAN_API_MODULE_IMPLEMENT_I18N(Common, CommonSchema)
+intfI18N::intfI18N(
+    const QString &_module,
+    const QString &_schema
+) :
+intfSQLBasedModule(
+    _module,
+    _schema,
+    tblI18N::Name,
+    tblI18N::Private::ORMFields,
+    tblI18N::Private::Relations,
+    tblI18N::Private::Indexes
+) { ; }
 
-Common::Common() :
-    intfSQLBasedModule(
-        CommonDomain,
-        CommonSchema,
-        ""
-) {
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Common, CommonSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(Common, CommonSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(Common, CommonSchema)
-
-    this->addSubModule(&Alerts::instance());
-    this->addSubModule(&AlertTemplates::instance());
+QVariant IMPL_ORMGET_ANONYMOUSE(intfI18N) {
+    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
-} //namespace Targoman::API::CommonModule
+} //namespace Targoman::API::ORM
