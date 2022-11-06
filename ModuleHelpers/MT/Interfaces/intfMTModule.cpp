@@ -45,7 +45,6 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
         intfAccountUserAssetsFiles                      *_userAssetsFiles,
         intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
         intfAccountCoupons                              *_discounts,
         intfAccountPrizes                               *_prizes,
         //MT --
@@ -78,7 +77,6 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
     ),
@@ -129,11 +127,27 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     const QString &_action
 ) {
     ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
-                                 .where({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::Equal, enuAuditableStatus::Active });
+                                 .where({ tblAccountUserAssetsBase::Fields::uasStatus, enuConditionOperator::Equal, enuAuditableStatus::Active })
+                                 .addCols(this->accountUserAssets()->selectableColumnNames())
+                                 ;
 
     SelectQuery
-        .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+//        .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+                        .where({ tblAccountAssetUsageBase::Fields::usgResolution,
+                                 enuConditionOperator::Equal,
+                                 Targoman::API::AAA::enuAssetUsageResolution::Total
+                               }),
+                        tblAccountAssetUsageBase::Name,
+                        { tblAccountAssetUsageBase::Name, tblAccountAssetUsageBase::Fields::usg_uasID,
+                          enuConditionOperator::Equal,
+                          tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uasID }
+                        )
+        .addCols(this->accountAssetUsage()->selectableColumnNames())
+
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+        .addCols(this->accountSaleables()->selectableColumnNames())
+
         .inlineLeftJoin(tblAccountProductsBase::Name/*, tblAccountProductsBase::Name*/, clsCondition(
                         tblAccountProductsBase::Name,
                         tblAccountProductsBase::Fields::prdID,
@@ -141,6 +155,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
                         tblAccountSaleablesBase::Name,
                         tblAccountSaleablesBase::Fields::slb_prdID
                         ))
+        .addCols(this->accountProducts()->selectableColumnNames())
 
         .andWhere({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
@@ -413,9 +428,9 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
 
     // start and end dates
     //---------------------------------------------
-    if ((_activeCredit.Credit.UserAsset.uasValidFromDate.isValid() == false)
+    if (_activeCredit.Credit.Product.prdStartAtFirstUse
+        && (_activeCredit.Credit.UserAsset.uasValidFromDate.isValid() == false)
         && (_activeCredit.Credit.UserAsset.uasValidToDate.isValid() == false)
-        && _activeCredit.Credit.Saleable.slbStartAtFirstUse
         && NULLABLE_HAS_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes)
         && NULLABLE_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes) > 0
     ) {
@@ -429,12 +444,12 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             .arg(tblAccountUserAssetsBase::Name)
         ;
 
-        clsDACResult Result = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
-                                                                          QueryString,
-                                                                          {
-                                                                              APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID),
-                                                                              _activeCredit.Credit.UserAsset.uasID
-                                                                          });
+        clsDACResult Result = this->accountUserAssets()->execQuery(APICALLBOOM_PARAM,
+                                                                   QueryString,
+                                                                   {
+                                                                       APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID),
+                                                                       _activeCredit.Credit.UserAsset.uasID
+                                                                   });
     }
 
     // usage
@@ -447,47 +462,43 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             return;
 
         QVariantMap CreditValues = UsageIter.value().toMap();
-//        QString CreditKey = CreditValues.firstKey();
+
+        QString CreditKey = CreditValues.firstKey();
+        if (CreditKey.startsWith(QString("%1::").arg(MTAction::TRANSLATE)))
+            CreditKey = CreditKey.mid(QString("%1::").arg(MTAction::TRANSLATE).length());
+
         qint64 UsedWordCount = CreditValues.first().toLongLong();
 
-        // usage history
-        //---------------------------------------------
-        QueryString = QString(R"(
-            INSERT INTO %1
-               SET ush_uasID = ?
-                 , ushLastDateTime = NOW()
-                 , ushSumUsedTotalWords = ?
-                ON DUPLICATE KEY UPDATE
-                   ushLastDateTime = NOW()
-                 , ushSumUsedTotalWords = ushSumUsedTotalWords + ?
-)")
-            .arg(tblAccountAssetUsageHistoryBase::Name)
-        ;
-
-        clsDACResult Result1 = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
-                                                                           QueryString,
-                                                                           {
-                                                                               _activeCredit.Credit.UserAsset.uasID,
-                                                                               UsedWordCount,
-                                                                               UsedWordCount,
-                                                                           });
-
-        // usage
-        //---------------------------------------------
         QueryString = QString(R"(
             INSERT INTO %1
                SET usg_uasID = ?
+                 , usgResolution = ?
+                 , usgLastDateTime = NOW()
+                 %2
                  , usgUsedTotalWords = ?
                 ON DUPLICATE KEY UPDATE
-                   usgUsedTotalWords = usgUsedTotalWords + ?
+                   usgLastDateTime = NOW()
+                 , usgUsedTotalWords = IFNULL(usgUsedTotalWords, 0) + ?
 )")
             .arg(tblAccountAssetUsageBase::Name)
+            .arg(CreditKey.isEmpty() ? "" : QString(", usgKey = '%1'").arg(CreditKey))
         ;
 
+        //total:
+        clsDACResult Result1 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
+                                                                    QueryString,
+                                                                    {
+                                                                        _activeCredit.Credit.UserAsset.uasID,
+                                                                        QChar(enuAssetUsageResolution::Total),
+                                                                        UsedWordCount,
+                                                                        UsedWordCount,
+                                                                    });
+        //per hour:
         clsDACResult Result2 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
                                                                     QueryString,
                                                                     {
                                                                         _activeCredit.Credit.UserAsset.uasID,
+                                                                        QChar(enuAssetUsageResolution::Hour),
                                                                         UsedWordCount,
                                                                         UsedWordCount,
                                                                     });

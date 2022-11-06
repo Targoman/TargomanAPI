@@ -317,33 +317,6 @@ namespace tblAccountAssetUsage {
     );
 }
 
-namespace tblAccountAssetUsageHistory {
-
-    namespace ExtraFields {
-    }
-
-    namespace ExtraRelation {
-    //        constexpr char AAA[] = "aaa";
-    }
-
-    namespace Private {
-        const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
-        };
-
-        const QList<stuRelation> ExtraRelations = {
-        };
-
-        const QList<stuDBIndex> ExtraIndexes = {
-        };
-
-    } //namespace Private
-
-    TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountAssetUsageHistoryBase_DTO
-    );
-}
-
 namespace tblAccountCoupons {
 
     namespace ExtraFields {
@@ -470,17 +443,6 @@ class AccountAssetUsage : public intfAccountAssetUsageMT<false>
 {
 //    Q _OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountAssetUsage)
-
-public:
-};
-
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class AccountAssetUsageHistory : public intfAccountAssetUsageHistoryMT<false>
-{
-//    Q _OBJECT
-    TARGOMAN_API_SUBMODULE_DEFINE(TargomanMT, AccountAssetUsageHistory)
 
 public:
 };

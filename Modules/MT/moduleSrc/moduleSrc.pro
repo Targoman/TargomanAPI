@@ -11,11 +11,13 @@ ModuleName=MT
 HEADERS += \
     MT.h \
     MTDefs.hpp \
+    ORM/Charts.h \
     ORM/MTHelpers.h \
     ORM/Accounting.h
 
 SOURCES += \
     MT.cpp \
+    ORM/Charts.cpp \
     ORM/MTHelpers.cpp \
     ORM/Accounting.cpp
 

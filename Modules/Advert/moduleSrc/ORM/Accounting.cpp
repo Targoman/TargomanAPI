@@ -156,29 +156,16 @@ AccountAssetUsage::AccountAssetUsage() :
         tblAccountAssetUsage::Private::ExtraIndexes
 ) { ; }
 
-/******************************************************/
-/******************************************************/
-/******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(Advert, AccountAssetUsageHistory)
-
-AccountAssetUsageHistory::AccountAssetUsageHistory() :
-    intfAccountAssetUsageHistory(
-        AdvertSchema,
-        tblAccountAssetUsageHistory::Private::ExtraORMFields,
-        tblAccountAssetUsageHistory::Private::ExtraRelations,
-        tblAccountAssetUsageHistory::Private::ExtraIndexes
-) { ; }
-
-QStringList AccountAssetUsageHistory::creditFieldNames() {
-    return {
-        tblAccountAssetUsageHistory::ExtraFields::ushSumDays,
-        tblAccountAssetUsageHistory::ExtraFields::ushSumDayShow,
-        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalShow,
-        tblAccountAssetUsageHistory::ExtraFields::ushSumDayClicks,
-        tblAccountAssetUsageHistory::ExtraFields::ushSumMonthClicks,
-        tblAccountAssetUsageHistory::ExtraFields::ushSumTotalClicks,
-    };
-}
+//QStringList AccountAssetUsage::creditFieldNames() {
+//    return {
+//        tblAccountAssetUsage::ExtraFields::usgDays,
+//        tblAccountAssetUsage::ExtraFields::usgDayShow,
+//        tblAccountAssetUsage::ExtraFields::usgTotalShow,
+//        tblAccountAssetUsage::ExtraFields::usgDayClicks,
+//        tblAccountAssetUsage::ExtraFields::usgMonthClicks,
+//        tblAccountAssetUsage::ExtraFields::usgTotalClicks,
+//    };
+//}
 
 /******************************************************/
 /******************************************************/

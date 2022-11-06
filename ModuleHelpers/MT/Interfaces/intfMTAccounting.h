@@ -367,42 +367,6 @@ namespace tblAccountAssetUsageMTBase {
     );
 }
 
-namespace tblAccountAssetUsageHistoryMTBase {
-
-    namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(ushSumUsedTotalWords);
-    }
-
-    namespace ExtraRelation {
-    //        constexpr char AAA[] = "aaa";
-    }
-
-    namespace Private {
-        const QList<clsORMField> ExtraORMFields = {
-            //ColName                               Type            Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
-            { ExtraFields::ushSumUsedTotalWords,    S(quint32),     QFV.integer().minValue(0),  QRequired,  UPAdmin }
-        };
-
-        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
-            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
-            return { };
-        };
-
-        const QList<stuDBIndex> ExtraIndexes = {
-        };
-
-    } //namespace Private
-
-#define SF_tblAccountAssetUsageHistoryMTBase_DTO \
-    SF_tblAccountAssetUsageHistoryBase_DTO
-
-    TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountAssetUsageHistoryMTBase_DTO,
-
-        SF_quint32              (ushSumUsedTotalWords)
-    );
-}
-
 namespace tblAccountCouponsMTBase {
 
     namespace ExtraFields {
@@ -599,36 +563,9 @@ public:
                             const QList<DBM::clsORMField>& _exclusiveCols = {},
                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
                             const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-};
 
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class baseintfAccountAssetUsageHistoryMT //: private QObject
-{
-//    Q _OBJECT
-
-public:
-    baseintfAccountAssetUsageHistoryMT();
-
-//protected slots:
-//APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
-//APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
-};
-
-template <bool _itmplIsTokenBase>
-class intfAccountAssetUsageHistoryMT : public intfAccountAssetUsageHistory<_itmplIsTokenBase>, public baseintfAccountAssetUsageHistoryMT
-{
-//    Q _OBJECT
-
-public:
-    intfAccountAssetUsageHistoryMT(const QString& _schema,
-                                   const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                   const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                   const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-protected:
-    virtual QStringList creditFieldNames();
+//protected:
+//    virtual QStringList creditFieldNames();
 };
 
 /******************************************************/

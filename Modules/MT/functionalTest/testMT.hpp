@@ -191,6 +191,8 @@ private slots:
                               { "ar", "شرح عربی ۱۲۳" },
                         }) },
                     }) },
+                    { tblAccountProductsBase::Fields::prdDurationMinutes,   60 },
+                    { tblAccountProductsBase::Fields::prdStartAtFirstUse,   true },
                 }
             );
 
@@ -220,7 +222,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
-//                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,     60 },
 //                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,             1000 },
                 }
             );
@@ -248,8 +249,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,            12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,           150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,      "test mt Saleable 456 vt" },
-                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,         60 },
-                    { tblAccountSaleablesBase::Fields::slbStartAtFirstUse,      true },
                     { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,    1000 },
                 }
             );
@@ -606,17 +605,17 @@ private slots:
         }
     }
 
-    void assetUsageHistory_1() {
+    void assetUsage_chart() {
         QT_TRY {
             QVariant Result = callUserAPI(
                 RESTClientHelper::POST,
-                "MT/AccountAssetUsageHistory/report",
+                "MT/AccountAssetUsage/chart",
                 {},
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "assetID",     },
-                    { "step",       15 },
-                    { "stepUnit",   "Minute" },
+//                    { "step",       15 },
+//                    { "stepUnit",   "Minute" },
                 }
             );
 

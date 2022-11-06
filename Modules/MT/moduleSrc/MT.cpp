@@ -36,6 +36,7 @@ using namespace Targoman::API::ModuleHelpers::MT;
 #include "MTDefs.hpp"
 #include "ORM/MTHelpers.h"
 #include "ORM/Accounting.h"
+#include "ORM/Charts.h"
 
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
@@ -70,7 +71,6 @@ MT::MT() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
-        &AccountAssetUsageHistory::instance(),
         &AccountCoupons::instance(),
         nullptr,
         //---------------------
@@ -95,7 +95,6 @@ MT::MT() :
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsage.data());
-    this->addSubModule(AccountAssetUsageHistory.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in MT module
 
@@ -105,6 +104,8 @@ MT::MT() :
     this->addSubModule(&MTTokenStats::instance());
     this->addSubModule(&MTTranslatedPhrases::instance());
     this->addSubModule(&MTTranslationLogs::instance());
+
+    this->addSubModule(&Charts::instance());
 }
 
 QMap<QString, stuModuleDBInfo> MT::requiredDBs() const {

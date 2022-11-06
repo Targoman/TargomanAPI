@@ -84,7 +84,6 @@ DELETE FROM dev_AAA.tblRoles WHERE LOWER(rolName) LIKE '%test%';
 DELETE FROM dev_Common.tblAlerts;
 DELETE FROM dev_Common.tblDBG;
 TRUNCATE dev_Advert.tblActionLogs;
-DELETE FROM dev_Advert.tblAccountAssetUsageHistory;
 DELETE FROM dev_Advert.tblAccountAssetUsage;
 DELETE FROM dev_Advert.tblAccountUserAssets_files;
 DELETE FROM dev_Advert.tblAccountUserAssets;

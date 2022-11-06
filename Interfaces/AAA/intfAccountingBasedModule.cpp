@@ -119,7 +119,6 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     baseintfAccountUserAssets           *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     baseintfAccountAssetUsage           *_assetUsage,
-    baseintfAccountAssetUsageHistory    *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -132,7 +131,6 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     AccountUserAssets(_userAssets),
     AccountUserAssetsFiles(_userAssetsFiles),
     AccountAssetUsage(_assetUsage),
-    AccountAssetUsageHistory(_assetUsageHistory),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
@@ -748,40 +746,31 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     }
 
     //-- duration
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
-            || NULLABLE_HAS_VALUE(_basketItem.Product.prdDurationMinutes)
-    ) {
-        quint32 DurationMinutes = NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
-                                  ? NULLABLE_VALUE(_basketItem.Saleable.slbDurationMinutes)
-                                  : NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes);
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdDurationMinutes)) {
 
         qry.addCol(tblAccountUserAssetsBase::Fields::uasDurationMinutes);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, DurationMinutes);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes));
 
-        if (_basketItem.Saleable.slbStartAtFirstUse == false) {
+        if (_basketItem.Product.prdStartAtFirstUse == false) {
             qry.addCols({
                             tblAccountUserAssetsBase::Fields::uasValidFromDate,
                             tblAccountUserAssetsBase::Fields::uasValidToDate,
                         })
             ;
             values.insert(tblAccountUserAssetsBase::Fields::uasValidFromDate, DBExpression::NOW());
-            values.insert(tblAccountUserAssetsBase::Fields::uasValidToDate, DBExpression::DATE_ADD(
-                              DBExpression::NOW(), DurationMinutes, enuDBExpressionIntervalUnit::MINUTE));
+            values.insert(tblAccountUserAssetsBase::Fields::uasValidToDate,
+                          DBExpression::DATE_ADD(DBExpression::NOW(),
+                                                 NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes),
+                                                 enuDBExpressionIntervalUnit::MINUTE));
         }
     }
 
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidFromHour)) {
-        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
-        values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidFromHour));
-    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidFromHour)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidFromHour)) {
         qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
         values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Product.prdValidFromHour));
     }
 
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidToHour)) {
-        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
-        values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidToHour));
-    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidToHour)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidToHour)) {
         qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
         values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Product.prdValidToHour));
     }
@@ -1775,7 +1764,6 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
     intfAccountUserAssets<false>        *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     intfAccountAssetUsage<false>        *_assetUsage,
-    intfAccountAssetUsageHistory<false> *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -1790,7 +1778,6 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1836,7 +1823,6 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
     intfAccountUserAssets<true>         *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     intfAccountAssetUsage<true>         *_assetUsage,
-    intfAccountAssetUsageHistory<true>  *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -1851,7 +1837,6 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1924,7 +1909,6 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
     intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
     intfAccountUserAssetsFiles                      *_userAssetsFiles,
     intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-    intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
     intfAccountCoupons                              *_discounts,
     intfAccountPrizes                               *_prizes
 ) :
@@ -1939,7 +1923,6 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
     )

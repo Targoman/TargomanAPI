@@ -258,10 +258,12 @@ QVariantMap MTHelper::doTranslation(
 
     //check credit
     //-----------------------------------------
+    QString FullDir = _dir.first + "2" + _dir.second;
+
     ServiceUsage_t RequestedUsage = {
 //            { QString("%1=%2::%3-%4").arg(RequestedUsage::CREDIT).arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
         { RequestedUsage::CREDIT, QVariantMap({
-              { QString("translate::%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+              { QString("%1::%2::%3").arg(MTAction::TRANSLATE).arg(_engine).arg(FullDir), SourceWordCount },
         }) },
 //            { MTRequestedUsage::ENGINE,     _engine },
 //            { MTRequestedUsage::DIR,        QString("%1-%2").arg(_dir.first).arg(_dir.second) },

@@ -65,7 +65,6 @@ public:
         intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
         intfAccountUserAssetsFiles                      *_userAssetsFiles,
         intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
         intfAccountCoupons                              *_discounts,
         intfAccountPrizes                               *_prizes,
         //MT --

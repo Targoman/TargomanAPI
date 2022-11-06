@@ -50,7 +50,6 @@ public:
         baseintfAccountUserAssets           *_userAssets,
         intfAccountUserAssetsFiles          *_userAssetsFiles,
         baseintfAccountAssetUsage           *_assetUsage,
-        baseintfAccountAssetUsageHistory    *_assetUsageHistory,
         intfAccountCoupons                  *_discounts = nullptr,
         intfAccountPrizes                   *_prizes = nullptr
     );
@@ -291,7 +290,6 @@ public:
     baseintfAccountUserAssets*          accountUserAssets()         { return this->AccountUserAssets.data(); }
     intfAccountUserAssetsFiles*         accountUserAssetsFiles()    { return this->AccountUserAssetsFiles.data(); }
     baseintfAccountAssetUsage*          accountAssetUsage()        { return this->AccountAssetUsage.data(); }
-    baseintfAccountAssetUsageHistory*   accountAssetUsageHistory() { return this->AccountAssetUsageHistory.data(); }
     intfAccountCoupons*                 accountCoupons()            { return this->AccountCoupons.data(); }
     intfAccountPrizes*                  accountPrizes()             { return this->AccountPrizes.data(); }
 
@@ -305,7 +303,6 @@ protected:
     QScopedPointer<baseintfAccountUserAssets>           AccountUserAssets;
     QScopedPointer<intfAccountUserAssetsFiles>          AccountUserAssetsFiles;
     QScopedPointer<baseintfAccountAssetUsage>           AccountAssetUsage;
-    QScopedPointer<baseintfAccountAssetUsageHistory>    AccountAssetUsageHistory;
     QScopedPointer<intfAccountCoupons>                  AccountCoupons;
     QScopedPointer<intfAccountPrizes>                   AccountPrizes;
 
@@ -330,7 +327,6 @@ protected:
         intfAccountUserAssets<false>        *_userAssets,
         intfAccountUserAssetsFiles          *_userAssetsFiles,
         intfAccountAssetUsage<false>        *_assetUsage,
-        intfAccountAssetUsageHistory<false> *_assetUsageHistory,
         intfAccountCoupons                  *_discounts = nullptr,
         intfAccountPrizes                   *_prizes = nullptr
     );
@@ -374,7 +370,6 @@ protected:
         intfAccountUserAssets<true>         *_userAssets,
         intfAccountUserAssetsFiles          *_userAssetsFiles,
         intfAccountAssetUsage<true>         *_assetUsage,
-        intfAccountAssetUsageHistory<true>  *_assetUsageHistory,
         intfAccountCoupons                  *_discounts = nullptr,
         intfAccountPrizes                   *_prizes = nullptr
     );
@@ -418,7 +413,6 @@ protected:
         intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
         intfAccountUserAssetsFiles                      *_userAssetsFiles,
         intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
         intfAccountCoupons                              *_discounts = nullptr,
         intfAccountPrizes                               *_prizes = nullptr
     );

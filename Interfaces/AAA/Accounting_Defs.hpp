@@ -83,6 +83,16 @@ TARGOMAN_DEFINE_ENUM(enuAssetHistoryReportStepUnit,
 //                     Year       = 'Y',
                      );
 
+TARGOMAN_DEFINE_ENUM(enuAssetUsageResolution,
+                     Total      = 'T',
+                     Year       = 'Y',
+                     Month      = 'M',
+//                     Week       = 'W',
+                     Day        = 'D',
+                     Hour       = 'H',
+                     Minute     = 'I',
+                     );
+
 } //namespace Targoman::API::AAA
 
 //TAPI_REGISTER_TARGOMAN_ENUM() in Accounting_Interfaces.cpp:
@@ -91,6 +101,7 @@ TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuDiscountType);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuAssetHistoryReportStepUnit);
+TAPI_DECLARE_METATYPE_ENUM(Targoman::API::AAA, enuAssetUsageResolution);
 
 namespace Targoman::API::AAA {
 
@@ -137,6 +148,7 @@ namespace tblAccountProductsBase {
         TARGOMAN_CREATE_CONSTEXPR(prdValidFromHour);
         TARGOMAN_CREATE_CONSTEXPR(prdValidToHour);
         TARGOMAN_CREATE_CONSTEXPR(prdDurationMinutes);
+        TARGOMAN_CREATE_CONSTEXPR(prdStartAtFirstUse);
         TARGOMAN_CREATE_CONSTEXPR(prdPrivs);
         TARGOMAN_CREATE_CONSTEXPR(prdVAT);
         TARGOMAN_CREATE_CONSTEXPR(prd_untID);
@@ -191,12 +203,6 @@ namespace tblAccountSaleablesBase {
         // slbRemainingQty = slbInStockQty - (slbOrderedQty - slbReturnedQty)
 
         TARGOMAN_CREATE_CONSTEXPR(slbVoucherTemplate);
-        TARGOMAN_CREATE_CONSTEXPR(slbValidFromDate);
-        TARGOMAN_CREATE_CONSTEXPR(slbValidToDate);
-        TARGOMAN_CREATE_CONSTEXPR(slbValidFromHour);
-        TARGOMAN_CREATE_CONSTEXPR(slbValidToHour);
-        TARGOMAN_CREATE_CONSTEXPR(slbDurationMinutes);
-        TARGOMAN_CREATE_CONSTEXPR(slbStartAtFirstUse);
 
         TARGOMAN_CREATE_CONSTEXPR(slbStatus);
         TARGOMAN_CREATE_CONSTEXPR(slbCreatedBy_usrID);
@@ -277,15 +283,9 @@ namespace tblAccountAssetUsageBase {
 
     namespace Fields {
         TARGOMAN_CREATE_CONSTEXPR(usg_uasID);
-    }
-}
-
-namespace tblAccountAssetUsageHistoryBase {
-    constexpr char Name[] = "tblAccountAssetUsageHistory";
-
-    namespace Fields {
-        TARGOMAN_CREATE_CONSTEXPR(ush_uasID);
-        TARGOMAN_CREATE_CONSTEXPR(ushLastDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(usgResolution);
+        TARGOMAN_CREATE_CONSTEXPR(usgLastDateTime);
+        TARGOMAN_CREATE_CONSTEXPR(usgKey);
     }
 }
 
@@ -415,6 +415,7 @@ namespace tblAccountProductsBase {
             { Fields::prdValidFromHour,         S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
             { Fields::prdValidToHour,           S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull,      UPOwner },
             { Fields::prdDurationMinutes,       S(NULLABLE_TYPE(quint32)),          QFV,                                    QNull,      UPOwner },
+            { Fields::prdStartAtFirstUse,       S(bool),                            QFV,                                    false,      UPOwner },
             { Fields::prdPrivs,                 S(TAPI::PrivObject_t),              QFV,                                    QNull,      UPOwner },
             { Fields::prdVAT,                   S(NULLABLE_TYPE(double)),           QFV.real().minValue(0).maxValue(100),   QNull,      UPOwner },
             { Fields::prd_untID,                S(NULLABLE_TYPE(quint16)),          QFV,                                    QNull,      UPOwner },
@@ -471,6 +472,7 @@ namespace tblAccountProductsBase {
     SF_NULLABLE_quint8          (prdValidFromHour), \
     SF_NULLABLE_quint8          (prdValidToHour), \
     SF_NULLABLE_quint32         (prdDurationMinutes), \
+    SF_bool                     (prdStartAtFirstUse), \
     SF_JSON_t                   (prdPrivs), \
     SF_NULLABLE_qreal           (prdVAT), \
     SF_NULLABLE_quint16         (prd_untID), \
@@ -542,12 +544,6 @@ namespace tblAccountSaleablesBase {
             { Fields::slbOrderedQty,            S(NULLABLE_TYPE(double)),           QFV,                            QNull,      UPAdmin },
             { Fields::slbReturnedQty,           S(NULLABLE_TYPE(double)),           QFV,                            QNull,      UPAdmin },
             { Fields::slbVoucherTemplate,       S(QString),                         QFV,                            QNull,      UPOwner },
-            { Fields::slbValidFromDate,         S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                            QNull,      UPOwner },
-            { Fields::slbValidToDate,           S(NULLABLE_TYPE(TAPI::DateTime_t)), QFV,                            QNull,      UPOwner },
-            { Fields::slbValidFromHour,         S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
-            { Fields::slbValidToHour,           S(NULLABLE_TYPE(quint8)),           QFV.integer().minValue(0).maxValue(23), QNull, UPOwner },
-            { Fields::slbDurationMinutes,       S(NULLABLE_TYPE(quint32)),          QFV,                            QNull,      UPOwner },
-            { Fields::slbStartAtFirstUse,       S(bool),                            QFV,                            false,      UPOwner },
             { Fields::slbStatus,                ORM_STATUS_FIELD(TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active) },
             { ORM_INVALIDATED_AT_FIELD },
             { Fields::slbCreationDateTime,      ORM_CREATED_ON },
@@ -602,12 +598,6 @@ namespace tblAccountSaleablesBase {
     SF_NULLABLE_qreal           (slbOrderedQty), \
     SF_NULLABLE_qreal           (slbReturnedQty), \
     SF_QString                  (slbVoucherTemplate), \
-    SF_DateTime_t               (slbValidFromDate), \
-    SF_DateTime_t               (slbValidToDate), \
-    SF_NULLABLE_quint8          (slbValidFromHour), \
-    SF_NULLABLE_quint8          (slbValidToHour), \
-    SF_NULLABLE_quint32         (slbDurationMinutes), \
-    SF_bool                     (slbStartAtFirstUse), \
     SF_ORM_STATUS_FIELD         (slbStatus, TAPI::enuGenericStatus, TAPI::enuGenericStatus::Active), \
     SF_ORM_CREATED_ON           (slbCreationDateTime), \
     SF_ORM_CREATED_BY           (slbCreatedBy_usrID), \
@@ -840,14 +830,17 @@ namespace tblAccountAssetUsageBase {
 
     namespace Private {
         const QList<clsORMField> ORMFields = {
-            ///<  ColName                              Type                Validation                              Default    UpBy   Sort  Filter Self  Virt   PK
-            { Fields::usg_uasID, ORM_PRIMARYKEY_64},
+            //ColName                   Type                    Validation  Default    UpBy   Sort  Filter Self  Virt   PK
+            { Fields::usg_uasID,        ORM_PRIMARYKEY_64 },
+            { Fields::usgResolution,    S(Targoman::API::AAA::enuAssetUsageResolution::Type), QFV, Targoman::API::AAA::enuAssetUsageResolution::Total, UPNone },
+            { Fields::usgLastDateTime,  S(TAPI::DateTime_t),    QFV,        QRequired,  UPNone },
+            { Fields::usgKey,           S(QString),             QFV,        QNull,      UPNone },
         };
 
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
-                ///<  Col                                  Reference Table                                  ForeignCol                        Rename     LeftJoin
-                { Fields::usg_uasID, R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID},
+                //Col                   Reference Table                             ForeignCol                        Rename     LeftJoin
+                { Fields::usg_uasID,    R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID},
             };
         };
 
@@ -857,43 +850,13 @@ namespace tblAccountAssetUsageBase {
     } //namespace Private
 
 #define SF_tblAccountAssetUsageBase_DTO \
-    SF_ORM_PRIMARYKEY_64        (usg_uasID)
+    SF_ORM_PRIMARYKEY_64        (usg_uasID), \
+    SF_Enum                     (usgResolution, Targoman::API::AAA::enuAssetUsageResolution, Targoman::API::AAA::enuAssetUsageResolution::Total), \
+    SF_DateTime_t               (usgLastDateTime), \
+    SF_QString                  (usgKey)
 
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageBase_DTO
-    );
-}
-
-namespace tblAccountAssetUsageHistoryBase {
-    namespace Relation {
-//        constexpr char AAA[] = "aaa";
-    }
-
-    namespace Private {
-        const QList<clsORMField> ORMFields = {
-            //ColName                   Type                    Validation  Default    UpBy   Sort  Filter Self  Virt   PK
-            { Fields::ush_uasID,        ORM_PRIMARYKEY_64 },
-            { Fields::ushLastDateTime,  S(TAPI::DateTime_t),    QFV,        QRequired, UPAdmin },
-        };
-
-        inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
-            return {
-                //Col                   Reference Table                             ForeignCol                                  Rename     LeftJoin
-                { Fields::ush_uasID,    R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID },
-            };
-        };
-
-        const QList<stuDBIndex> Indexes = {
-        };
-
-    } //namespace Private
-
-#define SF_tblAccountAssetUsageHistoryBase_DTO \
-    SF_ORM_PRIMARYKEY_64        (ush_uasID), \
-    SF_DateTime_t               (ushLastDateTime)
-
-    TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountAssetUsageHistoryBase_DTO
     );
 }
 
@@ -914,7 +877,7 @@ namespace tblAccountCouponsBase {
             { Fields::cpnValidFrom,               S(TAPI::DateTime_t),               QFV,                                     QRequired, UPAdmin },
             { Fields::cpnExpiryTime,              S(NULLABLE_TYPE(TAPI::DateTime_t)),QFV,                                     QNull,     UPAdmin },
             { Fields::cpnAmount,                  S(quint32),                        QFV,                                     QRequired, UPAdmin }, //, false, false },
-            { Fields::cpnAmountType,              S(Targoman::API::AAA::enuDiscountType::Type), QFV,              Targoman::API::AAA::enuDiscountType::Percent, UPAdmin },
+            { Fields::cpnAmountType,              S(Targoman::API::AAA::enuDiscountType::Type), QFV,                          Targoman::API::AAA::enuDiscountType::Percent, UPAdmin },
             { Fields::cpnMaxAmount,               S(NULLABLE_TYPE(quint32)),         QFV,                                     QNull,     UPAdmin }, //, false, false },
             { Fields::cpnSaleableBasedMultiplier, S(TAPI::JSON_t),                   QFV,                                     QRequired, UPAdmin }, //, false, false },
 //            { Fields::cpnSaleableBasedMultiplier, S(QList<Targoman::API::AAA::stuDiscountSaleableBasedMultiplier>), QFV,                    QRequired, UPAdmin, false, false },

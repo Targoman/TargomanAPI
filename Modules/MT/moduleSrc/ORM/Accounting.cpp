@@ -157,19 +157,6 @@ AccountAssetUsage::AccountAssetUsage() :
 /******************************************************/
 /******************************************************/
 /******************************************************/
-TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountAssetUsageHistory)
-
-AccountAssetUsageHistory::AccountAssetUsageHistory() :
-    intfAccountAssetUsageHistoryMT(
-        MTSchema,
-        tblAccountAssetUsageHistory::Private::ExtraORMFields,
-        tblAccountAssetUsageHistory::Private::ExtraRelations,
-        tblAccountAssetUsageHistory::Private::ExtraIndexes
-) { ; }
-
-/******************************************************/
-/******************************************************/
-/******************************************************/
 TARGOMAN_API_SUBMODULE_IMPLEMENT(MT, AccountCoupons)
 
 AccountCoupons::AccountCoupons() :
