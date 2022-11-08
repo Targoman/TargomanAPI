@@ -35,3 +35,8 @@ ALTER TABLE `tblAccountAssetUsage`
     DROP PRIMARY KEY;
 
 DROP TABLE tblAccountAssetUsageHistory;
+
+
+
+
+

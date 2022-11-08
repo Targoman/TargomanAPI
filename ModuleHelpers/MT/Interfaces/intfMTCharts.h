@@ -26,6 +26,43 @@
 
 #include "Interfaces/API/intfPureModule.h"
 
+namespace Targoman::API::ModuleHelpers::MT {
+
+TAPI_DEFINE_STRUCT(stuChartSeriesItemProps,
+    SF_QString(ValueSuffix)
+);
+
+TAPI_DEFINE_STRUCT(stuChartSeriesItem,
+    SF_QString(Label),
+    SF_QListOfVarStruct(Props, stuChartSeriesItemProps)
+);
+typedef QMap<QString, stuChartSeriesItem> ChartSeries_t;
+
+TAPI_DEFINE_STRUCT(stuYChartData,
+    SF_QString(Y)
+);
+typedef QMap<QString, stuYChartData> YChartDataSet_t;
+
+TAPI_DEFINE_STRUCT(stuMultiProgressChart,
+    SF_QString          (Type),
+    SF_QMapOfVarStruct  (Series, stuChartSeriesItem, ChartSeries_t),
+    SF_QMapOfVarStruct  (Data, stuYChartData, YChartDataSet_t)
+);
+
+
+
+
+
+TAPI_DEFINE_STRUCT(stuXYChartData,
+    SF_QString(X),
+    SF_QString(Y)
+);
+typedef QMap<QString, stuXYChartData> XYChartDataSet_t;
+
+}
+
+TAPI_DECLARE_METATYPE(Targoman::API::ModuleHelpers::MT::stuMultiProgressChart)
+
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 using namespace API;
@@ -43,7 +80,17 @@ public:
 protected:
 //    virtual QStringList creditFieldNames() = 0;
 
-    QVariant usageData(
+    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart usageDataForProgressBar(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _currentActorID
+    );
+
+    QVariant usageDataForPieChart(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _currentActorID
+    );
+
+    QVariant usageDataForLineChart(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _currentActorID
     );
@@ -65,12 +112,28 @@ protected:
 //    }
 
 protected slots:
-    QVariant REST_GET(
-        usageData,
+    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
+        usageDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
         ),
-        "Get MT Usage progress bar chart data"
+        "Get MT Usage chart data for progress bar"
+    );
+
+    QVariant REST_GET(
+        usageDataForPieChart,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+        ),
+        "Get MT Usage chart data for pie chart"
+    );
+
+    QVariant REST_GET(
+        usageDataForLineChart,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+        ),
+        "Get MT Usage chart data for lin chart"
     );
 };
 
@@ -90,13 +153,31 @@ protected:
 //    }
 
 protected slots:
-    QVariant REST_GET(
-        usageData,
+    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
+        usageDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _apiToken
         ),
-        "Get MT Usage progress bar chart data"
+        "Get MT Usage chart data for progress bar"
+    );
+
+    QVariant REST_GET(
+        usageDataForPieChart,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _apiToken
+        ),
+        "Get MT Usage chart data for pie chart"
+    );
+
+    QVariant REST_GET(
+        usageDataForLineChart,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _apiToken
+        ),
+        "Get MT Usage chart data for lin chart"
     );
 };
 

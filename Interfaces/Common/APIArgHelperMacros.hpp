@@ -411,7 +411,7 @@ typedef QMap<QString, QString> QStringMap;
 #define NULLABLE_M2STR(_type)                           NULLABLE_M2STR_PREFIX #_type NULLABLE_M2STR_POSTFIX
 #define NULLABLE_TYPE(_type)                            std::optional<_type>
 #define NULLABLE_VAR(_type, _name)                      NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value)                          *_value
+#define NULLABLE_VALUE(_value)                          (*_value)
 #define NULLABLE_GET(_value)                            (_value.has_value() ? *_value : QVariant())
 #define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.has_value() ? *_value : _def)
 #define NULLABLE_SET(_var, _value)                      (_var = _value)

@@ -1186,13 +1186,21 @@ TAPI_DEFINE_STRUCT(stuDigested,
 //    QJsonObject   Privs;
 );
 
+TAPI_DEFINE_STRUCT(stuAssetCredit,
+    SF_NULLABLE_qint32 (PerDay, 0),
+    SF_NULLABLE_qint32 (PerWeek, 0),
+    SF_NULLABLE_qint32 (PerMonth, 0),
+    SF_NULLABLE_qint64 (Total, 0)
+);
+
 TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
     SF_Struct           (UserAsset, tblAccountUserAssetsBase::DTO, v.uasID),
     SF_Struct           (AssetUsage, tblAccountAssetUsageBase::DTO, v.usg_uasID),
+    SF_Struct           (Credit, stuAssetCredit, [](auto v) { return ((v.PerDay != 0) && (v.PerWeek != 0) && (v.PerMonth != 0) && (v.Total != 0)); }(v)),
 
-    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; }(v))
+    SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; } (v))
 );
 
 ///@TODO: key : ???

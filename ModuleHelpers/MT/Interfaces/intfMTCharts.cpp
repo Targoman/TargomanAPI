@@ -32,6 +32,11 @@ using namespace Targoman::API;
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::Helpers;
 
+TAPI_REGISTER_METATYPE_TYPE_STRUCT(
+    /* namespace          */ Targoman::API::ModuleHelpers::MT,
+    /* type               */ stuMultiProgressChart
+);
+
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 quint64 checkAPITokenOwner(
@@ -278,6 +283,7 @@ const schema =
 }
 
 const sampleProgressData = {max: 200, curr: 40}
+
 const sampleMultipProgressBar= [
     {name: "formal", title:"رسمی", value: 40},
     {name: "informal", title:"محاوره", value: 60},
@@ -314,22 +320,132 @@ const sampleLineData = {
  *
  * informal: |xxxxxxxxxxxxxxxx-------------|
  *           used: 60             total: 200
+const sampleMultipProgressBar = [
+    { type: },
+    { data: [
+        { name: "formal", title:"رسمی", value: 40 },
+        { name: "informal", title:"محاوره", value: 60 },
+    ]},
+]
  */
-QVariant baseintfMTCharts::usageData(
+
+stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _currentActorID
+) {
+    stuMultiProgressChart Result;
+
+    Result.Type = "multiprogress";
+
+    Result.Series.insert("MT_FORMAL", stuChartSeriesItem(
+                             "رسمی",
+                             {
+                                stuChartSeriesItemProps("%")
+                             }
+                             ));
+
+    Result.Series.insert("MT_INFORMAL", stuChartSeriesItem(
+                             "محاوره",
+                             {
+                                stuChartSeriesItemProps("%")
+                             }
+                             ));
+
+    Result.Data.insert("MT_FORMAL", stuYChartData("30"));
+    Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
+
+    return Result;
+
+//    return QVariantMap({
+//                           { "type", "multiprogress" },
+//                           { "series", QVariantMap({
+//                                 { "MT_FORMAL", QVariantMap({
+//                                       { "label", "رسمی" },
+//                                       { "props", QVariantMap({
+//                                             { "valueSuffix", "%" }
+//                                       }) },
+//                                 }) },
+//                                 { "MT_INFORMAL", QVariantMap({
+//                                       { "label", "محاوره" },
+//                                       { "props", QVariantMap({
+//                                             { "valueSuffix", "%" }
+//                                       }) },
+//                                 }) },
+//                           }) },
+//                           { "data", QVariantMap({
+//                                 { "MT_FORMAL", QVariantList({
+//                                       30,
+//                                       40
+//                                 }) },
+//                                 { "MT_INFORMAL", 60 },
+//                           }) },
+//                       });
+
+
+
+
+
+    QStringList QueryStringParts;
+    QueryStringParts.append("SELECT");
+
+//    REGEXP_LIKE(usgKey, '(.*::)(.*::)formal', 'i')
+
+
+
+
+}
+
+QVariant baseintfMTCharts::usageDataForPieChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _currentActorID
 ) {
     return QVariantMap({
-                           QVariantMap({
-                               { "name", "formal" },
-                               { "title", "رسمی" },
-                               { "value", 40 },
-                           }),
-                           QVariantMap({
-                               { "name", "informal" },
-                               { "title", "محاوره" },
-                               { "value", 60 },
-                           }),
+                           { "type", "pie" },
+                           { "series", QVariantMap({
+                                 { "MT_FORMAL", QVariantMap({
+                                       { "label", "رسمی" },
+                                       { "props", {} },
+                                 }) },
+                                 { "MT_INFORMAL", QVariantMap({
+                                       { "label", "محاوره" },
+                                       { "props", {} },
+                                 }) },
+                           }) },
+                           { "data", QVariantMap({
+                                 { "MT_FORMAL", 40 },
+                                 { "MT_INFORMAL", 60 },
+                           }) },
+                       });
+}
+
+QVariant baseintfMTCharts::usageDataForLineChart(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _currentActorID
+) {
+    return QVariantMap({
+                           { "type", "line" },
+                           { "series", QVariantMap({
+                                 { "MT_FORMAL", QVariantMap({
+                                       { "label", "رسمی" },
+                                       { "props", {} },
+                                 }) },
+                                 { "MT_INFORMAL", QVariantMap({
+                                       { "label", "محاوره" },
+                                       { "props", {} },
+                                 }) },
+                           }) },
+                           { "data", QVariantMap({
+                                 { "MT_FORMAL", QVariantMap({
+                                       { "2020-12-01", 12 },
+                                       { "2020-12-02", 14 },
+                                       { "2020-12-03", 15 },
+                                 }) },
+                                 { "MT_INFORMAL", QVariantMap({
+                                       { "2020-12-01", 17 },
+                                       { "2020-12-02", 47 },
+                                       { "2020-12-04", 77 },
+                                 }) },
+                           }) },
                        });
 }
 
@@ -477,14 +593,40 @@ baseintfMTCharts_USER::baseintfMTCharts_USER(
         _module
 ) { ; }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageData, (
+Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
 )) {
     quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageData(
+    return this->usageDataForProgressBar(
+        APICALLBOOM_PARAM,
+        CurrentActorID
+    );
+}
+
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForPieChart, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+)) {
+    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+
+//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->usageDataForPieChart(
+        APICALLBOOM_PARAM,
+        CurrentActorID
+    );
+}
+
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForLineChart, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+)) {
+    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+
+//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->usageDataForLineChart(
         APICALLBOOM_PARAM,
         CurrentActorID
     );
@@ -500,7 +642,7 @@ baseintfMTCharts_API::baseintfMTCharts_API(
         _module
 ) { ; }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_API, usageData, (
+Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
     QString _apiToken
 )) {
@@ -508,7 +650,35 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, usageData, (
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageData(
+    return this->usageDataForProgressBar(
+        APICALLBOOM_PARAM,
+        CurrentActorID
+    );
+}
+
+QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForPieChart, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    QString _apiToken
+)) {
+    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->usageDataForPieChart(
+        APICALLBOOM_PARAM,
+        CurrentActorID
+    );
+}
+
+QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForLineChart, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    QString _apiToken
+)) {
+    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+
+//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+
+    return this->usageDataForLineChart(
         APICALLBOOM_PARAM,
         CurrentActorID
     );

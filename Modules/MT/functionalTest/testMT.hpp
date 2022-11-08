@@ -193,6 +193,9 @@ private slots:
                     }) },
                     { tblAccountProductsBase::Fields::prdDurationMinutes,   60 },
                     { tblAccountProductsBase::Fields::prdStartAtFirstUse,   true },
+                    { tblAccountProductsMTBase::ExtraFields::prdCreditSpecs, QVariantMap({
+                          { "ALL", 1000 },
+                    }) },
                 }
             );
 
@@ -222,7 +225,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
-//                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,             1000 },
                 }
             );
         } QT_CATCH (exTargomanBase &exp) {
@@ -249,7 +251,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,            12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,           150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,      "test mt Saleable 456 vt" },
-                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,    1000 },
                 }
             );
 

@@ -17,3 +17,5 @@ ALTER TABLE `tblAccountSaleables`
     DROP COLUMN `slbDurationMinutes`,
     DROP COLUMN `slbStartAtFirstUse`;
 
+ALTER TABLE `tblAccountSaleables`
+    DROP COLUMN `slbCreditTotalWords`;
