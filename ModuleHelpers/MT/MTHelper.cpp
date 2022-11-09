@@ -239,7 +239,7 @@ QVariantMap MTHelper::doTranslation(
     CacheLookupTime.start();
 
     QString FullDir = _dir.first + "2" + _dir.second;
-    QString TranslateKey = QString("%1::%2::%3").arg(_engine).arg(FullDir).arg(SourceClass);
+    QString TranslateKey = QString("%1::%2::%3").arg(_engine).arg(SourceClass).arg(FullDir);
 
     QString CacheKey = QCryptographicHash::hash(QString("%1::%2")
 //                                                .arg(_useSpecialClass)

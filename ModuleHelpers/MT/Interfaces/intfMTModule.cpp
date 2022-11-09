@@ -362,16 +362,19 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
             TAPI::setFromVariant(DBCurrentDateTime, UserAssetInfo.value(Targoman::API::CURRENT_TIMESTAMP));
 
         //-- --------------------------------
-        if (UserAssetInfo.contains(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs)) {
-            QVariantMap CreditSpecs = UserAssetInfo[tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs].toMap();
-            if (CreditSpecs.isEmpty()) {
-                //set to zero if not defined?
+        QVariantMap CreditSpecs;
+        if (UserAssetInfo.contains(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs))
+            CreditSpecs = UserAssetInfo[tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs].toMap();
+        if (CreditSpecs.isEmpty() && UserAssetInfo.contains(tblAccountProductsMTBase::ExtraFields::prdCreditSpecs))
+            CreditSpecs = UserAssetInfo[tblAccountProductsMTBase::ExtraFields::prdCreditSpecs].toMap();
+
+        if (CreditSpecs.isEmpty()) {
+            //set to zero if not defined?
 //                AssetItem.Credit = stuAssetCredit(0, 0, 0, 0);
-            } else {
-                auto Value = extractCreditValue(UserAssetInfo, CreditKey);
-                if (NULLABLE_HAS_VALUE(Value))
-                    AssetItem.Credit = NULLABLE_VALUE(Value);
-            }
+        } else {
+            auto Value = extractCreditValue(CreditSpecs, CreditKey);
+            if (NULLABLE_HAS_VALUE(Value))
+                AssetItem.Credit = NULLABLE_VALUE(Value);
         }
 
         //zero credit is not allowed
