@@ -74,23 +74,23 @@ Advert::Advert() :
         {
             { "show", {
                 /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayShow,
-                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
+//                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
                 /* asset-week  */ {},
-                /* usage-week  */ {},
+//                /* usage-week  */ {},
                 /* asset-month */ {},
-                /* usage-month */ {},
-                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow,
-                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
+//                /* usage-month */ {},
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow
+//                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
             }},
             { "click", {
                 /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayClicks,
-                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
+//                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
                 /* asset-week  */ {},
-                /* usage-week  */ {},
+//                /* usage-week  */ {},
                 /* asset-month */ tblAccountUserAssets::ExtraFields::uasMonthClicks,
-                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
-                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks,
-                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
+//                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks
+//                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
             }},
         },
         &AccountUnits::instance(),

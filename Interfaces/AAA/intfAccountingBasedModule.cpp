@@ -135,11 +135,11 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
-    foreach (auto Col, this->AssetUsageLimitsCols) {
-        Q_ASSERT(Col.AssetPerDay.isEmpty()      == Col.UsagePerDay.isEmpty());
-        Q_ASSERT(Col.AssetPerWeek.isEmpty()     == Col.UsagePerWeek.isEmpty());
-        Q_ASSERT(Col.AssetPerMonth.isEmpty()    == Col.UsagePerMonth.isEmpty());
-        Q_ASSERT(Col.AssetTotal.isEmpty()       == Col.UsageTotal.isEmpty());
+//    foreach (auto Col, this->AssetUsageLimitsCols) {
+//        Q_ASSERT(Col.AssetPerDay.isEmpty()      == Col.UsagePerDay.isEmpty());
+//        Q_ASSERT(Col.AssetPerWeek.isEmpty()     == Col.UsagePerWeek.isEmpty());
+//        Q_ASSERT(Col.AssetPerMonth.isEmpty()    == Col.UsagePerMonth.isEmpty());
+//        Q_ASSERT(Col.AssetTotal.isEmpty()       == Col.UsageTotal.isEmpty());
 
 //        if (Col.UsagePerDay.size())
 //            this->AssetUsageLimitsColsName.append(Col.UsagePerDay);
@@ -152,7 +152,7 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 
 //        if (Col.UsageTotal.size())
 //            this->AssetUsageLimitsColsName.append(Col.UsageTotal);
-    }
+//    }
 }
 
 /******************************************************************\
@@ -184,16 +184,16 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
 //        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
     auto FnCheckCredit = [](const QString &_creditKey, qint64 &_creditValue, stuUsage _remaining, auto _type) {
-        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && NULLABLE_VALUE(_remaining.PerDay) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && NULLABLE_VALUE(_remaining.PerWeek) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && NULLABLE_VALUE(_remaining.PerMonth) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && NULLABLE_VALUE(_remaining.Total) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_creditKey));
     };
 
@@ -217,8 +217,8 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
         qint64 CreditValue = CreditValues.first().toLongLong();
 
         /*
-         1/ translate::NMT::en2fa::kooft
-         2/ translate::NMT::en2fa
+         1/ translate::NMT::formal::en2fa
+         2/ translate::NMT::formal
          3/ translate::NMT
          4/ translate
         */
@@ -346,8 +346,8 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 qint64 CreditValue = CreditValues.first().toLongLong();
 
                 /*
-                 1/ translate::NMT::en2fa::kooft
-                 2/ translate::NMT::en2fa
+                 1/ translate::NMT::formal::en2fa
+                 2/ translate::NMT::formal
                  3/ translate::NMT
                  4/ translate
                 */
@@ -360,10 +360,10 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
                     stuUsage Remaining = _assetItem.Digested.Limits.value(CreditKey);
 
-                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - CreditValue <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - CreditValue <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - CreditValue <= 0)
-                           || (NULLABLE_HAS_VALUE(Remaining.Total) && *Remaining.Total - CreditValue <= 0)
+                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && NULLABLE_VALUE(Remaining.PerDay) < CreditValue)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && NULLABLE_VALUE(Remaining.PerWeek) < CreditValue)
+                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && NULLABLE_VALUE(Remaining.PerMonth) < CreditValue)
+                           || (NULLABLE_HAS_VALUE(Remaining.Total) && NULLABLE_VALUE(Remaining.Total) < CreditValue)
                         )
                         return false;
 

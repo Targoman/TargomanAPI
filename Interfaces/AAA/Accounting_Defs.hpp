@@ -1104,10 +1104,10 @@ TAPI_DEFINE_STRUCT(stuBasketItem,
 
 /*****************************************************************************/
 TAPI_DEFINE_STRUCT(stuUsage,
-    SF_NULLABLE_quint32 (PerDay),
-    SF_NULLABLE_quint32 (PerWeek),
-    SF_NULLABLE_quint32 (PerMonth),
-    SF_NULLABLE_quint64 (Total)
+    SF_NULLABLE_qint32 (PerDay),
+    SF_NULLABLE_qint32 (PerWeek),
+    SF_NULLABLE_qint32 (PerMonth),
+    SF_NULLABLE_qint64 (Total)
 );
 
 ///key : action
@@ -1115,34 +1115,34 @@ typedef QMap<QString, stuUsage> UsageLimits_t;
 
 struct stuUsageColDefinition {
     QString AssetPerDay;
-    QString UsagePerDay;
+//    QString UsagePerDay;
     QString AssetPerWeek;
-    QString UsagePerWeek;
+//    QString UsagePerWeek;
     QString AssetPerMonth;
-    QString UsagePerMonth;
+//    QString UsagePerMonth;
     QString AssetTotal;
-    QString UsageTotal;
+//    QString UsageTotal;
 
     stuUsageColDefinition()
     { ; }
 
     stuUsageColDefinition(const stuUsageColDefinition &_other) :
-        AssetPerDay(_other.AssetPerDay),     UsagePerDay(_other.UsagePerDay),
-        AssetPerWeek(_other.AssetPerWeek),   UsagePerWeek(_other.UsagePerWeek),
-        AssetPerMonth(_other.AssetPerMonth), UsagePerMonth(_other.UsagePerMonth),
-        AssetTotal(_other.AssetTotal),       UsageTotal(_other.UsageTotal)
+        AssetPerDay(_other.AssetPerDay),     // UsagePerDay(_other.UsagePerDay),
+        AssetPerWeek(_other.AssetPerWeek),   // UsagePerWeek(_other.UsagePerWeek),
+        AssetPerMonth(_other.AssetPerMonth), // UsagePerMonth(_other.UsagePerMonth),
+        AssetTotal(_other.AssetTotal)        // UsageTotal(_other.UsageTotal)
     { ; }
 
     stuUsageColDefinition(
-        const QString &_assetPerDay,    const QString &_usagePerDay,
-        const QString &_assetPerWeek,   const QString &_usagePerWeek,
-        const QString &_assetPerMonth,  const QString &_usagePerMonth,
-        const QString &_assetTotal,     const QString &_usageTotal
+        const QString &_assetPerDay,    // const QString &_usagePerDay,
+        const QString &_assetPerWeek,   // const QString &_usagePerWeek,
+        const QString &_assetPerMonth,  // const QString &_usagePerMonth,
+        const QString &_assetTotal      // const QString &_usageTotal
     ) :
-        AssetPerDay(_assetPerDay),      UsagePerDay(_usagePerDay),
-        AssetPerWeek(_assetPerWeek),    UsagePerWeek(_usagePerWeek),
-        AssetPerMonth(_assetPerMonth),  UsagePerMonth(_usagePerMonth),
-        AssetTotal(_assetTotal),        UsageTotal(_usageTotal)
+        AssetPerDay(_assetPerDay),      // UsagePerDay(_usagePerDay),
+        AssetPerWeek(_assetPerWeek),    // UsagePerWeek(_usagePerWeek),
+        AssetPerMonth(_assetPerMonth),  // UsagePerMonth(_usagePerMonth),
+        AssetTotal(_assetTotal)         // UsageTotal(_usageTotal)
     { ; }
 };
 
@@ -1165,17 +1165,23 @@ inline AssetUsageLimitsCols_t mergeAssetUsageLimitsCols(const AssetUsageLimitsCo
             if (it->AssetPerMonth.isEmpty() == false)    Result[it.key()].AssetPerMonth = it->AssetPerMonth;
             if (it->AssetTotal.isEmpty() == false)       Result[it.key()].AssetTotal    = it->AssetTotal;
 
-            if (it->UsagePerDay.isEmpty() == false)      Result[it.key()].UsagePerDay   = it->UsagePerDay;
-            if (it->UsagePerWeek.isEmpty() == false)     Result[it.key()].UsagePerWeek  = it->UsagePerWeek;
-            if (it->UsagePerMonth.isEmpty() == false)    Result[it.key()].UsagePerMonth = it->UsagePerMonth;
-            if (it->UsageTotal.isEmpty() == false)       Result[it.key()].UsageTotal    = it->UsageTotal;
+//            if (it->UsagePerDay.isEmpty() == false)      Result[it.key()].UsagePerDay   = it->UsagePerDay;
+//            if (it->UsagePerWeek.isEmpty() == false)     Result[it.key()].UsagePerWeek  = it->UsagePerWeek;
+//            if (it->UsagePerMonth.isEmpty() == false)    Result[it.key()].UsagePerMonth = it->UsagePerMonth;
+//            if (it->UsageTotal.isEmpty() == false)       Result[it.key()].UsageTotal    = it->UsageTotal;
         }
     }
 
     return Result;
 }
 
-typedef QMap<QString, QString> OrderAdditives_t;
+//null: unlimited
+TAPI_DEFINE_STRUCT(stuAssetCredit,
+    SF_NULLABLE_qint32 (PerDay,    NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (PerWeek,   NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (PerMonth,  NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (Total,     NULLABLE_NULL_VALUE)
+);
 
 TAPI_DEFINE_STRUCT(stuDigested,
 //    QJsonObject   Additives;
@@ -1186,18 +1192,12 @@ TAPI_DEFINE_STRUCT(stuDigested,
 //    QJsonObject   Privs;
 );
 
-TAPI_DEFINE_STRUCT(stuAssetCredit,
-    SF_NULLABLE_qint32 (PerDay, 0),
-    SF_NULLABLE_qint32 (PerWeek, 0),
-    SF_NULLABLE_qint32 (PerMonth, 0),
-    SF_NULLABLE_qint64 (Total, 0)
-);
-
 TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (Product, tblAccountProductsBase::DTO, v.prdID),
     SF_Struct           (Saleable, tblAccountSaleablesBase::DTO, v.slbID),
     SF_Struct           (UserAsset, tblAccountUserAssetsBase::DTO, v.uasID),
-    SF_Struct           (AssetUsage, tblAccountAssetUsageBase::DTO, v.usg_uasID),
+//    SF_Struct           (AssetUsage, tblAccountAssetUsageBase::DTO, v.usg_uasID),
+
     SF_Struct           (Credit, stuAssetCredit, [](auto v) { return ((v.PerDay != 0) && (v.PerWeek != 0) && (v.PerMonth != 0) && (v.Total != 0)); }(v)),
 
     SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; } (v))
@@ -1244,6 +1244,8 @@ TAPI_DEFINE_STRUCT(stuActiveCredit,
     SF_QMapOfVarStruct  (MyLimitsOnParent, stuUsage, UsageLimits_t)
 //    SF_qint64           (TTL)
 );
+
+typedef QMap<QString, QString> OrderAdditives_t;
 
 //constexpr char DISCOUNT_TYPE_SYSTEM[]   = "SYSTEM";
 //constexpr char DISCOUNT_TYPE_COUPON[]   = "COUPON";
