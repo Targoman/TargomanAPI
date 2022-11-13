@@ -2,13 +2,16 @@
 
 #include <Qt>
 #include <QObject>
+#include <QSharedData>
 #include <QVariant>
 #include <QMap>
+#include <QHash>
 #include <QList>
 #include <QVector>
 #include <QStringList>
 #include <QDir>
 #include <QPointer>
+#include <QSharedPointer>
 
 #include <string>
 #include <set>

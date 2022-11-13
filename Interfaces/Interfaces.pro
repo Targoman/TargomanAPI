@@ -20,6 +20,7 @@ DIST_HEADERS += \
     Common/GenericEnums.hpp \
     Common/APIArgHelperMacros.hpp \
     Common/QtTypes.hpp \
+    Common/tmplNullable.h \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Authentication.h \

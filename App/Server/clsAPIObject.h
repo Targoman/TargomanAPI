@@ -120,7 +120,7 @@ public:
         return this->ParamTypesName.contains(PARAM_ORMFIELDS);
     }
 
-    inline bool ttl() const {return this->TTL;}
+    inline bool ttl() const { return this->TTL;}
 
     inline QString paramType(quint8 _paramIndex) const {
         Q_ASSERT(_paramIndex < this->/*BaseMethod.parameterType()*/ParamTypesID.size());

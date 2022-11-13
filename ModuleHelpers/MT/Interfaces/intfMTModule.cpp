@@ -203,7 +203,6 @@ NULLABLE_TYPE(stuAssetCredit) extractCreditValue(
     return NULLABLE_NULL_VALUE;
 }
 
-
 template <bool _itmplIsTokenBase>
 stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
@@ -395,12 +394,13 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 //            continue;
 
         //-- remaining credit --------------------------------
-        UsageLimits_t SaleableUsageLimits;
-
-        stuUsage Usage(-1, -1, -1, -1);
+        stuUsage Usage;
 
         //day
-        if (UserAssetInfo.contains("UsedPerDay") && (AssetItem.Credit.PerDay > 0)) {
+        if ((AssetItem.Credit.PerDay > 0)
+                && UserAssetInfo.contains("UsedPerDay")
+                && UserAssetInfo["UsedPerDay"].isValid()
+        ) {
             qint32 UsedPerDay = UserAssetInfo["UsedPerDay"].toLongLong();
             if (AssetItem.Credit.PerDay <= UsedPerDay)
                 continue;
@@ -412,60 +412,17 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
         //month
 
         //total
-        if (UserAssetInfo.contains("UsedTotal") && (AssetItem.Credit.Total > 0)) {
+        if ((AssetItem.Credit.Total > 0)
+                && UserAssetInfo.contains("UsedTotal")
+                && UserAssetInfo["UsedTotal"].isValid()
+        ) {
             qint32 UsedTotal = UserAssetInfo["UsedTotal"].toLongLong();
             if (AssetItem.Credit.Total <= UsedTotal)
                 continue;
             Usage.Total = NULLABLE_VALUE(AssetItem.Credit.Total) - UsedTotal;
         }
 
-        SaleableUsageLimits.insert(_action, Usage);
-
-        /*
-        for (auto Iter = this->AssetUsageLimitsCols.begin();
-            Iter != this->AssetUsageLimitsCols.end();
-            Iter++
-        ) {
-            if (_action.isEmpty() || Iter.key() == _action) {
-
-                stuUsage Usage;
-
-                if (Iter->AssetPerDay.isEmpty() == false)
-                    Usage.PerDay = UserAssetInfo.value(Iter->AssetPerDay).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerDay).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerDay).toUInt()
-                                      : 0);
-
-                if (Iter->AssetPerWeek.isEmpty() == false)
-                    Usage.PerWeek = UserAssetInfo.value(Iter->AssetPerWeek).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerWeek).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerWeek).toUInt()
-                                      : 0);
-
-                if (Iter->AssetPerMonth.isEmpty() == false)
-                    Usage.PerMonth = UserAssetInfo.value(Iter->AssetPerMonth).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerMonth).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerMonth).toUInt()
-                                      : 0);
-
-                if (Iter->AssetTotal.isEmpty() == false)
-                    Usage.Total = UserAssetInfo.value(Iter->AssetTotal).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsageTotal).isValid()
-                                      ? UserAssetInfo.value(Iter->UsageTotal).toUInt()
-                                      : 0);
-
-                //Key: action
-                SaleableUsageLimits.insert(Iter.key(), Usage);
-//                {
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
-//                });
-            }
-        }
-        */
-        AssetItem.Digested.Limits = SaleableUsageLimits;
+        AssetItem.Digested.Limits.insert(_action, Usage);
 
         //-- --------------------------------
         this->digestPrivs(APICALLBOOM_PARAM, AssetItem);
@@ -492,8 +449,7 @@ void intfMTModule<_itmplIsTokenBase>::breakCredit(
     const stuAssetItem &_assetItem,
     Q_DECL_UNUSED const QString &_action
 ) {
-    /*
-                        1         2         3
+    /*                  1         2         3
      days   : 0         0         0         0
      before : |-----------------------------|  total: 100 words / used: 30 words / Duration: 30 Days
      now    :           |

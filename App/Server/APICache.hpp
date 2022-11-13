@@ -76,7 +76,7 @@ public:
 class CentralCache
 {
 public:
-    static bool isValid() {return CentralCache::Connector.isNull() == false;}
+    static bool isValid() { return CentralCache::Connector.isNull() == false;}
     static void setup(intfCacheConnector* _connector) { CentralCache::Connector.reset(_connector); }
     static void setValue(const QString& _key, const QVariant& _value, qint32 _ttl) {
         if (CentralCache::Connector.isNull() == false)

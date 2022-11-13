@@ -447,7 +447,7 @@ QString clsColSpecs::buildColNameString(
 
         QStringList parts;
 
-        QString AggFunction = enuConditionalAggregation::toStr(*this->Data->ConditionalAggregation);
+        QString AggFunction = enuConditionalAggregation::toStr(NULLABLE_VALUE(this->Data->ConditionalAggregation));
         if (this->Data->ConditionalAggregation != enuConditionalAggregation::IF)
             AggFunction.chop(2);
         AggFunction += "(";
@@ -499,10 +499,10 @@ QString clsColSpecs::buildColNameString(
        ///@TODO: why using ANY_VALUE?
 //                   if (this->Data->GroupByCols.size())
 //                       AggFunction = "ANY_VALUE(";
-    } else if (*this->Data->SimpleAggregation == enuAggregation::DISTINCT_COUNT)
+    } else if (NULLABLE_VALUE(this->Data->SimpleAggregation) == enuAggregation::DISTINCT_COUNT)
         AggFunction = "COUNT(DISTINCT ";
     else
-        AggFunction = enuAggregation::toStr(*this->Data->SimpleAggregation)
+        AggFunction = enuAggregation::toStr(NULLABLE_VALUE(this->Data->SimpleAggregation))
                       + "(";
 
     QString ColumnPrefix = (_otherTableAlias.length() ? _otherTableAlias : _tableAlias);

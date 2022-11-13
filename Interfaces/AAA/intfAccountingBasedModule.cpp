@@ -311,10 +311,10 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
             return Now; //QDateTime(Now.date().addDays(1));
 
         return _assetItem.UserAsset.uasValidFromHour < _assetItem.UserAsset.uasValidToHour
-            ? QDateTime(Now.date()).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600)
+                ? QDateTime(Now.date()).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasValidToHour) * 3600)
 //            : _assetItem.UserAsset.uasValidToDate == Now/*.date()*/
 //                ? Now //QDateTime(Now.date().addDays(1))
-                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600);
+                : QDateTime(Now.date().addDays(1)).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasValidToHour) * 3600);
     };
 
     auto FnIsInvalidPackage = [this, &APICALLBOOM_PARAM, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
@@ -399,8 +399,9 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
         return true;
     };
 
-    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && FnIsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
-        return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit)
+            && FnIsInvalidPackage(NULLABLE_VALUE(ServiceCreditsInfo.PreferedCredit)) == false)
+        return stuActiveCredit(NULLABLE_VALUE(ServiceCreditsInfo.PreferedCredit),
                                NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
                                ServiceCreditsInfo.MyLimitsOnParent
 //                               -1

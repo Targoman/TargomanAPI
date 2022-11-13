@@ -1103,11 +1103,16 @@ TAPI_DEFINE_STRUCT(stuBasketItem,
 );
 
 /*****************************************************************************/
+//NULL: unlimited
 TAPI_DEFINE_STRUCT(stuUsage,
-    SF_NULLABLE_qint32 (PerDay),
-    SF_NULLABLE_qint32 (PerWeek),
-    SF_NULLABLE_qint32 (PerMonth),
-    SF_NULLABLE_qint64 (Total)
+//    SF_NULLABLE_qint32 (PerDay),
+//    SF_NULLABLE_qint32 (PerWeek),
+//    SF_NULLABLE_qint32 (PerMonth),
+//    SF_NULLABLE_qint64 (Total)
+    SF_NULLABLE_qint32 (PerDay,    NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (PerWeek,   NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (PerMonth,  NULLABLE_NULL_VALUE),
+    SF_NULLABLE_qint32 (Total,     NULLABLE_NULL_VALUE)
 );
 
 ///key : action
@@ -1175,7 +1180,7 @@ inline AssetUsageLimitsCols_t mergeAssetUsageLimitsCols(const AssetUsageLimitsCo
     return Result;
 }
 
-//null: unlimited
+//NULL: unlimited
 TAPI_DEFINE_STRUCT(stuAssetCredit,
     SF_NULLABLE_qint32 (PerDay,    NULLABLE_NULL_VALUE),
     SF_NULLABLE_qint32 (PerWeek,   NULLABLE_NULL_VALUE),
@@ -1198,7 +1203,8 @@ TAPI_DEFINE_STRUCT(stuAssetItem,
     SF_Struct           (UserAsset, tblAccountUserAssetsBase::DTO, v.uasID),
 //    SF_Struct           (AssetUsage, tblAccountAssetUsageBase::DTO, v.usg_uasID),
 
-    SF_Struct           (Credit, stuAssetCredit, [](auto v) { return ((v.PerDay != 0) && (v.PerWeek != 0) && (v.PerMonth != 0) && (v.Total != 0)); }(v)),
+    SF_Struct           (Credit, stuAssetCredit, [](Q_DECL_UNUSED auto v) { return true;
+                            /*((v.PerDay != 0) && (v.PerWeek != 0) && (v.PerMonth != 0) && (v.Total != 0))*/; }(v)),
 
     SF_Struct           (Digested, stuDigested, [](Q_DECL_UNUSED auto v) { return true; } (v))
 );
@@ -1333,7 +1339,7 @@ TAPI_DEFINE_STRUCT(stuVoucherItemForTrustedAction,
 //    SF_NULLABLE_Enum            (Status, enuVoucherItemProcessStatus)
 //);
 
-//bool KKKKKKKKKKKKKKKKKK() {return true;}
+//bool KKKKKKKKKKKKKKKKKK() { return true;}
 
 
 namespace RequestedUsage {

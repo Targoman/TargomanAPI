@@ -69,7 +69,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
 //    COMPLEXITY_Complex,
 //    Targoman::API::AccountModule,
 //    stuMultiJWT,
-//    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+//    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{ return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 //);
 
 using namespace Targoman::Common::Configuration;

@@ -51,7 +51,7 @@ class Q_DECL_EXPORT FormalityChecker
 {
 public:
     instanceGetter(FormalityChecker)
-    inline QString check(const QString _lang, QString _text) {return this->FCInstance->check(_lang, _text);}
+    inline QString check(const QString _lang, QString _text) { return this->FCInstance->check(_lang, _text);}
 
 private:
     FormalityChecker() : FCInstance(new Targoman::Apps::clsFormalityChecker) { ; }
