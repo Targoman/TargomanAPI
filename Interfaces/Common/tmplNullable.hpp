@@ -119,6 +119,10 @@ public:
         this->Data->setValue(_value);
     }
 
+//    virtual ~tmplNullable() {
+//        delete (this->Data);
+//    }
+
 public:
     bool isNull() const {
         return (this->Data->isNull());

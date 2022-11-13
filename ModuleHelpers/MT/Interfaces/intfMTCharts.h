@@ -44,6 +44,7 @@ TAPI_DEFINE_STRUCT(stuYChartData,
 typedef QMap<QString, stuYChartData> YChartDataSet_t;
 
 TAPI_DEFINE_STRUCT(stuMultiProgressChart,
+    SF_QString          (Title),
     SF_QString          (Type),
     SF_QMapOfVarStruct  (Series, stuChartSeriesItem, ChartSeries_t),
     SF_QMapOfVarStruct  (Data, stuYChartData, YChartDataSet_t)

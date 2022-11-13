@@ -327,35 +327,13 @@ const sampleMultipProgressBar = [
         { name: "informal", title:"محاوره", value: 60 },
     ]},
 ]
- */
+
+*/
 
 stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _currentActorID
 ) {
-    stuMultiProgressChart Result;
-
-    Result.Type = "multiprogress";
-
-    Result.Series.insert("MT_FORMAL", stuChartSeriesItem(
-                             "رسمی",
-                             {
-                                stuChartSeriesItemProps("%")
-                             }
-                             ));
-
-    Result.Series.insert("MT_INFORMAL", stuChartSeriesItem(
-                             "محاوره",
-                             {
-                                stuChartSeriesItemProps("%")
-                             }
-                             ));
-
-    Result.Data.insert("MT_FORMAL", stuYChartData("30"));
-    Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
-
-    return Result;
-
 //    return QVariantMap({
 //                           { "type", "multiprogress" },
 //                           { "series", QVariantMap({
@@ -381,6 +359,32 @@ stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
 //                           }) },
 //                       });
 
+    stuMultiProgressChart Result;
+
+    Result.Title = "Remaining credit percentage";
+
+    Result.Type = "multiprogress";
+
+    Result.Series.insert("MT_FORMAL", stuChartSeriesItem(
+                             "رسمی",
+                             {
+                                stuChartSeriesItemProps("%")
+                             }
+                             ));
+
+    Result.Series.insert("MT_INFORMAL", stuChartSeriesItem(
+                             "محاوره",
+                             {
+                                stuChartSeriesItemProps("%")
+                             }
+                             ));
+
+    Result.Data.insert("MT_FORMAL", stuYChartData("30"));
+    Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
+
+    return Result;
+
+
 
 
 
@@ -388,9 +392,91 @@ stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
     QStringList QueryStringParts;
     QueryStringParts.append("SELECT");
 
-//    REGEXP_LIKE(usgKey, '(.*::)(.*::)formal', 'i')
+//    REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
 
+/*
 
+SELECT
+tblAccountAssetUsage_total.usg_uasID
+-- , tblAccountAssetUsage.usgResolution
+, tblAccountAssetUsage_total.SumUsed AS TotalUsed
+, tblAccountAssetUsage_perYear.DateRes AS YearDateRes
+, tblAccountAssetUsage_perYear.SumUsed AS UsedPerYear
+, tblAccountAssetUsage_perMonth.DateRes AS MonthDateRes
+, tblAccountAssetUsage_perMonth.SumUsed AS UsedPerMonth
+, tblAccountAssetUsage_perDay.DateRes AS DayDateRes
+, tblAccountAssetUsage_perDay.SumUsed AS UsedPerDay
+, tblAccountAssetUsage_perHour.DateRes AS HourDateRes
+, tblAccountAssetUsage_perHour.SumUsed AS UsedPerHour
+-- , tblAccountAssetUsage.usgLastDateTime
+-- , tblAccountAssetUsage.usgKey
+, tblAccountUserAssets.*
+
+FROM tblAccountUserAssets
+
+LEFT JOIN (
+SELECT usg_uasID
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'T'
+GROUP BY usg_uasID
+) tblAccountAssetUsage_total
+ON tblAccountAssetUsage_total.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'Y'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y')
+) tblAccountAssetUsage_perYear
+ON tblAccountAssetUsage_perYear.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'M'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m')
+) tblAccountAssetUsage_perMonth
+ON tblAccountAssetUsage_perMonth.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'D'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d')
+) tblAccountAssetUsage_perDay
+ON tblAccountAssetUsage_perDay.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'H'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H')
+) tblAccountAssetUsage_perHour
+ON tblAccountAssetUsage_perHour.usg_uasID = tblAccountUserAssets.uasID
+
+WHERE tblAccountAssetUsage_total.usg_uasID IS NOT null
+
+-- AND uas_actorID = 542
+
+*/
 
 
 }

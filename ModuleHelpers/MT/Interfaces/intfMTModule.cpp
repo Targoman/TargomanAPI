@@ -221,8 +221,8 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
         QVariantMap CreditValues = UsageIter.value().toMap();
 
         CreditKey = CreditValues.firstKey();
-        if (CreditKey.startsWith(QString("%1::").arg(MTAction::TRANSLATE)))
-            CreditKey = CreditKey.mid(QString("%1::").arg(MTAction::TRANSLATE).length());
+        if (CreditKey.startsWith(QString("%1::").arg(_action/*MTAction::TRANSLATE*/)))
+            CreditKey = CreditKey.mid(QString("%1::").arg(_action/*MTAction::TRANSLATE*/).length());
 
 //        qint64 UsedWordCount = CreditValues.first().toLongLong();
         break;
@@ -231,7 +231,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     if (CreditKey.isEmpty())
         throw exHTTPInternalServerError("Credit key is empty");
 
-    QString FullCreditKey = QString("%1::%2").arg(MTAction::TRANSLATE).arg(CreditKey);
+    QString FullCreditKey = QString("%1::%2").arg(_action/*MTAction::TRANSLATE*/).arg(CreditKey);
 
     ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
                                  .where({ tblAccountUserAssetsBase::Fields::uasStatus,

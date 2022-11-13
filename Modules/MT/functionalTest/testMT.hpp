@@ -606,12 +606,32 @@ private slots:
         }
     }
 
-    void assetUsage_chart() {
+    //charts
+    //--------------------------------------
+    void assetUsage_chart_Schema() {
         QT_TRY {
             QVariant Result = callUserAPI(
-                RESTClientHelper::POST,
-                "MT/AccountAssetUsage/chart",
-                {},
+                RESTClientHelper::GET,
+                "MT/Charts/schema",
+                {
+//                    { "key", "dashboard" },
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void assetUsage_chart_usageDataForProgressBar() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "MT/Charts/usageDataForProgressBar",
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "assetID",     },
