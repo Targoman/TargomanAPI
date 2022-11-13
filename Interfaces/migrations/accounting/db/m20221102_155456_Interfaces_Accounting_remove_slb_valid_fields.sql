@@ -16,6 +16,3 @@ ALTER TABLE `tblAccountSaleables`
     DROP COLUMN `slbValidToHour`,
     DROP COLUMN `slbDurationMinutes`,
     DROP COLUMN `slbStartAtFirstUse`;
-
-ALTER TABLE `tblAccountSaleables`
-    DROP COLUMN `slbCreditTotalWords`;

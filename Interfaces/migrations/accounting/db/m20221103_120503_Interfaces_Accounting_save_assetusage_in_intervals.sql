@@ -18,11 +18,11 @@ ALTER TABLE `tblAccountAssetUsage`
         `usg_uasID`,
         `usgResolution`,
         CASE `usgResolution`
-            WHEN 'Y' THEN date_format(`usgLastDateTime`,'%Y')
-            WHEN 'M' THEN date_format(`usgLastDateTime`,'%Y-%m')
-            WHEN 'D' THEN date_format(`usgLastDateTime`,'%Y-%m-%d')
-            WHEN 'H' THEN date_format(`usgLastDateTime`,'%Y-%m-%d %H')
-            WHEN 'I' THEN date_format(`usgLastDateTime`,'%Y-%m-%d %H:%i')
+            WHEN 'Y' THEN DATE_FORMAT(`usgLastDateTime`,'%Y')
+            WHEN 'M' THEN DATE_FORMAT(`usgLastDateTime`,'%Y-%m')
+            WHEN 'D' THEN DATE_FORMAT(`usgLastDateTime`,'%Y-%m-%d')
+            WHEN 'H' THEN DATE_FORMAT(`usgLastDateTime`,'%Y-%m-%d %H')
+            WHEN 'I' THEN DATE_FORMAT(`usgLastDateTime`,'%Y-%m-%d %H:%i')
             ELSE 'TOTAL'
         END,
         IFNULL(`usgKey`,'[[NO-KEY]]')
@@ -35,8 +35,3 @@ ALTER TABLE `tblAccountAssetUsage`
     DROP PRIMARY KEY;
 
 DROP TABLE tblAccountAssetUsageHistory;
-
-
-
-
-

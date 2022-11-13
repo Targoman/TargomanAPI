@@ -6,6 +6,13 @@ ERROR("THIS MIGRATION FILE IS NOT READY FOR EXECUTE.")
 
 USE `{{dbprefix}}{{Schema}}`;
 
+ALTER TABLE `tblAccountSaleables`
+    DROP COLUMN `slbCreditTotalWords`;
+
+
+
+
+
 ALTER TABLE `tblAccountProducts`
     ADD COLUMN `prdCreditSpecs` JSON NULL AFTER `prdUpdatedBy_usrID`;
 
