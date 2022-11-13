@@ -231,6 +231,8 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     if (CreditKey.isEmpty())
         throw exHTTPInternalServerError("Credit key is empty");
 
+    QString FullCreditKey = QString("%1::%2").arg(MTAction::TRANSLATE).arg(CreditKey);
+
     ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
                                  .where({ tblAccountUserAssetsBase::Fields::uasStatus,
                                           enuConditionOperator::Equal,
@@ -422,7 +424,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
             Usage.Total = NULLABLE_VALUE(AssetItem.Credit.Total) - UsedTotal;
         }
 
-        AssetItem.Digested.Limits.insert(_action, Usage);
+        AssetItem.Digested.Limits.insert(FullCreditKey, Usage);
 
         //-- --------------------------------
         this->digestPrivs(APICALLBOOM_PARAM, AssetItem);

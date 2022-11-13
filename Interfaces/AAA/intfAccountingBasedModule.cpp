@@ -335,8 +335,8 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                  UsageIter != _requestedUsage.end();
                  UsageIter++
             ) {
-                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
-                    continue;
+//                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
+//                    continue;
 
                 if (UsageIter.key() != RequestedUsage::CREDIT)
                     continue;
@@ -355,17 +355,16 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 while (CreditKey.isEmpty() == false) {
                     // check
                     //----------------
-                    if (_assetItem.Digested.Limits.contains(CreditKey) == false)
-                        continue;
+                    if (_assetItem.Digested.Limits.contains(CreditKey)) {
+                        stuUsage Remaining = _assetItem.Digested.Limits.value(CreditKey);
 
-                    stuUsage Remaining = _assetItem.Digested.Limits.value(CreditKey);
-
-                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && NULLABLE_VALUE(Remaining.PerDay) < CreditValue)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && NULLABLE_VALUE(Remaining.PerWeek) < CreditValue)
-                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && NULLABLE_VALUE(Remaining.PerMonth) < CreditValue)
-                           || (NULLABLE_HAS_VALUE(Remaining.Total) && NULLABLE_VALUE(Remaining.Total) < CreditValue)
-                        )
-                        return false;
+                        if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && NULLABLE_VALUE(Remaining.PerDay) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && NULLABLE_VALUE(Remaining.PerWeek) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && NULLABLE_VALUE(Remaining.PerMonth) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.Total) && NULLABLE_VALUE(Remaining.Total) < CreditValue)
+                            )
+                            return true;
+                    }
 
                     // next
                     //----------------
@@ -396,7 +395,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 //                }
             }
         }
-        return true;
+        return false;
     };
 
     if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit)
