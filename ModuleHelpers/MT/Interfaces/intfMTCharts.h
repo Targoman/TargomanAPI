@@ -25,6 +25,7 @@
 #define TARGOMAN_API_MODULEHELPERS_MT_INTERFACES_INTFMTCHARTS_H
 
 #include "Interfaces/API/intfPureModule.h"
+//#include "intfMTModule.h"
 
 namespace Targoman::API::ModuleHelpers::MT {
 
@@ -68,6 +69,7 @@ namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 using namespace API;
 
+template <bool _itmplIsTokenBase>
 class baseintfMTCharts : public intfPureModule
 {
 public:
@@ -76,29 +78,38 @@ public:
     );
 
 //public:
-//    virtual bool IsTokenBase() = 0;
+//    intfMTModule<_itmplIsTokenBase> *mtModule();
 
 protected:
+    QVariant getSchema(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        QString _key = {}
+    );
+
 //    virtual QStringList creditFieldNames() = 0;
 
     Targoman::API::ModuleHelpers::MT::stuMultiProgressChart usageDataForProgressBar(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        quint64 _currentActorID
+        quint64 _actorID,
+        QString _key = {}
     );
 
     QVariant usageDataForPieChart(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        quint64 _currentActorID
+        quint64 _actorID,
+        QString _key = {}
     );
 
     QVariant usageDataForLineChart(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
-        quint64 _currentActorID
+        quint64 _actorID,
+        QString _key = {}
     );
+
 };
 
 /******************************************************/
-class baseintfMTCharts_USER : public baseintfMTCharts
+class baseintfMTCharts_USER : public baseintfMTCharts<false>
 {
     Q_OBJECT
 
@@ -113,10 +124,20 @@ protected:
 //    }
 
 protected slots:
+    QVariant REST_GET(
+        schema,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _key = {}
+        ),
+        "Get Charts schema"
+    );
+
     Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
         usageDataForProgressBar,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _key = {}
         ),
         "Get MT Usage chart data for progress bar"
     );
@@ -124,7 +145,8 @@ protected slots:
     QVariant REST_GET(
         usageDataForPieChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _key = {}
         ),
         "Get MT Usage chart data for pie chart"
     );
@@ -132,14 +154,15 @@ protected slots:
     QVariant REST_GET(
         usageDataForLineChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _key = {}
         ),
         "Get MT Usage chart data for lin chart"
     );
 };
 
 /******************************************************/
-class baseintfMTCharts_API : public baseintfMTCharts
+class baseintfMTCharts_API : public baseintfMTCharts<true>
 {
     Q_OBJECT
 
@@ -154,11 +177,22 @@ protected:
 //    }
 
 protected slots:
+    QVariant REST_GET(
+        schema,
+        (
+            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            QString _apiToken,
+            QString _key = {}
+        ),
+        "Get Charts schema"
+    );
+
     Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
         usageDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString _apiToken
+            QString _apiToken,
+            QString _key = {}
         ),
         "Get MT Usage chart data for progress bar"
     );
@@ -167,7 +201,8 @@ protected slots:
         usageDataForPieChart,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString _apiToken
+            QString _apiToken,
+            QString _key = {}
         ),
         "Get MT Usage chart data for pie chart"
     );
@@ -176,7 +211,8 @@ protected slots:
         usageDataForLineChart,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString _apiToken
+            QString _apiToken,
+            QString _key = {}
         ),
         "Get MT Usage chart data for lin chart"
     );

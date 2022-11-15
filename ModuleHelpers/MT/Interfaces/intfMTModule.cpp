@@ -101,12 +101,9 @@ QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
     tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
     AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
 
-    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
-    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
     if (AccountProductsMTBaseDTO.prdCreditSpecs.isEmpty() == false)
         Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs,
-                      AccountProductsMTBaseDTO.prdCreditSpecs
+                      AccountProductsMTBaseDTO.prdCreditSpecs.object().toVariantMap()
                       );
 
     return Result;

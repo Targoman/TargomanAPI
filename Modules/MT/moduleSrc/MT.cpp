@@ -201,7 +201,11 @@ QVariantMap MT::getCustomUserAssetFieldsForQuery(
 ) {
     ///@TODO: [very important] complete this
 
-    QVariantMap Result;
+    QVariantMap Result = intfMTModule::getCustomUserAssetFieldsForQuery(
+                             APICALLBOOM_PARAM,
+                             _basketItem,
+                             _oldVoucherItem
+                             );
 
 //    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
 //        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());

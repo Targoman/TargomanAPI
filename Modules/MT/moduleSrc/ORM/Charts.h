@@ -39,16 +39,6 @@ class Charts : public intfMTCharts<true>
 {
     Q_OBJECT
     TARGOMAN_API_SUBMODULE_DEFINE(MT, Charts)
-
-protected slots:
-    QVariant REST_GET(
-        schema,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString _key = {}
-        ),
-        "Get Charts schema"
-    );
 };
 
 } //namespace ORM

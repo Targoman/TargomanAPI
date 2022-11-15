@@ -27,6 +27,7 @@
 #include "Interfaces/AAA/clsJWT.hpp"
 //#include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Helpers/TokenHelper.h"
+#include "intfMTAccounting.h"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
@@ -73,11 +74,17 @@ quint64 checkAPITokenOwner(
 /**************************************************************************************\
 |** baseintfMTCharts ******************************************************************|
 \**************************************************************************************/
-baseintfMTCharts::baseintfMTCharts(
+template <bool _itmplIsTokenBase>
+baseintfMTCharts<_itmplIsTokenBase>::baseintfMTCharts(
     const QString &_module
 ) :
     intfPureModule(_module)
 { ; }
+
+//template <bool _itmplIsTokenBase>
+//intfMTModule<_itmplIsTokenBase> *baseintfMTCharts<_itmplIsTokenBase>::mtModule() {
+//    return this->MTModule;
+//}
 
 /*
 SELECT
@@ -312,6 +319,197 @@ const sampleLineData = {
 
 */
 
+template <bool _itmplIsTokenBase>
+QVariant baseintfMTCharts<_itmplIsTokenBase>::getSchema(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    QString _key
+) {
+    ///@TODO: read from tblConfigurations
+
+    QString Schema = R"(
+{
+    title: 'MT Charts',
+    charts: [
+        {
+            type: multiprogress,
+            title: 'Remaining credit percentage',
+            charts: [
+                {
+                    type: 'progressBar',
+                    title: 'Formal',
+                    name: 'Formal',
+                    min: '{{MIN}}',
+                    max: '{{MAX}}',
+                    value: '{{VALUE}}',
+                    endpoint: {
+                        'url' : '{{API_URL}}/MT/Charts/usageDataForProgressBar',
+                        'params' : [
+                            'apiToken' : '{{API_TOKEN}}',
+                            'key' : '{{KEY}}',
+                            'path' : '*::formal',
+                        ],
+                    },
+                },
+            ],
+            endpoint: {
+                'url' : '{{API_URL}}/MT/Charts/usageDataForProgressBar',
+                'params' : [
+                    'apiToken' : '{{API_TOKEN}}',
+                    'key' : '{{KEY}}',
+                    'withSchema' : 1,
+                ],
+            },
+            props: {
+                key: 'value' //Key values in order to customize chart. TBDL
+            }
+        },
+
+
+        {
+            type: pie,
+            title: 'Optional title (default null)', //ex. Type of usage
+            items: [{
+                name: 'name of the field', // ex. Formal
+                label: 'label', //ex. Formal
+                value: '{{VALUE_PLACE_HOLDER}}', // ex. {{MT_FORMAL}}
+            }, {
+                name: 'name of the field', // ex. Informal
+                label: 'label', //ex. Informal
+                value: '{{VALUE_PLACE_HOLDER}}' // ex. {{MT_INFORMAL}}
+            }],
+            endpoint: 'API endpoint to fetch data', //optional when used in multiPie
+            props: {
+                key: 'value' //Key values in order to customize chart. TBDL
+            }
+        },
+        {
+            type: multiPie,
+            title: 'Optional box title (default null)', //ex. Type of usage
+            charts: 'Optional array of at least one pie', //optional when used in multiprogress
+            endpoint: 'API endpoint to fetch data of data+specs',
+            props: {
+                overall: 'true or false indicating wheter to generate an overal piechart or not',
+                key: 'value' //Key values in order to customize chart. TBDL
+            }
+        },
+        {
+            type: '2D',
+            title: 'Optional title (default null)', //ex. Historical Usage
+            axis: {
+                X: {
+                    label: 'Optional Main X axis label', //ex. Time
+                    type: 'date|int|float| ...',
+                    props: {
+                        key: 'value' //Key values in order to customize chart. TBDL
+                    }
+                },
+                Y: {
+                    label: 'Optional Main Y axis label', //ex. Count
+                    type: 'int|float| ...',
+                    props: {
+                        key: 'value' //Key values in order to customize chart. TBDL
+                    }
+                },
+                X2: { //Optional
+                    label: 'Optional Secondary X axis label', //ex. Time
+                    type: 'date|int|float| ...',
+                    props: {
+                        key: 'value' //Key values in order to customize chart. TBDL
+                    }
+                },
+                Y2: { //Optional
+                    label: 'Optional Secondary Y axis label', //ex. Count
+                    type: 'int|float| ...',
+                    props: {
+                        key: 'value' //Key values in order to customize chart. TBDL
+                    }
+                }
+            },
+            endpoint: 'API endpoint to fetch data',
+            type: 'line|bar|stacked|Candle|mixed...',
+            items: [ { //this is optinal and can be fetched from endpoint
+                    type: 'line|bar|stacked|Candle...', //optinal to be used on mixed type,
+                    name: 'name of the field', // ex. Formal
+                    value: '{{VALUE_PLACE_HOLDER}}', // ex. {{MT_INFORMAL}}
+                    props: {
+                        key: 'value' //Key values in order to customize chart. TBDL
+                    }
+                }
+            ],
+            props: {
+                key: 'value' //Key values in order to customize chart. TBDL
+            }
+        }
+    ]
+}
+)";
+
+    return Schema
+            .replace("{{KEY}}", _key)
+            ;
+}
+
+/*
+-- input: -----------------------
+{
+    "ALL": 10000,
+    "NMT": {
+        "ALL": 5000,
+        "en2fa": {
+            "ALL": 1000,
+            "formal": 2000
+        }
+    },
+    "TST": {
+        "ALL": 4000
+    },
+    "ENMT": {
+        "en2fa": {
+            "formal": 3000
+        }
+    }
+}
+
+-- output: -----------------------
+NMT					->  5,000
+NMT::formal			->  1,000
+NMT::formal::en2fa	->  2,300
+ENMT::formal::en2fa	->  3,000
+ENMT::informal		-> -1
+TST					-> -1
+ALL					-> 10,000
+*/
+void extractSumOfCreditValues(
+    QMap<QString, qint64> &_sumOfCredits,
+    const QVariantMap &_creditSpecs,
+    const QString &_parentPath = {}
+) {
+    for (auto it = _creditSpecs.constBegin();
+         it != _creditSpecs.constEnd();
+         it++
+    ) {
+        QString Path = it.key();
+        QVariant Value = it.value();
+
+        QString FullPath = (_parentPath.isEmpty()
+                            ? Path
+                            : _parentPath + "::" + Path).toLower();
+
+        if (Value.canConvert<QVariantMap>()) {
+            extractSumOfCreditValues(
+                _sumOfCredits,
+                Value.toMap(),
+                FullPath
+                );
+        } else {
+            if (_sumOfCredits.contains(FullPath))
+                _sumOfCredits[FullPath] = _sumOfCredits[FullPath] + Value.toLongLong();
+            else
+                _sumOfCredits[FullPath] = Value.toLongLong();
+        }
+    }
+}
+
 /***
  * report type: multi progress bar
  *
@@ -327,12 +525,12 @@ const sampleMultipProgressBar = [
         { name: "informal", title:"محاوره", value: 60 },
     ]},
 ]
-
 */
-
-stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
+template <bool _itmplIsTokenBase>
+stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressBar(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    quint64 _currentActorID
+    quint64 _actorID,
+    QString _key
 ) {
 //    return QVariantMap({
 //                           { "type", "multiprogress" },
@@ -382,17 +580,72 @@ stuMultiProgressChart baseintfMTCharts::usageDataForProgressBar(
     Result.Data.insert("MT_FORMAL", stuYChartData("30"));
     Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
 
-    return Result;
 
+    baseintfAccountingBasedModule* ParentModule = dynamic_cast<baseintfAccountingBasedModule*>(this->parentModule());
 
+    //credits
+    //------------------------------------------------
+    ORMSelectQuery SelectQuery = ParentModule->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
+                                 .where({ tblAccountUserAssetsBase::Fields::uasStatus,
+                                          enuConditionOperator::Equal,
+                                          enuAuditableStatus::Active })
+//                                 .addCols(this->accountUserAssets()->selectableColumnNames())
+                                 ;
 
+    SelectQuery
+        .andWhere({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::LessEqual,
+                DBExpression::NOW() })
+        )
+        .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::Null })
+            .orCond({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::GreaterEqual,
+                DBExpression::NOW() })
+        )
+    ;
+
+    TAPI::stuTable Table = SelectQuery.pageSize(0).all();
+
+    QList<quint64> AssetsIDs;
+    QMap<QString, qint64> SumOfCredits;
+
+    foreach (QVariant Row, Table.Rows) {
+        QVariantMap UserAssetInfo = Row.toMap();
+
+        AssetsIDs.append(UserAssetInfo[tblAccountUserAssetsBase::Fields::uasID].toULongLong());
+
+        if (UserAssetInfo.contains(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs) == false)
+            continue;
+
+        QVariantMap CreditSpecs = UserAssetInfo[tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs].toMap();
+        extractSumOfCreditValues(SumOfCredits, CreditSpecs);
+    }
+
+    //usages
+    //------------------------------------------------
+    QString Schema = getSchema(APICALLBOOM_PARAM, _key).toString();
+
+    QStringList ChartPaths = {
+        "NMT::formal",
+        "NMT::informal",
+    };
+
+    foreach (QString ChartPath, ChartPaths) {
+
+    }
 
 
     QStringList QueryStringParts;
     QueryStringParts.append("SELECT");
 
 //    REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+
+
+
+
+    return Result;
+
 
 /*
 
@@ -481,9 +734,11 @@ WHERE tblAccountAssetUsage_total.usg_uasID IS NOT null
 
 }
 
-QVariant baseintfMTCharts::usageDataForPieChart(
+template <bool _itmplIsTokenBase>
+QVariant baseintfMTCharts<_itmplIsTokenBase>::usageDataForPieChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    quint64 _currentActorID
+    quint64 _actorID,
+    QString _key
 ) {
     return QVariantMap({
                            { "type", "pie" },
@@ -504,9 +759,11 @@ QVariant baseintfMTCharts::usageDataForPieChart(
                        });
 }
 
-QVariant baseintfMTCharts::usageDataForLineChart(
+template <bool _itmplIsTokenBase>
+QVariant baseintfMTCharts<_itmplIsTokenBase>::usageDataForLineChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    quint64 _currentActorID
+    quint64 _actorID,
+    QString _key
 ) {
     return QVariantMap({
                            { "type", "line" },
@@ -537,7 +794,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 
 //TAPI::stuTable baseintfMTCharts::charts(
 //    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-//    quint64                 _currentActorID,
+//    quint64                 _actorID,
 //    quint64                 _pageIndex,
 //    quint16                 _pageSize,
 //    bool                    _reportCount,
@@ -606,7 +863,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 //    QStringList WhereParts;
 
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-//        WhereParts.append(QString("uas_actorID = %1").arg(_currentActorID));
+//        WhereParts.append(QString("uas_actorID = %1").arg(_actorID));
 
 //    if (_assetID > 0)
 //        WhereParts.append(QString("ush_uasID = %1").arg(_assetID));
@@ -679,8 +936,16 @@ baseintfMTCharts_USER::baseintfMTCharts_USER(
         _module
 ) { ; }
 
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, schema, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _key
+)) {
+    return getSchema(APICALLBOOM_PARAM, _key);
+}
+
 Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _key
 )) {
     quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
 
@@ -688,12 +953,14 @@ Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMT
 
     return this->usageDataForProgressBar(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForPieChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _key
 )) {
     quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
 
@@ -701,12 +968,14 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForPieChart, (
 
     return this->usageDataForPieChart(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForLineChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _key
 )) {
     quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
 
@@ -714,7 +983,8 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForLineChart, (
 
     return this->usageDataForLineChart(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
@@ -728,9 +998,18 @@ baseintfMTCharts_API::baseintfMTCharts_API(
         _module
 ) { ; }
 
+QVariant IMPL_REST_GET(baseintfMTCharts_API, schema, (
+    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    QString _apiToken,
+    QString _key
+)) {
+    return getSchema(APICALLBOOM_PARAM, _key);
+}
+
 Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    QString _apiToken
+    QString _apiToken,
+    QString _key
 )) {
     quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
 
@@ -738,13 +1017,15 @@ Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMT
 
     return this->usageDataForProgressBar(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForPieChart, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    QString _apiToken
+    QString _apiToken,
+    QString _key
 )) {
     quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
 
@@ -752,13 +1033,15 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForPieChart, (
 
     return this->usageDataForPieChart(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForLineChart, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    QString _apiToken
+    QString _apiToken,
+    QString _key
 )) {
     quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
 
@@ -766,7 +1049,8 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForLineChart, (
 
     return this->usageDataForLineChart(
         APICALLBOOM_PARAM,
-        CurrentActorID
+        CurrentActorID,
+        _key
     );
 }
 
@@ -782,6 +1066,7 @@ intfMTCharts<_itmplIsTokenBase>::intfMTCharts(
     )
 { ; }
 
+/**************************************************************************************/
 template class intfMTCharts<false>;
 template class intfMTCharts<true>;
 
