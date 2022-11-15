@@ -450,64 +450,130 @@ QVariant baseintfMTCharts<_itmplIsTokenBase>::getSchema(
 }
 
 /*
+
+credit:
 -- input: -----------------------
 {
-    "ALL": 10000,
-    "NMT": {
-        "ALL": 5000,
-        "en2fa": {
-            "ALL": 1000,
-            "formal": 2000
+    'NMT': {
+        'ALL': 5000,
+        'formal': {
+            'ALL': {
+                total: 1000
+            },
+            'en2fa': {
+                'day' : 2000,
+                'week' : 2100,
+                'month' : 2200,
+                'total' : 2300
+            }
         }
     },
-    "TST": {
-        "ALL": 4000
-    },
-    "ENMT": {
-        "en2fa": {
-            "formal": 3000
+    'ENMT': {
+        'formal': {
+            'en2fa': 3000,
+        },
+        'Informal' : {
+            month: 1000,
+            total: -1  //unlimited total so it can be discarded
         }
-    }
+    },
+    'TST': {
+        'month' : 4000
+        // this means total is unlimited
+    },
+    'ALL': 10000
 }
 
 -- output: -----------------------
-NMT					->  5,000
-NMT::formal			->  1,000
-NMT::formal::en2fa	->  2,300
-ENMT::formal::en2fa	->  3,000
-ENMT::informal		-> -1
-TST					-> -1
-ALL					-> 10,000
+NMT                 -> 5,000
+NMT::formal         -> 1,000
+NMT::formal::en2fa	-> 2,300
+ENMT::formal::en2fa	-> 3,000
+ENMT::informal      -> -1
+TST                 -> -1
+ALL                 -> 10,000
+
 */
-void extractSumOfCreditValues(
-    QMap<QString, qint64> &_sumOfCredits,
+
+struct stuCreditUsageRemained {
+    qint64 Credit = -1;
+    qint64 Usage = 0;
+    qint64 Remained = -1;
+};
+
+int extractSumOfCreditValues(
+    QMap<QString, stuCreditUsageRemained> &_creditUsageRemained,
     const QVariantMap &_creditSpecs,
     const QString &_parentPath = {}
 ) {
+    int NumOfInserted = 0;
+
     for (auto it = _creditSpecs.constBegin();
          it != _creditSpecs.constEnd();
          it++
     ) {
-        QString Path = it.key();
         QVariant Value = it.value();
+        QString Path = it.key().toLower();
 
-        QString FullPath = (_parentPath.isEmpty()
-                            ? Path
-                            : _parentPath + "::" + Path).toLower();
+        if ((Path == "day") || (Path == "week") || (Path == "month"))
+            continue;
+
+        QString FullPath = _parentPath;
+
+        if (Path == "all")
+            Path = (FullPath.isEmpty() ? "*" : "");
+        else if (Path == "total") {
+            if (Value.canConvert<QVariantMap>())
+                throw exTargomanBase("'total' credit item must be leaf");
+            Path = "";
+        }
+
+        if (Path.length()) {
+            if (FullPath.isEmpty() == false)
+                FullPath += "::";
+            FullPath += Path;
+        }
 
         if (Value.canConvert<QVariantMap>()) {
-            extractSumOfCreditValues(
-                _sumOfCredits,
+            int n = extractSumOfCreditValues(
+                _creditUsageRemained,
                 Value.toMap(),
                 FullPath
                 );
+
+            if (n > 0)
+                ++NumOfInserted;
         } else {
-            if (_sumOfCredits.contains(FullPath))
-                _sumOfCredits[FullPath] = _sumOfCredits[FullPath] + Value.toLongLong();
+            qint64 V = Value.toLongLong();
+
+            if ((V != -1) && _creditUsageRemained.contains(FullPath))
+                _creditUsageRemained[FullPath].Credit += V;
             else
-                _sumOfCredits[FullPath] = Value.toLongLong();
+                _creditUsageRemained[FullPath].Credit = V;
+
+            ++NumOfInserted;
         }
     }
+
+    if (NumOfInserted == 0) {
+        QString Path = "";
+        if (_parentPath.isEmpty())
+            Path = "*";
+
+        QString FullPath = _parentPath;
+
+        if (Path.length()) {
+            if (FullPath.isEmpty() == false)
+                FullPath += "::";
+            FullPath += Path;
+        }
+
+        _creditUsageRemained[FullPath].Credit = -1;
+
+        ++NumOfInserted;
+    }
+
+    return NumOfInserted;
 }
 
 /***
@@ -526,6 +592,7 @@ const sampleMultipProgressBar = [
     ]},
 ]
 */
+
 template <bool _itmplIsTokenBase>
 stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressBar(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
@@ -581,6 +648,9 @@ stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressB
     Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
 
 
+
+    QMap<QString, stuCreditUsageRemained> CreditUsageRemained;
+
     baseintfAccountingBasedModule* ParentModule = dynamic_cast<baseintfAccountingBasedModule*>(this->parentModule());
 
     //credits
@@ -607,29 +677,76 @@ stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressB
 
     TAPI::stuTable Table = SelectQuery.pageSize(0).all();
 
-    QList<quint64> AssetsIDs;
-    QMap<QString, qint64> SumOfCredits;
+    QStringList AssetsIDs;
+//    QMap<QString, qint64> SumOfCredits;
 
     foreach (QVariant Row, Table.Rows) {
         QVariantMap UserAssetInfo = Row.toMap();
 
-        AssetsIDs.append(UserAssetInfo[tblAccountUserAssetsBase::Fields::uasID].toULongLong());
+        AssetsIDs.append(UserAssetInfo[tblAccountUserAssetsBase::Fields::uasID].toString());
 
         if (UserAssetInfo.contains(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs) == false)
             continue;
 
         QVariantMap CreditSpecs = UserAssetInfo[tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs].toMap();
-        extractSumOfCreditValues(SumOfCredits, CreditSpecs);
+        extractSumOfCreditValues(CreditUsageRemained, CreditSpecs);
     }
 
     //usages
     //------------------------------------------------
-    QString Schema = getSchema(APICALLBOOM_PARAM, _key).toString();
+    ORMSelectQuery UsageSelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(APICALLBOOM_PARAM)
+                                      .where({ tblAccountAssetUsageBase::Fields::usg_uasID,
+                                               enuConditionOperator::In,
+                                               AssetsIDs.join(",") })
+                                      .andWhere({ tblAccountAssetUsageBase::Fields::usgResolution,
+                                                  enuConditionOperator::Equal,
+                                                  Targoman::API::AAA::enuAssetUsageResolution::Total
+                                                })
+                                      ;
 
-    QStringList ChartPaths = {
-        "NMT::formal",
-        "NMT::informal",
-    };
+    TAPI::stuTable UsageTable = UsageSelectQuery.pageSize(0).all();
+
+    foreach (QVariant Row, UsageTable.Rows) {
+        QVariantMap AssetUsageInfo = Row.toMap();
+
+        tblAccountAssetUsageMTBase::DTO AccountAssetUsageMTBaseDTO;
+        AccountAssetUsageMTBaseDTO.fromJson(QJsonObject::fromVariantMap(AssetUsageInfo));
+
+        QString UsageKey = AccountAssetUsageMTBaseDTO.usgKey.toLower();
+
+        while (UsageKey.length()) {
+            if (CreditUsageRemained.contains(UsageKey)) {
+                CreditUsageRemained[UsageKey].Usage += AccountAssetUsageMTBaseDTO.usgUsedTotalWords;
+
+                break;
+            }
+
+            int idx = UsageKey.lastIndexOf("::");
+            if (idx < 0)
+                break;
+
+            UsageKey = UsageKey.left(idx);
+        }
+    }
+
+//    QString Schema = getSchema(APICALLBOOM_PARAM, _key).toString();
+//    QStringList ChartPaths = extract from schema
+
+    for (auto it = CreditUsageRemained.begin();
+         it != CreditUsageRemained.end();
+         ++it
+    ) {
+        ///@TODO: remove item if not exists in schema
+
+        if ((it->Credit == -1) || (it->Usage == 0))
+            continue;
+
+        it->Remained = it->Credit - it->Usage;
+    }
+
+    //output
+    //------------------------------------------------
+    QStringList ChartPaths = CreditUsageRemained.keys();
 
     foreach (QString ChartPath, ChartPaths) {
 

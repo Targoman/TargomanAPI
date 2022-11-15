@@ -194,8 +194,48 @@ private slots:
                     { tblAccountProductsBase::Fields::prdDurationMinutes,   60 },
                     { tblAccountProductsBase::Fields::prdStartAtFirstUse,   true },
                     { tblAccountProductsMTBase::ExtraFields::prdCreditSpecs, QVariantMap({
-                          { "ALL", 1000 },
-                    }) },
+                          { "TEST_AAA", QVariantMap({
+                              { "ALL", 35000 },
+                              { "formal", QVariantMap({
+                                  { "ALL", QVariantMap({
+                                        { "total", 31000 },
+                                  }) },
+                                  { "en2fa", QVariantMap({
+                                        { "day", 32000 },
+                                        { "week", 32100 },
+                                        { "month", 32200 },
+                                        { "total", 32300 },
+                                  }) },
+                              }) },
+                          }) },
+                          { "NMT", QVariantMap({
+                              { "ALL", 5000 },
+                              { "formal", QVariantMap({
+                                  { "ALL", QVariantMap({
+                                        { "total", 1000 },
+                                  }) },
+                                  { "en2fa", QVariantMap({
+                                        { "day", 2000 },
+                                        { "week", 2100 },
+                                        { "month", 2200 },
+                                        { "total", 2300 },
+                                  }) },
+                              }) },
+                          }) },
+                          { "ENMT", QVariantMap({
+                              { "formal", QVariantMap({
+                                  { "en2fa", 3000 },
+                              }) },
+                              { "informal", QVariantMap({
+                                    { "month", 1000 },
+                                    { "total", -1 },
+                              }) },
+                          }) },
+                          { "TST", QVariantMap({
+                              { "month", 4000 },
+                          }) },
+                          { "ALL", 10000 },
+                      }) },
                 }
             );
 
@@ -554,7 +594,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "This is a sample text for testing." },
+                            { "text", "This is a sample text for testing and a b" },
                             { "engine", "TEST_AAA" },
                             { "dir", "en2fa" },
                         });
@@ -574,7 +614,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "text", "این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه" },
                             { "engine", "TEST_AAA" },
                             { "dir", "fa2en" },
                         });
@@ -594,7 +634,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "text", "این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش" },
                             { "engine", "TEST_AAA" },
                             { "dir", "fa2ar" },
                         });

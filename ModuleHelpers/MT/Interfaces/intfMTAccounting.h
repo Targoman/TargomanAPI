@@ -339,8 +339,8 @@ namespace tblAccountAssetUsageMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type                        Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
-            { ExtraFields::usgUsedTotalWords,   S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(0),  QNull,      UPAdmin }
+            //ColName                           Type        Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
+            { ExtraFields::usgUsedTotalWords,   S(quint32), QFV.integer().minValue(0),  QNull,      UPAdmin }
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -359,7 +359,7 @@ namespace tblAccountAssetUsageMTBase {
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageMTBase_DTO,
 
-        SF_NULLABLE_quint32         (usgUsedTotalWords)
+        SF_quint32                  (usgUsedTotalWords)
     );
 }
 

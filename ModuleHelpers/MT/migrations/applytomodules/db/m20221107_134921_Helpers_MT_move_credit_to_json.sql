@@ -45,3 +45,6 @@ UPDATE tblAccountUserAssets
 
 ALTER TABLE `tblAccountUserAssets`
     DROP COLUMN `uasCreditTotalWords`;
+
+ALTER TABLE `tblAccountAssetUsage`
+    CHANGE COLUMN `usgUsedTotalWords` `usgUsedTotalWords` INT(10) UNSIGNED NOT NULL AFTER `usgUniqueMD5`;
