@@ -61,7 +61,7 @@ TAPI_DEFINE_STRUCT(stuXYChartData,
 );
 typedef QMap<QString, stuXYChartData> XYChartDataSet_t;
 
-}
+} // namespace Targoman::API::ModuleHelpers::MT
 
 TAPI_DECLARE_METATYPE(Targoman::API::ModuleHelpers::MT::stuMultiProgressChart)
 
@@ -69,16 +69,12 @@ namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 using namespace API;
 
-template <bool _itmplIsTokenBase>
 class baseintfMTCharts : public intfPureModule
 {
 public:
     baseintfMTCharts(
         const QString &_module
     );
-
-//public:
-//    intfMTModule<_itmplIsTokenBase> *mtModule();
 
 protected:
     QVariant getSchema(
@@ -88,7 +84,7 @@ protected:
 
 //    virtual QStringList creditFieldNames() = 0;
 
-    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart usageDataForProgressBar(
+    QVariant usageDataForProgressBar(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         QString _key = {}
@@ -109,7 +105,7 @@ protected:
 };
 
 /******************************************************/
-class baseintfMTCharts_USER : public baseintfMTCharts<false>
+class baseintfMTCharts_USER : public baseintfMTCharts
 {
     Q_OBJECT
 
@@ -133,7 +129,7 @@ protected slots:
         "Get Charts schema"
     );
 
-    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
+    QVariant REST_GET(
         usageDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
@@ -162,7 +158,7 @@ protected slots:
 };
 
 /******************************************************/
-class baseintfMTCharts_API : public baseintfMTCharts<true>
+class baseintfMTCharts_API : public baseintfMTCharts
 {
     Q_OBJECT
 
@@ -187,7 +183,7 @@ protected slots:
         "Get Charts schema"
     );
 
-    Targoman::API::ModuleHelpers::MT::stuMultiProgressChart REST_GET(
+    QVariant REST_GET(
         usageDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,

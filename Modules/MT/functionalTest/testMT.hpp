@@ -654,6 +654,7 @@ private slots:
                 RESTClientHelper::GET,
                 "MT/Charts/schema",
                 {
+                    { "apiToken",   this->TokenJWT },
 //                    { "key", "dashboard" },
                 }
             );

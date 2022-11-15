@@ -74,8 +74,7 @@ quint64 checkAPITokenOwner(
 /**************************************************************************************\
 |** baseintfMTCharts ******************************************************************|
 \**************************************************************************************/
-template <bool _itmplIsTokenBase>
-baseintfMTCharts<_itmplIsTokenBase>::baseintfMTCharts(
+baseintfMTCharts::baseintfMTCharts(
     const QString &_module
 ) :
     intfPureModule(_module)
@@ -319,51 +318,73 @@ const sampleLineData = {
 
 */
 
-template <bool _itmplIsTokenBase>
-QVariant baseintfMTCharts<_itmplIsTokenBase>::getSchema(
+QVariant baseintfMTCharts::getSchema(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     QString _key
 ) {
     ///@TODO: read from tblConfigurations
 
+    QVariantMap RemainingCreditPercentageCharts = {
+        { "title", "Remaining credit percentage" },
+        { "type", "multiprogress" },
+        { "charts", QVariantMap({
+              { "%%ITERATION%%", QVariantMap({
+                    { "type", "progressBar" },
+                    { "name", "{{NAME}}" },
+                    { "title", "{{TITLE}}" },
+                    { "min", "{{MIN}}" },
+                    { "max", "{{MAX}}" },
+                    { "value", "{{VALUE}}" },
+              }) },
+        }) },
+        { "endpoint", QVariantMap({
+              { "url", "{{API_URL}}/MT/Charts/usageDataForProgressBar" },
+              { "params", QVariantMap({
+                    { "apiToken", "{{API_TOKEN}}" },
+                    { "key", _key },
+              }) },
+        }) },
+    };
+
+    QVariantMap Charts = {
+        { "title", "MT Charts" },
+        { "charts", QVariantList({
+              RemainingCreditPercentageCharts,
+        }) }
+    };
+
+    return Charts;
+
+    /*
     QString Schema = R"(
 {
-    title: 'MT Charts',
-    charts: [
+    "title": "MT Charts",
+    "charts": [
         {
-            type: multiprogress,
-            title: 'Remaining credit percentage',
-            charts: [
+            "type": "multiprogress",
+            "title": "Remaining credit percentage",
+            "charts": [
                 {
-                    type: 'progressBar',
-                    title: 'Formal',
-                    name: 'Formal',
-                    min: '{{MIN}}',
-                    max: '{{MAX}}',
-                    value: '{{VALUE}}',
-                    endpoint: {
-                        'url' : '{{API_URL}}/MT/Charts/usageDataForProgressBar',
-                        'params' : [
-                            'apiToken' : '{{API_TOKEN}}',
-                            'key' : '{{KEY}}',
-                            'path' : '*::formal',
+                    "type": "progressBar",
+                    "title": "Formal",
+                    "name": "Formal",
+                    "min": "{{MIN}}",
+                    "max": "{{MAX}}",
+                    "value": "{{VALUE}}",
+                    "endpoint": {
+                        "url" : "{{API_URL}}/MT/Charts/usageDataForProgressBar",
+                        "params" : [
+                            "apiToken" : "{{API_TOKEN}}",
+                            "key" : "{{KEY}}",
+                            "path" : "*::formal",
                         ],
                     },
                 },
             ],
-            endpoint: {
-                'url' : '{{API_URL}}/MT/Charts/usageDataForProgressBar',
-                'params' : [
-                    'apiToken' : '{{API_TOKEN}}',
-                    'key' : '{{KEY}}',
-                    'withSchema' : 1,
-                ],
-            },
-            props: {
-                key: 'value' //Key values in order to customize chart. TBDL
-            }
-        },
-
+        }
+    ]
+}
+)";
 
         {
             type: pie,
@@ -443,10 +464,11 @@ QVariant baseintfMTCharts<_itmplIsTokenBase>::getSchema(
     ]
 }
 )";
-
     return Schema
             .replace("{{KEY}}", _key)
             ;
+*/
+
 }
 
 /*
@@ -593,8 +615,7 @@ const sampleMultipProgressBar = [
 ]
 */
 
-template <bool _itmplIsTokenBase>
-stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressBar(
+QVariant baseintfMTCharts::usageDataForProgressBar(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
@@ -624,33 +645,6 @@ stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressB
 //                           }) },
 //                       });
 
-    stuMultiProgressChart Result;
-
-    Result.Title = "Remaining credit percentage";
-
-    Result.Type = "multiprogress";
-
-    Result.Series.insert("MT_FORMAL", stuChartSeriesItem(
-                             "رسمی",
-                             {
-                                stuChartSeriesItemProps("%")
-                             }
-                             ));
-
-    Result.Series.insert("MT_INFORMAL", stuChartSeriesItem(
-                             "محاوره",
-                             {
-                                stuChartSeriesItemProps("%")
-                             }
-                             ));
-
-    Result.Data.insert("MT_FORMAL", stuYChartData("30"));
-    Result.Data.insert("MT_INFORMAL", stuYChartData("60"));
-
-
-
-    QMap<QString, stuCreditUsageRemained> CreditUsageRemained;
-
     baseintfAccountingBasedModule* ParentModule = dynamic_cast<baseintfAccountingBasedModule*>(this->parentModule());
 
     //credits
@@ -677,8 +671,11 @@ stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressB
 
     TAPI::stuTable Table = SelectQuery.pageSize(0).all();
 
+    if (Table.Rows.count() == 0)
+        return {};
+
     QStringList AssetsIDs;
-//    QMap<QString, qint64> SumOfCredits;
+    QMap<QString, stuCreditUsageRemained> CreditUsageRemained;
 
     foreach (QVariant Row, Table.Rows) {
         QVariantMap UserAssetInfo = Row.toMap();
@@ -746,20 +743,45 @@ stuMultiProgressChart baseintfMTCharts<_itmplIsTokenBase>::usageDataForProgressB
 
     //output
     //------------------------------------------------
-    QStringList ChartPaths = CreditUsageRemained.keys();
+//    stuMultiProgressChart Result;
 
-    foreach (QString ChartPath, ChartPaths) {
+    QVariantList Result;
 
+//    Result.Title = "Remaining credit percentage";
+//    Result.Type = "multiprogress";
+
+    for (auto it = CreditUsageRemained.constBegin();
+         it != CreditUsageRemained.constEnd();
+         ++it
+    ) {
+//        Result.Series.insert(it.key(), stuChartSeriesItem(
+//                                 it.key(), //"رسمی",
+//                                 {
+//                                    stuChartSeriesItemProps("%")
+//                                 }
+//                                 ));
+
+        quint32 Value;
+
+//        if (it->Remained == -1)
+        if (it->Credit == -1)
+            Value = 50;
+        else if (it->Remained == -1)
+            Value = 0;
+        else
+            Value = (quint32)(((double)it->Remained * 100.0) / (double)it->Credit);
+
+        Result.append(QVariantMap({
+                                      { "NAME", it.key() },
+                                      { "TITLE", it.key() }, //"رسمی"
+                                      { "VALUE", Value },
+                                      { "MIN", 0 },
+                                      { "MAX", 100 },
+                                  }));
+
+
+//        Result.Data.insert(it.key(), stuYChartData(QString::number(Value)));
     }
-
-
-    QStringList QueryStringParts;
-    QueryStringParts.append("SELECT");
-
-//    REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-
-
-
 
     return Result;
 
@@ -851,8 +873,7 @@ WHERE tblAccountAssetUsage_total.usg_uasID IS NOT null
 
 }
 
-template <bool _itmplIsTokenBase>
-QVariant baseintfMTCharts<_itmplIsTokenBase>::usageDataForPieChart(
+QVariant baseintfMTCharts::usageDataForPieChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
@@ -876,8 +897,7 @@ QVariant baseintfMTCharts<_itmplIsTokenBase>::usageDataForPieChart(
                        });
 }
 
-template <bool _itmplIsTokenBase>
-QVariant baseintfMTCharts<_itmplIsTokenBase>::usageDataForLineChart(
+QVariant baseintfMTCharts::usageDataForLineChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
@@ -1060,7 +1080,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, schema, (
     return getSchema(APICALLBOOM_PARAM, _key);
 }
 
-Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _key
 )) {
@@ -1123,7 +1143,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, schema, (
     return getSchema(APICALLBOOM_PARAM, _key);
 }
 
-Targoman::API::ModuleHelpers::MT::stuMultiProgressChart IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
+QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
     QString _apiToken,
     QString _key
