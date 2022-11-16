@@ -104,13 +104,15 @@ public: \
 //put this macro inside module class definition (.h) after TARGOMAN_API_MODULE_DEFINE
 #define TARGOMAN_API_MODULE_DEFINE_I18N(_module, _schema) \
 protected: \
-    QScopedPointer<I18N> _I18N;
+    QScopedPointer<I18N> _I18N; \
+    virtual Targoman::API::ORM::intfI18N* i18n();
 
 // .cpp:
 //----------------------------------------------------
 //put this macro before module class constructor (.cpp)
 #define TARGOMAN_API_MODULE_IMPLEMENT_I18N(_module, _schema) \
-    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, I18N)
+    TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, I18N) \
+    Targoman::API::ORM::intfI18N* _module::i18n() { return dynamic_cast<Targoman::API::ORM::intfI18N*>(_I18N.data()); }
 
 //put this macro into module class constructor (.cpp)
 #define TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(_module, _schema) \

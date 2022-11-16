@@ -28,10 +28,12 @@
 //#include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Helpers/TokenHelper.h"
 #include "intfMTAccounting.h"
+#include "intfMTModule.h"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
 using namespace Targoman::API::Helpers;
+using namespace Targoman::API::ORM;
 
 TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::ModuleHelpers::MT,
@@ -743,6 +745,21 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 
     //output
     //------------------------------------------------
+//    Targoman::API::ORM::intfI18N* I18N;
+//    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+//        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+//    else
+//        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
+
+//    auto I18NRows = I18N->makeSelectQuery(APICALLBOOM_PARAM)
+//                    .where({ tblI18N::Fields::i18nKey,
+//                             enuConditionOperator::In,
+//                             "'" + CreditUsageRemained.keys().join("','") + "'"
+//                           })
+//                    .pageSize(0)
+//                    .all();
+
+
 //    stuMultiProgressChart Result;
 
     QVariantList Result;
