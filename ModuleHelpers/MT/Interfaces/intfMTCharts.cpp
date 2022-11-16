@@ -355,7 +355,7 @@ QVariant baseintfMTCharts::getSchema(
     };
 
     QVariantMap Charts = {
-        { "title", "MT Charts" },
+        { "title", I18N->translated(APICALLBOOM_PARAM, "MT Charts") },
         { "charts", QVariantList({
               RemainingCreditPercentageCharts,
         }) }
@@ -628,31 +628,6 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
     quint64 _actorID,
     QString _key
 ) {
-//    return QVariantMap({
-//                           { "type", "multiprogress" },
-//                           { "series", QVariantMap({
-//                                 { "MT_FORMAL", QVariantMap({
-//                                       { "label", "رسمی" },
-//                                       { "props", QVariantMap({
-//                                             { "valueSuffix", "%" }
-//                                       }) },
-//                                 }) },
-//                                 { "MT_INFORMAL", QVariantMap({
-//                                       { "label", "محاوره" },
-//                                       { "props", QVariantMap({
-//                                             { "valueSuffix", "%" }
-//                                       }) },
-//                                 }) },
-//                           }) },
-//                           { "data", QVariantMap({
-//                                 { "MT_FORMAL", QVariantList({
-//                                       30,
-//                                       40
-//                                 }) },
-//                                 { "MT_INFORMAL", 60 },
-//                           }) },
-//                       });
-
     baseintfAccountingBasedModule* ParentModule = dynamic_cast<baseintfAccountingBasedModule*>(this->parentModule());
 
     //credits
@@ -677,7 +652,9 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
         )
     ;
 
-    TAPI::stuTable Table = SelectQuery.pageSize(0).all();
+    TAPI::stuTable Table = SelectQuery
+                           .pageSize(0)
+                           .all();
 
     if (Table.Rows.count() == 0)
         return {};
@@ -773,10 +750,11 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
     auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
                            .addCol(tblI18N::Fields::i18nKey)
                            .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.%2')),"
-                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.default'))"
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.%3')),"
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
                                                                ")")
                                                        .arg(tblI18N::Name)
+                                                       .arg(tblI18N::Fields::i18nValue)
                                                        .arg(APICALLBOOM_PARAM.language())
                                                        ),
                                    "Translated")

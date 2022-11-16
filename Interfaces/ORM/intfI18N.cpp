@@ -50,10 +50,11 @@ QString intfI18N::translated(
     auto Data = this->makeSelectQuery(APICALLBOOM_PARAM)
                 .addCol(tblI18N::Fields::i18nKey)
                 .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.%2')),"
-                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.default')),"
-                                                    "'%3')")
+                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.%3')),"
+                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default')),"
+                                                    "'%4')")
                                             .arg(tblI18N::Name)
+                                            .arg(tblI18N::Fields::i18nValue)
                                             .arg(APICALLBOOM_PARAM.language())
                                             .arg(_key)
                                             ),
