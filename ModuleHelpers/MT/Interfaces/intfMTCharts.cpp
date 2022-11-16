@@ -850,12 +850,14 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
             Value = 50;
         else if (it->Remained == -1)
             Value = 0;
+        else if ((it->Credit == 0) || (it->Remained == 0))
+            Value = 100;
         else
             Value = (quint32)(((double)it->Remained * 100.0) / (double)it->Credit);
 
         Result.append(QVariantMap({
                                       { "NAME", it.key() },
-                                      { "TITLE", Title }, //"رسمی"
+                                      { "TITLE", Title },
                                       { "VALUE", Value },
                                       { "MIN", 0 },
                                       { "MAX", 100 },
