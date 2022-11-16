@@ -79,7 +79,7 @@ const QMap<int, intfAPIArgManipulator*> MetaTypeInfoMap = {
     template <> std::function<QStringList()> tmplAPIArg<_baseType, _complexity, false, true>::fnOptions = nullptr; \
     \
     template <> std::function<QVariant(NULLABLE_TYPE(_baseType) _value)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnToVariant = \
-        [](NULLABLE_TYPE(_baseType) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(*_value);}; \
+        [](NULLABLE_TYPE(_baseType) _value) { return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_baseType, _complexity, false, true>::toVariant(NULLABLE_VALUE(_value)); }; \
     template <> std::function<NULLABLE_TYPE(_baseType)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_baseType), _complexity, true>::fnFromVariant = \
         [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_baseType) { \
             if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_baseType)(); \
@@ -125,8 +125,8 @@ DO_ON_TYPE_NULLABLE_VALID(COMPLEXITY_Integral, bool,
                               if (_value.toString() == "true" || _value.toString() == "1") return true;
                                   throw exHTTPBadRequest(_paramName + " is not a valid bool");
                           },
-                          [](const QVariant& _val) -> QVariant {return !(_val == "false" || _val == "0");},
-                          [](const QList<DBM::clsORMField>&) -> QString {return "valid bool as 1|true|0|false";}
+                          [](const QVariant& _val) -> QVariant { return !(_val == "false" || _val == "0");},
+                          [](const QList<DBM::clsORMField>&) -> QString { return "valid bool as 1|true|0|false";}
 )
 
 namespace Server {

@@ -200,6 +200,7 @@ QVariantMap MTHelper::doTranslation(
 
     _text = this->tokenize(_text, _dir.first);
     quint64 SourceWordCount = static_cast<quint64>(_text.split(' ').size());
+    QString SourceClass = this->detectClass(_text, _dir.first);
 
     //dic
     //-----------------------------------------
@@ -237,14 +238,15 @@ QVariantMap MTHelper::doTranslation(
     QTime CacheLookupTime;
     CacheLookupTime.start();
 
-    QString CacheKey = QCryptographicHash::hash(QString("%1:%2:%3:%4:%5")
-                                                    .arg(_useSpecialClass)
-                                                    .arg(_engine)
-                                                    .arg(_dir.first)
-                                                    .arg(_dir.second)
-                                                    .arg(_text)
+    QString FullDir = _dir.first + "2" + _dir.second;
+    QString TranslateKey = QString("%1::%2::%3").arg(_engine).arg(SourceClass).arg(FullDir);
+
+    QString CacheKey = QCryptographicHash::hash(QString("%1::%2")
+//                                                .arg(_useSpecialClass)
+                                                .arg(TranslateKey)
+                                                .arg(_text)
                                                 .toUtf8(),
-                                            QCryptographicHash::Md4).toHex();
+                                                QCryptographicHash::Md4).toHex();
 
     QVariantMap CachedTranslation = this->TranslationCache[CacheKey];
 
@@ -258,10 +260,11 @@ QVariantMap MTHelper::doTranslation(
 
     //check credit
     //-----------------------------------------
+
     ServiceUsage_t RequestedUsage = {
 //            { QString("%1=%2::%3-%4").arg(RequestedUsage::CREDIT).arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
         { RequestedUsage::CREDIT, QVariantMap({
-              { QString("translate::%1::%2-%3").arg(_engine).arg(_dir.first).arg(_dir.second), SourceWordCount },
+              { QString("%1::%2").arg(MTAction::TRANSLATE).arg(TranslateKey), SourceWordCount },
         }) },
 //            { MTRequestedUsage::ENGINE,     _engine },
 //            { MTRequestedUsage::DIR,        QString("%1-%2").arg(_dir.first).arg(_dir.second) },
@@ -321,17 +324,17 @@ QVariantMap MTHelper::doTranslation(
 
     //-----------------------------------------
     auto FnFindClassAndEngine = [this](
-                                QString _text,
-                                const TranslationDir_t &_dir,
-                                const QString &_engine,
-                                bool _useSpecialClass,
-                                QString &_class
+        QString _text,
+        const TranslationDir_t &_dir,
+        const QString &_engine,
+        bool _useSpecialClass,
+        QString &_class
     ) -> clsEngine* {
         clsEngine* TranslationEngine = nullptr;
-        _class = "";
 
         if (_useSpecialClass) {
-            _class = this->detectClass(_engine, _text, _dir.first);
+            if (_class.isEmpty())
+                _class = this->detectClass(/*_engine, */_text, _dir.first);
 
             TranslationEngine = this->RegisteredEngines.value(stuEngineSpecs::makeFullName(_engine, _dir.first, _dir.second, _class));
 
@@ -366,15 +369,13 @@ QVariantMap MTHelper::doTranslation(
         throw exHTTPInternalServerError("Unable to find translate result");
     };
 
-    QString Class;
-
     //1: find _dir.first class end engine
     clsEngine* TranslationEngine = FnFindClassAndEngine(
                                        _text,
                                        _dir,
                                        _engine,
                                        _useSpecialClass,
-                                       Class
+                                       SourceClass
                                        );
 
     if (TranslationEngine != nullptr) {
@@ -385,7 +386,7 @@ QVariantMap MTHelper::doTranslation(
                                           _dir,
 //                                          _engine,
 //                                          _useSpecialClass,
-                                          Class,
+                                          SourceClass,
                                           TranslationEngine,
                                           _detailed,
                                           _detokenize,
@@ -411,6 +412,7 @@ QVariantMap MTHelper::doTranslation(
     //-----------------------------------------
     QString TextToTranslate = _text;
     TranslationDir_t Dir;
+    QString Class = "";
     _detailed = false;
 
     //phase 1
@@ -441,6 +443,7 @@ QVariantMap MTHelper::doTranslation(
     TextToTranslate = FnGetTranslationResultText(PreTranslationResult);
 
     //phase 2
+    Class = "";
     Dir = { "en", _dir.second };
     clsEngine* PostTranslationEngine = FnFindClassAndEngine(
                                            TextToTranslate,
@@ -588,9 +591,11 @@ QVariantMap MTHelper::internalDoTranslation(
     return TranslationResult;
 }
 
-QString MTHelper::detectClass(const QString& _engine, const QString& _text, const QString& _lang) {
-    Q_UNUSED(_engine);
-
+QString MTHelper::detectClass(
+//    const QString& _engine,
+    const QString& _text,
+    const QString& _lang
+) {
     if (gConfigs::Classifier::SupportsIXML.value() == false)
         return FormalityChecker::instance().check(_lang, TargomanTextProcessor::instance().ixml2Text(_text, false, false, false));
 

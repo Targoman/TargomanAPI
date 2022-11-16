@@ -69,7 +69,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(TAPI, enuSaleableType);
 //    COMPLEXITY_Complex,
 //    Targoman::API::AccountModule,
 //    stuMultiJWT,
-//    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
+//    [](const Targoman::API::AccountModule::stuMultiJWT& _value) -> QVariant{ return QJsonObject({{"ssn", _value.Session}, {"lgn", _value.Login}}).toVariantMap();}
 //);
 
 using namespace Targoman::Common::Configuration;
@@ -140,6 +140,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(Account)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Account, AAASchema);
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(Account, AAASchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(Account, AAASchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Account, AAASchema)
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Account, AAASchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Account, AAASchema)
@@ -151,6 +153,8 @@ Account::Account() :
                       )
 {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(Account, AAASchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(Account, AAASchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Account, AAASchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Account, AAASchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Account, AAASchema)

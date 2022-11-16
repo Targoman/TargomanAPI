@@ -203,9 +203,13 @@ protected:
 
 public:
 //    QString cleanText(QString &_text);
-    QString tokenize(const QString& _text, const QString& _lang);
-    QString detokenize(const QString& _text, const QString& _lang);
-    QString detectClass(const QString& _engine, const QString& _text, const QString& _lang);
+    QString tokenize(const QString &_text, const QString &_lang);
+    QString detokenize(const QString &_text, const QString &_lang);
+    QString detectClass(
+//            const QString &_engine,
+            const QString &_text,
+            const QString &_lang
+            );
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QString preprocessText(

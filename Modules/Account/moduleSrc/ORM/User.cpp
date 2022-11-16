@@ -352,9 +352,9 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     if (_name.isNull() == false)                    ToUpdate.insert(tblUser::Fields::usrName, _name);
     if (_family.isNull() == false)                  ToUpdate.insert(tblUser::Fields::usrFamily, _family);
     if (_language.isNull() == false)                ToUpdate.insert(tblUser::Fields::usrLanguage, _language);
-    if (NULLABLE_HAS_VALUE(_gender))                ToUpdate.insert(tblUser::Fields::usrGender, *_gender);
-    if (NULLABLE_HAS_VALUE(_enableEmailAlerts))     ToUpdate.insert(tblUser::Fields::usrEnableEmailAlerts, *_enableEmailAlerts ? 1 : 0);
-    if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::Fields::usrEnableSMSAlerts, *_enableSMSAlerts ? 1 : 0);
+    if (NULLABLE_HAS_VALUE(_gender))                ToUpdate.insert(tblUser::Fields::usrGender, NULLABLE_VALUE(_gender));
+    if (NULLABLE_HAS_VALUE(_enableEmailAlerts))     ToUpdate.insert(tblUser::Fields::usrEnableEmailAlerts, NULLABLE_VALUE(_enableEmailAlerts) ? 1 : 0);
+    if (NULLABLE_HAS_VALUE(_enableSMSAlerts))       ToUpdate.insert(tblUser::Fields::usrEnableSMSAlerts, NULLABLE_VALUE(_enableSMSAlerts) ? 1 : 0);
     if (_ssid.isNull() == false)                    ToUpdate.insert(tblUser::Fields::usrSSID, _ssid);
     if (_address.isNull() == false)                 ToUpdate.insert(tblUser::Fields::usrAddress, _address);
 
@@ -493,7 +493,7 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 //    }
     if (NULLABLE_HAS_VALUE(_birthDate)) {
         ToUpdate.append(tblUserExtraInfo::Fields::ueiBirthDate);
-        Params.append(NULLABLE_GET(_birthDate));
+        Params.append(NULLABLE_VALUE(_birthDate));
     }
 
     //--------------------------------------

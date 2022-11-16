@@ -26,6 +26,8 @@
 
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ORM/intfConfigurations.h"
+#include "Interfaces/ORM/intfI18N.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
@@ -36,6 +38,8 @@ using namespace Targoman::API::ORM;
 namespace Targoman::API::TicketingModule {
 
 TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_CONFIGURATIONS_PREPARENT;
+TARGOMAN_I18N_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
@@ -51,6 +55,8 @@ class Ticketing : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Ticketing);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE_CONFIGURATIONS(Ticketing, TicketingSchema);
+    TARGOMAN_API_MODULE_DEFINE_I18N(Ticketing, TicketingSchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Ticketing, TicketingSchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Ticketing, TicketingSchema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(Ticketing, TicketingSchema);
@@ -128,6 +134,8 @@ protected slots:
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(Ticketing, TicketingSchema);
+TARGOMAN_CONFIGURATIONS_POSTPARENT(Ticketing, TicketingSchema);
+TARGOMAN_I18N_POSTPARENT(Ticketing, TicketingSchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Ticketing, TicketingSchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Ticketing, TicketingSchema);
 TARGOMAN_FAQ_POSTPARENT(Ticketing, TicketingSchema);

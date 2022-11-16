@@ -177,14 +177,16 @@ private slots:
                     { tblAccountProductsBase::Fields::prdName,          "test Targoman product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
                     { tblAccountProductsBase::Fields::prd_untID,        1 },
-                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
-                          { "fa", "عنوان فارسی ۱۲۳" },
-                          { "ar", "عنوان عربی ۱۲۳" },
-                          { "fr", "عنوان فرانسوی ۱۲۳" },
-                    }) },
-                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
-                          { "fa", "شرح فارسی ۱۲۳" },
-                          { "ar", "شرح عربی ۱۲۳" },
+                    { tblAccountProductsBase::Fields::prdI18NData,      QVariantMap({
+                        { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                              { "fa", "عنوان فارسی ۱۲۳" },
+                              { "ar", "عنوان عربی ۱۲۳" },
+                              { "fr", "عنوان فرانسوی ۱۲۳" },
+                        }) },
+                        { tblAccountProductsBase::Fields::prdDesc, QVariantMap({
+                              { "fa", "شرح فارسی ۱۲۳" },
+                              { "ar", "شرح عربی ۱۲۳" },
+                        }) },
                     }) },
                 }
             );

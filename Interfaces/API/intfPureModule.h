@@ -415,6 +415,10 @@ public:
 
     virtual QString parentModuleName() const /*{ return QString(); }; //*/= 0;
 
+    virtual void setParentModule(Q_DECL_UNUSED intfPureModule* _parentModule) { ; }
+
+    virtual intfPureModule* parentModule() const { return nullptr; }
+
 protected:
     virtual stuModuleDBInfo requiredDB() const { return {}; }
 
@@ -429,7 +433,6 @@ public:
      * @brief initializeModule called after module loaded and db config is registered
      */
     virtual void initializeModule() { ; }
-
     virtual void setInstancePointer() { ; }
 
     virtual QList<DBM::clsORMField> filterItems(qhttp::THttpMethod _method = qhttp::EHTTP_ACL) {
@@ -483,6 +486,7 @@ public: \
         return this->Methods; \
     } \
     void addSubModule(intfPureModule* _submodule) { \
+        _submodule->setParentModule(this); \
         if (this->Methods.isEmpty()) listOfMethods(); \
         if (_submodule->parentModuleName() != this->moduleBaseName()) \
             throw Targoman::Common::exTargomanNotImplemented(QString("Not from same parent (%1 <> %2)").arg(_submodule->parentModuleName()).arg(this->moduleBaseName())); \
@@ -514,8 +518,11 @@ public: \
         throw Targoman::Common::exTargomanNotImplemented("listOfMethods must not be called on submodules"); \
     } \
     static _name& instance() { static _name* Instance = nullptr; return *(Q_LIKELY(Instance) ? Instance : (Instance = new _name)); } \
+    virtual void setParentModule(Targoman::API::API::intfPureModule* _parentModule); \
+    virtual Targoman::API::API::intfPureModule* parentModule() const final; \
 private: \
-    TAPI_DISABLE_COPY(_name)
+    TAPI_DISABLE_COPY(_name) \
+    Targoman::API::API::intfPureModule* ParentModule;
 
 #define TARGOMAN_API_SUBMODULE_DEFINE(_module, _name) \
     TARGOMAN_API_SUBMODULE_DEFINE_WO_CTOR(_module, _name) \
@@ -523,7 +530,9 @@ private: \
     _name();
 
 //put this macro before module class constructor (.cpp)
-#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name)
+#define TARGOMAN_API_SUBMODULE_IMPLEMENT(_module, _name) \
+    void _name::setParentModule(Targoman::API::API::intfPureModule* _parentModule) { this->ParentModule = _parentModule; } \
+    Targoman::API::API::intfPureModule* _name::parentModule() const { return this->ParentModule; }
 
 //enuTokenActorType::Type _name::actorType() const { return _module::instance()->actorType(); }
 

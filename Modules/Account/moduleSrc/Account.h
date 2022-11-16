@@ -26,6 +26,8 @@
 
 #include "Interfaces/ORM/intfActionLogs.h"
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ORM/intfConfigurations.h"
+#include "Interfaces/ORM/intfI18N.h"
 #include "Interfaces/ObjectStorage/ORM/ObjectStorage.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
@@ -44,6 +46,8 @@ namespace Targoman::API::AccountModule {
 //};
 
 TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_CONFIGURATIONS_PREPARENT;
+TARGOMAN_I18N_PREPARENT;
 TARGOMAN_ACTIONLOG_PREPARENT;
 TARGOMAN_OBJECTSTORAGE_PREPARENT;
 TARGOMAN_FAQ_PREPARENT;
@@ -59,6 +63,8 @@ class Account : public intfSQLBasedModule //intfSQLBasedWithActionLogsModule
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Account);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_CONFIGURATIONS(Account, AAASchema);
+    TARGOMAN_API_MODULE_DEFINE_I18N(Account, AAASchema);
     TARGOMAN_API_MODULE_DEFINE_ACTIONLOG(Account, AAASchema);
     TARGOMAN_API_MODULE_DEFINE_OBJECTSTORAGE(Account, AAASchema);
     TARGOMAN_API_MODULE_DEFINE_FAQ(Account, AAASchema);
@@ -532,6 +538,8 @@ private slots:
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(Account, AAASchema);
+TARGOMAN_CONFIGURATIONS_POSTPARENT(Account, AAASchema);
+TARGOMAN_I18N_POSTPARENT(Account, AAASchema);
 TARGOMAN_ACTIONLOG_POSTPARENT(Account, AAASchema);
 TARGOMAN_OBJECTSTORAGE_POSTPARENT(Account, AAASchema);
 TARGOMAN_FAQ_POSTPARENT(Account, AAASchema);

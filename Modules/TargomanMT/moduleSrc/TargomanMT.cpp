@@ -52,6 +52,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(TargomanMT)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(TargomanMT, TargomanMTSchema)
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(TargomanMT, TargomanMTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(TargomanMT, TargomanMTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(TargomanMT, TargomanMTSchema);
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(TargomanMT, TargomanMTSchema);
@@ -68,7 +70,6 @@ TargomanMT::TargomanMT() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
-        &AccountAssetUsageHistory::instance(),
         &AccountCoupons::instance(),
         nullptr,
         //---------------------
@@ -79,10 +80,12 @@ TargomanMT::TargomanMT() :
         &MTTranslatedPhrases::instance(),
         &MTTranslationLogs::instance()
 ) {
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Targoman, TargomanMTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Targoman, TargomanMTSchema);
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Targoman, TargomanMTSchema)
-    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Targoman, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(TargomanMT, TargomanMTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(TargomanMT, TargomanMTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(TargomanMT, TargomanMTSchema);
 
     this->addSubModule(&MTCorrectionRules::instance());
     this->addSubModule(&MTDigestedTranslationLogs::instance());
@@ -98,7 +101,6 @@ TargomanMT::TargomanMT() :
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsage.data());
-    this->addSubModule(AccountAssetUsageHistory.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in Targoman module
 }
@@ -196,7 +198,11 @@ QVariantMap TargomanMT::getCustomUserAssetFieldsForQuery(
 ) {
     ///@TODO: [very important] complete this
 
-    QVariantMap Result;
+    QVariantMap Result = intfMTModule::getCustomUserAssetFieldsForQuery(
+                             APICALLBOOM_PARAM,
+                             _basketItem,
+                             _oldVoucherItem
+                             );
 
 //    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
 //        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());

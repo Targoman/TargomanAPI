@@ -24,8 +24,9 @@
 #ifndef TAPI_APIARGHELPERMACROS_HPP
 #define TAPI_APIARGHELPERMACROS_HPP
 
-#include <optional>
 #include "APIArgHelperMacrosPrivate.h"
+//#include <optional>
+#include "tmplNullable.hpp"
 
 /************************************************************/
 #define TAPI_ADD_TYPE_SPECIALFROMVARIANT(_baseType, _typeName, _fnSetFromVariant) \
@@ -405,21 +406,38 @@ typedef QMap<QString, QString> QStringMap;
 #define V2U32(v) INTERNAL_V2U32(v)
 
 /**********************************************************************************************************************/
-#define NULLABLE_UNDERLAYER_CLASS_NAME                  "std::optional"
-#define NULLABLE_M2STR_PREFIX                           "std::optional<"
+//#define NULLABLE_UNDERLAYER_CLASS_NAME                  "std::optional"
+//#define NULLABLE_M2STR_PREFIX                           "std::optional<"
+//#define NULLABLE_M2STR_POSTFIX                          ">"
+//#define NULLABLE_M2STR(_type)                           NULLABLE_M2STR_PREFIX #_type NULLABLE_M2STR_POSTFIX
+//#define NULLABLE_TYPE(_type)                            std::optional<_type>
+//#define NULLABLE_VAR(_type, _name)                      NULLABLE_TYPE(_type) _name
+//#define NULLABLE_VALUE(_value)                          (*_value)
+//#define NULLABLE_GET(_value)                            (_value.has_value() ? *_value : QVariant())
+//#define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.has_value() ? *_value : _def)
+//#define NULLABLE_SET(_var, _value)                      (_var = _value)
+//#define NULLABLE_NULL_VALUE                             std::nullopt
+//#define NULLABLE_NULL_VALUE_AS_STRING                   "std::nullopt"
+//#define NULLABLE_RESET(_var)                            (_var = NULLABLE_NULL_VALUE)
+//#define NULLABLE_IS_NULL(_nullable)                     (_nullable.has_value() == false)
+//#define NULLABLE_HAS_VALUE(_nullable)                   _nullable.has_value()
+//#define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
+
+#define NULLABLE_UNDERLAYER_CLASS_NAME                  "TAPI::tmplNullable"
+#define NULLABLE_M2STR_PREFIX                           "TAPI::tmplNullable<"
 #define NULLABLE_M2STR_POSTFIX                          ">"
 #define NULLABLE_M2STR(_type)                           NULLABLE_M2STR_PREFIX #_type NULLABLE_M2STR_POSTFIX
-#define NULLABLE_TYPE(_type)                            std::optional<_type>
+#define NULLABLE_TYPE(_type)                            TAPI::tmplNullable<_type>
 #define NULLABLE_VAR(_type, _name)                      NULLABLE_TYPE(_type) _name
-#define NULLABLE_VALUE(_value)                          *_value
-#define NULLABLE_GET(_value)                            (_value.has_value() ? *_value : QVariant())
-#define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.has_value() ? *_value : _def)
+#define NULLABLE_VALUE(_value)                          _value.value()
+#define NULLABLE_GET(_value)                            (_value.hasValue() ? _value.value() : QVariant())
+#define NULLABLE_GET_OR_DEFAULT(_value, _def)           (_value.hasValue() ? _value.value() : _def)
 #define NULLABLE_SET(_var, _value)                      (_var = _value)
 #define NULLABLE_NULL_VALUE                             std::nullopt
 #define NULLABLE_NULL_VALUE_AS_STRING                   "std::nullopt"
 #define NULLABLE_RESET(_var)                            (_var = NULLABLE_NULL_VALUE)
-#define NULLABLE_IS_NULL(_nullable)                     (_nullable.has_value() == false)
-#define NULLABLE_HAS_VALUE(_nullable)                   _nullable.has_value()
+#define NULLABLE_IS_NULL(_nullable)                     _nullable.isNull()
+#define NULLABLE_HAS_VALUE(_nullable)                   _nullable.hasValue()
 #define NULLABLE_INSTANTIATE_FROM_QVARIANT(_type, _val) (_val.isNull() ? NULLABLE_TYPE(_type)() : NULLABLE_TYPE(_type)(_val.template value<_type>()))
 
 //template <typename _type>

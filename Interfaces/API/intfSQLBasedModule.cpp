@@ -254,25 +254,20 @@ quint64 intfSQLBasedModule::Create(
 
 //    TAPI::ORMFields_t CreateInfo;
     //key: language
-    QMap<QString, TAPI::ORMFields_t> I18NCreateInfo;
+//    QMap<QString, TAPI::ORMFields_t> I18NCreateInfo;
+    QVariantMap I18NCreateInfo;
 
     //1: extract I18N fields
-    if (this->name().endsWith("I18N") == false) {
+    if (this->name().endsWith("I18NData") == false) {
         TAPI::ORMFields_t::iterator it = _createInfo.begin();
         while (it != _createInfo.end()) {
-            if (it.key().endsWith("I18N")) {
-                QString ColName = it.key(); //.chopped(QString("I18N").length());
+            if (it.key().endsWith("I18NData")) {
+//                QString ColName = it.key(); //.chopped(QString("I18N").length());
 
-                QVariantMap ValuesByLanguage = it.value().toMap();
+                I18NCreateInfo = it.value().toMap();
                 it = _createInfo.erase(it);
 
-                IteratorHelper::ConstIterator(ValuesByLanguage)
-                        .runAll([&ColName, &I18NCreateInfo](QString _key, QVariant _value) -> bool {
-                            I18NCreateInfo[_key].insert(ColName, _value);
-                            return true;
-                        });
-
-                continue;
+                break;
             } else
                 it++;
         }
@@ -295,25 +290,14 @@ quint64 intfSQLBasedModule::Create(
     if ((LastID > 0) && (I18NCreateInfo.isEmpty() == false)) {
         intfSQLBasedModule* I18NModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "I18N"]);
         if (I18NModule) {
-            IteratorHelper::ConstIterator(I18NCreateInfo)
-                    .runAll([&I18NModule, &APICALLBOOM_PARAM, LastID](QString _key, QVariant _value) -> bool {
-                        TAPI::ORMFields_t I18NInfo;
-                        I18NInfo.insert("pid", LastID);
-                        I18NInfo.insert("language", _key);
+            TAPI::ORMFields_t I18NInfo;
 
-                        IteratorHelper::ConstIterator(_value.toMap())
-                                .runAll([&I18NInfo](QString _key, QVariant _value) -> bool {
-                                    I18NInfo.insert(_key, _value);
-                                    return true;
-                                });
+            I18NInfo.insert("i18nPID", LastID);
+            I18NInfo.insert("i18nData", I18NCreateInfo);
 
-                        /*quint64 I18NLastID = */I18NModule->Create(
-                                                      APICALLBOOM_PARAM,
-                                                      I18NInfo
-                                                      );
-
-                        return true;
-                    });
+            I18NModule->Create(APICALLBOOM_PARAM,
+                               I18NInfo
+                               );
         }
     }
 
@@ -337,25 +321,20 @@ bool intfSQLBasedModule::Update(
 
 //    TAPI::ORMFields_t UpdateInfo;
     //key: language
-    QMap<QString, TAPI::ORMFields_t> I18NUpdateInfo;
+//    QMap<QString, TAPI::ORMFields_t> I18NUpdateInfo;
+    QVariantMap I18NUpdateInfo;
 
     //1: extract I18N fields
     TAPI::ORMFields_t::iterator it = _updateInfo.begin();
-    if (this->name().endsWith("I18N") == false) {
+    if (this->name().endsWith("I18NData") == false) {
         while (it != _updateInfo.end()) {
-            if (it.key().endsWith("I18N")) {
-                QString ColName = it.key(); //.chopped(QString("I18N").length());
+            if (it.key().endsWith("I18NData")) {
+//                QString ColName = it.key(); //.chopped(QString("I18N").length());
 
-                QVariantMap ValuesByLanguage = it.value().toMap();
+                I18NUpdateInfo = it.value().toMap();
                 it = _updateInfo.erase(it);
 
-                IteratorHelper::ConstIterator(ValuesByLanguage)
-                        .runAll([&ColName, &I18NUpdateInfo](QString _key, QVariant _value) -> bool {
-                            I18NUpdateInfo[_key].insert(ColName, _value);
-                            return true;
-                        });
-
-                continue;
+                break;
             } else
                 it++;
         }
@@ -387,8 +366,12 @@ bool intfSQLBasedModule::Update(
 
     quint64 NumRowsAffected = query.execute(APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID)) > 0;
 
+
+
+    ///@TODO: very important: complete this
+
     //3: run I18N
-    if ((NumRowsAffected > 0) && (I18NUpdateInfo.isEmpty() == false)) {
+/*    if ((NumRowsAffected > 0) && (I18NUpdateInfo.isEmpty() == false)) {
         intfSQLBasedModule* I18NModule = dynamic_cast<intfSQLBasedModule*>(clsTable::Registry[this->nameWithSchema() + "I18N"]);
         if (I18NModule) {
             IteratorHelper::ConstIterator(I18NUpdateInfo)
@@ -406,7 +389,7 @@ bool intfSQLBasedModule::Update(
                         //PK: id,language
                         TAPI::PKsByPath_t I18NPKs = QString("%1,%2").arg(_pksByPath).arg(_key);
 
-                        /*quint64 I18NRowsCount = */I18NModule->Update(
+                        I18NModule->Update(
                                                          APICALLBOOM_PARAM,
                                                          I18NPKs,
                                                          I18NInfo
@@ -416,6 +399,7 @@ bool intfSQLBasedModule::Update(
                     });
         }
     }
+*/
 
     //--
     return NumRowsAffected;

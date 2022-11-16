@@ -99,7 +99,7 @@ public:
     /**
       Returns true if SimpleCrypt has been initialized with a key.
       */
-    bool hasKey() const {return !m_keyParts.isEmpty();}
+    bool hasKey() const { return !m_keyParts.isEmpty();}
 
     /**
       Sets the compression mode to use when encrypting data. The default mode is Auto.
@@ -110,7 +110,7 @@ public:
     /**
       Returns the CompressionMode that is currently in use.
       */
-    CompressionMode compressionMode() const {return m_compressionMode;}
+    CompressionMode compressionMode() const { return m_compressionMode;}
 
     /**
       Sets the integrity mode to use when encrypting data. The default mode is Checksum.
@@ -121,12 +121,12 @@ public:
     /**
       Returns the IntegrityProtectionMode that is currently in use.
       */
-    IntegrityProtectionMode integrityProtectionMode() const {return m_protectionMode;}
+    IntegrityProtectionMode integrityProtectionMode() const { return m_protectionMode;}
 
     /**
       Returns the last error that occurred.
       */
-    Error lastError() const {return m_lastError;}
+    Error lastError() const { return m_lastError;}
 
     /**
       Encrypts the @arg plaintext string with the key the class was initialized with, and returns

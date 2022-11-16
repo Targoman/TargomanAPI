@@ -100,7 +100,7 @@ namespace tblAccountUnitsI18NMTBase {
 namespace tblAccountProductsMTBase {
 
     namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(prdCreditTotalWords);
+        TARGOMAN_CREATE_CONSTEXPR(prdCreditSpecs);
     }
 
     namespace ExtraRelation {
@@ -109,8 +109,8 @@ namespace tblAccountProductsMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type                        Validation      Default     UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::prdCreditTotalWords, S(NULLABLE_TYPE(quint32)),  QFV.integer(),  QNull,      UPOwner },
+            //ColName                       Type                Validation      Default     UpBy       Sort  Filter Self  Virt   PK
+            { ExtraFields::prdCreditSpecs,  S(TAPI::JSON_t),    QFV.integer(),  QNull,      UPOwner },
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -129,7 +129,7 @@ namespace tblAccountProductsMTBase {
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountProductsMTBase_DTO,
 
-        SF_NULLABLE_quint32         (prdCreditTotalWords)
+        SF_JSON_t                   (prdCreditSpecs)
     );
 }
 
@@ -168,7 +168,6 @@ namespace tblAccountProductsI18NMTBase {
 namespace tblAccountSaleablesMTBase {
 
     namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(slbCreditTotalWords);
     }
 
     namespace ExtraRelation {
@@ -178,7 +177,6 @@ namespace tblAccountSaleablesMTBase {
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
             //ColName                           Type                        Validation      Default     UpBy       Sort  Filter Self  Virt   PK
-            { ExtraFields::slbCreditTotalWords, S(NULLABLE_TYPE(quint32)),  QFV.integer(),  QNull,      UPOwner },
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -195,9 +193,7 @@ namespace tblAccountSaleablesMTBase {
     SF_tblAccountSaleablesBase_DTO
 
     TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountSaleablesMTBase_DTO,
-
-        SF_NULLABLE_quint32         (slbCreditTotalWords)
+        SF_tblAccountSaleablesMTBase_DTO
     );
 }
 
@@ -267,7 +263,7 @@ namespace tblAccountSaleablesFilesMTBase {
 namespace tblAccountUserAssetsMTBase {
 
     namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(uasCreditTotalWords);
+        TARGOMAN_CREATE_CONSTEXPR(uasCreditSpecs);
     }
 
     namespace ExtraRelation {
@@ -276,8 +272,8 @@ namespace tblAccountUserAssetsMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type                        Validation                  Default     UpBy    Sort    Filter Self  Virt   PK
-            { ExtraFields::uasCreditTotalWords, S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(0),  QNull,      UPAdmin }
+            //ColName                       Type                Validation  Default     UpBy    Sort    Filter Self  Virt   PK
+            { ExtraFields::uasCreditSpecs,  S(TAPI::JSON_t),    QFV,        QNull,      UPAdmin }
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -296,7 +292,7 @@ namespace tblAccountUserAssetsMTBase {
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountUserAssetsMTBase_DTO,
 
-        SF_NULLABLE_quint32         (uasCreditTotalWords)
+        SF_JSON_t                   (uasCreditSpecs)
     );
 }
 
@@ -343,8 +339,8 @@ namespace tblAccountAssetUsageMTBase {
 
     namespace Private {
         const QList<clsORMField> ExtraORMFields = {
-            //ColName                           Type                        Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
-            { ExtraFields::usgUsedTotalWords,   S(NULLABLE_TYPE(quint32)),  QFV.integer().minValue(0),  QNull,      UPAdmin }
+            //ColName                           Type        Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
+            { ExtraFields::usgUsedTotalWords,   S(quint32), QFV.integer().minValue(0),  QNull,      UPAdmin }
         };
 
         inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
@@ -363,43 +359,7 @@ namespace tblAccountAssetUsageMTBase {
     TAPI_DEFINE_STRUCT(DTO,
         SF_tblAccountAssetUsageMTBase_DTO,
 
-        SF_NULLABLE_quint32         (usgUsedTotalWords)
-    );
-}
-
-namespace tblAccountAssetUsageHistoryMTBase {
-
-    namespace ExtraFields {
-        TARGOMAN_CREATE_CONSTEXPR(ushSumUsedTotalWords);
-    }
-
-    namespace ExtraRelation {
-    //        constexpr char AAA[] = "aaa";
-    }
-
-    namespace Private {
-        const QList<clsORMField> ExtraORMFields = {
-            //ColName                               Type            Validation                  Default     UpBy        Sort    Filter Self  Virt   PK
-            { ExtraFields::ushSumUsedTotalWords,    S(quint32),     QFV.integer().minValue(0),  QRequired,  UPAdmin }
-        };
-
-        inline const QList<stuRelation> ExtraRelations(Q_DECL_UNUSED const QString& _schema) {
-            ///Col                              Reference Table                      ForeignCol             Rename     LeftJoin
-            return { };
-        };
-
-        const QList<stuDBIndex> ExtraIndexes = {
-        };
-
-    } //namespace Private
-
-#define SF_tblAccountAssetUsageHistoryMTBase_DTO \
-    SF_tblAccountAssetUsageHistoryBase_DTO
-
-    TAPI_DEFINE_STRUCT(DTO,
-        SF_tblAccountAssetUsageHistoryMTBase_DTO,
-
-        SF_quint32              (ushSumUsedTotalWords)
+        SF_quint32                  (usgUsedTotalWords)
     );
 }
 
@@ -599,36 +559,9 @@ public:
                             const QList<DBM::clsORMField>& _exclusiveCols = {},
                             const QList<DBM::stuRelation>& _exclusiveRelations = {},
                             const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-};
 
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class baseintfAccountAssetUsageHistoryMT //: private QObject
-{
-//    Q _OBJECT
-
-public:
-    baseintfAccountAssetUsageHistoryMT();
-
-//protected slots:
-//APICALLBOOM_TYPE_JWT_TOKENBASE_DECL
-//APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL
-};
-
-template <bool _itmplIsTokenBase>
-class intfAccountAssetUsageHistoryMT : public intfAccountAssetUsageHistory<_itmplIsTokenBase>, public baseintfAccountAssetUsageHistoryMT
-{
-//    Q _OBJECT
-
-public:
-    intfAccountAssetUsageHistoryMT(const QString& _schema,
-                                   const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                   const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                   const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-protected:
-    virtual QStringList creditFieldNames();
+//protected:
+//    virtual QStringList creditFieldNames();
 };
 
 /******************************************************/

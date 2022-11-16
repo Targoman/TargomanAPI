@@ -61,6 +61,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(Advert)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Advert, AdvertSchema)
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(Advert, AdvertSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(Advert, AdvertSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(Advert, AdvertSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(Advert, AdvertSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(Advert, AdvertSchema)
@@ -72,23 +74,23 @@ Advert::Advert() :
         {
             { "show", {
                 /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayShow,
-                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
+//                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayShow,
                 /* asset-week  */ {},
-                /* usage-week  */ {},
+//                /* usage-week  */ {},
                 /* asset-month */ {},
-                /* usage-month */ {},
-                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow,
-                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
+//                /* usage-month */ {},
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalShow
+//                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalShow
             }},
             { "click", {
                 /* asset-day   */ tblAccountUserAssets::ExtraFields::uasDayClicks,
-                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
+//                /* usage-day   */ tblAccountAssetUsage::ExtraFields::usgDayClicks,
                 /* asset-week  */ {},
-                /* usage-week  */ {},
+//                /* usage-week  */ {},
                 /* asset-month */ tblAccountUserAssets::ExtraFields::uasMonthClicks,
-                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
-                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks,
-                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
+//                /* usage-month */ tblAccountAssetUsage::ExtraFields::usgMonthClicks,
+                /* asset-total */ tblAccountUserAssets::ExtraFields::uasTotalClicks
+//                /* usage-total */ tblAccountAssetUsage::ExtraFields::usgTotalClicks
             }},
         },
         &AccountUnits::instance(),
@@ -98,10 +100,11 @@ Advert::Advert() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
-        &AccountAssetUsageHistory::instance(),
         &AccountCoupons::instance()
 ) {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(Advert, AdvertSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(Advert, AdvertSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(Advert, AdvertSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(Advert, AdvertSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(Advert, AdvertSchema)
@@ -113,7 +116,6 @@ Advert::Advert() :
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsage.data());
-    this->addSubModule(AccountAssetUsageHistory.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in advertisement module
 
@@ -375,8 +377,10 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     TAPI::ORMFields_t ProductValues = TAPI::ORMFields_t({
         { tblAccountProductsBase::Fields::prdCode,              ProductCode },
         { tblAccountProductsBase::Fields::prdName,              FixtureHelper::MakeRandomizeName(_random, " ", "fixture product", "name") },
-        { tblAccountProductsBase::Fields::prdNameI18N,          QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+        { tblAccountProductsBase::Fields::prdI18NData,          QVariantMap({
+            { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "آگهی شماره") },
+            }) },
         }) },
         { tblAccountProductsBase::Fields::prdInStockQty,        1'000 },
         { tblAccountProductsBase::Fields::prd_untID,            1 },
@@ -396,8 +400,10 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountSaleablesBase::Fields::slb_prdID,           ProductID },
         { tblAccountSaleablesBase::Fields::slbCode,             SaleableCode },
         { tblAccountSaleablesBase::Fields::slbName,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "name") },
-        { tblAccountSaleablesBase::Fields::slbNameI18N,         QVariantMap({
-              { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+        { tblAccountSaleablesBase::Fields::slbI18NData,         QVariantMap({
+            { tblAccountSaleablesBase::Fields::slbName, QVariantMap({
+                { "fa", FixtureHelper::MakeRandomizeName(_random, " ", "طرح فروش آگهی شماره") },
+            }) },
         }) },
         { tblAccountSaleablesBase::Fields::slbDesc,             FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "desc") },
         { tblAccountSaleablesBase::Fields::slbType,             TAPI::enuSaleableType::toStr(TAPI::enuSaleableType::Special) },

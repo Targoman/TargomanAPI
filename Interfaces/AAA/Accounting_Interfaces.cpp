@@ -22,8 +22,8 @@
  */
 
 //#include "intfAccountingBasedModule.h"
-#include "PrivHelpers.h"
 #include "Accounting_Interfaces.h"
+#include "PrivHelpers.h"
 #include "Interfaces/AAA/Authorization.h"
 #include "Interfaces/Common/QtTypes.hpp"
 #include "Interfaces/Helpers/TokenHelper.h"
@@ -38,6 +38,7 @@ TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuDiscountType);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuVoucherItemProcessStatus);
 TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuAssetHistoryReportStepUnit);
+TAPI_REGISTER_TARGOMAN_ENUM(Targoman::API::AAA, enuAssetUsageResolution);
 
 TAPI_REGISTER_METATYPE_TYPE_STRUCT(
     /* namespace          */ Targoman::API::AAA,
@@ -96,6 +97,37 @@ namespace Targoman::API::AAA {
 //constexpr char ASA_TTL[] = "TT";
 //constexpr char ASA_LIMITSONPARENT[] = "LP";
 
+quint64 checkAPITokenOwner(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    QString             _apiToken
+) {
+    if (APICALLBOOM_PARAM.jwtActorType() != TAPI::enuTokenActorType::USER)
+        throw exAuthorization("JWT is not USER type");
+
+    _apiToken = _apiToken.trimmed();
+    if (_apiToken.isEmpty())
+        throw exHTTPInternalServerError("API Token not provided");
+
+    enuTokenBanType TokenBanType = TokenHelper::GetTokenBanType(_apiToken);
+    if (TokenBanType == enuTokenBanType::Block)
+        throw exAuthorization("This API Token is blocked");
+
+    TAPI::JWT_t APITokenJWTPayload;
+    QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
+
+    clsJWT APITokenJWT(APITokenJWTPayload);
+
+    if (APITokenJWT.actorType() != TAPI::enuTokenActorType::API)
+        throw exAuthorization("Just API Token is allowed");
+
+    if (APITokenJWT.ownerID() != APICALLBOOM_PARAM.getActorID())
+        throw exAuthorization("API Token is not yours");
+
+    quint64 APITokenID = APITokenJWT.actorID();
+
+    return APITokenID;
+}
+
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
@@ -152,36 +184,22 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
             .removeCols({
                             tblAccountUnitsBase::Fields::untName
                         })
-            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountUnitsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountUnits"
-                      , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias, tblAccountUnitsBase::Fields::untName)),
-                    DBExpression::VALUE(R("lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N)),
+            .leftJoin(tblAccountUnitsI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE("
+                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.%2')),"
+                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.default')),"
+                                                "%3.untName)")
+                                        .arg(tblAccountUnitsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountUnitsBase::Name : _alias)
+                                        ),
                     tblAccountUnitsBase::Fields::untName
-                   )
+                    )
         ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountUnitsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountUnitsI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountUnitsI18NBase::Fields::untNameI18N)),
-                                    tblAccountUnitsI18NBase::Fields::untNameI18N)
-                            .groupBy(tblAccountUnitsI18NBase::Fields::pid)
-                            , "lng_tblAccountUnits"
-                            , { "lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountUnitsBase::Name, tblAccountUnitsBase::Fields::untID
-                            }
-                           )
-            .addCol(R("lng_tblAccountUnits", tblAccountUnitsI18NBase::Fields::untNameI18N), tblAccountUnitsBase::Fields::untNameI18N)
+            .leftJoin(tblAccountUnitsI18NBase::Name, tblAccountUnitsI18NBase::Name)
+            .addCol(R(tblAccountUnitsI18NBase::Name, tblAccountUnitsI18NBase::Fields::i18nData), tblAccountUnitsBase::Fields::untI18NData)
         ;
     }
 
@@ -277,46 +295,26 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountProductsBase::Fields::prdName,
                             tblAccountProductsBase::Fields::prdDesc,
                         })
-            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountProductsI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountProducts"
-                      , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdName)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N)),
+            .leftJoin(tblAccountProductsI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdName.%2')), %3.prdName)")
+                                        .arg(tblAccountProductsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
+                                        ),
                     tblAccountProductsBase::Fields::prdName
-                   )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias, tblAccountProductsBase::Fields::prdDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N)),
+                    )
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdDesc.%2')), %3.prdDesc)")
+                                        .arg(tblAccountProductsI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
+                                        ),
                     tblAccountProductsBase::Fields::prdDesc
-                   )
-        ;
+                    )
+            ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountProductsI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountProductsI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountProductsI18NBase::Fields::prdNameI18N)),
-                                    tblAccountProductsI18NBase::Fields::prdNameI18N)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountProductsI18NBase::Fields::prdDescI18N)),
-                                    tblAccountProductsI18NBase::Fields::prdDescI18N)
-                            .groupBy(tblAccountProductsI18NBase::Fields::pid)
-                            , "lng_tblAccountProducts"
-                            , { "lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountProductsBase::Name, tblAccountProductsBase::Fields::prdID
-                            }
-                           )
-            .addCol(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdNameI18N), tblAccountProductsBase::Fields::prdNameI18N)
-            .addCol(R("lng_tblAccountProducts", tblAccountProductsI18NBase::Fields::prdDescI18N), tblAccountProductsBase::Fields::prdDescI18N)
+            .leftJoin(tblAccountProductsI18NBase::Name, tblAccountProductsI18NBase::Name)
+            .addCol(R(tblAccountProductsI18NBase::Name, tblAccountProductsI18NBase::Fields::i18nData), tblAccountProductsBase::Fields::prdI18NData)
         ;
     }
 
@@ -406,46 +404,26 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                             tblAccountSaleablesBase::Fields::slbName,
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
-            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblAccountSaleablesI18NBase::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblAccountSaleables"
-                      , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbName)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
+            .leftJoin(tblAccountSaleablesI18NBase::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbName.%2')), %3.slbName)")
+                                        .arg(tblAccountSaleablesI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
+                                        ),
                     tblAccountSaleablesBase::Fields::slbName
-                   )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias, tblAccountSaleablesBase::Fields::slbDesc)),
-                    DBExpression::VALUE(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N)),
+                    )
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbDesc.%2')), %3.slbDesc)")
+                                        .arg(tblAccountSaleablesI18NBase::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
+                                        ),
                     tblAccountSaleablesBase::Fields::slbDesc
-                   )
-        ;
+                    )
+            ;
     } else {
         Query
-            .nestedLeftJoin(intfAccountSaleablesI18N::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblAccountSaleablesI18NBase::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountSaleablesI18NBase::Fields::slbNameI18N)),
-                                    tblAccountSaleablesI18NBase::Fields::slbNameI18N)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblAccountSaleablesI18NBase::Fields::slbDescI18N)),
-                                    tblAccountSaleablesI18NBase::Fields::slbDescI18N)
-                            .groupBy(tblAccountSaleablesI18NBase::Fields::pid)
-                            , "lng_tblAccountSaleables"
-                            , { "lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblAccountSaleablesBase::Name, tblAccountSaleablesBase::Fields::slbID
-                            }
-                           )
-            .addCol(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbNameI18N), tblAccountSaleablesBase::Fields::slbNameI18N)
-            .addCol(R("lng_tblAccountSaleables", tblAccountSaleablesI18NBase::Fields::slbDescI18N), tblAccountSaleablesBase::Fields::slbDescI18N)
+            .leftJoin(tblAccountSaleablesI18NBase::Name, tblAccountSaleablesI18NBase::Name)
+            .addCol(R(tblAccountSaleablesI18NBase::Name, tblAccountSaleablesI18NBase::Fields::i18nData), tblAccountSaleablesBase::Fields::slbI18NData)
         ;
     }
 
@@ -640,8 +618,12 @@ QVariant IMPL_ORMGET_USER(baseintfAccountUserAssets_USER) {
             _cols = {};
         }
 
-        _query.innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+        _query
+                .innerJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
                 .addCols(intfAccountSaleables::MyInstance[this->Schema]->selectableColumnNames())
+
+                .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+                .addCols(baseintfAccountAssetUsage::MyInstance[this->Schema]->selectableColumnNames())
                 ;
     };
 
@@ -663,37 +645,6 @@ baseintfAccountUserAssets_API::baseintfAccountUserAssets_API(
     )
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
-
-quint64 checkAPITokenOwner(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
-    QString             _apiToken
-) {
-    if (APICALLBOOM_PARAM.jwtActorType() != TAPI::enuTokenActorType::USER)
-        throw exAuthorization("JWT is not USER type");
-
-    _apiToken = _apiToken.trimmed();
-    if (_apiToken.isEmpty())
-        throw exHTTPInternalServerError("API Token not provided");
-
-    enuTokenBanType TokenBanType = TokenHelper::GetTokenBanType(_apiToken);
-    if (TokenBanType == enuTokenBanType::Block)
-        throw exAuthorization("This API Token is blocked");
-
-    TAPI::JWT_t APITokenJWTPayload;
-    QJWT::extractAndDecryptPayload(_apiToken, APITokenJWTPayload);
-
-    clsJWT APITokenJWT(APITokenJWTPayload);
-
-    if (APITokenJWT.actorType() != TAPI::enuTokenActorType::API)
-        throw exAuthorization("Just API Token is allowed");
-
-    if (APITokenJWT.ownerID() != APICALLBOOM_PARAM.getActorID())
-        throw exAuthorization("API Token is not yours");
-
-    quint64 APITokenID = APITokenJWT.actorID();
-
-    return APITokenID;
-}
 
 QVariant IMPL_REST_GET(baseintfAccountUserAssets_API, , (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
@@ -901,6 +852,9 @@ QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {
 /******************************************************************/
 /******************************************************************/
 /******************************************************************/
+//key: schema
+QMap<QString, baseintfAccountAssetUsage*> baseintfAccountAssetUsage::MyInstance;
+
 baseintfAccountAssetUsage::baseintfAccountAssetUsage(
     const QString& _schema,
     const QList<DBM::clsORMField>& _cols,
@@ -915,14 +869,17 @@ baseintfAccountAssetUsage::baseintfAccountAssetUsage(
         _indexes
     )
     // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
+{
+    baseintfAccountAssetUsage::MyInstance[_schema] = this;
+}
+
 
 /******************************************************************/
 baseintfAccountAssetUsage_USER::baseintfAccountAssetUsage_USER(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations,
-    const QList<DBM::stuDBIndex>& _indexes
+    const QString &_schema,
+    const QList<DBM::clsORMField> &_cols,
+    const QList<DBM::stuRelation> &_relations,
+    const QList<DBM::stuDBIndex> &_indexes
 ) :
     baseintfAccountAssetUsage(
         _schema,
@@ -934,8 +891,10 @@ baseintfAccountAssetUsage_USER::baseintfAccountAssetUsage_USER(
 { ; }
 
 QVariant IMPL_ORMGET_USER(baseintfAccountAssetUsage_USER) {
+    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+
     if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -970,10 +929,10 @@ QVariant IMPL_REST_GET(baseintfAccountAssetUsage_API, , (
 )) {
     bool _translate = true;
 
-    quint64 APITokenID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
 
 //    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APITokenID }}, _filters);
+      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -991,315 +950,6 @@ intfAccountAssetUsage<_itmplIsTokenBase>::intfAccountAssetUsage(
         tblAccountAssetUsageBase::Private::ORMFields + _exclusiveCols,
         tblAccountAssetUsageBase::Private::Relations(_schema) + _exclusiveRelations,
         tblAccountAssetUsageBase::Private::Indexes + _exclusiveIndexes
-    )
-    // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
-
-/******************************************************************/
-/******************************************************************/
-/******************************************************************/
-baseintfAccountAssetUsageHistory::baseintfAccountAssetUsageHistory(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations,
-    const QList<DBM::stuDBIndex>& _indexes
-) :
-    intfSQLBasedModule(
-        _schema,
-        tblAccountAssetUsageHistoryBase::Name,
-        _cols,
-        _relations,
-        _indexes
-    )
-    // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
-
-/*
-SELECT
-    1 + DATEDIFF(columnDate, @start_date) DIV 7  AS weekNumber
-  , @start_date + INTERVAL (DATEDIFF(columnDate, @start_date) DIV 7) WEEK
-      AS week_start_date
-  , MIN(columnDate) AS actual_first_date
-  , MAX(columnDate) AS actual_last_date
-  , SUM(otherColumn)
-  , AVG(otherColumn)
-  ---
-FROM
-    tableX
-WHERE
-    columnDate >= @start_date
-GROUP BY
-    DATEDIFF(columnDate, @start_date) DIV 7 ;
-*/
-TAPI::stuTable baseintfAccountAssetUsageHistory::report(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
-    quint64                 _currentActorID,
-    quint64                 _pageIndex,
-    quint16                 _pageSize,
-    bool                    _reportCount,
-    quint64                 _assetID,
-    TAPI::DateTime_t        _fromDate,
-    TAPI::DateTime_t        _toDate,
-    quint16                 _step,
-    enuAssetHistoryReportStepUnit::Type _stepUnit
-) {
-    QStringList QueryStringParts;
-    QueryStringParts.append("SELECT");
-
-    //--
-    QString StrFromDate = _fromDate.isValid()
-                          ? _fromDate.toString("yyyy-MM-dd hh:mm:ss")
-                          : "";
-
-    QString StrToDate = _toDate.isValid()
-                        ? _toDate.toString("yyyy-MM-dd hh:mm:ss")
-                        : "";
-
-    QString DateDiffPart;
-    if (_stepUnit == enuAssetHistoryReportStepUnit::Minute) {
-        if (_fromDate.isValid())
-            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(ushLastDateTime, '%1')) DIV %2")
-                           .arg(StrFromDate)
-                           .arg(_step * 60);
-        else
-            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(NOW(), ushLastDateTime)) DIV %1")
-                           .arg(_step * 60);
-    } else if (_stepUnit == enuAssetHistoryReportStepUnit::Hour) {
-        if (_fromDate.isValid())
-            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(ushLastDateTime, '%1')) DIV %2")
-                           .arg(StrFromDate)
-                           .arg(_step * 60 * 60);
-        else
-            DateDiffPart = QString("1 + TIME_TO_SEC(TIMEDIFF(NOW(), ushLastDateTime)) DIV %1")
-                           .arg(_step * 60 * 60);
-    } else if (_stepUnit == enuAssetHistoryReportStepUnit::Day) {
-        if (_fromDate.isValid())
-            DateDiffPart = QString("1 + DATEDIFF(ushLastDateTime, '%1') DIV %2")
-                           .arg(StrFromDate)
-                           .arg(_step);
-        else
-            DateDiffPart = QString("1 + DATEDIFF(NOW(), ushLastDateTime) DIV %1")
-                           .arg(_step);
-    }
-    QueryStringParts.append(QString("%1 AS counter").arg(DateDiffPart));
-
-    //--
-    QueryStringParts.append(", COUNT(*) AS pointsCount");
-    QueryStringParts.append(", MIN(ushLastDateTime) AS minDate");
-    QueryStringParts.append(", MAX(ushLastDateTime) AS maxDate");
-
-    //--
-    foreach (auto CreditField, this->creditFieldNames()) {
-        QueryStringParts.append(QString(", SUM(%1) AS %1").arg(CreditField));
-    }
-
-    //--
-    QueryStringParts.append("FROM tblAccountAssetUsageHistory ush");
-    QueryStringParts.append("INNER JOIN tblAccountUserAssets uas");
-    QueryStringParts.append("ON uas.uasID = ush.ush_uasID");
-
-    //--
-    QStringList WhereParts;
-
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        WhereParts.append(QString("uas_actorID = %1").arg(_currentActorID));
-
-    if (_assetID > 0)
-        WhereParts.append(QString("ush_uasID = %1").arg(_assetID));
-
-    if (_fromDate.isValid())
-        WhereParts.append(QString("ushLastDateTime >= '%1'").arg(StrFromDate));
-
-    if (_toDate.isValid())
-        WhereParts.append(QString("ushLastDateTime <= '%1'").arg(StrToDate));
-
-    if (WhereParts.isEmpty() == false) {
-        QueryStringParts.append("WHERE");
-        QueryStringParts.append(WhereParts.join("\n AND "));
-    }
-
-    //--
-    QueryStringParts.append(QString("GROUP BY %1").arg(DateDiffPart));
-
-    //--
-    QueryStringParts.append("ORDER BY MIN(ushLastDateTime)");
-
-    //--
-    QString QueryString = QueryStringParts.join("\n");
-
-    TAPI::stuTable Result;
-    Result.HasCount = false;
-
-    if (_reportCount) {
-        QString CountingQueryString = QString("SELECT COUNT(*) AS cnt FROM (\n%1\n) qry").arg(QueryString);
-        QJsonDocument ResultTotalRows = this->execQuery(APICALLBOOM_PARAM, CountingQueryString).toJson(true);
-
-        Result.HasCount = true;
-        Result.TotalRows = ResultTotalRows
-                           .toVariant()
-                           .toMap()["cnt"]
-                           .toULongLong();
-
-    }
-
-    if ((_pageIndex > 0) || (_pageSize > 0)) {
-        if (_pageSize == 0)
-            _pageSize = 100;
-
-        QueryString += QString("\nLIMIT %1,%2").arg(_pageIndex * _pageSize).arg(_pageSize);
-    }
-
-    QJsonDocument ResultRows = this->execQuery(APICALLBOOM_PARAM, QueryString).toJson(false);
-
-    Result.Rows = ResultRows
-                  .toVariant()
-                  .toList();
-
-    if (_pageSize > 0)
-        Result.PageCount = ceil((double)Result.TotalRows / _pageSize);
-    else
-        Result.PageCount = 1;
-
-    Result.HasMore = (Result.PageCount > (_pageIndex + 1));
-
-    return Result;
-}
-
-/******************************************************************/
-baseintfAccountAssetUsageHistory_USER::baseintfAccountAssetUsageHistory_USER(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations,
-    const QList<DBM::stuDBIndex>& _indexes
-) :
-    baseintfAccountAssetUsageHistory(
-        _schema,
-        _cols,
-        _relations,
-        _indexes
-    )
-    // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
-
-QVariant IMPL_ORMGET_USER(baseintfAccountAssetUsageHistory_USER) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
-
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
-
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
-}
-
-QVariant IMPL_REST_GET_OR_POST(baseintfAccountAssetUsageHistory_USER, report, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    quint64                         _pageIndex,
-    quint16                         _pageSize,
-    bool                            _reportCount,
-    quint64                         _assetID,
-    TAPI::DateTime_t                _fromDate,
-    TAPI::DateTime_t                _toDate,
-    quint16                         _step,
-    Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit
-)) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
-
-    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
-
-    return this->report(
-        APICALLBOOM_PARAM,
-        CurrentActorID,
-        _pageIndex,
-        _pageSize,
-        _reportCount,
-        _assetID,
-        _fromDate,
-        _toDate,
-        _step,
-        _stepUnit
-    ).toVariant(CompactList);
-}
-
-/******************************************************************/
-baseintfAccountAssetUsageHistory_API::baseintfAccountAssetUsageHistory_API(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _cols,
-    const QList<DBM::stuRelation>& _relations,
-    const QList<DBM::stuDBIndex>& _indexes
-) :
-    baseintfAccountAssetUsageHistory(
-        _schema,
-        _cols,
-        _relations,
-        _indexes
-    )
-    // , intfAccountORMBase<_itmplIsTokenBase>()
-{ ; }
-
-QVariant IMPL_REST_GET(baseintfAccountAssetUsageHistory_API, , (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
-    QString             _apiToken,
-    TAPI::PKsByPath_t   _pksByPath,
-    quint64             _pageIndex,
-    quint16             _pageSize,
-    TAPI::Cols_t        _cols,
-    TAPI::Filter_t      _filters,
-    TAPI::OrderBy_t     _orderBy,
-    TAPI::GroupBy_t     _groupBy,
-    bool                _reportCount
-)) {
-    bool _translate = true;
-
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
-
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-      this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
-
-    return this->Select(GET_METHOD_ARGS_CALL_VALUES);
-}
-
-QVariant IMPL_REST_GET_OR_POST(baseintfAccountAssetUsageHistory_API, report, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
-    QString                         _apiToken,
-    quint64                         _pageIndex,
-    quint16                         _pageSize,
-    bool                            _reportCount,
-    quint64                         _assetID,
-    TAPI::DateTime_t                _fromDate,
-    TAPI::DateTime_t                _toDate,
-    quint16                         _step,
-    Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit
-)) {
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
-
-    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
-
-    return this->report(
-        APICALLBOOM_PARAM,
-        CurrentActorID,
-        _pageIndex,
-        _pageSize,
-        _reportCount,
-        _assetID,
-        _fromDate,
-        _toDate,
-        _step,
-        _stepUnit
-    ).toVariant(CompactList);
-}
-
-/******************************************************************/
-template <bool _itmplIsTokenBase>
-intfAccountAssetUsageHistory<_itmplIsTokenBase>::intfAccountAssetUsageHistory(
-    const QString& _schema,
-    const QList<DBM::clsORMField>& _exclusiveCols,
-    const QList<DBM::stuRelation>& _exclusiveRelations,
-    const QList<DBM::stuDBIndex>& _exclusiveIndexes
-) :
-    std::conditional<_itmplIsTokenBase, baseintfAccountAssetUsageHistory_API, baseintfAccountAssetUsageHistory_USER>::type(
-        _schema,
-        tblAccountAssetUsageHistoryBase::Private::ORMFields + _exclusiveCols,
-        tblAccountAssetUsageHistoryBase::Private::Relations(_schema) + _exclusiveRelations,
-        tblAccountAssetUsageHistoryBase::Private::Indexes + _exclusiveIndexes
     )
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
@@ -1519,7 +1169,6 @@ stuAssetItemReq_t& stuAssetItemReq_t::fromVariant(const QVariant& _value, const 
 template class intfAccountUserAssets<false>;
 //template class intfAccountUserAssetsFiles<false>;
 template class intfAccountAssetUsage<false>;
-template class intfAccountAssetUsageHistory<false>;
 //template class intfAccountCoupons<false>;
 //template class intfAccountPrizes<false>;
 
@@ -1533,7 +1182,6 @@ template class intfAccountAssetUsageHistory<false>;
 template class intfAccountUserAssets<true>;
 //template class intfAccountUserAssetsFiles<true>;
 template class intfAccountAssetUsage<true>;
-template class intfAccountAssetUsageHistory<true>;
 //template class intfAccountCoupons<true>;
 //template class intfAccountPrizes<true>;
 

@@ -119,7 +119,6 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     baseintfAccountUserAssets           *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     baseintfAccountAssetUsage           *_assetUsage,
-    baseintfAccountAssetUsageHistory    *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -132,16 +131,15 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
     AccountUserAssets(_userAssets),
     AccountUserAssetsFiles(_userAssetsFiles),
     AccountAssetUsage(_assetUsage),
-    AccountAssetUsageHistory(_assetUsageHistory),
     AccountCoupons(_discounts),
     AccountPrizes(_prizes),
     AssetUsageLimitsCols(_AssetUsageLimitsCols)
 {
-    foreach (auto Col, this->AssetUsageLimitsCols) {
-        Q_ASSERT(Col.AssetPerDay.isEmpty()      == Col.UsagePerDay.isEmpty());
-        Q_ASSERT(Col.AssetPerWeek.isEmpty()     == Col.UsagePerWeek.isEmpty());
-        Q_ASSERT(Col.AssetPerMonth.isEmpty()    == Col.UsagePerMonth.isEmpty());
-        Q_ASSERT(Col.AssetTotal.isEmpty()       == Col.UsageTotal.isEmpty());
+//    foreach (auto Col, this->AssetUsageLimitsCols) {
+//        Q_ASSERT(Col.AssetPerDay.isEmpty()      == Col.UsagePerDay.isEmpty());
+//        Q_ASSERT(Col.AssetPerWeek.isEmpty()     == Col.UsagePerWeek.isEmpty());
+//        Q_ASSERT(Col.AssetPerMonth.isEmpty()    == Col.UsagePerMonth.isEmpty());
+//        Q_ASSERT(Col.AssetTotal.isEmpty()       == Col.UsageTotal.isEmpty());
 
 //        if (Col.UsagePerDay.size())
 //            this->AssetUsageLimitsColsName.append(Col.UsagePerDay);
@@ -154,7 +152,7 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 
 //        if (Col.UsageTotal.size())
 //            this->AssetUsageLimitsColsName.append(Col.UsageTotal);
-    }
+//    }
 }
 
 /******************************************************************\
@@ -186,16 +184,16 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
 //        throw exHTTPForbidden("[82] You don't have access to: " + this->ServiceName);
 
     auto FnCheckCredit = [](const QString &_creditKey, qint64 &_creditValue, stuUsage _remaining, auto _type) {
-        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && *_remaining.PerDay - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerDay) && NULLABLE_VALUE(_remaining.PerDay) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Day:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && *_remaining.PerWeek - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerWeek) && NULLABLE_VALUE(_remaining.PerWeek) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Week:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && *_remaining.PerMonth - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.PerMonth) && NULLABLE_VALUE(_remaining.PerMonth) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Month:%2>").arg(_type).arg(_creditKey));
 
-        if (NULLABLE_HAS_VALUE(_remaining.Total) && *_remaining.Total - _creditValue <= 0)
+        if (NULLABLE_HAS_VALUE(_remaining.Total) && NULLABLE_VALUE(_remaining.Total) < _creditValue)
             throw exPaymentRequired(QString("You have not enough credit: <%1:Total:%2>").arg(_type).arg(_creditKey));
     };
 
@@ -219,8 +217,8 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
         qint64 CreditValue = CreditValues.first().toLongLong();
 
         /*
-         1/ translate::NMT::en2fa::kooft
-         2/ translate::NMT::en2fa
+         1/ translate::NMT::formal::en2fa
+         2/ translate::NMT::formal
          3/ translate::NMT
          4/ translate
         */
@@ -308,19 +306,19 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
             : Now; //QDateTime(Now.date());
     };
 
-    auto FnEffectiveEndDateTime = [Now](const stuAssetItem& _assetItem) -> QDateTime {
+    auto FnEffectiveEndDateTime = [Now](const stuAssetItem &_assetItem) -> QDateTime {
         if (NULLABLE_IS_NULL(_assetItem.UserAsset.uasValidFromHour) || NULLABLE_IS_NULL(_assetItem.UserAsset.uasValidToHour))
             return Now; //QDateTime(Now.date().addDays(1));
 
         return _assetItem.UserAsset.uasValidFromHour < _assetItem.UserAsset.uasValidToHour
-            ? QDateTime(Now.date()).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600)
+                ? QDateTime(Now.date()).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasValidToHour) * 3600)
 //            : _assetItem.UserAsset.uasValidToDate == Now/*.date()*/
 //                ? Now //QDateTime(Now.date().addDays(1))
-                : QDateTime(Now.date().addDays(1)).addSecs(*_assetItem.UserAsset.uasValidToHour * 3600);
+                : QDateTime(Now.date().addDays(1)).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasValidToHour) * 3600);
     };
 
     auto FnIsInvalidPackage = [this, &APICALLBOOM_PARAM, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
-                              (const stuAssetItem& _assetItem)
+                              (const stuAssetItem &_assetItem)
                               -> bool {
         if ((_assetItem.UserAsset.uasValidFromDate.isValid() && _assetItem.UserAsset.uasValidFromDate > Now/*.date()*/)
                || (_assetItem.UserAsset.uasValidToDate.isValid() && _assetItem.UserAsset.uasValidToDate < Now/*.date()*/)
@@ -330,22 +328,64 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
             )
             return false;
 
-        if (_requestedUsage.size()) {
+        if (_requestedUsage.size()
+                && (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false)
+        ) {
             for (auto UsageIter = _requestedUsage.begin();
                  UsageIter != _requestedUsage.end();
                  UsageIter++
             ) {
-                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
+//                if (_assetItem.Digested.Limits.contains(UsageIter.key()) == false)
+//                    continue;
+
+                if (UsageIter.key() != RequestedUsage::CREDIT)
                     continue;
+
+                QVariantMap CreditValues = UsageIter.value().toMap();
+                QString CreditKey = CreditValues.firstKey();
+                qint64 CreditValue = CreditValues.first().toLongLong();
+
+                /*
+                 1/ translate::NMT::formal::en2fa
+                 2/ translate::NMT::formal
+                 3/ translate::NMT
+                 4/ translate
+                */
+
+                while (CreditKey.isEmpty() == false) {
+                    // check
+                    //----------------
+                    if (_assetItem.Digested.Limits.contains(CreditKey)) {
+                        stuUsage Remaining = _assetItem.Digested.Limits.value(CreditKey);
+
+                        if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && NULLABLE_VALUE(Remaining.PerDay) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && NULLABLE_VALUE(Remaining.PerWeek) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && NULLABLE_VALUE(Remaining.PerMonth) < CreditValue)
+                               || (NULLABLE_HAS_VALUE(Remaining.Total) && NULLABLE_VALUE(Remaining.Total) < CreditValue)
+                            )
+                            return true;
+                    }
+
+                    // next
+                    //----------------
+                    int idx = CreditKey.lastIndexOf("::");
+                    if (idx < 0)
+                        break;
+
+                    CreditKey = CreditKey.left(idx);
+                }
+
+
 
 
 
 
                 //uncommewnt and use long credit count
 
-
 //                if (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false) {
+
 //                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
+
 //                    if ((NULLABLE_HAS_VALUE(Remaining.PerDay) && *Remaining.PerDay - UsageIter.value() <= 0)
 //                           || (NULLABLE_HAS_VALUE(Remaining.PerWeek) && *Remaining.PerWeek - UsageIter.value() <= 0)
 //                           || (NULLABLE_HAS_VALUE(Remaining.PerMonth) && *Remaining.PerMonth - UsageIter.value() <= 0)
@@ -353,22 +393,14 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 //                        )
 //                        return false;
 //                }
-
-
-
-
-
-
-
-
-
             }
         }
-        return true;
+        return false;
     };
 
-    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit) && FnIsInvalidPackage(*ServiceCreditsInfo.PreferedCredit) == false)
-        return stuActiveCredit(*ServiceCreditsInfo.PreferedCredit,
+    if (NULLABLE_HAS_VALUE(ServiceCreditsInfo.PreferedCredit)
+            && FnIsInvalidPackage(NULLABLE_VALUE(ServiceCreditsInfo.PreferedCredit)) == false)
+        return stuActiveCredit(NULLABLE_VALUE(ServiceCreditsInfo.PreferedCredit),
                                NULLABLE_HAS_VALUE(ServiceCreditsInfo.ParentID),
                                ServiceCreditsInfo.MyLimitsOnParent
 //                               -1
@@ -714,40 +746,31 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     }
 
     //-- duration
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
-            || NULLABLE_HAS_VALUE(_basketItem.Product.prdDurationMinutes)
-    ) {
-        quint32 DurationMinutes = NULLABLE_HAS_VALUE(_basketItem.Saleable.slbDurationMinutes)
-                                  ? NULLABLE_VALUE(_basketItem.Saleable.slbDurationMinutes)
-                                  : NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes);
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdDurationMinutes)) {
 
         qry.addCol(tblAccountUserAssetsBase::Fields::uasDurationMinutes);
-        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, DurationMinutes);
+        values.insert(tblAccountUserAssetsBase::Fields::uasDurationMinutes, NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes));
 
-        if (_basketItem.Saleable.slbStartAtFirstUse == false) {
+        if (_basketItem.Product.prdStartAtFirstUse == false) {
             qry.addCols({
                             tblAccountUserAssetsBase::Fields::uasValidFromDate,
                             tblAccountUserAssetsBase::Fields::uasValidToDate,
                         })
             ;
             values.insert(tblAccountUserAssetsBase::Fields::uasValidFromDate, DBExpression::NOW());
-            values.insert(tblAccountUserAssetsBase::Fields::uasValidToDate, DBExpression::DATE_ADD(
-                              DBExpression::NOW(), DurationMinutes, enuDBExpressionIntervalUnit::MINUTE));
+            values.insert(tblAccountUserAssetsBase::Fields::uasValidToDate,
+                          DBExpression::DATE_ADD(DBExpression::NOW(),
+                                                 NULLABLE_VALUE(_basketItem.Product.prdDurationMinutes),
+                                                 enuDBExpressionIntervalUnit::MINUTE));
         }
     }
 
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidFromHour)) {
-        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
-        values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidFromHour));
-    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidFromHour)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidFromHour)) {
         qry.addCol(tblAccountUserAssetsBase::Fields::uasValidFromHour);
         values.insert(tblAccountUserAssetsBase::Fields::uasValidFromHour, NULLABLE_VALUE(_basketItem.Product.prdValidFromHour));
     }
 
-    if (NULLABLE_HAS_VALUE(_basketItem.Saleable.slbValidToHour)) {
-        qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
-        values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Saleable.slbValidToHour));
-    } else if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidToHour)) {
+    if (NULLABLE_HAS_VALUE(_basketItem.Product.prdValidToHour)) {
         qry.addCol(tblAccountUserAssetsBase::Fields::uasValidToHour);
         values.insert(tblAccountUserAssetsBase::Fields::uasValidToHour, NULLABLE_VALUE(_basketItem.Product.prdValidToHour));
     }
@@ -1741,7 +1764,6 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
     intfAccountUserAssets<false>        *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     intfAccountAssetUsage<false>        *_assetUsage,
-    intfAccountAssetUsageHistory<false> *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -1756,7 +1778,6 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1802,7 +1823,6 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
     intfAccountUserAssets<true>         *_userAssets,
     intfAccountUserAssetsFiles          *_userAssetsFiles,
     intfAccountAssetUsage<true>         *_assetUsage,
-    intfAccountAssetUsageHistory<true>  *_assetUsageHistory,
     intfAccountCoupons                  *_discounts,
     intfAccountPrizes                   *_prizes
 ) :
@@ -1817,7 +1837,6 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
 ) { ; }
@@ -1890,7 +1909,6 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
     intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
     intfAccountUserAssetsFiles                      *_userAssetsFiles,
     intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-    intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
     intfAccountCoupons                              *_discounts,
     intfAccountPrizes                               *_prizes
 ) :
@@ -1905,7 +1923,6 @@ intfAccountingBasedModule<_itmplIsTokenBase>::intfAccountingBasedModule(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
     )

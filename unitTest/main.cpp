@@ -22,6 +22,7 @@
  */
 
 #include <QtTest>
+#include "testNullable.hpp"
 #include "testMacros.hpp"
 #include "testQueryBuilders.hpp"
 #include "App/Server/RESTAPIRegistry.h"
@@ -46,8 +47,9 @@ int main(int argc, char *argv[]) {
     int FailedTests = 0;
 
     try {
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
-        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
+        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testNullable, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testMacros, argc, argv);
+//        if (BreakOnFirstFail && !FailedTests) FailedTests += QTest::qExec(new testQueryBuilders, argc, argv);
     } catch (exTargomanBase &e) {
         ++FailedTests;
         qDebug() << "*** EXCEPTION ***" << QString("error(%1):%2").arg(e.code()).arg(e.what());

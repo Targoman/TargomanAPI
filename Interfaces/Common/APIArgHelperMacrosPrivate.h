@@ -427,8 +427,13 @@ inline QString toCammel(const QString& _name) {
         template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fnToORMValue = _fnToORMValue; \
         template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_type, _complexity, false>::fnFromORMValue = _fnFromORMValue; \
         template <> std::function<QStringList()> tmplAPIArg<_namespace::_type, _complexity, false>::fnOptions = _fnOptions; \
-        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnToVariant = \
-            [](NULLABLE_TYPE(_namespace::_type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(*_value);}; \
+        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_type) _value)> \
+            tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnToVariant = \
+                [](NULLABLE_TYPE(_namespace::_type) _value) { \
+                    return NULLABLE_IS_NULL(_value) \
+                        ? QVariant() \
+                        : tmplAPIArg<_namespace::_type, _complexity, false>::toVariant(NULLABLE_VALUE(_value)); \
+                }; \
         template <> std::function<NULLABLE_TYPE(_namespace::_type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_type), _complexity, true>::fnFromVariant = \
             [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_type) { \
                 if (!_value.isValid() || _value.isNull()) \
@@ -477,15 +482,21 @@ inline QString toCammel(const QString& _name) {
         template <> std::function<QVariant(const QVariant&)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnFromORMValue = _fnFromORMValue; \
         template <> std::function<QStringList()> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnOptions = _fnOptions; \
         template <> std::function<QString(const QList<DBM::clsORMField>& _allFields)> tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fnDescription = _fnDescription; \
-        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnToVariant = \
-            [](NULLABLE_TYPE(_namespace::_enum::Type) _value) {return NULLABLE_IS_NULL(_value) ? QVariant() : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(*_value);}; \
-        template <> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnFromVariant = \
-            [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
-                if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
-                NULLABLE_VAR(_namespace::_enum::Type, Value); \
-                Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
-                return Value; \
-            }; \
+        template <> std::function<QVariant(NULLABLE_TYPE(_namespace::_enum::Type) _value)> \
+            tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnToVariant = \
+                [](NULLABLE_TYPE(_namespace::_enum::Type) _value) { \
+                    return NULLABLE_IS_NULL(_value) \
+                        ? QVariant() \
+                        : tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::toVariant(NULLABLE_VALUE(_value)); \
+                }; \
+        template <> std::function<NULLABLE_TYPE(_namespace::_enum::Type)(QVariant _value, const QByteArray& _paramName)> \
+            tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnFromVariant = \
+                [](const QVariant& _value, const QByteArray& _paramName) -> NULLABLE_TYPE(_namespace::_enum::Type) { \
+                    if (!_value.isValid() || _value.isNull()) return NULLABLE_TYPE(_namespace::_enum::Type)(); \
+                    NULLABLE_VAR(_namespace::_enum::Type, Value); \
+                    Value = tmplAPIArg<_namespace::_enum::Type, COMPLEXITY_Enum, false>::fromVariant(_value, _paramName); \
+                    return Value; \
+                }; \
         template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnToORMValue = _fnToORMValue; \
         template <> std::function<QVariant(const QVariant&)> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnFromORMValue = _fnFromORMValue; \
         template <> std::function<QStringList()> tmplAPIArg<NULLABLE_TYPE(_namespace::_enum::Type), COMPLEXITY_Enum, true>::fnOptions = _fnOptions; \

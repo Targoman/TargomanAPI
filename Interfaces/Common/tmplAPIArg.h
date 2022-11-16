@@ -132,12 +132,12 @@ public:
     }
 
     inline void cleanup (void* _argStorage) final {if (_argStorage) delete (reinterpret_cast<_itmplType*>(_argStorage));}
-    inline bool hasFromVariantMethod() const final {return this->fnFromVariant != nullptr;}
-    inline bool hasToVariantMethod() const final {return this->fnToVariant != nullptr;}
+    inline bool hasFromVariantMethod() const final { return this->fnFromVariant != nullptr;}
+    inline bool hasToVariantMethod() const final { return this->fnToVariant != nullptr;}
     inline bool isPrimitiveType() const final { return _itmplVarType == COMPLEXITY_Integral;}
     inline QStringList options() const final { return this->fnOptions ? this->fnOptions() : QStringList() ;}
     inline enuVarComplexity complexity() const final { return _itmplVarType;}
-    inline bool isNullable() const final {return _itmplNullable;}
+    inline bool isNullable() const final { return _itmplNullable;}
     inline QString description(const QList<DBM::clsORMField>& _allFields) const final { 
         return this->fnDescription ? this->fnDescription(_allFields) : QString("A value of type: %1").arg(this->PrettyTypeName);
     }
@@ -153,8 +153,8 @@ public:
                     this->fnToORMValue(_val);
     }
     
-    inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final {return this->fnFromORMValue;}
-    inline std::function<QVariant(const QVariant& _val)> toORMValueConverter() const final {return this->fnToORMValue;}
+    inline std::function<QVariant(const QVariant& _val)> fromORMValueConverter() const final { return this->fnFromORMValue;}
+    inline std::function<QVariant(const QVariant& _val)> toORMValueConverter() const final { return this->fnToORMValue;}
 
     static _itmplType fromVariant(QVariant _value, const QByteArray& _paramName = {}) {
         if (tmplAPIArg<_itmplType, _itmplVarType, _itmplNullable, _isQtType>::fnFromVariant)

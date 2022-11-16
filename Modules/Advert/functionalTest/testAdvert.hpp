@@ -354,16 +354,18 @@ private slots:
                     { tblAccountProductsBase::Fields::prdName,          "test product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
                     { tblAccountProductsBase::Fields::prd_untID,        1 },
-                    { tblAccountProducts::ExtraFields::prdType,       Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
-                    { tblAccountProducts::ExtraFields::prd_locID,     this->LocationID },
-                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
-                          { "fa", "عنوان فارسی ۱۲۳" },
-                          { "ar", "عنوان عربی ۱۲۳" },
-                          { "fr", "عنوان فرانسوی ۱۲۳" },
-                    }) },
-                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
-                          { "fa", "شرح فارسی ۱۲۳" },
-                          { "ar", "شرح عربی ۱۲۳" },
+                    { tblAccountProducts::ExtraFields::prdType,         Targoman::API::AdvertModule::enuProductType::toStr(Targoman::API::AdvertModule::enuProductType::Advertise) },
+                    { tblAccountProducts::ExtraFields::prd_locID,       this->LocationID },
+                    { tblAccountProductsBase::Fields::prdI18NData,      QVariantMap({
+                        { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                              { "fa", "عنوان فارسی ۱۲۳" },
+                              { "ar", "عنوان عربی ۱۲۳" },
+                              { "fr", "عنوان فرانسوی ۱۲۳" },
+                        }) },
+                        { tblAccountProductsBase::Fields::prdDesc, QVariantMap({
+                              { "fa", "شرح فارسی ۱۲۳" },
+                              { "ar", "شرح عربی ۱۲۳" },
+                        }) },
                     }) },
                 }
             );
@@ -385,12 +387,14 @@ private slots:
                 {},
                 {
                     { tblAccountProductsBase::Fields::prdName,          "test product 123456" },
-                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
-                          { "fa", "عنوان فارسی 123456" },
-                    }) },
-                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
-                          { "fa", "شرح فارسی 123456" },
-                          { "ar", "شرح عربی 123456" },
+                    { tblAccountProductsBase::Fields::prdI18NData,      QVariantMap({
+                        { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                              { "fa", "عنوان فارسی 123456" },
+                        }) },
+                        { tblAccountProductsBase::Fields::prdDesc, QVariantMap({
+                              { "fa", "شرح فارسی 123456" },
+                              { "ar", "شرح عربی 123456" },
+                        }) },
                     }) },
                 }
             );
@@ -420,12 +424,14 @@ private slots:
 //                    { tblAccountSaleablesBase::Fields::slbProductCount,     900 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test Saleable 456 vt" },
-                    { tblAccountSaleablesI18NBase::Fields::slbNameI18N,     QVariantMap({
-                          { "fa", "عنوان فارسی 123456" },
-                          { "ar", "عنوان عربی 123456" },
-                    }) },
-                    { tblAccountSaleablesI18NBase::Fields::slbDescI18N,     QVariantMap({
-                          { "fa", "شرح فارسی 123456" },
+                    { tblAccountSaleablesBase::Fields::slbI18NData,         QVariantMap({
+                        { tblAccountSaleablesBase::Fields::slbName, QVariantMap({
+                              { "fa", "عنوان فارسی 123456" },
+                              { "ar", "عنوان عربی 123456" },
+                        }) },
+                        { tblAccountSaleablesBase::Fields::slbDesc, QVariantMap({
+                              { "fa", "شرح فارسی 123456" },
+                        }) },
                     }) },
                 }
             );

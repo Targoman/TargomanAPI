@@ -26,6 +26,7 @@
 
 #include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "intfMTHelpers.h"
+#include "Interfaces/ORM/intfI18N.h"
 using namespace Targoman::API::AAA;
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
@@ -65,7 +66,6 @@ public:
         intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
         intfAccountUserAssetsFiles                      *_userAssetsFiles,
         intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
         intfAccountCoupons                              *_discounts,
         intfAccountPrizes                               *_prizes,
         //MT --
@@ -108,6 +108,8 @@ public:
         const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
     );
+
+    virtual Targoman::API::ORM::intfI18N* i18n() = 0;
 
 protected:
     virtual QVariantMap getCustomUserAssetFieldsForQuery(

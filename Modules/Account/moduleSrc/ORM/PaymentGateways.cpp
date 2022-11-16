@@ -78,36 +78,19 @@ ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
     if (_translate) {
         Query
             .removeCol(tblPaymentGatewayTypes::Fields::pgtName)
-            .nestedLeftJoin(PaymentGatewayTypesI18N::instance().makeSelectQuery(APICALLBOOM_PARAM)
-                      .where({ tblPaymentGatewayTypesI18N::Fields::language, enuConditionOperator::Equal, APICALLBOOM_PARAM.language() })
-                      , "lng_tblPaymentGatewayTypes"
-                      , { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pid,
-                          enuConditionOperator::Equal,
-                          tblPaymentGatewayTypes::Name, tblPaymentGatewayTypes::Fields::pgtID
-                      }
-                     )
-            .addCol(enuConditionalAggregation::IF,
-                    { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N, enuConditionOperator::Null },
-                    DBExpression::VALUE(R(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias, tblPaymentGatewayTypes::Fields::pgtName)),
-                    DBExpression::VALUE(R("lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)),
+            .leftJoin(tblPaymentGatewayTypesI18N::Name)
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.pgtName.%2')), %3.pgtName)")
+                                        .arg(tblPaymentGatewayTypesI18N::Name)
+                                        .arg(APICALLBOOM_PARAM.language())
+                                        .arg(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias)
+                                        ),
                     tblPaymentGatewayTypes::Fields::pgtName
-                   )
+                    )
         ;
     } else {
         Query
-            .nestedLeftJoin(PaymentGatewayTypesI18N::instance().makeSelectQuery(APICALLBOOM_PARAM)
-                            .addCol(tblPaymentGatewayTypesI18N::Fields::pid)
-                            .addCol(DBExpression::VALUE(QString("CONCAT('[', GROUP_CONCAT(JSON_OBJECT(`language`, %1)), ']')")
-                                                        .arg(tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)),
-                                    tblPaymentGatewayTypesI18N::Fields::pgtNameI18N)
-                            .groupBy(tblPaymentGatewayTypesI18N::Fields::pid)
-                            , "lng_tblPaymentGatewayTypes"
-                            , { "lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pid,
-                                enuConditionOperator::Equal,
-                                tblPaymentGatewayTypes::Name, tblPaymentGatewayTypes::Fields::pgtID
-                            }
-                           )
-            .addCol(R("lng_tblPaymentGatewayTypes", tblPaymentGatewayTypesI18N::Fields::pgtNameI18N), tblPaymentGatewayTypes::Fields::pgtNameI18N)
+            .leftJoin(tblPaymentGatewayTypesI18N::Name, tblPaymentGatewayTypesI18N::Name)
+            .addCol(R(tblPaymentGatewayTypesI18N::Name, tblPaymentGatewayTypesI18N::Fields::i18nData), tblPaymentGatewayTypes::Fields::pgtI18NData)
         ;
     }
 

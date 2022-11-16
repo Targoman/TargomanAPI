@@ -217,7 +217,7 @@ namespace TAPI { \
     inline QJsonValue toJsonValue(const NULLABLE_TYPE(_numericType)& _val) { \
         if (NULLABLE_IS_NULL(_val)) \
             return QJsonValue(); \
-        QJsonValue JsonVal = static_cast<double>(*_val); \
+        QJsonValue JsonVal = static_cast<double>(NULLABLE_VALUE(_val)); \
         return JsonVal; \
     } \
 }

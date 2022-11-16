@@ -54,8 +54,8 @@ public:
       return $sourceText;
     }
 
-    protected function maxChars() {return 700;}
-    protected function maxCharPerWord() {return 30;}
+    protected function maxChars() { return 700;}
+    protected function maxCharPerWord() { return 30;}
 
     protected function makeSrcSentences($sourceText) {
         $makeSrc = function($phrase) {

@@ -25,6 +25,8 @@
 #define TARGOMAN_API_MODULES_COMMON_COMMON_H
 
 #include "Interfaces/ORM/intfMigrations.h"
+#include "Interfaces/ORM/intfConfigurations.h"
+#include "Interfaces/ORM/intfI18N.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
 #include "Interfaces/API/intfSQLBasedModule.h"
 #include "ORM/Defs.hpp"
@@ -32,6 +34,8 @@
 namespace Targoman::API::CommonModule {
 
 TARGOMAN_MIGRATIONS_PREPARENT;
+TARGOMAN_CONFIGURATIONS_PREPARENT;
+TARGOMAN_I18N_PREPARENT;
 
 class Common : public intfSQLBasedModule
 {
@@ -44,11 +48,15 @@ class Common : public intfSQLBasedModule
     TARGOMAN_API_MODULE_DEFINE_DB_CONFIGS(Common);
     //---------------------------------------------------------
     TARGOMAN_API_MODULE_DEFINE_MIGRATIONS(Common, CommonSchema);
+    TARGOMAN_API_MODULE_DEFINE_CONFIGURATIONS(Common, CommonSchema);
+    TARGOMAN_API_MODULE_DEFINE_I18N(Common, CommonSchema);
 
 protected slots:
 };
 
 TARGOMAN_MIGRATIONS_POSTPARENT(Common, CommonSchema);
+TARGOMAN_CONFIGURATIONS_POSTPARENT(Common, CommonSchema);
+TARGOMAN_I18N_POSTPARENT(Common, CommonSchema);
 
 } //namespace Targoman::API::CommonModule
 

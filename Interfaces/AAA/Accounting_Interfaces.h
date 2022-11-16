@@ -25,7 +25,6 @@
 #define TARGOMAN_API_AAA_ACCOUNTING_INTERFACES_H
 
 #include "Interfaces/AAA/Accounting_Defs.hpp"
-
 #include "Interfaces/API/intfSQLBasedModule.h"
 using namespace Targoman::API::API;
 
@@ -423,6 +422,14 @@ public:
                               const QList<DBM::clsORMField>& _cols = {},
                               const QList<DBM::stuRelation>& _relations = {},
                               const QList<DBM::stuDBIndex>& _indexes = {});
+
+public:
+    //key: schema
+    static QMap<QString, baseintfAccountAssetUsage*> MyInstance;
+//    friend class intfAccountUserAssets;
+
+//protected:
+//    virtual QStringList creditFieldNames() = 0;
 };
 
 /******************************************************/
@@ -485,132 +492,6 @@ public:
                      const QList<DBM::clsORMField>& _exclusiveCols = {},
                      const QList<DBM::stuRelation>& _exclusiveRelations = {},
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
-
-};
-
-/******************************************************/
-/******************************************************/
-/******************************************************/
-class baseintfAccountAssetUsageHistory : public intfSQLBasedModule
-{
-//    Q _OBJECT
-
-public:
-    baseintfAccountAssetUsageHistory(const QString& _schema,
-                                     const QList<DBM::clsORMField>& _cols = {},
-                                     const QList<DBM::stuRelation>& _relations = {},
-                                     const QList<DBM::stuDBIndex>& _indexes = {});
-
-protected:
-    virtual QStringList creditFieldNames() = 0;
-
-    TAPI::stuTable report(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
-        quint64                 _currentActorID,
-        quint64                 _pageIndex = 0,
-        quint16                 _pageSize = 100,
-        bool                    _reportCount = true,
-        quint64                 _assetID = 0,
-        TAPI::DateTime_t        _fromDate = {},
-        TAPI::DateTime_t        _toDate = {},
-        quint16                 _step = 1,
-        Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
-    );
-};
-
-/******************************************************/
-class baseintfAccountAssetUsageHistory_USER : public baseintfAccountAssetUsageHistory
-{
-    Q_OBJECT
-    ACCORM_TOKENBASE_TYPES(false)
-
-public:
-    baseintfAccountAssetUsageHistory_USER(const QString& _schema,
-                                          const QList<DBM::clsORMField>& _cols = {},
-                                          const QList<DBM::stuRelation>& _relations = {},
-                                          const QList<DBM::stuDBIndex>& _indexes = {});
-
-private slots:
-//    QVariant ORMGET_TOKENBASE("Get User Asset Usage")
-    QVariant ORMGET_USER("Get User Asset Usage History")
-
-    QVariant REST_GET_OR_POST(
-        report,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
-            quint64                         _pageIndex = 0,
-            quint16                         _pageSize = 100,
-            bool                            _reportCount = true,
-            quint64                         _assetID = 0,
-            TAPI::DateTime_t                _fromDate = {},
-            TAPI::DateTime_t                _toDate = {},
-            quint16                         _step = 1,
-            Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
-        ),
-        "Get User Asset Usage History Report"
-    );
-};
-
-/******************************************************/
-class baseintfAccountAssetUsageHistory_API : public baseintfAccountAssetUsageHistory
-{
-    Q_OBJECT
-    ACCORM_TOKENBASE_TYPES(true)
-
-public:
-    baseintfAccountAssetUsageHistory_API(const QString& _schema,
-                                         const QList<DBM::clsORMField>& _cols = {},
-                                         const QList<DBM::stuRelation>& _relations = {},
-                                         const QList<DBM::stuDBIndex>& _indexes = {});
-
-private slots:
-//    QVariant ORMGET_TOKENBASE("Get User Asset Usage")
-//    QVariant ORMGET_API("Get User Asset Usage")
-    QVariant REST_GET(
-        ,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
-            QString             _apiToken,
-            TAPI::PKsByPath_t   _pksByPath = {},
-            quint64             _pageIndex = 0,
-            quint16             _pageSize = 20,
-            TAPI::Cols_t        _cols = {},
-            TAPI::Filter_t      _filters = {},
-            TAPI::OrderBy_t     _orderBy = {},
-            TAPI::GroupBy_t     _groupBy = {},
-            bool                _reportCount = true
-        ),
-        "Get User Asset Usage History"
-    );
-
-    QVariant REST_GET_OR_POST(
-        report,
-        (
-            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
-            QString                         _apiToken,
-            quint64                         _pageIndex = 0,
-            quint16                         _pageSize = 100,
-            bool                            _reportCount = true,
-            quint64                         _assetID = 0,
-            TAPI::DateTime_t                _fromDate = {},
-            TAPI::DateTime_t                _toDate = {},
-            quint16                         _step = 1,
-            Targoman::API::AAA::enuAssetHistoryReportStepUnit::Type _stepUnit = enuAssetHistoryReportStepUnit::Day
-        ),
-        "Get User Asset Usage History Report"
-    );
-};
-
-/******************************************************/
-template <bool _itmplIsTokenBase>
-class intfAccountAssetUsageHistory : public std::conditional<_itmplIsTokenBase, baseintfAccountAssetUsageHistory_API, baseintfAccountAssetUsageHistory_USER>::type //intfSQLBasedModule// , public intfAccountORMBase<_itmplIsTokenBase>
-{
-public:
-    intfAccountAssetUsageHistory(//bool _isTokenBase,
-                                 const QString& _schema,
-                                 const QList<DBM::clsORMField>& _exclusiveCols = {},
-                                 const QList<DBM::stuRelation>& _exclusiveRelations = {},
-                                 const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 };
 

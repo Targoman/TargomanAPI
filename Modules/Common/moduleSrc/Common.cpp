@@ -34,6 +34,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(Common)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(Common, CommonSchema);
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(Common, CommonSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(Common, CommonSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(Common, CommonSchema)
 
 Common::Common() :
     intfSQLBasedModule(
@@ -42,6 +44,8 @@ Common::Common() :
         ""
 ) {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(Common, CommonSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(Common, CommonSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(Common, CommonSchema)
 
     this->addSubModule(&Alerts::instance());
     this->addSubModule(&AlertTemplates::instance());

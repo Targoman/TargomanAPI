@@ -180,15 +180,62 @@ private slots:
                     { tblAccountProductsBase::Fields::prdName,          "test mt product 123" },
                     { tblAccountProductsBase::Fields::prdInStockQty,    1'000 },
                     { tblAccountProductsBase::Fields::prd_untID,        1 },
-                    { tblAccountProductsBase::Fields::prdNameI18N,      QVariantMap({
-                          { "fa", "عنوان فارسی ۱۲۳" },
-                          { "ar", "عنوان عربی ۱۲۳" },
-                          { "fr", "عنوان فرانسوی ۱۲۳" },
+                    { tblAccountProductsBase::Fields::prdI18NData,      QVariantMap({
+                        { tblAccountProductsBase::Fields::prdName, QVariantMap({
+                              { "fa", "عنوان فارسی ۱۲۳" },
+                              { "ar", "عنوان عربی ۱۲۳" },
+                              { "fr", "عنوان فرانسوی ۱۲۳" },
+                        }) },
+                        { tblAccountProductsBase::Fields::prdDesc, QVariantMap({
+                              { "fa", "شرح فارسی ۱۲۳" },
+                              { "ar", "شرح عربی ۱۲۳" },
+                        }) },
                     }) },
-                    { tblAccountProductsBase::Fields::prdDescI18N,      QVariantMap({
-                          { "fa", "شرح فارسی ۱۲۳" },
-                          { "ar", "شرح عربی ۱۲۳" },
-                    }) },
+                    { tblAccountProductsBase::Fields::prdDurationMinutes,   60 },
+                    { tblAccountProductsBase::Fields::prdStartAtFirstUse,   true },
+                    { tblAccountProductsMTBase::ExtraFields::prdCreditSpecs, QVariantMap({
+                          { "TEST_AAA", QVariantMap({
+                              { "ALL", 35000 },
+                              { "formal", QVariantMap({
+                                  { "ALL", QVariantMap({
+                                        { "total", 31000 },
+                                  }) },
+                                  { "en2fa", QVariantMap({
+                                        { "day", 32000 },
+                                        { "week", 32100 },
+                                        { "month", 32200 },
+                                        { "total", 32300 },
+                                  }) },
+                              }) },
+                          }) },
+                          { "NMT", QVariantMap({
+                              { "ALL", 5000 },
+                              { "formal", QVariantMap({
+                                  { "ALL", QVariantMap({
+                                        { "total", 1000 },
+                                  }) },
+                                  { "en2fa", QVariantMap({
+                                        { "day", 2000 },
+                                        { "week", 2100 },
+                                        { "month", 2200 },
+                                        { "total", 2300 },
+                                  }) },
+                              }) },
+                          }) },
+                          { "ENMT", QVariantMap({
+                              { "formal", QVariantMap({
+                                  { "en2fa", 3000 },
+                              }) },
+                              { "informal", QVariantMap({
+                                    { "month", 1000 },
+                                    { "total", -1 },
+                              }) },
+                          }) },
+                          { "TST", QVariantMap({
+                              { "month", 4000 },
+                          }) },
+                          { "ALL", 10000 },
+                      }) },
                 }
             );
 
@@ -218,8 +265,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,        12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,       150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  "test mt Saleable 456 vt" },
-//                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,     60 },
-//                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,             1000 },
                 }
             );
         } QT_CATCH (exTargomanBase &exp) {
@@ -246,9 +291,6 @@ private slots:
                     { tblAccountSaleablesBase::Fields::slbBasePrice,            12'000 },
                     { tblAccountSaleablesBase::Fields::slbInStockQty,           150 },
                     { tblAccountSaleablesBase::Fields::slbVoucherTemplate,      "test mt Saleable 456 vt" },
-                    { tblAccountSaleablesBase::Fields::slbDurationMinutes,         60 },
-                    { tblAccountSaleablesBase::Fields::slbStartAtFirstUse,      true },
-                    { tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords,    1000 },
                 }
             );
 
@@ -552,7 +594,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "This is a sample text for testing." },
+                            { "text", "This is a sample text for testing and a b" },
                             { "engine", "TEST_AAA" },
                             { "dir", "en2fa" },
                         });
@@ -572,7 +614,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "text", "این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه" },
                             { "engine", "TEST_AAA" },
                             { "dir", "fa2en" },
                         });
@@ -592,7 +634,7 @@ private slots:
                         "MT/translate",
                         {},
                         {
-                            { "text", "این یک متن نمونه برای آزمایش است." },
+                            { "text", "این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش است و این یک متن نمونه برای آزمایش" },
                             { "engine", "TEST_AAA" },
                             { "dir", "fa2ar" },
                         });
@@ -604,17 +646,38 @@ private slots:
         }
     }
 
-    void assetUsageHistory_1() {
+    //charts
+    //--------------------------------------
+    void assetUsage_chart_Schema() {
         QT_TRY {
             QVariant Result = callUserAPI(
-                RESTClientHelper::POST,
-                "MT/AccountAssetUsageHistory/report",
-                {},
+                RESTClientHelper::GET,
+                "MT/Charts/schema",
+                {
+                    { "apiToken",   this->TokenJWT },
+//                    { "key", "dashboard" },
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void assetUsage_chart_usageDataForProgressBar() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "MT/Charts/usageDataForProgressBar",
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "assetID",     },
-                    { "step",       15 },
-                    { "stepUnit",   "Minute" },
+//                    { "step",       15 },
+//                    { "stepUnit",   "Minute" },
                 }
             );
 

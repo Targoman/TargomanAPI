@@ -45,7 +45,6 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         intfAccountUserAssets<_itmplIsTokenBase>        *_userAssets,
         intfAccountUserAssetsFiles                      *_userAssetsFiles,
         intfAccountAssetUsage<_itmplIsTokenBase>        *_assetUsage,
-        intfAccountAssetUsageHistory<_itmplIsTokenBase> *_assetUsageHistory,
         intfAccountCoupons                              *_discounts,
         intfAccountPrizes                               *_prizes,
         //MT --
@@ -62,13 +61,13 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         mergeAssetUsageLimitsCols({
                 { MTAction::TRANSLATE, {
                     /* asset-day   */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerDay,
-                    /* usage-day   */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerDay,
+//                    /* usage-day   */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerDay,
                     /* asset-week  */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerWeek,
-                    /* usage-week  */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerWeek,
+//                    /* usage-week  */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerWeek,
                     /* asset-month */ {}, //tblAccountUserAssetsMTBase::ExtraFields::uasCreditWordsPerMonth,
-                    /* usage-month */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerMonth,
-                    /* asset-total */ tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                    /* usage-total */ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
+//                    /* usage-month */ {}, //tblAccountAssetUsageMTBase::ExtraFields::usgUsedWordsPerMonth,
+                    /* asset-total */ {} //tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
+//                    /* usage-total */ {} //tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
                 }},
             }, _exclusiveAssetUsageLimitsCols),
         _units,
@@ -78,7 +77,6 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
         _userAssets,
         _userAssetsFiles,
         _assetUsage,
-        _assetUsageHistory,
         _discounts,
         _prizes
     ),
@@ -103,24 +101,105 @@ QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
     tblAccountProductsMTBase::DTO AccountProductsMTBaseDTO;
     AccountProductsMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
 
-    tblAccountSaleablesMTBase::DTO AccountSaleablesMTBaseDTO;
-    AccountSaleablesMTBaseDTO.fromJson(_basketItem._lastFromJsonSource);
-
-    if (NULLABLE_HAS_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountSaleablesMTBaseDTO.slbCreditTotalWords)
+    if (AccountProductsMTBaseDTO.prdCreditSpecs.isEmpty() == false)
+        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs,
+                      AccountProductsMTBaseDTO.prdCreditSpecs.object().toVariantMap()
                       );
-    else if (NULLABLE_HAS_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords))
-        Result.insert(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords,
-                      NULLABLE_VALUE(AccountProductsMTBaseDTO.prdCreditTotalWords)
-                      );
-    //else leave uasCreditTotalWords as null
 
     return Result;
 }
 
 // accounting
 /*********************************************************************/
+
+NULLABLE_TYPE(stuAssetCredit) extractCreditValue(
+    QVariantMap _creditSpecs,
+    QString _creditKey
+) {
+    if (_creditKey.isEmpty())
+        return NULLABLE_NULL_VALUE;
+
+    QStringList Keys = _creditKey.split("::");
+
+    auto FnExtractCreditValues = [](QVariant &_value) -> NULLABLE_TYPE(stuAssetCredit) {
+
+        if (_value.canConvert<QVariantMap>() == false) { //.userType() != QMetaType::QVariantMap)
+            stuAssetCredit Credit;
+
+            //total
+            if (_value.toLongLong() >= 0)
+                Credit.Total = _value.toLongLong();
+
+            return Credit;
+        }
+
+        QVariantMap ValueAsMap = _value.toMap();
+
+        if (ValueAsMap.contains("day")
+            || ValueAsMap.contains("week")
+            || ValueAsMap.contains("month")
+            || ValueAsMap.contains("total")
+        ) {
+            stuAssetCredit Credit;
+
+            //day
+            if (ValueAsMap.contains("day") && (ValueAsMap["day"].toLongLong() >= 0))
+                Credit.PerDay = ValueAsMap["day"].toLongLong();
+
+            //week
+            if (ValueAsMap.contains("week") && (ValueAsMap["week"].toLongLong() >= 0))
+                Credit.PerWeek = ValueAsMap["week"].toLongLong();
+
+            //month
+            if (ValueAsMap.contains("month") && (ValueAsMap["month"].toLongLong() >= 0))
+                Credit.PerMonth = ValueAsMap["month"].toLongLong();
+
+            //total
+            if (ValueAsMap.contains("total") && (ValueAsMap["total"].toLongLong() >= 0))
+                Credit.Total = ValueAsMap["total"].toLongLong();
+
+            return Credit;
+        }
+
+        return NULLABLE_NULL_VALUE;
+    };
+
+//    while (Keys.length()) {
+        QString Key = Keys.first().toLower();
+        Keys.removeFirst();
+
+        if (_creditSpecs.contains(Key)) {
+            QVariant Value = _creditSpecs[Key];
+
+            NULLABLE_TYPE(stuAssetCredit) Credit = FnExtractCreditValues(Value);
+            if (Credit != NULLABLE_NULL_VALUE)
+                return Credit;
+
+            QVariantMap ValueAsMap = Value.toMap();
+            auto Ret = extractCreditValue(
+                           ValueAsMap,
+                           Keys.join("::")
+                           );
+
+            if (Ret != NULLABLE_NULL_VALUE)
+                return Ret;
+        }
+
+        //Key not found? look at neighbour `ALL`
+        if (_creditSpecs.contains("ALL")) {
+            QVariant Value = _creditSpecs["ALL"];
+
+            NULLABLE_TYPE(stuAssetCredit) Credit = FnExtractCreditValues(Value);
+            if (Credit != NULLABLE_NULL_VALUE)
+                return Credit;
+
+            throw exHTTPInternalServerError("Incorrect value for credit");
+        }
+//    }
+
+    return NULLABLE_NULL_VALUE;
+}
+
 template <bool _itmplIsTokenBase>
 stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
@@ -128,11 +207,90 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
-    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM);
+    QString CreditKey;
+    for (auto UsageIter = _requestedUsage.begin();
+         UsageIter != _requestedUsage.end();
+         UsageIter++
+    ) {
+        if (UsageIter.key() != RequestedUsage::CREDIT)
+            continue;
+
+        QVariantMap CreditValues = UsageIter.value().toMap();
+
+        CreditKey = CreditValues.firstKey();
+        if (CreditKey.startsWith(QString("%1::").arg(_action/*MTAction::TRANSLATE*/)))
+            CreditKey = CreditKey.mid(QString("%1::").arg(_action/*MTAction::TRANSLATE*/).length());
+
+//        qint64 UsedWordCount = CreditValues.first().toLongLong();
+        break;
+    }
+
+    if (CreditKey.isEmpty())
+        throw exHTTPInternalServerError("Credit key is empty");
+
+    QString FullCreditKey = QString("%1::%2").arg(_action/*MTAction::TRANSLATE*/).arg(CreditKey);
+
+    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
+                                 .where({ tblAccountUserAssetsBase::Fields::uasStatus,
+                                          enuConditionOperator::Equal,
+                                          enuAuditableStatus::Active })
+                                 .addCols(this->accountUserAssets()->selectableColumnNames())
+                                 ;
 
     SelectQuery
-        .leftJoinWith(tblAccountUserAssetsBase::Relation::Usage)
+        //total:
+        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+                        .where({ tblAccountAssetUsageBase::Fields::usgResolution,
+                                 enuConditionOperator::Equal,
+                                 Targoman::API::AAA::enuAssetUsageResolution::Total
+                               })
+                        .andWhere({
+                                      { enuAggregation::LOWER, tblAccountAssetUsageBase::Fields::usgKey },
+                                      enuConditionOperator::Equal,
+                                      CreditKey.toLower()
+                                  })
+//                        , tblAccountAssetUsageBase::Name,
+                        , "tblAccountAssetUsage_Total",
+                        { "tblAccountAssetUsage_Total", tblAccountAssetUsageBase::Fields::usg_uasID,
+                          enuConditionOperator::Equal,
+                          tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uasID }
+                        )
+//        .addCols(this->accountAssetUsage()->selectableColumnNames())
+        .addCol(R("tblAccountAssetUsage_Total", tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords),
+//                tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords
+                "UsedTotal"
+                )
+
+        //day:
+        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+                        .addCol(tblAccountAssetUsageBase::Fields::usg_uasID)
+                        .addCol(enuAggregation::SUM,
+                                tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords,
+                                "SumUsed")
+                        .where({ tblAccountAssetUsageBase::Fields::usgResolution,
+                                 enuConditionOperator::Equal,
+                                 Targoman::API::AAA::enuAssetUsageResolution::Day
+                               })
+                        .andWhere({
+                                      { enuAggregation::LOWER, tblAccountAssetUsageBase::Fields::usgKey },
+                                      enuConditionOperator::Equal,
+                                      CreditKey.toLower()
+                                  })
+                        .groupBy(tblAccountAssetUsageBase::Fields::usg_uasID)
+                        , "tblAccountAssetUsage_perDay",
+                        { "tblAccountAssetUsage_perDay", tblAccountAssetUsageBase::Fields::usg_uasID,
+                          enuConditionOperator::Equal,
+                          tblAccountUserAssetsBase::Name, tblAccountUserAssetsBase::Fields::uasID }
+                        )
+        .addCol(R("tblAccountAssetUsage_perDay", "SumUsed"), "UsedPerDay")
+    ;
+
+    SelectQuery
         .leftJoinWith(tblAccountUserAssetsBase::Relation::Saleable)
+        .addCols(this->accountSaleables()->selectableColumnNames())
+    ;
+
+    SelectQuery
         .inlineLeftJoin(tblAccountProductsBase::Name/*, tblAccountProductsBase::Name*/, clsCondition(
                         tblAccountProductsBase::Name,
                         tblAccountProductsBase::Fields::prdID,
@@ -140,8 +298,11 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
                         tblAccountSaleablesBase::Name,
                         tblAccountSaleablesBase::Fields::slb_prdID
                         ))
+        .addCols(this->accountProducts()->selectableColumnNames())
+    ;
 
-        .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
+    SelectQuery
+        .andWhere({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _actorID })
 
         .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::Null })
             .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::LessEqual,
@@ -163,41 +324,14 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
     ;
 
     ///check remaining credit
-//    QString CoalescePart = QString("COALESCE(%1,%2,%3)")
-//                           .arg(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords)
-//                           .arg(tblAccountSaleablesMTBase::ExtraFields::slbCreditTotalWords)
-//                           .arg(tblAccountProductsMTBase::ExtraFields::prdCreditTotalWords)
-//                           ;
-
-    SelectQuery.andWhere(clsCondition({ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords, enuConditionOperator::Null })
-                         .orCond({ tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords, enuConditionOperator::Null })
-                         .orCond({ DBExpression::VALUE(QString("%1-%2")
-                                        .arg(tblAccountUserAssetsMTBase::ExtraFields::uasCreditTotalWords)
-                                        .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
-                                   ),
-                                   enuConditionOperator::Greater,
-                                   0 }));
-//                         .orCond({ DBExpression::VALUE(CoalescePart), enuConditionOperator::Null })
+//    SelectQuery.andWhere(clsCondition({ tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords, enuConditionOperator::Null })
+//                         .orCond({ tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs, enuConditionOperator::Null })
 //                         .orCond({ DBExpression::VALUE(QString("%1-%2")
-//                                        .arg(CoalescePart)
+//                                        .arg(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs)
 //                                        .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
 //                                   ),
 //                                   enuConditionOperator::Greater,
 //                                   0 }));
-
-//    for (auto _usageIter = _requestedUsage.constBegin();
-//         _usageIter != _requestedUsage.constEnd();
-//         _usageIter++
-//    ) {
-//        if (_usageIter.key() != RequestedUsage::CREDIT)
-//            continue;
-
-//        QVariantMap CreditValues = _usageIter.value().toMap();
-//        QString CreditKey = CreditValues.firstKey();
-//        qint64 CreditValue = CreditValues.first().toLongLong();
-
-//        SelectQuery.andWhere({  })
-//    }
 
     //-------------------------------
     SelectQuery.orderBy(tblAccountUserAssetsBase::Fields::uasDurationMinutes);
@@ -215,61 +349,81 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 
         stuAssetItem AssetItem;
 
+        //-- --------------------------------
         AssetItem.fromJson(JsonUserAssetInfo); // -> for save _lastFromJsonSource
         AssetItem.Product.fromJson(JsonUserAssetInfo);
         AssetItem.Saleable.fromJson(JsonUserAssetInfo);
         AssetItem.UserAsset.fromJson(JsonUserAssetInfo);
-        AssetItem.AssetUsage.fromJson(JsonUserAssetInfo);
+//        AssetItem.AssetUsage.fromJson(JsonUserAssetInfo);
 
         if (DBCurrentDateTime.isNull())
             TAPI::setFromVariant(DBCurrentDateTime, UserAssetInfo.value(Targoman::API::CURRENT_TIMESTAMP));
 
         //-- --------------------------------
-        UsageLimits_t SaleableUsageLimits;
-        for (auto Iter = this->AssetUsageLimitsCols.begin();
-            Iter != this->AssetUsageLimitsCols.end();
-            Iter++
-        ) {
-            if (_action.isEmpty() || Iter.key() == _action) {
+        QVariantMap CreditSpecs;
+        if (UserAssetInfo.contains(tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs))
+            CreditSpecs = UserAssetInfo[tblAccountUserAssetsMTBase::ExtraFields::uasCreditSpecs].toMap();
+        if (CreditSpecs.isEmpty() && UserAssetInfo.contains(tblAccountProductsMTBase::ExtraFields::prdCreditSpecs))
+            CreditSpecs = UserAssetInfo[tblAccountProductsMTBase::ExtraFields::prdCreditSpecs].toMap();
 
-                stuUsage Usage;
-
-                if (Iter->AssetPerDay.isEmpty() == false)
-                    Usage.PerDay = UserAssetInfo.value(Iter->AssetPerDay).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerDay).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerDay).toUInt()
-                                      : 0);
-
-                if (Iter->AssetPerWeek.isEmpty() == false)
-                    Usage.PerWeek = UserAssetInfo.value(Iter->AssetPerWeek).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerWeek).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerWeek).toUInt()
-                                      : 0);
-
-                if (Iter->AssetPerMonth.isEmpty() == false)
-                    Usage.PerMonth = UserAssetInfo.value(Iter->AssetPerMonth).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsagePerMonth).isValid()
-                                      ? UserAssetInfo.value(Iter->UsagePerMonth).toUInt()
-                                      : 0);
-
-                if (Iter->AssetTotal.isEmpty() == false)
-                    Usage.Total = UserAssetInfo.value(Iter->AssetTotal).toUInt()
-                                   - (UserAssetInfo.value(Iter->UsageTotal).isValid()
-                                      ? UserAssetInfo.value(Iter->UsageTotal).toUInt()
-                                      : 0);
-
-                //Key: action
-                SaleableUsageLimits.insert(Iter.key(), Usage);
-//                {
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerDay)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerWeek)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint32, UserAssetInfo.value(Iter->PerMonth)),
-//                    NULLABLE_INSTANTIATE_FROM_QVARIANT(quint64, UserAssetInfo.value(Iter->Total))
-//                });
-            }
+        if (CreditSpecs.isEmpty()) {
+            //set to zero if not defined?
+//                AssetItem.Credit = stuAssetCredit(0, 0, 0, 0);
+        } else {
+            auto Value = extractCreditValue(CreditSpecs, CreditKey);
+            if (NULLABLE_HAS_VALUE(Value))
+                AssetItem.Credit = NULLABLE_VALUE(Value);
         }
-        AssetItem.Digested.Limits = SaleableUsageLimits;
 
+        //zero credit is not allowed
+        if ((AssetItem.Credit.PerDay == 0)
+                && (AssetItem.Credit.PerWeek == 0)
+                && (AssetItem.Credit.PerMonth == 0)
+                && (AssetItem.Credit.Total == 0)
+            )
+            continue;
+
+//        quint32 usgUsedTotalWords = 0;
+//        if (UserAssetInfo.contains(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords))
+//            usgUsedTotalWords = UserAssetInfo[tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords].toULongLong();
+
+//        //check remaining credit
+//        if ((AssetItem.Credit.Total > 0)
+//                && (AssetItem.Credit.Total <= usgUsedTotalWords))
+//            continue;
+
+        //-- remaining credit --------------------------------
+        stuUsage Usage;
+
+        //day
+        if ((AssetItem.Credit.PerDay > 0)
+                && UserAssetInfo.contains("UsedPerDay")
+                && UserAssetInfo["UsedPerDay"].isValid()
+        ) {
+            qint32 UsedPerDay = UserAssetInfo["UsedPerDay"].toLongLong();
+            if (AssetItem.Credit.PerDay <= UsedPerDay)
+                continue;
+            Usage.PerDay = NULLABLE_VALUE(AssetItem.Credit.PerDay) - UsedPerDay;
+        }
+
+        //week
+
+        //month
+
+        //total
+        if ((AssetItem.Credit.Total > 0)
+                && UserAssetInfo.contains("UsedTotal")
+                && UserAssetInfo["UsedTotal"].isValid()
+        ) {
+            qint32 UsedTotal = UserAssetInfo["UsedTotal"].toLongLong();
+            if (AssetItem.Credit.Total <= UsedTotal)
+                continue;
+            Usage.Total = NULLABLE_VALUE(AssetItem.Credit.Total) - UsedTotal;
+        }
+
+        AssetItem.Digested.Limits.insert(FullCreditKey, Usage);
+
+        //-- --------------------------------
         this->digestPrivs(APICALLBOOM_PARAM, AssetItem);
 
         //-- --------------------------------
@@ -294,8 +448,7 @@ void intfMTModule<_itmplIsTokenBase>::breakCredit(
     const stuAssetItem &_assetItem,
     Q_DECL_UNUSED const QString &_action
 ) {
-    /*
-                        1         2         3
+    /*                  1         2         3
      days   : 0         0         0         0
      before : |-----------------------------|  total: 100 words / used: 30 words / Duration: 30 Days
      now    :           |
@@ -408,6 +561,36 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
     if (_activeCredit.Credit.UserAsset.uasID == 0)
         return;
 
+    QString QueryString;
+
+    // start and end dates
+    //---------------------------------------------
+    if (_activeCredit.Credit.Product.prdStartAtFirstUse
+        && (_activeCredit.Credit.UserAsset.uasValidFromDate.isValid() == false)
+        && (_activeCredit.Credit.UserAsset.uasValidToDate.isValid() == false)
+        && NULLABLE_HAS_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes)
+        && NULLABLE_VALUE(_activeCredit.Credit.UserAsset.uasDurationMinutes) > 0
+    ) {
+        QueryString = QString(R"(
+            UPDATE %1
+               SET uasValidFromDate = NOW()
+                 , uasValidToDate = DATE_ADD(NOW(), INTERVAL uasDurationMinutes MINUTE)
+                 , uasUpdatedBy_usrID = ?
+             WHERE uasID = ?
+)")
+            .arg(tblAccountUserAssetsBase::Name)
+        ;
+
+        clsDACResult Result = this->accountUserAssets()->execQuery(APICALLBOOM_PARAM,
+                                                                   QueryString,
+                                                                   {
+                                                                       APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID),
+                                                                       _activeCredit.Credit.UserAsset.uasID
+                                                                   });
+    }
+
+    // usage
+    //---------------------------------------------
     for (auto UsageIter = _requestedUsage.begin();
          UsageIter != _requestedUsage.end();
          UsageIter++
@@ -416,55 +599,48 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             return;
 
         QVariantMap CreditValues = UsageIter.value().toMap();
-//        QString CreditKey = CreditValues.firstKey();
+
+        QString CreditKey = CreditValues.firstKey();
+        if (CreditKey.startsWith(QString("%1::").arg(MTAction::TRANSLATE)))
+            CreditKey = CreditKey.mid(QString("%1::").arg(MTAction::TRANSLATE).length());
+
         qint64 UsedWordCount = CreditValues.first().toLongLong();
 
-        // usage history
-        //---------------------------------------------
-        QString QueryString = QString(R"(
-            INSERT INTO %1
-               SET %2 = ?
-                 , %3 = NOW()
-                 , %4 = ?
-            ON DUPLICATE KEY
-            UPDATE %3 = NOW()
-                 , %4 = %4 + ?
-)")
-            .arg(tblAccountAssetUsageHistoryBase::Name)
-            .arg(tblAccountAssetUsageHistoryBase::Fields::ush_uasID)
-            .arg(tblAccountAssetUsageHistoryBase::Fields::ushLastDateTime)
-            .arg(tblAccountAssetUsageHistoryMTBase::ExtraFields::ushSumUsedTotalWords)
-        ;
-
-        clsDACResult Result1 = this->accountAssetUsageHistory()->execQuery(APICALLBOOM_PARAM,
-                                                                           QueryString,
-                                                                           {
-                                                                               _activeCredit.Credit.UserAsset.uasID,
-                                                                               UsedWordCount,
-                                                                               UsedWordCount,
-                                                                           });
-
-        // usage
-        //---------------------------------------------
         QueryString = QString(R"(
             INSERT INTO %1
-               SET %2 = ?
-                 , %3 = ?
-            ON DUPLICATE KEY
-            UPDATE %3 = %3 + ?
+               SET usg_uasID = ?
+                 , usgResolution = ?
+                 , usgLastDateTime = NOW()
+                 , usgKey = '%2'
+                 , usgUsedTotalWords = ?
+                ON DUPLICATE KEY UPDATE
+                   usgLastDateTime = NOW()
+                 , usgUsedTotalWords = IFNULL(usgUsedTotalWords, 0) + ?
 )")
             .arg(tblAccountAssetUsageBase::Name)
-            .arg(tblAccountAssetUsageBase::Fields::usg_uasID)
-            .arg(tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords)
+            .arg(CreditKey)
         ;
 
-        clsDACResult Result2 = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
-                                                                    QueryString,
-                                                                    {
-                                                                        _activeCredit.Credit.UserAsset.uasID,
-                                                                        UsedWordCount,
-                                                                        UsedWordCount,
-                                                                    });
+        QList<QChar> Resolutions = {
+            QChar(enuAssetUsageResolution::Total),
+//            QChar(enuAssetUsageResolution::Year),
+//            QChar(enuAssetUsageResolution::Month),
+//            QChar(enuAssetUsageResolution::Week),
+            QChar(enuAssetUsageResolution::Day),
+            QChar(enuAssetUsageResolution::Hour),
+//            QChar(enuAssetUsageResolution::Minute),
+        };
+
+        foreach (QChar Resolution, Resolutions) {
+            clsDACResult Result = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
+                                                                       QueryString,
+                                                                       {
+                                                                           _activeCredit.Credit.UserAsset.uasID,
+                                                                           Resolution,
+                                                                           UsedWordCount,
+                                                                           UsedWordCount,
+                                                                       });
+        }
     }
 }
 

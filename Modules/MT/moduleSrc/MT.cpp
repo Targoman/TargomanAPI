@@ -36,6 +36,7 @@ using namespace Targoman::API::ModuleHelpers::MT;
 #include "MTDefs.hpp"
 #include "ORM/MTHelpers.h"
 #include "ORM/Accounting.h"
+#include "ORM/Charts.h"
 
 #include "Interfaces/Helpers/RESTClientHelper.h"
 #include "Interfaces/Helpers/FixtureHelper.h"
@@ -52,6 +53,8 @@ TARGOMAN_API_MODULE_IMPLEMENT(MT)
 TARGOMAN_API_MODULE_IMPLEMENT_DB_CONFIG(MT, MTSchema)
 //---------------------------------------------------------
 TARGOMAN_API_MODULE_IMPLEMENT_MIGRATIONS(MT, MTSchema);
+TARGOMAN_API_MODULE_IMPLEMENT_CONFIGURATIONS(MT, MTSchema)
+TARGOMAN_API_MODULE_IMPLEMENT_I18N(MT, MTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_ACTIONLOG(MT, MTSchema);
 TARGOMAN_API_MODULE_IMPLEMENT_OBJECTSTORAGE(MT, MTSchema)
 TARGOMAN_API_MODULE_IMPLEMENT_FAQ(MT, MTSchema);
@@ -68,7 +71,6 @@ MT::MT() :
         &AccountUserAssets::instance(),
         &AccountUserAssetsFiles::instance(),
         &AccountAssetUsage::instance(),
-        &AccountAssetUsageHistory::instance(),
         &AccountCoupons::instance(),
         nullptr,
         //---------------------
@@ -80,6 +82,8 @@ MT::MT() :
         &MTTranslationLogs::instance()
 ) {
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_MIGRATIONS(MT, MTSchema);
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_CONFIGURATIONS(MT, MTSchema)
+    TARGOMAN_API_MODULE_IMPLEMENT_CTOR_I18N(MT, MTSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_ACTIONLOG(MT, MTSchema);
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_OBJECTSTORAGE(MT, MTSchema)
     TARGOMAN_API_MODULE_IMPLEMENT_CTOR_FAQ(MT, MTSchema);
@@ -91,7 +95,6 @@ MT::MT() :
     this->addSubModule(AccountUserAssets.data());
     this->addSubModule(AccountUserAssetsFiles.data());
     this->addSubModule(AccountAssetUsage.data());
-    this->addSubModule(AccountAssetUsageHistory.data());
     this->addSubModule(AccountCoupons.data());
     //this->addSubModule(AccountPrizes); // There is no prize in MT module
 
@@ -101,6 +104,8 @@ MT::MT() :
     this->addSubModule(&MTTokenStats::instance());
     this->addSubModule(&MTTranslatedPhrases::instance());
     this->addSubModule(&MTTranslationLogs::instance());
+
+    this->addSubModule(&Charts::instance());
 }
 
 QMap<QString, stuModuleDBInfo> MT::requiredDBs() const {
@@ -196,7 +201,11 @@ QVariantMap MT::getCustomUserAssetFieldsForQuery(
 ) {
     ///@TODO: [very important] complete this
 
-    QVariantMap Result;
+    QVariantMap Result = intfMTModule::getCustomUserAssetFieldsForQuery(
+                             APICALLBOOM_PARAM,
+                             _basketItem,
+                             _oldVoucherItem
+                             );
 
 //    if (_basketItem.AdditionalInfo.contains(ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS))
 //        Result.insert(tblAccountUserAssets::ExtraFields::uasDays, _basketItem.AdditionalInfo[ASSET_ITEM_ADDITIONAL_INTO_KEY_PLUS_MAX_DAYS].toInt());

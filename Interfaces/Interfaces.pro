@@ -20,6 +20,7 @@ DIST_HEADERS += \
     Common/GenericEnums.hpp \
     Common/APIArgHelperMacros.hpp \
     Common/QtTypes.hpp \
+    Common/tmplNullable.h \
     AAA/AAA.hpp \
     AAA/AAADefs.hpp \
     AAA/Authentication.h \
@@ -47,6 +48,8 @@ HEADERS += \
     Helpers/TokenHelper.h \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
+    ORM/intfConfigurations.h \
+    ORM/intfI18N.h \
     Server/APICallBoom.h \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
@@ -86,6 +89,8 @@ SOURCES += \
     Helpers/TokenHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \
+    ORM/intfConfigurations.cpp \
+    ORM/intfI18N.cpp \
     Server/APICallBoom.cpp \
     Server/ServerCommon.cpp \
     Server/clsSimpleCrypt.cpp \
@@ -135,7 +140,11 @@ OTHER_FILES += \
     migrations/faq/.gitkeep \
     migrations/faq/db/*.sql \
     migrations/faq/local/*.sh \
-    migrations/faq/local/.migrations
+    migrations/faq/local/.migrations \
+    migrations/services/.gitkeep \
+    migrations/services/db/*.sql \
+    migrations/services/local/*.sh \
+    migrations/services/local/.migrations
 
 INCLUDEPATH += \
 #    $$BASE_PROJECT_PATH/App/ \

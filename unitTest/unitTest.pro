@@ -9,6 +9,7 @@
 PRJDIR = ".."
 
 HEADERS +=  \
+    testNullable.hpp \
     testMacros.hpp \
     testQueryBuilders.hpp \
     $$BASE_PROJECT_PATH/App/Server/RESTAPIRegistry.h \
