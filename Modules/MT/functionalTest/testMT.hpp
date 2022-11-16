@@ -656,6 +656,11 @@ private slots:
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "key", "dashboard" },
+                },
+                {},
+                {},
+                {
+                    "accept-language: fa",
                 }
             );
 
@@ -678,6 +683,11 @@ private slots:
 //                    { "assetID",     },
 //                    { "step",       15 },
 //                    { "stepUnit",   "Minute" },
+                },
+                {},
+                {},
+                {
+                    "accept-language: fa",
                 }
             );
 

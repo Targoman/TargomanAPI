@@ -75,6 +75,11 @@ public:
             const QString &_schema
             );
 
+public:
+    QString translated(
+            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            const QString &_key);
+
 private slots:
     QVariant ORMGET_ANONYMOUSE("Get I18N")
 };

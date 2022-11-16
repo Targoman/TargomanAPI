@@ -326,8 +326,14 @@ QVariant baseintfMTCharts::getSchema(
 ) {
     ///@TODO: read from tblConfigurations
 
+    Targoman::API::ORM::intfI18N* I18N;
+    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+    else
+        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
+
     QVariantMap RemainingCreditPercentageCharts = {
-        { "title", "Remaining credit percentage" },
+        { "title", I18N->translated(APICALLBOOM_PARAM, "Remaining credit percentage") },
         { "type", "multiprogress" },
         { "charts", QVariantMap({
               { "%%ITERATION%%", QVariantMap({
@@ -731,12 +737,25 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 //    QString Schema = getSchema(APICALLBOOM_PARAM, _key).toString();
 //    QStringList ChartPaths = extract from schema
 
+    QStringList FullKeys;
+    QStringList Engines;
+    QStringList Classes;
+    QStringList Directions;
+
     for (auto it = CreditUsageRemained.begin();
          it != CreditUsageRemained.end();
          ++it
     ) {
         ///@TODO: remove item if not exists in schema
 
+        //----------
+        FullKeys.append(it.key());
+        auto Parts = it.key().split("::");
+        if (Parts.length() >= 3) Directions.append(Parts[2]);
+        if (Parts.length() >= 2) Classes.append(Parts[1]);
+        if (Parts.length() >= 1) Engines.append(Parts[0]);
+
+        //----------
         if ((it->Credit == -1) || (it->Usage == 0))
             continue;
 
@@ -745,21 +764,58 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 
     //output
     //------------------------------------------------
-//    Targoman::API::ORM::intfI18N* I18N;
-//    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
-//        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
-//    else
-//        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
+    Targoman::API::ORM::intfI18N* I18N;
+    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+    else
+        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
-//    auto I18NRows = I18N->makeSelectQuery(APICALLBOOM_PARAM)
-//                    .where({ tblI18N::Fields::i18nKey,
-//                             enuConditionOperator::In,
-//                             "'" + CreditUsageRemained.keys().join("','") + "'"
-//                           })
-//                    .pageSize(0)
-//                    .all();
+    auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
+                           .addCol(tblI18N::Fields::i18nKey)
+                           .addCol(DBExpression::VALUE(QString("COALESCE("
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.%2')),"
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.default'))"
+                                                               ")")
+                                                       .arg(tblI18N::Name)
+                                                       .arg(APICALLBOOM_PARAM.language())
+                                                       ),
+                                   "Translated")
 
+                           .where({ tblI18N::Fields::i18nKey,
+                                    enuConditionOperator::In,
+                                    "'" + FullKeys.join("','") + "'"
+                                  });
+    if (Engines.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Engines.join("','") + "'"
+                                });
+    if (Classes.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Classes.join("','") + "'"
+                                });
+    if (Directions.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Directions.join("','") + "'"
+                                });
 
+    auto I18NRows = I18NSelectQuery
+                    .pageSize(0)
+                    .all();
+
+    QMap<QString, QString> I18NMap;
+
+    foreach (QVariant Row, I18NRows.Rows) {
+        QVariantMap Info = Row.toMap();
+
+        if (Info["Translated"].toString().isEmpty())
+            continue;
+
+        I18NMap.insert(Info[tblI18N::Fields::i18nKey].toString(), Info["Translated"].toString());
+    }
+    //------------------------------------------------
 //    stuMultiProgressChart Result;
 
     QVariantList Result;
@@ -778,6 +834,37 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 //                                 }
 //                                 ));
 
+        QString Title = it.key().split("::").join(" - ");
+        if (I18NMap.contains(it.key()))
+            Title = I18NMap[it.key()];
+        else {
+            auto KeyParts = it.key().split("::");
+            QStringList TitleParts;
+
+            if (KeyParts.length() >= 1) {
+                if (I18NMap.contains(KeyParts[0]))
+                    TitleParts.append(I18NMap[KeyParts[0]]);
+                else
+                    TitleParts.append(KeyParts[0]);
+            }
+
+            if (KeyParts.length() >= 2) {
+                if (I18NMap.contains(KeyParts[1]))
+                    TitleParts.append(I18NMap[KeyParts[1]]);
+                else
+                    TitleParts.append(KeyParts[1]);
+            }
+
+            if (KeyParts.length() >= 3) {
+                if (I18NMap.contains(KeyParts[2]))
+                    TitleParts.append(I18NMap[KeyParts[2]]);
+                else
+                    TitleParts.append(KeyParts[2]);
+            }
+
+            Title = TitleParts.join(" - ");
+        }
+
         quint32 Value;
 
 //        if (it->Remained == -1)
@@ -790,7 +877,7 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 
         Result.append(QVariantMap({
                                       { "NAME", it.key() },
-                                      { "TITLE", it.key() }, //"رسمی"
+                                      { "TITLE", Title }, //"رسمی"
                                       { "VALUE", Value },
                                       { "MIN", 0 },
                                       { "MAX", 100 },

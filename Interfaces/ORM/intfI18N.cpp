@@ -43,6 +43,33 @@ intfSQLBasedModule(
     tblI18N::Private::Indexes
 ) { ; }
 
+QString intfI18N::translated(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    const QString &_key
+) {
+    auto Data = this->makeSelectQuery(APICALLBOOM_PARAM)
+                .addCol(tblI18N::Fields::i18nKey)
+                .addCol(DBExpression::VALUE(QString("COALESCE("
+                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.%2')),"
+                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nValue, '$.default')),"
+                                                    "'%3')")
+                                            .arg(tblI18N::Name)
+                                            .arg(APICALLBOOM_PARAM.language())
+                                            .arg(_key)
+                                            ),
+                        "Translated")
+                .where({ tblI18N::Fields::i18nKey,
+                         enuConditionOperator::Equal,
+                         _key
+                       })
+                .tryOne();
+
+    if (Data.isEmpty())
+        return _key;
+
+    return Data["Translated"].toString().trimmed();
+}
+
 QVariant IMPL_ORMGET_ANONYMOUSE(intfI18N) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
