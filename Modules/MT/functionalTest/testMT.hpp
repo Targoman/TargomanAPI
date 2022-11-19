@@ -660,7 +660,7 @@ private slots:
                 {},
                 {},
                 {
-                    "accept-language: fa",
+                    "accept-language: fa-IR",
                 }
             );
 
@@ -687,7 +687,7 @@ private slots:
                 {},
                 {},
                 {
-                    "accept-language: fa",
+                    "accept-language: fa-IR",
                 }
             );
 
@@ -714,7 +714,7 @@ private slots:
                 {},
                 {},
                 {
-                    "accept-language: fa",
+                    "accept-language: fa-IR",
                 }
             );
 

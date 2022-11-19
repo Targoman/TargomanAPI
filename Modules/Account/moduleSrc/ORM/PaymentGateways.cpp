@@ -79,7 +79,7 @@ ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
         Query
             .removeCol(tblPaymentGatewayTypes::Fields::pgtName)
             .leftJoin(tblPaymentGatewayTypesI18N::Name)
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.pgtName.%2')), %3.pgtName)")
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.pgtName.\"%2\"')), %3.pgtName)")
                                         .arg(tblPaymentGatewayTypesI18N::Name)
                                         .arg(APICALLBOOM_PARAM.language())
                                         .arg(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias)

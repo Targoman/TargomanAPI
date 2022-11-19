@@ -765,7 +765,7 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getU
     auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
                            .addCol(tblI18N::Fields::i18nKey)
                            .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.%3')),"
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.\"%3\"')),"
                                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
                                                                ")")
                                                        .arg(tblI18N::Name)
