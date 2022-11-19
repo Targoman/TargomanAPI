@@ -35,10 +35,10 @@ using namespace Targoman::API::AAA;
 using namespace Targoman::API::Helpers;
 using namespace Targoman::API::ORM;
 
-TAPI_REGISTER_METATYPE_TYPE_STRUCT(
-    /* namespace          */ Targoman::API::ModuleHelpers::MT,
-    /* type               */ stuMultiProgressChart
-);
+//TAPI_REGISTER_METATYPE_TYPE_STRUCT(
+//    /* namespace          */ Targoman::API::ModuleHelpers::MT,
+//    /* type               */ stuMultiProgressChart
+//);
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
@@ -332,7 +332,7 @@ QVariant baseintfMTCharts::getSchema(
     else
         I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
-    QVariantMap RemainingCreditPercentageCharts = {
+    QVariantMap RemainingCreditPercentageMultiProgress = {
         { "title", I18N->translated(APICALLBOOM_PARAM, "Remaining credit percentage") },
         { "type", "multiprogress" },
         { "charts", QVariantMap({
@@ -354,10 +354,30 @@ QVariant baseintfMTCharts::getSchema(
         }) },
     };
 
+    QVariantMap RemainingCreditPercentagePieChart = {
+        { "title", I18N->translated(APICALLBOOM_PARAM, "Remaining credit percentage") },
+        { "type", "pie" },
+        { "items", QVariantMap({
+              { "%%ITERATION%%", QVariantMap({
+                    { "name", "{{NAME}}" },
+                    { "title", "{{TITLE}}" },
+                    { "value", "{{VALUE}}" },
+              }) },
+        }) },
+        { "endpoint", QVariantMap({
+              { "url", "{{API_URL}}/MT/Charts/usageDataForPieChart" },
+              { "params", QVariantMap({
+                    { "apiToken", "{{API_TOKEN}}" },
+                    { "key", _key },
+              }) },
+        }) },
+    };
+
     QVariantMap Charts = {
         { "title", I18N->translated(APICALLBOOM_PARAM, "MT Charts") },
         { "charts", QVariantList({
-              RemainingCreditPercentageCharts,
+              RemainingCreditPercentageMultiProgress,
+              RemainingCreditPercentagePieChart,
         }) }
     };
 
@@ -525,12 +545,6 @@ ALL                 -> 10,000
 
 */
 
-struct stuCreditUsageRemained {
-    qint64 Credit = -1;
-    qint64 Usage = 0;
-    qint64 Remained = -1;
-};
-
 int extractSumOfCreditValues(
     QMap<QString, stuCreditUsageRemained> &_creditUsageRemained,
     const QVariantMap &_creditSpecs,
@@ -623,7 +637,8 @@ const sampleMultipProgressBar = [
 ]
 */
 
-QVariant baseintfMTCharts::usageDataForProgressBar(
+//CreditUsageRemained_t, I18NMap
+std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getUsageData(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
@@ -660,7 +675,7 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
         return {};
 
     QStringList AssetsIDs;
-    QMap<QString, stuCreditUsageRemained> CreditUsageRemained;
+    CreditUsageRemained_t CreditUsageRemained;
 
     foreach (QVariant Row, Table.Rows) {
         QVariantMap UserAssetInfo = Row.toMap();
@@ -793,25 +808,34 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 
         I18NMap.insert(Info[tblI18N::Fields::i18nKey].toString(), Info["Translated"].toString());
     }
+
     //------------------------------------------------
-//    stuMultiProgressChart Result;
+    return { CreditUsageRemained, I18NMap };
+}
+
+QVariant baseintfMTCharts::usageDataForProgressBar(
+    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    quint64 _actorID,
+    QString _key
+) {
+    auto [CreditUsageRemained, I18NMap] = getUsageData(
+            APICALLBOOM_PARAM,
+            _actorID,
+            _key
+            );
 
     QVariantList Result;
 
-//    Result.Title = "Remaining credit percentage";
-//    Result.Type = "multiprogress";
+    Targoman::API::ORM::intfI18N* I18N;
+    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+    else
+        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
     for (auto it = CreditUsageRemained.constBegin();
          it != CreditUsageRemained.constEnd();
          ++it
     ) {
-//        Result.Series.insert(it.key(), stuChartSeriesItem(
-//                                 it.key(), //"رسمی",
-//                                 {
-//                                    stuChartSeriesItemProps("%")
-//                                 }
-//                                 ));
-
         QString Title = it.key().split("::").join(" - ");
         if (I18NMap.contains(it.key()))
             Title = I18NMap[it.key()];
@@ -862,99 +886,9 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
                                       { "MIN", 0 },
                                       { "MAX", 100 },
                                   }));
-
-
-//        Result.Data.insert(it.key(), stuYChartData(QString::number(Value)));
     }
 
     return Result;
-
-
-/*
-
-SELECT
-tblAccountAssetUsage_total.usg_uasID
--- , tblAccountAssetUsage.usgResolution
-, tblAccountAssetUsage_total.SumUsed AS TotalUsed
-, tblAccountAssetUsage_perYear.DateRes AS YearDateRes
-, tblAccountAssetUsage_perYear.SumUsed AS UsedPerYear
-, tblAccountAssetUsage_perMonth.DateRes AS MonthDateRes
-, tblAccountAssetUsage_perMonth.SumUsed AS UsedPerMonth
-, tblAccountAssetUsage_perDay.DateRes AS DayDateRes
-, tblAccountAssetUsage_perDay.SumUsed AS UsedPerDay
-, tblAccountAssetUsage_perHour.DateRes AS HourDateRes
-, tblAccountAssetUsage_perHour.SumUsed AS UsedPerHour
--- , tblAccountAssetUsage.usgLastDateTime
--- , tblAccountAssetUsage.usgKey
-, tblAccountUserAssets.*
-
-FROM tblAccountUserAssets
-
-LEFT JOIN (
-SELECT usg_uasID
-, SUM(usgUsedTotalWords) AS SumUsed
-FROM tblAccountAssetUsage
-WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-AND usgResolution = 'T'
-GROUP BY usg_uasID
-) tblAccountAssetUsage_total
-ON tblAccountAssetUsage_total.usg_uasID = tblAccountUserAssets.uasID
-
-LEFT JOIN (
-SELECT usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y') AS DateRes
-, SUM(usgUsedTotalWords) AS SumUsed
-FROM tblAccountAssetUsage
-WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-AND usgResolution = 'Y'
-GROUP BY usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y')
-) tblAccountAssetUsage_perYear
-ON tblAccountAssetUsage_perYear.usg_uasID = tblAccountUserAssets.uasID
-
-LEFT JOIN (
-SELECT usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m') AS DateRes
-, SUM(usgUsedTotalWords) AS SumUsed
-FROM tblAccountAssetUsage
-WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-AND usgResolution = 'M'
-GROUP BY usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m')
-) tblAccountAssetUsage_perMonth
-ON tblAccountAssetUsage_perMonth.usg_uasID = tblAccountUserAssets.uasID
-
-LEFT JOIN (
-SELECT usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d') AS DateRes
-, SUM(usgUsedTotalWords) AS SumUsed
-FROM tblAccountAssetUsage
-WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-AND usgResolution = 'D'
-GROUP BY usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d')
-) tblAccountAssetUsage_perDay
-ON tblAccountAssetUsage_perDay.usg_uasID = tblAccountUserAssets.uasID
-
-LEFT JOIN (
-SELECT usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H') AS DateRes
-, SUM(usgUsedTotalWords) AS SumUsed
-FROM tblAccountAssetUsage
-WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
-AND usgResolution = 'H'
-GROUP BY usg_uasID
-, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H')
-) tblAccountAssetUsage_perHour
-ON tblAccountAssetUsage_perHour.usg_uasID = tblAccountUserAssets.uasID
-
-WHERE tblAccountAssetUsage_total.usg_uasID IS NOT null
-
--- AND uas_actorID = 542
-
-*/
-
-
 }
 
 QVariant baseintfMTCharts::usageDataForPieChart(
@@ -962,23 +896,65 @@ QVariant baseintfMTCharts::usageDataForPieChart(
     quint64 _actorID,
     QString _key
 ) {
-    return QVariantMap({
-                           { "type", "pie" },
-                           { "series", QVariantMap({
-                                 { "MT_FORMAL", QVariantMap({
-                                       { "label", "رسمی" },
-                                       { "props", {} },
-                                 }) },
-                                 { "MT_INFORMAL", QVariantMap({
-                                       { "label", "محاوره" },
-                                       { "props", {} },
-                                 }) },
-                           }) },
-                           { "data", QVariantMap({
-                                 { "MT_FORMAL", 40 },
-                                 { "MT_INFORMAL", 60 },
-                           }) },
-                       });
+    auto [CreditUsageRemained, I18NMap] = getUsageData(
+            APICALLBOOM_PARAM,
+            _actorID,
+            _key
+            );
+
+    QVariantMap Result;
+
+    for (auto it = CreditUsageRemained.constBegin();
+         it != CreditUsageRemained.constEnd();
+         ++it
+    ) {
+//        QString Title = it.key().split("::").join(" - ");
+//        if (I18NMap.contains(it.key()))
+//            Title = I18NMap[it.key()];
+//        else {
+//            auto KeyParts = it.key().split("::");
+//            QStringList TitleParts;
+
+//            if (KeyParts.length() >= 1) {
+//                if (I18NMap.contains(KeyParts[0]))
+//                    TitleParts.append(I18NMap[KeyParts[0]]);
+//                else
+//                    TitleParts.append(KeyParts[0]);
+//            }
+
+//            if (KeyParts.length() >= 2) {
+//                if (I18NMap.contains(KeyParts[1]))
+//                    TitleParts.append(I18NMap[KeyParts[1]]);
+//                else
+//                    TitleParts.append(KeyParts[1]);
+//            }
+
+//            if (KeyParts.length() >= 3) {
+//                if (I18NMap.contains(KeyParts[2]))
+//                    TitleParts.append(I18NMap[KeyParts[2]]);
+//                else
+//                    TitleParts.append(KeyParts[2]);
+//            }
+
+//            Title = TitleParts.join(" - ");
+//        }
+
+        quint32 Value;
+
+//        if (it->Remained == -1)
+        if (it->Credit == -1)
+            Value = 50;
+        else if (it->Remained == -1)
+            Value = 0;
+        else if ((it->Credit == 0) || (it->Remained == 0))
+            Value = 100;
+        else
+            Value = (quint32)(((double)it->Remained * 100.0) / (double)it->Credit);
+
+        Result.insert(it.key(), Value);
+    }
+
+    return Result;
 }
 
 QVariant baseintfMTCharts::usageDataForLineChart(
@@ -1292,3 +1268,88 @@ template class intfMTCharts<false>;
 template class intfMTCharts<true>;
 
 } //namespace Targoman::API::ModuleHelpers::MT::Interfaces
+
+
+/*
+
+SELECT
+tblAccountAssetUsage_total.usg_uasID
+-- , tblAccountAssetUsage.usgResolution
+, tblAccountAssetUsage_total.SumUsed AS TotalUsed
+, tblAccountAssetUsage_perYear.DateRes AS YearDateRes
+, tblAccountAssetUsage_perYear.SumUsed AS UsedPerYear
+, tblAccountAssetUsage_perMonth.DateRes AS MonthDateRes
+, tblAccountAssetUsage_perMonth.SumUsed AS UsedPerMonth
+, tblAccountAssetUsage_perDay.DateRes AS DayDateRes
+, tblAccountAssetUsage_perDay.SumUsed AS UsedPerDay
+, tblAccountAssetUsage_perHour.DateRes AS HourDateRes
+, tblAccountAssetUsage_perHour.SumUsed AS UsedPerHour
+-- , tblAccountAssetUsage.usgLastDateTime
+-- , tblAccountAssetUsage.usgKey
+, tblAccountUserAssets.*
+
+FROM tblAccountUserAssets
+
+LEFT JOIN (
+SELECT usg_uasID
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'T'
+GROUP BY usg_uasID
+) tblAccountAssetUsage_total
+ON tblAccountAssetUsage_total.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'Y'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y')
+) tblAccountAssetUsage_perYear
+ON tblAccountAssetUsage_perYear.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'M'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m')
+) tblAccountAssetUsage_perMonth
+ON tblAccountAssetUsage_perMonth.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'D'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d')
+) tblAccountAssetUsage_perDay
+ON tblAccountAssetUsage_perDay.usg_uasID = tblAccountUserAssets.uasID
+
+LEFT JOIN (
+SELECT usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H') AS DateRes
+, SUM(usgUsedTotalWords) AS SumUsed
+FROM tblAccountAssetUsage
+WHERE REGEXP_LIKE(usgKey, '(.*::)formal(::.*)', 'i')
+AND usgResolution = 'H'
+GROUP BY usg_uasID
+, DATE_FORMAT(usgLastDateTime, '%Y-%m-%d %H')
+) tblAccountAssetUsage_perHour
+ON tblAccountAssetUsage_perHour.usg_uasID = tblAccountUserAssets.uasID
+
+WHERE tblAccountAssetUsage_total.usg_uasID IS NOT null
+
+-- AND uas_actorID = 542
+
+*/

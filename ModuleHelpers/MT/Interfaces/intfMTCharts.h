@@ -29,41 +29,48 @@
 
 namespace Targoman::API::ModuleHelpers::MT {
 
-TAPI_DEFINE_STRUCT(stuChartSeriesItemProps,
-    SF_QString(ValueSuffix)
-);
+//TAPI_DEFINE_STRUCT(stuChartSeriesItemProps,
+//    SF_QString(ValueSuffix)
+//);
 
-TAPI_DEFINE_STRUCT(stuChartSeriesItem,
-    SF_QString(Label),
-    SF_QListOfVarStruct(Props, stuChartSeriesItemProps)
-);
-typedef QMap<QString, stuChartSeriesItem> ChartSeries_t;
+//TAPI_DEFINE_STRUCT(stuChartSeriesItem,
+//    SF_QString(Label),
+//    SF_QListOfVarStruct(Props, stuChartSeriesItemProps)
+//);
+//typedef QMap<QString, stuChartSeriesItem> ChartSeries_t;
 
-TAPI_DEFINE_STRUCT(stuYChartData,
-    SF_QString(Y)
-);
-typedef QMap<QString, stuYChartData> YChartDataSet_t;
+//TAPI_DEFINE_STRUCT(stuYChartData,
+//    SF_QString(Y)
+//);
+//typedef QMap<QString, stuYChartData> YChartDataSet_t;
 
-TAPI_DEFINE_STRUCT(stuMultiProgressChart,
-    SF_QString          (Title),
-    SF_QString          (Type),
-    SF_QMapOfVarStruct  (Series, stuChartSeriesItem, ChartSeries_t),
-    SF_QMapOfVarStruct  (Data, stuYChartData, YChartDataSet_t)
-);
-
-
+//TAPI_DEFINE_STRUCT(stuMultiProgressChart,
+//    SF_QString          (Title),
+//    SF_QString          (Type),
+//    SF_QMapOfVarStruct  (Series, stuChartSeriesItem, ChartSeries_t),
+//    SF_QMapOfVarStruct  (Data, stuYChartData, YChartDataSet_t)
+//);
 
 
 
-TAPI_DEFINE_STRUCT(stuXYChartData,
-    SF_QString(X),
-    SF_QString(Y)
-);
-typedef QMap<QString, stuXYChartData> XYChartDataSet_t;
+
+
+//TAPI_DEFINE_STRUCT(stuXYChartData,
+//    SF_QString(X),
+//    SF_QString(Y)
+//);
+//typedef QMap<QString, stuXYChartData> XYChartDataSet_t;
+
+struct stuCreditUsageRemained {
+    qint64 Credit = -1;
+    qint64 Usage = 0;
+    qint64 Remained = -1;
+};
+typedef QMap<QString, stuCreditUsageRemained> CreditUsageRemained_t;
 
 } // namespace Targoman::API::ModuleHelpers::MT
 
-TAPI_DECLARE_METATYPE(Targoman::API::ModuleHelpers::MT::stuMultiProgressChart)
+//TAPI_DECLARE_METATYPE(Targoman::API::ModuleHelpers::MT::stuMultiProgressChart)
 
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
@@ -83,6 +90,13 @@ protected:
     );
 
 //    virtual QStringList creditFieldNames() = 0;
+
+    //CreditUsageRemained_t, I18NMap
+    std::tuple<CreditUsageRemained_t, QMap<QString, QString>> getUsageData(
+        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        quint64 _actorID,
+        QString _key = {}
+    );
 
     QVariant usageDataForProgressBar(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
