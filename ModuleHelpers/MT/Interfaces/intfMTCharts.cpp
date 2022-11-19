@@ -347,7 +347,7 @@ QVariant baseintfMTCharts::getSchema(
               }) },
         }) },
         { "endpoint", QVariantMap({
-              { "url", "{{API_URL}}/MT/Charts/usageDataForProgressBar" },
+              { "url", "{{API_URL}}/MT/Charts/remainedDataForProgressBar" },
               { "params", QVariantMap({
                     { "apiToken", "{{API_TOKEN}}" },
                     { "key", _key },
@@ -366,7 +366,37 @@ QVariant baseintfMTCharts::getSchema(
               }) },
         }) },
         { "endpoint", QVariantMap({
-              { "url", "{{API_URL}}/MT/Charts/usageDataForPieChart" },
+              { "url", "{{API_URL}}/MT/Charts/remainedDataForPieChart" },
+              { "params", QVariantMap({
+                    { "apiToken", "{{API_TOKEN}}" },
+                    { "key", _key },
+              }) },
+        }) },
+    };
+
+    QVariantMap CreditUsageLineCharts = {
+        { "title", I18N->translated(APICALLBOOM_PARAM, "Credits usages") },
+        { "type", "2d" },
+        { "axis", QVariantMap({
+            { "x", QVariantMap({
+                { "label", I18N->translated(APICALLBOOM_PARAM, "Date/Time") },
+                { "type", "date" },
+            }) },
+            { "y", QVariantMap({
+                { "label", I18N->translated(APICALLBOOM_PARAM, "Words") },
+                { "type", "int" },
+            }) },
+        }) },
+        { "charts", QVariantMap({
+              { "%%ITERATION%%", QVariantMap({
+                    { "type", "{{TYPE}}" },
+                    { "name", "{{NAME}}" },
+                    { "title", "{{TITLE}}" },
+                    { "points", "{{POINTS}}" },
+              }) },
+        }) },
+        { "endpoint", QVariantMap({
+              { "url", "{{API_URL}}/MT/Charts/usageDataForLineChart" },
               { "params", QVariantMap({
                     { "apiToken", "{{API_TOKEN}}" },
                     { "key", _key },
@@ -379,6 +409,7 @@ QVariant baseintfMTCharts::getSchema(
         { "charts", QVariantList({
               RemainingCreditPercentageMultiProgress,
               RemainingCreditPercentagePieChart,
+              CreditUsageLineCharts,
         }) }
     };
 
@@ -401,7 +432,7 @@ QVariant baseintfMTCharts::getSchema(
                     "max": "{{MAX}}",
                     "value": "{{VALUE}}",
                     "endpoint": {
-                        "url" : "{{API_URL}}/MT/Charts/usageDataForProgressBar",
+                        "url" : "{{API_URL}}/MT/Charts/remainedDataForProgressBar",
                         "params" : [
                             "apiToken" : "{{API_TOKEN}}",
                             "key" : "{{KEY}}",
@@ -639,7 +670,7 @@ const sampleMultipProgressBar = [
 */
 
 //CreditUsageRemained_t, I18NMap
-std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getUsageData(
+std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getCreditData(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
@@ -813,12 +844,12 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getU
     return { CreditUsageRemained, I18NMap };
 }
 
-QVariant baseintfMTCharts::usageDataForProgressBar(
+QVariant baseintfMTCharts::remainedDataForProgressBar(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
 ) {
-    auto [CreditUsageRemained, I18NMap] = getUsageData(
+    auto [CreditUsageRemained, I18NMap] = getCreditData(
             APICALLBOOM_PARAM,
             _actorID,
             _key
@@ -826,11 +857,11 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
 
     QVariantList Result;
 
-    Targoman::API::ORM::intfI18N* I18N;
-    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
-        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
-    else
-        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
+//    Targoman::API::ORM::intfI18N* I18N;
+//    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+//        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+//    else
+//        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
     for (auto it = CreditUsageRemained.constBegin();
          it != CreditUsageRemained.constEnd();
@@ -891,12 +922,12 @@ QVariant baseintfMTCharts::usageDataForProgressBar(
     return Result;
 }
 
-QVariant baseintfMTCharts::usageDataForPieChart(
+QVariant baseintfMTCharts::remainedDataForPieChart(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
     quint64 _actorID,
     QString _key
 ) {
-    auto [CreditUsageRemained, I18NMap] = getUsageData(
+    auto [CreditUsageRemained, I18NMap] = getCreditData(
             APICALLBOOM_PARAM,
             _actorID,
             _key
@@ -908,37 +939,6 @@ QVariant baseintfMTCharts::usageDataForPieChart(
          it != CreditUsageRemained.constEnd();
          ++it
     ) {
-//        QString Title = it.key().split("::").join(" - ");
-//        if (I18NMap.contains(it.key()))
-//            Title = I18NMap[it.key()];
-//        else {
-//            auto KeyParts = it.key().split("::");
-//            QStringList TitleParts;
-
-//            if (KeyParts.length() >= 1) {
-//                if (I18NMap.contains(KeyParts[0]))
-//                    TitleParts.append(I18NMap[KeyParts[0]]);
-//                else
-//                    TitleParts.append(KeyParts[0]);
-//            }
-
-//            if (KeyParts.length() >= 2) {
-//                if (I18NMap.contains(KeyParts[1]))
-//                    TitleParts.append(I18NMap[KeyParts[1]]);
-//                else
-//                    TitleParts.append(KeyParts[1]);
-//            }
-
-//            if (KeyParts.length() >= 3) {
-//                if (I18NMap.contains(KeyParts[2]))
-//                    TitleParts.append(I18NMap[KeyParts[2]]);
-//                else
-//                    TitleParts.append(KeyParts[2]);
-//            }
-
-//            Title = TitleParts.join(" - ");
-//        }
-
         quint32 Value;
 
 //        if (it->Remained == -1)
@@ -962,31 +962,188 @@ QVariant baseintfMTCharts::usageDataForLineChart(
     quint64 _actorID,
     QString _key
 ) {
-    return QVariantMap({
-                           { "type", "line" },
-                           { "series", QVariantMap({
-                                 { "MT_FORMAL", QVariantMap({
-                                       { "label", "رسمی" },
-                                       { "props", {} },
-                                 }) },
-                                 { "MT_INFORMAL", QVariantMap({
-                                       { "label", "محاوره" },
-                                       { "props", {} },
-                                 }) },
-                           }) },
-                           { "data", QVariantMap({
-                                 { "MT_FORMAL", QVariantMap({
-                                       { "2020-12-01", 12 },
-                                       { "2020-12-02", 14 },
-                                       { "2020-12-03", 15 },
-                                 }) },
-                                 { "MT_INFORMAL", QVariantMap({
-                                       { "2020-12-01", 17 },
-                                       { "2020-12-02", 47 },
-                                       { "2020-12-04", 77 },
-                                 }) },
-                           }) },
-                       });
+
+    baseintfAccountingBasedModule* ParentModule = dynamic_cast<baseintfAccountingBasedModule*>(this->parentModule());
+
+    //usages
+    //------------------------------------------------
+    ORMSelectQuery SelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(APICALLBOOM_PARAM)
+                                 .addCols(ParentModule->accountAssetUsage()->selectableColumnNames())
+                                 .innerJoinWith(tblAccountAssetUsageBase::Relation::UserAsset)
+                                 .where({ tblAccountUserAssetsBase::Fields::uas_actorID,
+                                          enuConditionOperator::Equal,
+                                          _actorID
+                                        })
+                                 .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::Null })
+                                     .orCond({ tblAccountUserAssetsBase::Fields::uasValidFromDate, enuConditionOperator::LessEqual,
+                                         DBExpression::NOW() })
+                                 )
+                                 .andWhere(clsCondition({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::Null })
+                                     .orCond({ tblAccountUserAssetsBase::Fields::uasValidToDate, enuConditionOperator::GreaterEqual,
+                                         DBExpression::NOW() })
+                                 )
+                                 .andWhere({ tblAccountAssetUsageBase::Fields::usgResolution,
+                                             enuConditionOperator::Equal,
+                                             Targoman::API::AAA::enuAssetUsageResolution::Total
+                                           })
+                                 ;
+
+    TAPI::stuTable UsageTable = SelectQuery.pageSize(0).all();
+
+    //key: nmt::formal::en2fa
+    //value: date:value
+    QMap<QString, QVariantMap> InnerResult;
+//    QMap<QString, QMap<QString, quint64>> InnerResult;
+
+    QStringList FullKeys;
+    QStringList Engines;
+    QStringList Classes;
+    QStringList Directions;
+
+    foreach (QVariant Row, UsageTable.Rows) {
+        QVariantMap AssetUsageInfo = Row.toMap();
+
+        tblAccountAssetUsageMTBase::DTO AccountAssetUsageMTBaseDTO;
+        AccountAssetUsageMTBaseDTO.fromJson(QJsonObject::fromVariantMap(AssetUsageInfo));
+
+        QString UsageKey = AccountAssetUsageMTBaseDTO.usgKey.toLower();
+
+        //----------
+        FullKeys.append(UsageKey);
+        auto Parts = UsageKey.split("::");
+        if (Parts.length() >= 3) Directions.append(Parts[2]);
+        if (Parts.length() >= 2) Classes.append(Parts[1]);
+        if (Parts.length() >= 1) Engines.append(Parts[0]);
+
+        //----------
+
+        if (InnerResult.contains(UsageKey)) {
+            InnerResult[UsageKey][AccountAssetUsageMTBaseDTO.usgLastDateTime.toString("yyyy-MM-dd hh:mm:ss")]
+                    = AccountAssetUsageMTBaseDTO.usgUsedTotalWords;
+        } else {
+            InnerResult.insert(UsageKey, { { AccountAssetUsageMTBaseDTO.usgLastDateTime.toString("yyyy-MM-dd hh:mm:ss"),
+                                             AccountAssetUsageMTBaseDTO.usgUsedTotalWords
+                                           } });
+        }
+    }
+
+    // i18n
+    //--------------------------------
+    Targoman::API::ORM::intfI18N* I18N;
+    if (dynamic_cast<intfMTModule<false>*>(this->parentModule()))
+        I18N = dynamic_cast<intfMTModule<false>*>(this->parentModule())->i18n();
+    else
+        I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
+
+    auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
+                           .addCol(tblI18N::Fields::i18nKey)
+                           .addCol(DBExpression::VALUE(QString("COALESCE("
+                                                               + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
+                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
+                                                               ")")
+                                                       .arg(tblI18N::Name)
+                                                       .arg(tblI18N::Fields::i18nValue)
+                                                       ),
+                                   "Translated")
+
+                           .where({ tblI18N::Fields::i18nKey,
+                                    enuConditionOperator::In,
+                                    "'" + FullKeys.join("','") + "'"
+                                  });
+    if (Engines.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Engines.join("','") + "'"
+                                });
+    if (Classes.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Classes.join("','") + "'"
+                                });
+    if (Directions.length())
+        I18NSelectQuery.orWhere({ tblI18N::Fields::i18nKey,
+                                  enuConditionOperator::In,
+                                  "'" + Directions.join("','") + "'"
+                                });
+
+    auto I18NRows = I18NSelectQuery
+                    .pageSize(0)
+                    .all();
+
+    QMap<QString, QString> I18NMap;
+
+    foreach (QVariant Row, I18NRows.Rows) {
+        QVariantMap Info = Row.toMap();
+
+        if (Info["Translated"].toString().isEmpty())
+            continue;
+
+        I18NMap.insert(Info[tblI18N::Fields::i18nKey].toString(), Info["Translated"].toString());
+    }
+
+    // output
+    //--------------------------------
+    QVariantMap Result;
+
+    for (auto it = InnerResult.constBegin();
+         it != InnerResult.constEnd();
+         it++
+    ) {
+        //title
+        //--------------------------------
+        QString Title = it.key().split("::").join(" - ");
+        if (I18NMap.contains(it.key()))
+            Title = I18NMap[it.key()];
+        else {
+            auto KeyParts = it.key().split("::");
+            QStringList TitleParts;
+
+            if (KeyParts.length() >= 1) {
+                if (I18NMap.contains(KeyParts[0]))
+                    TitleParts.append(I18NMap[KeyParts[0]]);
+                else
+                    TitleParts.append(KeyParts[0]);
+            }
+
+            if (KeyParts.length() >= 2) {
+                if (I18NMap.contains(KeyParts[1]))
+                    TitleParts.append(I18NMap[KeyParts[1]]);
+                else
+                    TitleParts.append(KeyParts[1]);
+            }
+
+            if (KeyParts.length() >= 3) {
+                if (I18NMap.contains(KeyParts[2]))
+                    TitleParts.append(I18NMap[KeyParts[2]]);
+                else
+                    TitleParts.append(KeyParts[2]);
+            }
+
+            Title = TitleParts.join(" - ");
+        }
+
+        //--------------------------------
+        QVariantList Points;
+
+        for (auto vit = it.value().constBegin();
+             vit != it.value().constEnd();
+             vit++
+        ) {
+            Points.append(QVariantMap({
+                                          { "x", vit.key() },
+                                          { "y", vit.value() },
+                                      }));
+        }
+
+        Result.insert(it.key(), QVariantMap({
+                                                { "NAME", it.key() },
+                                                { "TITLE", Title },
+                                                { "TYPE", "line" },
+                                                { "POINTS", Points },
+                                            }));
+    }
+
+    return Result;
 }
 
 //TAPI::stuTable baseintfMTCharts::charts(
@@ -1140,7 +1297,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, schema, (
     return getSchema(APICALLBOOM_PARAM, _key);
 }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, remainedDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _key
 )) {
@@ -1148,14 +1305,14 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForProgressBar, (
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageDataForProgressBar(
+    return this->remainedDataForProgressBar(
         APICALLBOOM_PARAM,
         CurrentActorID,
         _key
     );
 }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForPieChart, (
+QVariant IMPL_REST_GET(baseintfMTCharts_USER, remainedDataForPieChart, (
     APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
     QString _key
 )) {
@@ -1163,7 +1320,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForPieChart, (
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageDataForPieChart(
+    return this->remainedDataForPieChart(
         APICALLBOOM_PARAM,
         CurrentActorID,
         _key
@@ -1203,7 +1360,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, schema, (
     return getSchema(APICALLBOOM_PARAM, _key);
 }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
+QVariant IMPL_REST_GET(baseintfMTCharts_API, remainedDataForProgressBar, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
     QString _apiToken,
     QString _key
@@ -1212,14 +1369,14 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForProgressBar, (
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageDataForProgressBar(
+    return this->remainedDataForProgressBar(
         APICALLBOOM_PARAM,
         CurrentActorID,
         _key
     );
 }
 
-QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForPieChart, (
+QVariant IMPL_REST_GET(baseintfMTCharts_API, remainedDataForPieChart, (
     APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
     QString _apiToken,
     QString _key
@@ -1228,7 +1385,7 @@ QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForPieChart, (
 
 //    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
 
-    return this->usageDataForPieChart(
+    return this->remainedDataForPieChart(
         APICALLBOOM_PARAM,
         CurrentActorID,
         _key
