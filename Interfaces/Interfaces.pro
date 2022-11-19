@@ -45,6 +45,7 @@ HEADERS += \
     API/intfModuleHelper.h \
     Helpers/IteratorHelper.hpp \
     Helpers/JSonHelper.h \
+    Helpers/LanguageHelper.h \
     Helpers/TokenHelper.h \
     ORM/intfFAQ.h \
     ORM/intfMigrations.h \
@@ -86,6 +87,7 @@ HEADERS += \
 SOURCES += \
     API/intfModuleHelper.cpp \
     Helpers/JSonHelper.cpp \
+    Helpers/LanguageHelper.cpp \
     Helpers/TokenHelper.cpp \
     ORM/intfFAQ.cpp \
     ORM/intfMigrations.cpp \

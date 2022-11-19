@@ -25,10 +25,13 @@
 #include "Interfaces/AAA/Authorization.h"
 #include "Interfaces/AAA/AAADefs.hpp"
 #include "Interfaces/AAA/clsJWT.hpp"
+#include "Interfaces/Helpers/LanguageHelper.h"
 
 using namespace Targoman::API::AAA;
 
 namespace Targoman::API::ORM {
+
+using namespace Helpers;
 
 intfI18N::intfI18N(
     const QString &_module,
@@ -50,12 +53,11 @@ QString intfI18N::translated(
     auto Data = this->makeSelectQuery(APICALLBOOM_PARAM)
                 .addCol(tblI18N::Fields::i18nKey)
                 .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                    "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.\"%3\"')),"
+                                                    + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
                                                     "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default')),"
-                                                    "'%4')")
+                                                    "'%3')")
                                             .arg(tblI18N::Name)
                                             .arg(tblI18N::Fields::i18nValue)
-                                            .arg(APICALLBOOM_PARAM.language())
                                             .arg(_key)
                                             ),
                         "Translated")

@@ -29,6 +29,7 @@
 #include "Interfaces/Helpers/TokenHelper.h"
 #include "intfMTAccounting.h"
 #include "intfMTModule.h"
+#include "Interfaces/Helpers/LanguageHelper.h"
 
 using namespace Targoman::API;
 using namespace Targoman::API::AAA;
@@ -765,12 +766,11 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getU
     auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
                            .addCol(tblI18N::Fields::i18nKey)
                            .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                               "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.\"%3\"')),"
+                                                               + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
                                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
                                                                ")")
                                                        .arg(tblI18N::Name)
                                                        .arg(tblI18N::Fields::i18nValue)
-                                                       .arg(APICALLBOOM_PARAM.language())
                                                        ),
                                    "Translated")
 

@@ -25,6 +25,7 @@
 #include "../Account.h"
 #include "Payment/PaymentLogic.h"
 #include "Interfaces/Helpers/URLHelper.h"
+#include "Interfaces/Helpers/LanguageHelper.h"
 
 using namespace Targoman::API::AccountModule::Payment;
 using namespace Targoman::API::Helpers;
@@ -79,9 +80,9 @@ ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
         Query
             .removeCol(tblPaymentGatewayTypes::Fields::pgtName)
             .leftJoin(tblPaymentGatewayTypesI18N::Name)
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.pgtName.\"%2\"')), %3.pgtName)")
-                                        .arg(tblPaymentGatewayTypesI18N::Name)
-                                        .arg(APICALLBOOM_PARAM.language())
+            .addCol(DBExpression::VALUE(QString("COALESCE("
+                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblPaymentGatewayTypesI18N::Name, "pgtName") + ","
+                                                "%1.pgtName)")
                                         .arg(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias)
                                         ),
                     tblPaymentGatewayTypes::Fields::pgtName
