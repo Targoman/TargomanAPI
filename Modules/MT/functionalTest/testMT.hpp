@@ -660,7 +660,7 @@ private slots:
                 {},
                 {},
                 {
-                    "accept-language: fa",
+                    "accept-language: fa-IR",
                 }
             );
 
@@ -687,7 +687,34 @@ private slots:
                 {},
                 {},
                 {
-                    "accept-language: fa",
+                    "accept-language: fa-IR",
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void assetUsage_chart_usageDataForPieChart() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "MT/Charts/usageDataForPieChart",
+                {
+                    { "apiToken",   this->TokenJWT },
+//                    { "assetID",     },
+//                    { "step",       15 },
+//                    { "stepUnit",   "Minute" },
+                },
+                {},
+                {},
+                {
+                    "accept-language: fa-IR",
                 }
             );
 

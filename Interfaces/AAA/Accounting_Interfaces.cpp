@@ -186,7 +186,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
                         })
             .leftJoin(tblAccountUnitsI18NBase::Name)
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.%2')),"
+                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.\"%2\"')),"
                                                 "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.default')),"
                                                 "%3.untName)")
                                         .arg(tblAccountUnitsI18NBase::Name)
@@ -296,14 +296,14 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                             tblAccountProductsBase::Fields::prdDesc,
                         })
             .leftJoin(tblAccountProductsI18NBase::Name)
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdName.%2')), %3.prdName)")
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdName.\"%2\"')), %3.prdName)")
                                         .arg(tblAccountProductsI18NBase::Name)
                                         .arg(APICALLBOOM_PARAM.language())
                                         .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
                                         ),
                     tblAccountProductsBase::Fields::prdName
                     )
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdDesc.%2')), %3.prdDesc)")
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.prdDesc.\"%2\"')), %3.prdDesc)")
                                         .arg(tblAccountProductsI18NBase::Name)
                                         .arg(APICALLBOOM_PARAM.language())
                                         .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
@@ -405,14 +405,14 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                             tblAccountSaleablesBase::Fields::slbDesc,
                         })
             .leftJoin(tblAccountSaleablesI18NBase::Name)
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbName.%2')), %3.slbName)")
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbName.\"%2\"')), %3.slbName)")
                                         .arg(tblAccountSaleablesI18NBase::Name)
                                         .arg(APICALLBOOM_PARAM.language())
                                         .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
                                         ),
                     tblAccountSaleablesBase::Fields::slbName
                     )
-            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbDesc.%2')), %3.slbDesc)")
+            .addCol(DBExpression::VALUE(QString("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.slbDesc.\"%2\"')), %3.slbDesc)")
                                         .arg(tblAccountSaleablesI18NBase::Name)
                                         .arg(APICALLBOOM_PARAM.language())
                                         .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)

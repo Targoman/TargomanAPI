@@ -524,7 +524,7 @@ private slots:
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             QVERIFY_DUMP_RESULT(Result.isValid() == false);
@@ -551,7 +551,7 @@ private slots:
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             QVERIFY_DUMP_RESULT(Result.isValid() == false);
@@ -578,7 +578,7 @@ private slots:
                     { "lastPreVoucher", this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             QVERIFY_DUMP_RESULT(Result.isValid() == false);
@@ -650,7 +650,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -715,7 +715,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -819,7 +819,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -857,7 +857,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -912,7 +912,7 @@ private slots:
                 },
                 {},
                 {
-                    { "accept-language: fa" },
+                    { "accept-language: fa-IR" },
                 }
             );
 
@@ -1206,7 +1206,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
@@ -1243,7 +1243,7 @@ private slots:
                     { "lastPreVoucher",         this->LastPreVoucher.toJson().toVariantMap() },
                 },
                 {},
-                { "accept-language: fa" }
+                { "accept-language: fa-IR" }
             );
 
             stuBasketActionResult BasketActionResult;
