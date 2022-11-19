@@ -673,11 +673,11 @@ private slots:
         }
     }
 
-    void assetUsage_chart_usageDataForProgressBar() {
+    void assetUsage_chart_remainedDataForProgressBar() {
         QT_TRY {
             QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
-                "MT/Charts/usageDataForProgressBar",
+                "MT/Charts/remainedDataForProgressBar",
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "assetID",     },
@@ -700,11 +700,38 @@ private slots:
         }
     }
 
-    void assetUsage_chart_usageDataForPieChart() {
+    void assetUsage_chart_remainedDataForPieChart() {
         QT_TRY {
             QVariant Result = callUserAPI(
                 RESTClientHelper::GET,
-                "MT/Charts/usageDataForPieChart",
+                "MT/Charts/remainedDataForPieChart",
+                {
+                    { "apiToken",   this->TokenJWT },
+//                    { "assetID",     },
+//                    { "step",       15 },
+//                    { "stepUnit",   "Minute" },
+                },
+                {},
+                {},
+                {
+                    "accept-language: fa-IR",
+                }
+            );
+
+            QJsonDocument Doc = QJsonDocument::fromVariant(QVariantMap({{ "result", Result }}));
+            qDebug().noquote() << endl
+                               << "  Result:" << Doc.toJson();
+
+        } QT_CATCH (const std::exception &exp) {
+            QTest::qFail(exp.what(), __FILE__, __LINE__);
+        }
+    }
+
+    void assetUsage_chart_usageDataForLineChart() {
+        QT_TRY {
+            QVariant Result = callUserAPI(
+                RESTClientHelper::GET,
+                "MT/Charts/usageDataForLineChart",
                 {
                     { "apiToken",   this->TokenJWT },
 //                    { "assetID",     },

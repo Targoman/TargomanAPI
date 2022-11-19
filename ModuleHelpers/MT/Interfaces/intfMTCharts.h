@@ -92,19 +92,19 @@ protected:
 //    virtual QStringList creditFieldNames() = 0;
 
     //CreditUsageRemained_t, I18NMap
-    std::tuple<CreditUsageRemained_t, QMap<QString, QString>> getUsageData(
+    std::tuple<CreditUsageRemained_t, QMap<QString, QString>> getCreditData(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         QString _key = {}
     );
 
-    QVariant usageDataForProgressBar(
+    QVariant remainedDataForProgressBar(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         QString _key = {}
     );
 
-    QVariant usageDataForPieChart(
+    QVariant remainedDataForPieChart(
         INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
         quint64 _actorID,
         QString _key = {}
@@ -144,7 +144,7 @@ protected slots:
     );
 
     QVariant REST_GET(
-        usageDataForProgressBar,
+        remainedDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _key = {}
@@ -153,7 +153,7 @@ protected slots:
     );
 
     QVariant REST_GET(
-        usageDataForPieChart,
+        remainedDataForPieChart,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _key = {}
@@ -198,7 +198,7 @@ protected slots:
     );
 
     QVariant REST_GET(
-        usageDataForProgressBar,
+        remainedDataForProgressBar,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _apiToken,
@@ -208,7 +208,7 @@ protected slots:
     );
 
     QVariant REST_GET(
-        usageDataForPieChart,
+        remainedDataForPieChart,
         (
             APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
             QString _apiToken,

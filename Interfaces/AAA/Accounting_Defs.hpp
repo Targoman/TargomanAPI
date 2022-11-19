@@ -825,7 +825,7 @@ namespace tblAccountUserAssetsFilesBase {
 
 namespace tblAccountAssetUsageBase {
     namespace Relation {
-//        constexpr char AAA[] = "aaa";
+        constexpr char UserAsset[] = "userAsset";
     }
 
     namespace Private {
@@ -840,7 +840,9 @@ namespace tblAccountAssetUsageBase {
         inline const QList<stuRelation> Relations(Q_DECL_UNUSED const QString& _schema) {
             return {
                 //Col                   Reference Table                             ForeignCol                        Rename     LeftJoin
-                { Fields::usg_uasID,    R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID},
+                { Relation::UserAsset,
+                    { Fields::usg_uasID,    R(_schema, tblAccountUserAssetsBase::Name), tblAccountUserAssetsBase::Fields::uasID},
+                },
             };
         };
 
