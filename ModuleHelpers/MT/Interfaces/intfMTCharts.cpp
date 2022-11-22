@@ -379,7 +379,7 @@ QVariant baseintfMTCharts::getSchema(
         { "type", "2d" },
         { "axis", QVariantMap({
             { "x", QVariantMap({
-                { "label", I18N->translated(APICALLBOOM_PARAM, "Date/Time") },
+                { "label", I18N->translated(APICALLBOOM_PARAM, "Date") },
                 { "type", "date" },
             }) },
             { "y", QVariantMap({
@@ -984,7 +984,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
                                  )
                                  .andWhere({ tblAccountAssetUsageBase::Fields::usgResolution,
                                              enuConditionOperator::Equal,
-                                             Targoman::API::AAA::enuAssetUsageResolution::Total
+                                             Targoman::API::AAA::enuAssetUsageResolution::Day
                                            })
                                  ;
 
@@ -1017,11 +1017,13 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 
         //----------
 
+        QString DateKey = AccountAssetUsageMTBaseDTO.usgLastDateTime.toString("yyyy-MM-dd"); // hh:mm:ss");
+
         if (InnerResult.contains(UsageKey)) {
-            InnerResult[UsageKey][AccountAssetUsageMTBaseDTO.usgLastDateTime.toString("yyyy-MM-dd hh:mm:ss")]
+            InnerResult[UsageKey][DateKey]
                     = AccountAssetUsageMTBaseDTO.usgUsedTotalWords;
         } else {
-            InnerResult.insert(UsageKey, { { AccountAssetUsageMTBaseDTO.usgLastDateTime.toString("yyyy-MM-dd hh:mm:ss"),
+            InnerResult.insert(UsageKey, { { DateKey,
                                              AccountAssetUsageMTBaseDTO.usgUsedTotalWords
                                            } });
         }
