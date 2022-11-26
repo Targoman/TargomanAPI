@@ -37,14 +37,14 @@ intfI18N::intfI18N(
     const QString &_module,
     const QString &_schema
 ) :
-intfSQLBasedModule(
-    _module,
-    _schema,
-    tblI18N::Name,
-    tblI18N::Private::ORMFields,
-    tblI18N::Private::Relations,
-    tblI18N::Private::Indexes
-) { ; }
+    intfSQLBasedModule(
+        _module,
+        _schema,
+        tblI18N::Name,
+        tblI18N::Private::ORMFields,
+        tblI18N::Private::Relations,
+        tblI18N::Private::Indexes
+    ) { ; }
 
 QString intfI18N::translated(
     INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,

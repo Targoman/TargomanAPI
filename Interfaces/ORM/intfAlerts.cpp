@@ -37,6 +37,7 @@ intfAlerts::intfAlerts(
     intfSQLBasedModule(
         _module,
         _schema,
+        tblAlerts::Name,
         tblAlerts::Private::ORMFields,
         tblAlerts::Private::Relations,
         tblAlerts::Private::Indexes
