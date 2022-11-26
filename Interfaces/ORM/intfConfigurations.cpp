@@ -34,14 +34,14 @@ intfConfigurations::intfConfigurations(
     const QString &_module,
     const QString &_schema
 ) :
-intfSQLBasedModule(
-    _module,
-    _schema,
-    tblConfigurations::Name,
-    tblConfigurations::Private::ORMFields,
-    tblConfigurations::Private::Relations,
-    tblConfigurations::Private::Indexes
-) { ; }
+    intfSQLBasedModule(
+        _module,
+        _schema,
+        tblConfigurations::Name,
+        tblConfigurations::Private::ORMFields,
+        tblConfigurations::Private::Relations,
+        tblConfigurations::Private::Indexes
+    ) { ; }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfConfigurations) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);

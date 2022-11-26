@@ -37,14 +37,14 @@ intfFaqQuestions::intfFaqQuestions(
     const QString& _module,
     const QString& _schema
 ) :
-intfSQLBasedModule(
-    _module,
-    _schema,
-    tblFaqQuestions::Name,
-    tblFaqQuestions::Private::ORMFields,
-    tblFaqQuestions::Private::Relations(_schema),
-    tblFaqQuestions::Private::Indexes
-) { ; }
+    intfSQLBasedModule(
+        _module,
+        _schema,
+        tblFaqQuestions::Name,
+        tblFaqQuestions::Private::ORMFields,
+        tblFaqQuestions::Private::Relations(_schema),
+        tblFaqQuestions::Private::Indexes
+    ) { ; }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfFaqQuestions) {
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);

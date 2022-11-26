@@ -33,14 +33,14 @@ intfActionLogs::intfActionLogs(
     const QString& _module,
     const QString& _schema
 ) :
-intfSQLBasedModule(
-    _module,
-    _schema,
-    tblActionLogs::Name,
-    tblActionLogs::Private::ORMFields,
-    tblActionLogs::Private::Relations,
-    tblActionLogs::Private::Indexes
-) { ; }
+    intfSQLBasedModule(
+        _module,
+        _schema,
+        tblActionLogs::Name,
+        tblActionLogs::Private::ORMFields,
+        tblActionLogs::Private::Relations,
+        tblActionLogs::Private::Indexes
+    ) { ; }
 
 QVariant IMPL_ORMGET_USER(intfActionLogs) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":ActionLogs:CRUD~0100" });

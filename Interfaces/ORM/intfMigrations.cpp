@@ -34,14 +34,14 @@ intfMigrations::intfMigrations(
     const QString& _module,
     const QString& _schema
 ) :
-intfSQLBasedModule(
-    _module,
-    _schema,
-    tblMigrations::Name,
-    tblMigrations::Private::ORMFields,
-    tblMigrations::Private::Relations,
-    tblMigrations::Private::Indexes
-) { ; }
+    intfSQLBasedModule(
+        _module,
+        _schema,
+        tblMigrations::Name,
+        tblMigrations::Private::ORMFields,
+        tblMigrations::Private::Relations,
+        tblMigrations::Private::Indexes
+    ) { ; }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfMigrations) {
 //    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":Migrations:CRUD~0100" });
