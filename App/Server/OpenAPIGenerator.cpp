@@ -80,8 +80,34 @@ QJsonObject initializeObject(const QString &_host = "127.0.0.1", const quint16 _
 
 QJsonObject OpenAPIGenerator::retrieveJson(
     const QString &_host,
-    const quint16 _port
+    const quint16 _port,
+    const QString &_module
 ) {
+    auto FnFilterPaths = [&_module](const QJsonObject &_openApiInfo) -> QJsonObject {
+        if (_module.isEmpty())
+            return _openApiInfo;
+
+        QJsonObject OpenApiInfo = _openApiInfo;
+
+        QJsonObject Paths = OpenApiInfo["paths"].toObject();
+        QJsonObject OutPaths;
+
+        QString ModulePath = "/" + _module + "/";
+        for (auto it = Paths.constBegin();
+             it != Paths.constEnd();
+             it++
+        ) {
+            if (it.key().startsWith(ModulePath) == false)
+                continue;
+
+            OutPaths[it.key()] = it.value();
+        }
+
+        OpenApiInfo["paths"] = OutPaths;
+
+        return OpenApiInfo;
+    };
+
     if (OpenAPIGenerator::CachedJson.isEmpty() == false) {
         QJsonObject Return = OpenAPIGenerator::CachedJson;
 
@@ -93,7 +119,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(
 
         Return["host"] = HostPort;
 
-        return Return;
+        return FnFilterPaths(Return);
     }
 
     OpenAPIGenerator::CachedJson = initializeObject(_host, _port);
@@ -592,7 +618,7 @@ QJsonObject OpenAPIGenerator::retrieveJson(
     OpenAPIGenerator::CachedJson["paths"] = PathsObject;
     //OpenAPIGenerator::CachedJson["tags"] = TagsArray;
 
-    return OpenAPIGenerator::CachedJson;
+    return FnFilterPaths(OpenAPIGenerator::CachedJson);
 }
 
 } //namespace Targoman::API::Server

@@ -43,7 +43,8 @@ private slots:
     TAPI::RawData_t EXREST_GET_OR_POST(
         openAPI_json,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            const QString &_module = {}
         ),
         "",
         {
