@@ -31,7 +31,11 @@ namespace Targoman::API::Server {
 class OpenAPIGenerator
 {
 public:
-    static QJsonObject retrieveJson(const QString& _host = "127.0.0.1", const quint16 _port = 80);
+    static QJsonObject retrieveJson(
+            const QString& _host = "127.0.0.1",
+            const quint16 _port = 80,
+            const QString &_module = {}
+            );
 
 private:
     static QJsonObject CachedJson;

@@ -35,14 +35,16 @@ StaticModule::StaticModule() :
 { ; }
 
 TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
+    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    const QString &_module
 )) {
     gServerStats.Success.inc();
 
     return TAPI::RawData_t(
                 QJsonDocument(OpenAPIGenerator::retrieveJson(
                     APICALLBOOM_PARAM.host(),
-                    APICALLBOOM_PARAM.port()
+                    APICALLBOOM_PARAM.port(),
+                    _module
                 )).toJson(QJsonDocument::Compact),
                 "application/json; charset=utf-8"
                 );

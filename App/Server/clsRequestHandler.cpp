@@ -555,6 +555,16 @@ quint16 clsRequestHandler::port() const
 
 void clsRequestHandler::findAndCallAPI(QString _api) {
     QStringList Queries = this->Request->url().query().split('&', QString::SkipEmptyParts);
+    QStringList PathParts = _api.split('/', QString::SkipEmptyParts);
+
+    //auto route to StaticModule::openAPI_json with module parameter
+    if ((PathParts.length() == 2) && (PathParts.last() == "openAPI.json")) {
+        Queries.append(QString("module=%1").arg(PathParts.first()));
+
+        PathParts.removeFirst();
+
+        _api = '/' + PathParts.join('/');
+    }
 
     QString ExtraAPIPath;
     QString MethodString = this->Request->methodString();
