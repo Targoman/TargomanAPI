@@ -898,15 +898,15 @@ QVariant baseintfMTCharts::remainedDataForProgressBar(
             Title = TitleParts.join(" - ");
         }
 
-        qint32 Min;
-        quint32 Max;
-        quint32 Value;
+        qint64 Min;
+        qint64 Max;
+        qint64 Value;
 
 //        if (it->Remained == -1)
         if (it->Credit == -1) {
             Min   = -1;
-            Value =  0;
-            Max   =  1;
+            Value = -1;
+            Max   = -1;
         } else if ((it->Credit == 0) || (it->Remained == 0)) {
             Min   = 0;
             Value = 1;
