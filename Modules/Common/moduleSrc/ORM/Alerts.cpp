@@ -42,8 +42,8 @@ Alerts::Alerts() :
 { ; }
 
 QVariant IMPL_ORMGET_USER(Alerts) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{ tblAlerts::Fields::alr_usrID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAlerts::Fields::alr_usrID, _apiCallContext.getActorID() }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }

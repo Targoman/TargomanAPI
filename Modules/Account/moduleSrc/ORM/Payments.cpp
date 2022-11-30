@@ -62,9 +62,9 @@ OnlinePayments::OnlinePayments() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(OnlinePayments) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({
-                                 { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID() }
+                                 { tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID() }
                              }, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
@@ -78,7 +78,7 @@ QVariant IMPL_ORMGET_USER(OnlinePayments) {
   * this proxy received GET and POST and make GET call to the clients callback
   */
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _paymentKey
 )) {
 //curl -X POST 'http://localhost:10000/rest/v1/Account/OnlinePayments/paymentCallback?paymentKey=11&q1=qv1' -H 'content-type:application/json' -d '{"d1":"dv1"}'
@@ -87,7 +87,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
     if (_paymentKey.isEmpty())
         throw exTargomanBase("paymentKey is empty", ESTATUS_INTERNAL_SERVER_ERROR);
 
-    tblOnlinePayments::DTO OnlinePaymentDTO = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    tblOnlinePayments::DTO OnlinePaymentDTO = OnlinePayments::instance().makeSelectQuery(_apiCallContext)
 //            .addCols(OnlinePayments::instance().selectableColumnNames())
 //            .addCols(PaymentGateways::instance().selectableColumnNames())
 //            .innerJoinWith("paymentGateway")
@@ -100,14 +100,14 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 
     ResponseParams.insert("vchID", OnlinePaymentDTO.onp_vchID);
 
-    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
+    QList<QPair<QString, QString>> RequestQueryParams = _apiCallContext.getRequestQueryParams();
     foreach (auto Item, RequestQueryParams) {
 //        if (Item.first == "paymentKey")
 //            continue;
         ResponseParams.insert(Item.first, Item.second);
     }
 
-    QList<QPair<QString, QString>> RequestBodyParams = APICALLBOOM_PARAM.getRequestBodyParams();
+    QList<QPair<QString, QString>> RequestBodyParams = _apiCallContext.getRequestBodyParams();
     foreach (auto Item, RequestBodyParams) {
         ResponseParams.insert(Item.first, Item.second);
     }
@@ -121,7 +121,7 @@ QVariant IMPL_REST_GET_OR_POST(OnlinePayments, paymentCallback, (
 
 #ifdef QT_DEBUG
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestPayPage, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _paymentKey,
     Q_DECL_UNUSED QString _trackID,
     QString _callback
@@ -134,7 +134,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 
 */
 
-    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString HostPort = _apiCallContext.hostAndPort();
     QString ServerUrl = QString("https://%1%2")
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);
@@ -198,7 +198,7 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 </html>
 )";
 
-    tblOnlinePayments::DTO OnlinePaymentsDTO = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    tblOnlinePayments::DTO OnlinePaymentsDTO = OnlinePayments::instance().makeSelectQuery(_apiCallContext)
                                                .where({ tblOnlinePayments::Fields::onpMD5, enuConditionOperator::Equal, _paymentKey })
                                                .one<tblOnlinePayments::DTO>();
 
@@ -220,12 +220,12 @@ http://127.0.0.1:10000/rest/v1/Account/OnlinePayments/devTestPayPage?paymentKey=
 }
 
 QVariant IMPL_REST_GET_OR_POST(OnlinePayments, devTestCallbackPage, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _paymentKey,
     QString _result
 )) {
     QVariantMap ResponseParams;
-    QList<QPair<QString, QString>> RequestQueryParams = APICALLBOOM_PARAM.getRequestQueryParams();
+    QList<QPair<QString, QString>> RequestQueryParams = _apiCallContext.getRequestQueryParams();
     foreach (auto Item, RequestQueryParams) {
         if (Item.first == "paymentKey")
             continue;
@@ -266,10 +266,10 @@ QVariant IMPL_ORMGET_USER(OfflinePaymentClaims) {
 //    UploadGateways::instance().prepareFiltersList();
     UploadQueue::instance().prepareFiltersList();
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID()}}, _filters);
 
-    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+    auto fnTouchQuery = [this, &_apiCallContext](ORMSelectQuery &_query) {
         _query
                 .addCols(this->selectableColumnNames())
                 .leftJoin(tblVoucher::Name)
@@ -277,7 +277,7 @@ QVariant IMPL_ORMGET_USER(OfflinePaymentClaims) {
                 ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
-                    APICALLBOOM_PARAM,
+                    _apiCallContext,
                     _query,
                     UploadFiles::instance(),
                     UploadGateways::instance(),
@@ -293,18 +293,18 @@ QVariant IMPL_ORMGET_USER(OfflinePaymentClaims) {
 */
 
 //quint32 IMPL_ORMCREATE_USER(OfflinePaymentClaims) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+//    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
 //    return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 //}
 
 //bool IMPL_ORMUPDATE_USER(OfflinePaymentClaims) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+//    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 //    return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 //}
 
 //bool IMPL_ORMDELETE_USER(OfflinePaymentClaims) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+//    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
 //    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 //}
@@ -324,13 +324,13 @@ QVariant IMPL_ORMGET_USER(OfflinePaymentClaimsAttachments) {
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-                .setCond({ tblOfflinePaymentClaims::Fields::ofpcCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
-                .orCond({ tblOfflinePaymentClaimsAttachments::Fields::ofpcatCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
+                .setCond({ tblOfflinePaymentClaims::Fields::ofpcCreatedBy_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() })
+                .orCond({ tblOfflinePaymentClaimsAttachments::Fields::ofpcatCreatedBy_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() })
                 ;
 
-    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+    auto fnTouchQuery = [this, &_apiCallContext](ORMSelectQuery &_query) {
         _query
             .addCols(this->selectableColumnNames())
             .innerJoinWith("OfflinePaymentClaims")
@@ -338,7 +338,7 @@ QVariant IMPL_ORMGET_USER(OfflinePaymentClaimsAttachments) {
         ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
-                    APICALLBOOM_PARAM,
+                    _apiCallContext,
                     _query,
                     UploadFiles::instance(),
                     UploadGateways::instance(),
@@ -371,16 +371,16 @@ QVariant IMPL_ORMGET_USER(OfflinePayments) {
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-                .setCond({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
+                .setCond({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() })
                 .orCond(clsCondition({ tblVoucher::Fields::vch_usrID, enuConditionOperator::Null })
-                        .andCond({ tblOfflinePayments::Fields::ofpCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() }))
+                        .andCond({ tblOfflinePayments::Fields::ofpCreatedBy_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() }))
                 ;
 
-//    this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+//    this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID()}}, _filters);
 
-    auto fnTouchQuery = [this, &APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+    auto fnTouchQuery = [this, &_apiCallContext](ORMSelectQuery &_query) {
         _query
                 .addCols(this->selectableColumnNames())
                 .leftJoin(tblVoucher::Name)
@@ -388,7 +388,7 @@ QVariant IMPL_ORMGET_USER(OfflinePayments) {
                 ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
-                    APICALLBOOM_PARAM,
+                    _apiCallContext,
                     _query,
                     UploadFiles::instance(),
                     UploadGateways::instance(),
@@ -402,7 +402,7 @@ QVariant IMPL_ORMGET_USER(OfflinePayments) {
 }
 
 bool IMPL_ORMUPDATE_USER(OfflinePayments) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 

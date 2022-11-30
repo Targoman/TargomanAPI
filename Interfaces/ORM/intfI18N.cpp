@@ -47,13 +47,13 @@ intfI18N::intfI18N(
     ) { ; }
 
 QString intfI18N::translated(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString &_key
 ) {
-    auto Data = this->makeSelectQuery(APICALLBOOM_PARAM)
+    auto Data = this->makeSelectQuery(_apiCallContext)
                 .addCol(tblI18N::Fields::i18nKey)
                 .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                    + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
+                                                    + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
                                                     "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default')),"
                                                     "'%3')")
                                             .arg(tblI18N::Name)

@@ -140,7 +140,7 @@ class testQueryBuilders: public QObject
 {
     Q_OBJECT
 
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL APICALLBOOM_PARAM = APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(fnTiming);
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL _apiCallContext = APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL(fnTiming);
     TestTable1 t1;
     TestTable2 t2;
 //    TAPI::JWT_t JWT;
@@ -364,7 +364,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     /***************************************************************************************/
     void queryString_SELECT_EmptyCol() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
             ;
 
             QString qry = query.buildQueryString({}, false, false, true);
@@ -400,7 +400,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_EmptyCol_with_where() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
                 .andWhere({ "colB1", enuConditionOperator::Equal, 456 })
             ;
@@ -442,7 +442,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_simple() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
                 .addCols(QStringList({
                     "colA1",
                     "colB1",
@@ -473,7 +473,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_simpleWithAlias() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                     "colB1",
@@ -504,7 +504,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_aggregateCols() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
                 .addCol(enuAggregation::AVG, "colA1", "avg_colA1")
                 .addCol(enuAggregation::SUM, "colB1", "sum_colB1")
             ;
@@ -529,7 +529,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_aggregateConditionalCols() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
                 .addCols(QStringList({
                     "colA1",
                     "colC1",
@@ -595,7 +595,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_join() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext
                                             , "________"
                                             )
                 .addCols(QStringList({
@@ -657,7 +657,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_join_WithAlias() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
@@ -694,7 +694,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_joinWith() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM)
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext)
                 .addCols(QStringList({
                     "colA1",
                 }))
@@ -722,7 +722,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_joinWith_WithAlias() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
@@ -754,7 +754,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_autojoin_by_col() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                     "colB1",
@@ -780,7 +780,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_order_and_group_and_having() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
@@ -835,7 +835,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_COUNT_order_and_group_and_having() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
 //                    "colB1",
@@ -895,7 +895,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_union() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
 //                    "colB1",
@@ -921,7 +921,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
                 .pageIndex(20)
                 .pageSize(100)
                 .addUnionAll(
-                    t2.makeSelectQuery(APICALLBOOM_PARAM)
+                    t2.makeSelectQuery(_apiCallContext)
                     .addCol("colA2")
                 )
             ;
@@ -962,7 +962,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_filters() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                     "colB1",
@@ -997,11 +997,11 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_nested_join() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
-                .nestedLeftJoin(t2.makeSelectQuery(APICALLBOOM_PARAM)
+                .nestedLeftJoin(t2.makeSelectQuery(_apiCallContext)
                     .addCol("colB2")
                     .addCol("colC2")
                     .addCol(enuAggregation::COUNT, "colA2", "cnt")
@@ -1042,7 +1042,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_SELECT_colspec_as_condition() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
@@ -1093,12 +1093,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void select_nested_select() {
         QT_TRY {
-            ORMSelectQuery query = t1.makeSelectQuery(APICALLBOOM_PARAM, "alias_t1")
+            ORMSelectQuery query = t1.makeSelectQuery(_apiCallContext, "alias_t1")
                 .addCols(QStringList({
                     "colA1",
                 }))
-                .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
-                                               t2.makeSelectQuery(APICALLBOOM_PARAM, "alias_t2")
+                .nestedLeftJoin(ORMSelectQuery(_apiCallContext,
+                                               t2.makeSelectQuery(_apiCallContext, "alias_t2")
                                                , "tmp_t2"
                                                )
                                 , "nested_t2"
@@ -1153,7 +1153,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     /***************************************************************************************/
     void queryString_CREATE_values_unknown_column() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("colA1")
                 .addCol("colX1")
                 .addCol("colB1")
@@ -1175,7 +1175,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_values_required_column_not_provided() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("colA1")
 //                .addCol("colB1") -> req
 //                .addCol("colX1")
@@ -1197,7 +1197,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_values_single() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("colC1")
                 .addCol("colB1")
                 .addCol("colD1")
@@ -1248,7 +1248,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_with_options() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .options_ignore()
                 .addCol("colA1")
                 .addCol("colB1")
@@ -1292,7 +1292,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_values_multi() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("newNamerFor_F1")
                 .addCol("colB1")
                 .addCol("colA1")
@@ -1386,7 +1386,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_values_multi_use_binding() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("colG1")
                 .addCol("colB1")
                 .addCol("colA1")
@@ -1469,12 +1469,12 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_CREATE_values_from_select() {
         QT_TRY {
-            ORMCreateQuery query = t1.makeCreateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMCreateQuery query = t1.makeCreateQuery(_apiCallContext) //, "alias_t1")
                 .addCol("colA1")
                 .addCol("colB1")
                 .addCol("colC1")
                 .addCol("colD1")
-                .select(t2.makeSelectQuery(APICALLBOOM_PARAM)
+                .select(t2.makeSelectQuery(_apiCallContext)
                     .addCols(QStringList({
                         "colA2",
                         "colB2",
@@ -1527,7 +1527,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     /***************************************************************************************/
     void queryString_UPDATE_throw_on_no_where() {
         QT_TRY {
-            ORMUpdateQuery query = t1.makeUpdateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMUpdateQuery query = t1.makeUpdateQuery(_apiCallContext) //, "alias_t1")
                 .set("colB1", 123)
                 .set("colC1", "123")
                 .setNull("colD1")
@@ -1544,7 +1544,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_UPDATE_simple() {
         QT_TRY {
-            ORMUpdateQuery query = t1.makeUpdateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMUpdateQuery query = t1.makeUpdateQuery(_apiCallContext) //, "alias_t1")
                 .setNull("colD1")
                 .set("colC1", "v c1")
                 .set("colB1", 123)
@@ -1582,7 +1582,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_UPDATE_simple_use_binding() {
         QT_TRY {
-            ORMUpdateQuery query = t1.makeUpdateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMUpdateQuery query = t1.makeUpdateQuery(_apiCallContext) //, "alias_t1")
                 .setNull("colD1")
                 .set("colC1", "v c1")
                 .set("colB1", 123)
@@ -1635,7 +1635,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_UPDATE_increase() {
         QT_TRY {
-            ORMUpdateQuery query = t1.makeUpdateQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMUpdateQuery query = t1.makeUpdateQuery(_apiCallContext) //, "alias_t1")
                 .set("colB1", DBExpression::VALUE("colB1 + 10"))
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
@@ -1664,7 +1664,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
     /***************************************************************************************/
     void queryString_DELETE_throw_on_no_where() {
         QT_TRY {
-            ORMDeleteQuery query = t1.makeDeleteQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMDeleteQuery query = t1.makeDeleteQuery(_apiCallContext) //, "alias_t1")
             ;
 
             QVERIFY_EXCEPTION_THROWN(
@@ -1678,7 +1678,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_DELETE_simple() {
         QT_TRY {
-            ORMDeleteQuery query = t1.makeDeleteQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMDeleteQuery query = t1.makeDeleteQuery(_apiCallContext) //, "alias_t1")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
 
@@ -1702,7 +1702,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_DELETE_join() {
         QT_TRY {
-            ORMDeleteQuery query = t1.makeDeleteQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMDeleteQuery query = t1.makeDeleteQuery(_apiCallContext) //, "alias_t1")
                 .leftJoinWith("rel_a")
                 .where({ "colA1", enuConditionOperator::Equal, 123 })
             ;
@@ -1729,7 +1729,7 @@ t1.colA1 = DATE_ADD(NOW(),INTERVAL 15 MINUTE)
 
     void queryString_DELETE_multi_target() {
         QT_TRY {
-            ORMDeleteQuery query = t1.makeDeleteQuery(APICALLBOOM_PARAM) //, "alias_t1")
+            ORMDeleteQuery query = t1.makeDeleteQuery(_apiCallContext) //, "alias_t1")
                 .addTarget("t2")
                 .addTarget("t3")
                 .addTarget("t4")

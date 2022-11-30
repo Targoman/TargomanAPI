@@ -29,7 +29,7 @@
 namespace Targoman::API::AAA::Authentication {
 
 stuActiveAccount login(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString&     _ip,
     const QString&     _login,
     const QString&     _pass,
@@ -55,7 +55,7 @@ stuActiveAccount login(
                            .toJson(true)
                            .object();
 
-    return PrivHelpers::processUserObject(APICALLBOOM_PARAM, UserInfo, {}/*, _services*/);
+    return PrivHelpers::processUserObject(_apiCallContext, UserInfo, {}/*, _services*/);
 }
 
 /*
@@ -73,7 +73,7 @@ stuActiveAccount updatePrivs(const QString& _ip, const QString& _ssid, const QSt
 */
 
 QString renewExpiredJWT(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     INOUT TAPI::JWT_t &_JWTPayload,
     const QString &_ip,
     /*OUT*/ bool &_isRenewed
@@ -151,7 +151,7 @@ QString renewExpiredJWT(
                                           { "iIssuance", JWT.issuedAt() },
                                       }).toJson(true).object();
 
-    stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(APICALLBOOM_PARAM, UserInfo, {}/*, Services*/);
+    stuActiveAccount ActiveAccount = PrivHelpers::processUserObject(_apiCallContext, UserInfo, {}/*, Services*/);
 
     _JWTPayload["iat"] = ActiveAccount.Privs["Issuance"];
     _JWTPayload["privs"] = ActiveAccount.Privs["privs"];

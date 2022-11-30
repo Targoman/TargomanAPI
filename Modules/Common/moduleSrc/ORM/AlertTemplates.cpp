@@ -48,26 +48,26 @@ AlertTemplates::AlertTemplates() :
 QVariant IMPL_ORMGET_ANONYMOUSE(AlertTemplates) {
 #else
 QVariant IMPL_ORMGET_USER(AlertTemplates) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 #endif
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE_USER(AlertTemplates) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(AlertTemplates) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(AlertTemplates) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }

@@ -43,7 +43,7 @@ class User : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, User)
 
     ORMSelectQuery getPhotoQuery(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _usrID);
     
 private slots:
@@ -65,7 +65,7 @@ private slots:
     TAPI::Base64Image_t REST_GET(
         photo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _usrID
         ),
         "Get user photo as base64"
@@ -73,7 +73,7 @@ private slots:
     bool REST_UPDATE(
         photo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::Base64Image_t _image
         ),
         "Updates user image based using a base64 encoded image"
@@ -81,7 +81,7 @@ private slots:
     bool REST_POST(
         deletePhoto,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext
         ),
         "Delete user image"
     )
@@ -89,7 +89,7 @@ private slots:
     bool REST_UPDATE(
         email,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::Email_t   _email,
             TAPI::MD5_t     _pass,
             QString         _salt
@@ -100,7 +100,7 @@ private slots:
     bool REST_UPDATE(
         mobile,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::Mobile_t  _mobile,
             TAPI::MD5_t     _pass,
             QString         _salt
@@ -111,7 +111,7 @@ private slots:
     bool REST_UPDATE(
         personalInfo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString             _name = {},
             QString             _family = {},
             TAPI::ISO639_2_t    _language = {},
@@ -127,7 +127,7 @@ private slots:
     bool REST_UPDATE(
         financialInfo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::Sheba_t   _iban = {},
             TAPI::Ether_t   _ether = {}
         ),
@@ -137,7 +137,7 @@ private slots:
     bool REST_UPDATE(
         extraInfo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             NULLABLE_TYPE(TAPI::Date_t)    _birthDate = NULLABLE_NULL_VALUE,
             QString         _job = {},
             QString         _education = {},
@@ -236,7 +236,7 @@ class UserExtraInfo : public intfSQLBasedModule
 //    bool REST_UPDATE(
 //        birthDate,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            QString _birthDate
 //        ),
 //        "Updates users birth date"
@@ -245,7 +245,7 @@ class UserExtraInfo : public intfSQLBasedModule
 //    bool REST_UPDATE(
 //        photo,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            TAPI::Base64Image_t _image
 //        ),
 //        "Updates user image based using a base64 encoded image"
@@ -254,7 +254,7 @@ class UserExtraInfo : public intfSQLBasedModule
 //    bool REST_UPDATE(
 //        sheba,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            TAPI::Sheba_t _sheba
 //        ),
 //        "Updates user Sheba address"
@@ -263,7 +263,7 @@ class UserExtraInfo : public intfSQLBasedModule
 //    bool REST_UPDATE(
 //        etherAddress,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            TAPI::Ether_t _etherAddress
 //        ),
 //        "Updates user ethercoin address"

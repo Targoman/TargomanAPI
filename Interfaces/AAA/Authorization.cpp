@@ -29,7 +29,7 @@
 namespace Targoman::API::AAA::Authorization {
 
 void validateIPAddress(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _ip
 ) {
     makeAAADAC(DAC);
@@ -39,7 +39,7 @@ void validateIPAddress(
 }
 
 //QJsonObject retrieveTokenInfo(
-//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const QString& _token,
 //    const QString& _ip,
 //    const QStringList& _requiredPrivs
@@ -57,7 +57,7 @@ void validateIPAddress(
 //}
 
 bool hasPriv(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const TAPI::JWT_t& _jwt,
     const QStringList& _requiredAccess,
     bool _isSelf
@@ -65,7 +65,7 @@ bool hasPriv(
     if (_requiredAccess.isEmpty())
         return true;
 
-    QJsonObject Privs = privObjectFromInfo(APICALLBOOM_PARAM.getJWT());
+    QJsonObject Privs = privObjectFromInfo(_apiCallContext.getJWT());
 
     if ( Privs.isEmpty())
         return false;
@@ -78,22 +78,22 @@ bool hasPriv(
 }
 
 void checkPriv(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const TAPI::JWT_t &_jwt,
     const QStringList &_requiredAccess,
     bool _isSelf
 ) {
-    if (!hasPriv(APICALLBOOM_PARAM, _requiredAccess, _isSelf))
+    if (!hasPriv(_apiCallContext, _requiredAccess, _isSelf))
         throw exAuthorization("Not enought privileges: required are <" + _requiredAccess.join("|") + ">");
 }
 
 QVariant getPrivValue(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const TAPI::JWT_t &_jwt,
     QString _accessItem,
     const QVariant &_defIfNotFoundAndAllIsDefined
 ) {
-    QJsonObject Privs = privObjectFromInfo(APICALLBOOM_PARAM.getJWT());
+    QJsonObject Privs = privObjectFromInfo(_apiCallContext.getJWT());
 
     if (Privs.isEmpty())
         return QVariant();

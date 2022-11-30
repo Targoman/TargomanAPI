@@ -99,22 +99,22 @@ intfPaymentGateway* PaymentLogic::getGateway(const QString& _gatewayName) {
 //}
 
 QVariantList PaymentLogic::findAvailableGatewayTypes(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint32 _amount,
     QString _domain
 ) {
     QString Domain = URLHelper::domain(_domain, true);
 
-    ORMSelectQuery qry = PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery qry = PaymentGatewayTypes::instance().makeSelectQuery(_apiCallContext)
                       .addCol(tblPaymentGatewayTypes::Fields::pgtType)
 //                      .addCol(tblPaymentGatewayTypes::Fields::pgtName)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMinRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMinRequestAmount)
                       .addCol(DBExpression::VALUE("IFNULL(pgtMaxRequestAmount, 0)"), tblPaymentGatewayTypes::Fields::pgtMaxRequestAmount)
-                      .nestedInnerJoin(PaymentGatewayTypes::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                      .nestedInnerJoin(PaymentGatewayTypes::instance().makeSelectQuery(_apiCallContext)
                                  .addCol(tblPaymentGatewayTypes::Fields::pgtType)
                                  .addCol(enuAggregation::COUNT, tblPaymentGatewayTypes::Fields::pgtType, "_cnt")
 
-                                 .nestedInnerJoin(PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
+                                 .nestedInnerJoin(PaymentGateways::instance().makeSelectQuery(_apiCallContext)
                                             .addCols(PaymentGateways::instance().selectableColumnNames())
                                             .addCol(enuConditionalAggregation::IF,
                                                 { tblPaymentGateways::Fields::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
@@ -191,7 +191,7 @@ QVariantList PaymentLogic::findAvailableGatewayTypes(
 }
 
 const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint32 _amount,
     enuPaymentGatewayType::Type _gatewayType,
     QString _domain
@@ -205,13 +205,13 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
 
     QString Domain = URLHelper::domain(_domain, true);
 
-    ORMSelectQuery qry = PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery qry = PaymentGateways::instance().makeSelectQuery(_apiCallContext)
         .addCols(PaymentGateways::instance().selectableColumnNames())
         .addCols({
                      "tmptbl_inner.inner_pgwSumTodayPaidAmount",
                      "tmptbl_inner.inner_pgwTransactionFeeAmount",
                  })
-        .nestedLeftJoin(PaymentGateways::instance().makeSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(PaymentGateways::instance().makeSelectQuery(_apiCallContext)
             .addCol(tblPaymentGateways::Fields::pgwID)
             .addCol(enuConditionalAggregation::IF,
                     { tblPaymentGateways::Fields::pgwTransactionFeeType, enuConditionOperator::Equal, Targoman::API::AccountModule::enuPaymentGatewayTransactionFeeType::Percent }
@@ -263,7 +263,7 @@ const ORM::tblPaymentGateways::DTO PaymentLogic::findBestPaymentGateway(
 }
 
 QString PaymentLogic::createOnlinePaymentLink(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
     quint64 _vchID,
@@ -289,7 +289,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
     //1: find best payment gateway
     ORM::tblPaymentGateways::DTO PaymentGatewayDTO = PaymentLogic::findBestPaymentGateway(
-                                                         APICALLBOOM_PARAM,
+                                                         _apiCallContext,
                                                          _toPay,
                                                          _gatewayType,
                                                          _domain);
@@ -298,7 +298,7 @@ QString PaymentLogic::createOnlinePaymentLink(
     intfPaymentGateway* PaymentGatewayDriver = PaymentLogic::getGateway(PaymentGatewayDTO.pgwDriver);
 
     //3: create payment
-    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP(APICALLBOOM_PARAM,
+    TAPI::MD5_t onpMD5 = OnlinePayments::instance().callSP(_apiCallContext,
                                                            "spOnlinePayment_Create", {
                                                                { "iVoucherID", _vchID },
                                                                { "iGatewayID", PaymentGatewayDTO.pgwID },
@@ -315,7 +315,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         _outPaymentKey = onpMD5;
 
         QString Callback = QString("https://%1%2Account/OnlinePayments/paymentCallback?paymentKey=%3")
-                           .arg(APICALLBOOM_PARAM.hostAndPort())
+                           .arg(_apiCallContext.hostAndPort())
                            .arg(ServerCommonConfigs::BasePathWithVersion)
                            .arg(onpMD5);
 
@@ -323,7 +323,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         //4: call driver::request
         auto [Response, TrackID, PaymentLink] = PaymentGatewayDriver->prepareAndRequest(
-                APICALLBOOM_PARAM,
+                _apiCallContext,
                 PaymentGatewayDTO,
                 onpMD5,
                 _toPay,
@@ -331,7 +331,7 @@ QString PaymentLogic::createOnlinePaymentLink(
                 _invDesc
                 );
 
-        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(_apiCallContext, //SYSTEM_USER_ID,
                 {},
                 TAPI::ORMFields_t({
                    { tblOnlinePayments::Fields::onpTrackNumber, TrackID },
@@ -344,7 +344,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
         //increase pgwSumRequestCount and pgwSumRequestAmount
         try {
-            PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+            PaymentGateways::instance().callSP(_apiCallContext,
                                                "spPaymentGateway_UpdateRequestCounters", {
                                                    { "iPgwID", PaymentGatewayDTO.pgwID },
                                                    { "iAmount", _toPay },
@@ -356,7 +356,7 @@ QString PaymentLogic::createOnlinePaymentLink(
         return PaymentLink;
 
     } catch (std::exception &_exp) {
-        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(_apiCallContext, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                        { tblOnlinePayments::Fields::onpResult, _exp.what() },
@@ -372,7 +372,7 @@ QString PaymentLogic::createOnlinePaymentLink(
 
 // [PaymentID, VoucherID, TargetWalletID, PaymentAmount]
 std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePayment(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _paymentKey,
     const TAPI::JSON_t& _pgResponse
 //    QString _domain
@@ -382,7 +382,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
     if (_paymentKey.isEmpty())
         throw exPayment("paymentKey is empty");
 
-    QVariantMap OnlinePaymentInfo = OnlinePayments::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap OnlinePaymentInfo = OnlinePayments::instance().makeSelectQuery(_apiCallContext)
             .addCols(OnlinePayments::instance().selectableColumnNames())
             .addCols(PaymentGateways::instance().selectableColumnNames())
             .innerJoinWith("paymentGateway")
@@ -399,7 +399,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
 
     try {
         auto [Response, refNumber] = PaymentGatewayDriver->verifyAndSettle(
-                APICALLBOOM_PARAM,
+                _apiCallContext,
                 OnlinePayment.PaymentGateway,
                 OnlinePayment.OnlinePayment,
                 _pgResponse
@@ -408,7 +408,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
 
         //PaymentResponse.PaymentKey =?= _paymentKey
 
-        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(_apiCallContext, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
     //                    { tblOnlinePayments::Fields::onpTrackNumber, PaymentResponse.TrackID },
@@ -420,7 +420,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
                     });
 
         try {
-            PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+            PaymentGateways::instance().callSP(_apiCallContext,
                                                "spPaymentGateway_UpdateOkCounters", {
                                                    { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
                                                    { "iAmount", OnlinePayment.OnlinePayment.onpAmount },
@@ -436,7 +436,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
         };
 
     } catch (std::exception &_exp) {
-        OnlinePayments::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        OnlinePayments::instance().Update(_apiCallContext, //SYSTEM_USER_ID,
                     {},
                     TAPI::ORMFields_t({
                         { tblOnlinePayments::Fields::onpResult, _exp.what() },
@@ -447,7 +447,7 @@ std::tuple<quint64, quint64, quint64, quint64> PaymentLogic::approveOnlinePaymen
                     });
 
         //increase pgwSumFailedCount
-        PaymentGateways::instance().callSP(APICALLBOOM_PARAM,
+        PaymentGateways::instance().callSP(_apiCallContext,
                                            "spPaymentGateway_UpdateFailedCounters", {
                                                { "iPgwID", OnlinePayment.OnlinePayment.onp_pgwID },
                                                { "iAmount", OnlinePayment.OnlinePayment.onpAmount },

@@ -43,20 +43,20 @@ TicketAttachments::TicketAttachments() :
 
 QVariant IMPL_ORMGET_USER(TicketAttachments) {
 //    QString ExtraFilters;
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        ExtraFilters = QString ("( %1=%2 | %3=%4 | ( %5=NULL + %7=%8 )")
-//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID).arg(APICALLBOOM_PARAM.getActorID())
-//                       .arg(tblTicketAttachments::Fields::tktCreatedBy_usrID).arg(APICALLBOOM_PARAM.getActorID())
+//                       .arg(tblTicketAttachments::Fields::tktTarget_usrID).arg(_apiCallContext.getActorID())
+//                       .arg(tblTicketAttachments::Fields::tktCreatedBy_usrID).arg(_apiCallContext.getActorID())
 //                       .arg(tblTicketAttachments::Fields::tktTarget_usrID)
 //                       .arg(tblTicketAttachments::Fields::tktType).arg((Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast)));
 
     UploadQueue::instance().prepareFiltersList();
 
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
-            .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
-            .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, APICALLBOOM_PARAM.getActorID() })
+            .setCond({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() })
+            .orCond({ tblTickets::Fields::tktCreatedBy_usrID, enuConditionOperator::Equal, _apiCallContext.getActorID() })
             .orCond(
                 clsCondition({ tblTickets::Fields::tktTarget_usrID, enuConditionOperator::Null })
                 .andCond({ tblTickets::Fields::tktType,
@@ -64,7 +64,7 @@ QVariant IMPL_ORMGET_USER(TicketAttachments) {
                            Targoman::API::TicketingModule::enuTicketType::toStr(Targoman::API::TicketingModule::enuTicketType::Broadcast) })
             );
 
-    auto fnTouchQuery = [&APICALLBOOM_PARAM](ORMSelectQuery &_query) {
+    auto fnTouchQuery = [&_apiCallContext](ORMSelectQuery &_query) {
         _query
             .addCols({
                          tblTicketAttachments::Fields::tatID,
@@ -91,7 +91,7 @@ QVariant IMPL_ORMGET_USER(TicketAttachments) {
         ;
 
         ObjectStorageManager::applyGetFileUrlInQuery(
-                    APICALLBOOM_PARAM,
+                    _apiCallContext,
                     _query,
                     UploadFiles::instance(),
                     UploadGateways::instance(),

@@ -45,19 +45,19 @@ QVariant IMPL_ORMGET_ANONYMOUSE(Currency) {
 }
 
 quint64 IMPL_ORMCREATE_USER(Currency) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(Currency) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(Currency) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -68,14 +68,14 @@ bool IMPL_ORMDELETE_USER(Currency) {
  *     owner
  */
 bool IMPL_REST_UPDATE(Currency, setAsDefault, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::PKsByPath_t _pksByPath
 )) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canChangeDefault" });
+    Authorization::checkPriv(_apiCallContext, { this->moduleBaseName() + ":canChangeDefault" });
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spCurrency_SetAsDefault", {
-                     { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                     { "iUserID", _apiCallContext.getActorID() },
                      { "iCurID", _pksByPath },
                  });
 

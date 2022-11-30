@@ -174,7 +174,7 @@ void MTHelper::registerEngines() {
 
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::doTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t &_dir,
@@ -187,12 +187,12 @@ QVariantMap MTHelper::doTranslation(
     int &_preprocessTime,
     int &_translationTime
 ) {
-    APICALLBOOM_PARAM.createScopeTiming("translate");
+    _apiCallContext.createScopeTiming("translate");
 
     QTime Timer;
     Timer.start();
 
-    if (_detailed && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Detailed" }) == false)
+    if (_detailed && Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "Detailed" }) == false)
         throw exAuthorization("Not enought privileges to get detailed translation response.");
 
 //    _text = this->cleanText(unicode_trim(_text));
@@ -205,8 +205,8 @@ QVariantMap MTHelper::doTranslation(
     //dic
     //-----------------------------------------
     if (_dic) {
-        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
-            if (_dicFull && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
+        if (Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
+            if (_dicFull && Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
                 throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
             _preprocessTime = Timer.elapsed();
@@ -275,12 +275,12 @@ QVariantMap MTHelper::doTranslation(
 
     stuActiveCredit ActiveCredit;
 
-    if (APICALLBOOM_PARAM.isAnonymouse() == false) {
-//        QVariant Result = _mtModule->accountUserAssets()->Select(APICALLBOOM_PARAM,
+    if (_apiCallContext.isAnonymouse() == false) {
+//        QVariant Result = _mtModule->accountUserAssets()->Select(_apiCallContext,
 //                                                                 {}, 0, 0, {}, {}, {}, {}, false, false,
 //                                                                 clsCondition(tblAccountUserAssetsBase::Fields::uas_actorID,
 //                                                                              enuConditionOperator::Equal,
-//                                                                              APICALLBOOM_PARAM.getActorID())/*,
+//                                                                              _apiCallContext.getActorID())/*,
 //                                                                 3600*/);
 
 
@@ -298,7 +298,7 @@ QVariantMap MTHelper::doTranslation(
         //check credit
         //-----------------------------------------
         ActiveCredit = _mtModule->checkUsageIsAllowed(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             RequestedUsage,
             MTAction::TRANSLATE
             );
@@ -311,7 +311,7 @@ QVariantMap MTHelper::doTranslation(
 #ifdef QT_DEBUG
     if (_engine == "TEST_AAA") {
         _mtModule->saveAccountUsage(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             ActiveCredit,
             RequestedUsage,
             MTAction::TRANSLATE
@@ -380,7 +380,7 @@ QVariantMap MTHelper::doTranslation(
 
     if (TranslationEngine != nullptr) {
         QVariantMap TranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
-                                          APICALLBOOM_PARAM,
+                                          _apiCallContext,
                                           _mtModule,
                                           _text,
                                           _dir,
@@ -399,7 +399,7 @@ QVariantMap MTHelper::doTranslation(
             this->TranslationCache.insert(CacheKey, TranslationResult);
 
         _mtModule->saveAccountUsage(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             ActiveCredit,
             RequestedUsage,
             MTAction::TRANSLATE
@@ -426,7 +426,7 @@ QVariantMap MTHelper::doTranslation(
                                           );
 
     QVariantMap PreTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
-                                         APICALLBOOM_PARAM,
+                                         _apiCallContext,
                                          _mtModule,
                                          TextToTranslate,
                                          Dir,
@@ -454,7 +454,7 @@ QVariantMap MTHelper::doTranslation(
                                            );
 
     QVariantMap PostTranslationResult = this->internalDoTranslation<_itmplTokenActorType>(
-                                          APICALLBOOM_PARAM,
+                                          _apiCallContext,
                                           _mtModule,
                                           TextToTranslate,
                                           Dir,
@@ -475,7 +475,7 @@ QVariantMap MTHelper::doTranslation(
         this->TranslationCache.insert(CacheKey, PostTranslationResult);
 
     _mtModule->saveAccountUsage(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         ActiveCredit,
         RequestedUsage,
         MTAction::TRANSLATE
@@ -485,7 +485,7 @@ QVariantMap MTHelper::doTranslation(
 }
 
 //clsEngine* MTHelper::findEngine(
-//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    QString _text,
 //    const TranslationDir_t& _dir,
 //    const QString& _engine,
@@ -515,7 +515,7 @@ QVariantMap MTHelper::doTranslation(
 
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QVariantMap MTHelper::internalDoTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
@@ -534,7 +534,7 @@ QVariantMap MTHelper::internalDoTranslation(
     Timer.start();
 
     _text = this->preprocessText<_itmplTokenActorType>(
-                APICALLBOOM_PARAM,
+                _apiCallContext,
                 _mtModule,
                 _text,
                 _dir.first
@@ -548,7 +548,7 @@ QVariantMap MTHelper::internalDoTranslation(
 
     /********************************/
     TranslationResult = _translationEngine->doTranslation(
-                            APICALLBOOM_PARAM,
+                            _apiCallContext,
                             _text,
                             _detailed,
                             _detokenize);
@@ -556,7 +556,7 @@ QVariantMap MTHelper::internalDoTranslation(
 
     _translationTime = Timer.elapsed();
 
-    if (_class.size() && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
+    if (_class.size() && Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "ReportClass" }))
         TranslationResult[RESULTItems::CLASS] = _class;
 
     switch (TranslationResult.value(RESULTItems::ERRNO, 0).toInt()) {
@@ -604,7 +604,7 @@ QString MTHelper::detectClass(
 
 template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
 QString MTHelper::preprocessText(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
     const QString& _text,
     const QString& _lang
@@ -612,7 +612,7 @@ QString MTHelper::preprocessText(
     Q_UNUSED (_lang)
 
     if (this->CorrectionRule.isEmpty() || this->LastCorrectionRuleUpdateTime.elapsed() > 3600) {
-        QVariant Result = _mtModule->MTCorrectionRules->Select(APICALLBOOM_PARAM,
+        QVariant Result = _mtModule->MTCorrectionRules->Select(_apiCallContext,
                                                                {}, 0, 0, {}, {}, {}, {}, false, false,
                                                                clsCondition(tblMTCorrectionRulesBase::Fields::crlType,
                                                                             enuConditionOperator::Equal,
@@ -686,7 +686,7 @@ void MTHelper::addTranslationLog(quint64 _aptID, const QString& _engine, const Q
 
 /***********************************************************************************/
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
-    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_DECL &_apiCallContext,
     intfMTModule<false> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
@@ -701,14 +701,14 @@ template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::USER>(
 );
 
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::USER>(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     intfMTModule<false> *_mtModule,
     const QString& _text,
     const QString& _lang
 );
 
 template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
-    INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_DECL &_apiCallContext,
     intfMTModule<true> *_mtModule,
     QString _text,
     const TranslationDir_t& _dir,
@@ -723,7 +723,7 @@ template QVariantMap MTHelper::doTranslation<TAPI::enuTokenActorType::API>(
 );
 
 template QString MTHelper::preprocessText<TAPI::enuTokenActorType::API>(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     intfMTModule<true> *_mtModule,
     const QString& _text,
     const QString& _lang

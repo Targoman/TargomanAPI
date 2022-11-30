@@ -57,7 +57,7 @@ Bin::Bin() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(Bin) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 

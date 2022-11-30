@@ -277,20 +277,20 @@ const QStringList clsTable::selectableColumnNames(QString _tableAlias) const {
     return ColNames;
 }
 
-ORMSelectQuery clsTable::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
-    return ORMSelectQuery(APICALLBOOM_PARAM, *this, _alias);
+ORMSelectQuery clsTable::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+    return ORMSelectQuery(_apiCallContext, *this, _alias);
 }
 
-ORMCreateQuery clsTable::makeCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM) {
-    return ORMCreateQuery(APICALLBOOM_PARAM, *this);
+ORMCreateQuery clsTable::makeCreateQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext) {
+    return ORMCreateQuery(_apiCallContext, *this);
 }
 
-ORMUpdateQuery clsTable::makeUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
-    return ORMUpdateQuery(APICALLBOOM_PARAM, *this, _alias);
+ORMUpdateQuery clsTable::makeUpdateQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString& _alias) {
+    return ORMUpdateQuery(_apiCallContext, *this, _alias);
 }
 
-ORMDeleteQuery clsTable::makeDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString& _alias) {
-    return ORMDeleteQuery(APICALLBOOM_PARAM, *this, _alias);
+ORMDeleteQuery clsTable::makeDeleteQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString& _alias) {
+    return ORMDeleteQuery(_apiCallContext, *this, _alias);
 }
 
 const QString clsTable::domain() {
@@ -314,81 +314,81 @@ const QString clsTable::getStatusColumnName() {
 }
 
 clsDACResult clsTable::callSP(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _spName,
     const QVariantMap& _spArgs,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "sp");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSP({}, _spName, _spArgs, _purpose, _executionTime);
 }
 
 clsDACResult clsTable::callSPCacheable(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint32 _maxCacheTime,
     const QString& _spName,
     const QVariantMap& _spArgs,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable sp");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "cachable sp");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.callSPCacheable(_maxCacheTime, {}, _spName, _spArgs, _purpose, _executionTime);
 }
 
 clsDACResult clsTable::execQuery(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _queryStr,
     const QVariantList& _params,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "exec list");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
 }
 
 clsDACResult clsTable::execQuery(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _queryStr,
     const QVariantMap& _params,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "exec map");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQuery({}, _queryStr, _params, _purpose, _executionTime);
 }
 
 clsDACResult clsTable::execQueryCacheable(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint32 _maxCacheTime,
     const QString& _queryStr,
     const QVariantList& _params,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable exec list");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "cachable exec list");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);
 }
 
 clsDACResult clsTable::execQueryCacheable(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint32 _maxCacheTime,
     const QString& _queryStr,
     const QVariantMap& _params,
     const QString& _purpose,
     quint64* _executionTime
 ) {
-    auto ServerTiming = APICALLBOOM_PARAM.createScopeTiming("db", "cachable exec map");
+    auto ServerTiming = _apiCallContext.createScopeTiming("db", "cachable exec map");
 
     clsDAC DAC(this->domain(), this->Schema);
     return DAC.execQueryCacheable(_maxCacheTime, {}, _queryStr, _params, _purpose, _executionTime);

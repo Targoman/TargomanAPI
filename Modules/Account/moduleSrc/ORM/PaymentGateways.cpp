@@ -71,17 +71,17 @@ PaymentGatewayTypes::PaymentGatewayTypes() :
     PaymentGatewayTypesI18N::instance();
 }
 
-ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
     PaymentGatewayTypesI18N::instance().prepareFiltersList();
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate);
 
     if (_translate) {
         Query
             .removeCol(tblPaymentGatewayTypes::Fields::pgtName)
             .leftJoin(tblPaymentGatewayTypesI18N::Name)
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblPaymentGatewayTypesI18N::Name, "pgtName") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblPaymentGatewayTypesI18N::Name, "pgtName") + ","
                                                 "%1.pgtName)")
                                         .arg(_alias.isEmpty() ? tblPaymentGatewayTypes::Name : _alias)
                                         ),
@@ -99,22 +99,22 @@ ORMSelectQuery PaymentGatewayTypes::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
 }
 
 QVariant IMPL_ORMGET_USER(PaymentGatewayTypes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE_USER(PaymentGatewayTypes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(PaymentGatewayTypes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(PaymentGatewayTypes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
@@ -133,12 +133,12 @@ PaymentGateways::PaymentGateways() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(PaymentGateways) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE_USER(PaymentGateways) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     if (_createInfo.contains(tblPaymentGateways::Fields::pgwAllowedDomainName))
         _createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName] = URLHelper::domain(_createInfo[tblPaymentGateways::Fields::pgwAllowedDomainName].toString());
@@ -147,17 +147,17 @@ quint32 IMPL_ORMCREATE_USER(PaymentGateways) {
 }
 
 bool IMPL_ORMUPDATE_USER(PaymentGateways) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(PaymentGateways) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint32 _amount,
     QString _domain
 )) {
@@ -167,7 +167,7 @@ QVariantList IMPL_REST_GET_OR_POST(PaymentGateways, availableGatewayTypes, (
         throw exHTTPBadRequest("amount is zero");
 
     return PaymentLogic::findAvailableGatewayTypes(
-                APICALLBOOM_PARAM,
+                _apiCallContext,
                 _amount,
                 _domain
                 );

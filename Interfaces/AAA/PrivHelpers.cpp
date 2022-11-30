@@ -122,7 +122,7 @@ QVariant PrivHelpers::getPrivValue(const QJsonObject& _privs, const QString& _se
 }
 
 stuActiveAccount PrivHelpers::digestPrivileges(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QJsonArray &_privs
 //    quint64 _usrID
 //    const QStringList& _services
@@ -152,7 +152,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(
                 Privs = Targoman::Common::mergeJsonObjects(Privs, PrivIter);
 
                 if (PrivIter.key() != "ALL") {
-                    Targoman::API::AAA::stuActiveCredit ActiveAccount = serviceAccounting(PrivIter.key())->activeAccountObject(APICALLBOOM_PARAM, _usrID);
+                    Targoman::API::AAA::stuActiveCredit ActiveAccount = serviceAccounting(PrivIter.key())->activeAccountObject(_apiCallContext, _usrID);
                     if (ActiveAccount.TTL) {
 
                         ///@TODO: VERY IMPORTANT fix toJson(false)
@@ -177,7 +177,7 @@ stuActiveAccount PrivHelpers::digestPrivileges(
 }
 
 stuActiveAccount PrivHelpers::processUserObject(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     QJsonObject &_userObj,
     const QStringList &_requiredAccess
 //    const QStringList& _services
@@ -187,7 +187,7 @@ stuActiveAccount PrivHelpers::processUserObject(
 
     if (_userObj.size()) {
         stuActiveAccount ActiveAccount = PrivHelpers::digestPrivileges(
-                                             APICALLBOOM_PARAM,
+                                             _apiCallContext,
                                              _userObj[AAACommonItems::privs].toArray()
 //                                             static_cast<quint64>(_userObj[AAACommonItems::usrID].toDouble())
 //                                             _services

@@ -29,29 +29,29 @@
 
 namespace Targoman::API::AAA::Authorization {
     extern void validateIPAddress(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const QString& _ip);
 
 //    extern QJsonObject retrieveTokenInfo(
-//            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//            INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //            const QString& _token,
 //            const QString& _ip,
 //            const QStringList& _requiredPrivs = {});
 
     extern bool hasPriv(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //            const TAPI::JWT_t& _jwt,
             const QStringList& _requiredAccess,
             bool _isSelf = false);
 
     extern void checkPriv(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //            const TAPI::JWT_t& _jwt,
             const QStringList& _requiredAccess,
             bool _isSelf = false);
 
     extern QVariant getPrivValue(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //            const TAPI::JWT_t &_jwt,
             QString _accessItem,
             const QVariant &_defIfNotFoundAndAllIsDefined = {});

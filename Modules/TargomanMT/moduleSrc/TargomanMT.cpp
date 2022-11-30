@@ -118,7 +118,7 @@ void TargomanMT::initializeModule() {
 }
 
 void TargomanMT::computeAdditives(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -128,7 +128,7 @@ void TargomanMT::computeAdditives(
 };
 
 void TargomanMT::computeReferrer(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -167,7 +167,7 @@ void TargomanMT::computeReferrer(
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {
+    this->computeSystemDiscount(_apiCallContext, _basketItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -192,14 +192,14 @@ void TargomanMT::computeReferrer(
 };
 
 QVariantMap TargomanMT::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 
     QVariantMap Result = intfMTModule::getCustomUserAssetFieldsForQuery(
-                             APICALLBOOM_PARAM,
+                             _apiCallContext,
                              _basketItem,
                              _oldVoucherItem
                              );
@@ -214,7 +214,7 @@ QVariantMap TargomanMT::getCustomUserAssetFieldsForQuery(
 |** API Methods *************************************************|
 \****************************************************************/
 QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_IMPL &_apiCallContext,
     QString _text,
     QString _dir,
     bool _detailed,
@@ -224,7 +224,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 )) {
     QString _engine = "NMT";
 
-    if (APICALLBOOM_PARAM.isAnonymouse()) {
+    if (_apiCallContext.isAnonymouse()) {
 
     } else {
 
@@ -294,8 +294,8 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 //    Accounting::checkCredit(Privs, TARGOMAN_QUOTA_PREFIX+"MaxTotal", Stats["tksTotalWords"].toDouble()+ SourceWordCount);
 
     if (_dic) {
-        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
-            if (_dicFull && Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
+        if (Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "Dic" })) {
+            if (_dicFull && Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "DicFull" }))
                 throw exAuthorization("Not enought privileges to retrieve dictionary full response.");
 
             PreprocessTime = Timer.elapsed();
@@ -325,7 +325,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
 
         QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::USER>(
-                                      APICALLBOOM_PARAM,
+                                      _apiCallContext,
                                       this,
                                       _text,
                                       Dir,
@@ -352,7 +352,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
 
 //        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
-        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
+        if (Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
@@ -360,7 +360,7 @@ QVariantMap IMPL_REST_GET_OR_POST(TargomanMT, Translate, (
     } catch (exTargomanBase &_exp) {
         MTHelper::instance().addErrorLog(
                     //static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()),
-                    APICALLBOOM_PARAM.getActorID(),
+                    _apiCallContext.getActorID(),
                     _engine,
                     _dir,
                     SourceWordCount,

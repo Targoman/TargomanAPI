@@ -75,19 +75,19 @@ public:
 
 protected:
     virtual void computeAdditives(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void computeReferrer(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
@@ -96,7 +96,7 @@ private slots:
     QVariantMap REST_GET_OR_POST(
         Translate,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_DECL &_apiCallContext,
             QString _text,
             QString _dir,
             bool _detailed = false,

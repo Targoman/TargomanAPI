@@ -43,7 +43,7 @@ public:
 
 public:
     QVariantMap doTranslation(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const stuEngineSpecs& _engineSpecs,
             const QString& _text,
             bool _detailed,

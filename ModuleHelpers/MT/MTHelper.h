@@ -32,7 +32,7 @@
 #include "Gateways/intfTranslatorGateway.hpp"
 //#include "Interfaces/AAA/intfAccountingBasedModule.h"
 #include "Interfaces/API/intfModuleHelper.h"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 #include "Interfaces/intfMTModule.h"
 using namespace Targoman::Common::Configuration;
 using namespace Targoman::API::AAA;
@@ -161,7 +161,7 @@ public:
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap doTranslation(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         QString _text,
         const TranslationDir_t &_dir,
@@ -177,7 +177,7 @@ public:
 
 protected:
 //    clsEngine* findEngine(
-//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        QString _text,
 //        const TranslationDir_t& _dir,
 //        const QString& _engine,
@@ -187,7 +187,7 @@ protected:
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QVariantMap internalDoTranslation(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         QString _text,
         const TranslationDir_t& _dir,
@@ -213,7 +213,7 @@ public:
 
     template <TAPI::enuTokenActorType::Type _itmplTokenActorType>
     QString preprocessText(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         intfMTModule<_itmplTokenActorType == TAPI::enuTokenActorType::API> *_mtModule,
         const QString& _text,
         const QString& _lang

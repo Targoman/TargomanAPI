@@ -121,7 +121,7 @@ void MT::initializeModule() {
 }
 
 void MT::computeAdditives(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -131,7 +131,7 @@ void MT::computeAdditives(
 };
 
 void MT::computeReferrer(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -170,7 +170,7 @@ void MT::computeReferrer(
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {
+    this->computeSystemDiscount(_apiCallContext, _basketItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -195,14 +195,14 @@ void MT::computeReferrer(
 };
 
 QVariantMap MT::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
     ///@TODO: [very important] complete this
 
     QVariantMap Result = intfMTModule::getCustomUserAssetFieldsForQuery(
-                             APICALLBOOM_PARAM,
+                             _apiCallContext,
                              _basketItem,
                              _oldVoucherItem
                              );
@@ -217,7 +217,7 @@ QVariantMap MT::getCustomUserAssetFieldsForQuery(
 |** API Methods *************************************************|
 \****************************************************************/
 QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
-    APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_API_IMPL &_apiCallContext,
     QString _text,
     QString _dir,
     const QString& _engine,
@@ -299,7 +299,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 //    };
 
 //    this->checkUsageIsAllowed(
-//                APICALLBOOM_PARAM,
+//                _apiCallContext,
 //                RequestedUsage,
 //                MTAction::TRANSLATE
 //                );
@@ -311,7 +311,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
         int InternalPreprocessTime = 0, InternalTranslationTime = 0, InternalPostprocessTime = 0;
 
         QVariantMap Translation = MTHelper::instance().doTranslation<TAPI::enuTokenActorType::API>(
-                                      APICALLBOOM_PARAM,
+                                      _apiCallContext,
                                       this,
                                       _text,
                                       Dir,
@@ -338,7 +338,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
 
 //        MTHelper::instance().addTranslationLog(static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()), _engine, _dir, SourceWordCount, _text, OverallTime.elapsed());
 
-        if (Authorization::hasPriv(APICALLBOOM_PARAM, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
+        if (Authorization::hasPriv(_apiCallContext, { TARGOMAN_PRIV_PREFIX + "ReportServer" }) == false)
             Translation.remove(RESULTItems::SERVERID);
 
         return Translation;
@@ -346,7 +346,7 @@ QVariantMap IMPL_REST_GET_OR_POST(MT, Translate, (
     } catch (exTargomanBase &_exp) {
         MTHelper::instance().addErrorLog(
                     //static_cast<quint64>(TokenInfo[TOKENItems::tokID].toInt()),
-                    APICALLBOOM_PARAM.getActorID(),
+                    _apiCallContext.getActorID(),
                     _engine,
                     _dir,
                     SourceWordCount,

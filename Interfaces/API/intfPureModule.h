@@ -37,7 +37,7 @@
 #include "Interfaces/DBM/clsORMField.h"
 #include "Interfaces/DBM/clsTable.h"
 #include "Interfaces/Server/ServerCommon.h"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 using namespace Targoman::API::Server;
 using namespace TAPI;
 
@@ -53,8 +53,8 @@ using namespace TAPI;
 |** GET ***************************************************************|
 \**********************************************************************/
 //used by Api call methods
-#define INTERNAL_GET_METHOD_ARGS_DECL_APICALL(_apiCallBoomType) \
-    _apiCallBoomType    &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_DECL_APICALL(_apiCallContextType) \
+    _apiCallContextType    &_apiCallContext, \
     TAPI::PKsByPath_t   _pksByPath = {}, \
     quint64             _pageIndex = 0, \
     quint16             _pageSize = 20, \
@@ -65,8 +65,8 @@ using namespace TAPI;
     bool                _reportCount = true, \
     bool                _translate = true
 
-#define INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(_apiCallBoomType) \
-    _apiCallBoomType    &APICALLBOOM_PARAM, \
+#define INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(_apiCallContextType) \
+    _apiCallContextType    &_apiCallContext, \
     TAPI::PKsByPath_t   _pksByPath, \
     quint64             _pageIndex, \
     quint16             _pageSize, \
@@ -77,13 +77,13 @@ using namespace TAPI;
     bool                _reportCount, \
     bool                _translate
 
-#define GET_METHOD_ARGS_ANONYMOUSE_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)
-#define GET_METHOD_ARGS_USER_DECL_APICALL           INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_USER_DECL)
-#define GET_METHOD_ARGS_API_DECL_APICALL            INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_API_DECL)
+#define GET_METHOD_ARGS_ANONYMOUSE_DECL_APICALL     INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL)
+#define GET_METHOD_ARGS_USER_DECL_APICALL           INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLCONTEXT_TYPE_JWT_USER_DECL)
+#define GET_METHOD_ARGS_API_DECL_APICALL            INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLCONTEXT_TYPE_JWT_API_DECL)
 
-#define GET_METHOD_ARGS_ANONYMOUSE_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL)
-#define GET_METHOD_ARGS_USER_IMPL_APICALL           INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_USER_IMPL)
-#define GET_METHOD_ARGS_API_IMPL_APICALL            INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_API_IMPL)
+#define GET_METHOD_ARGS_ANONYMOUSE_IMPL_APICALL     INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL)
+#define GET_METHOD_ARGS_USER_IMPL_APICALL           INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLCONTEXT_TYPE_JWT_USER_IMPL)
+#define GET_METHOD_ARGS_API_IMPL_APICALL            INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLCONTEXT_TYPE_JWT_API_IMPL)
 
 #define ORMGET_ANONYMOUSE(_doc, ...)                apiGET(GET_METHOD_ARGS_ANONYMOUSE_DECL_APICALL) __VA_ARGS__; \
                                                     QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_USER_DECL_APICALL)); } \
@@ -110,8 +110,8 @@ using namespace TAPI;
 #define IMPL_ORMGET_API(_module)                    _module::apiGET(GET_METHOD_ARGS_API_IMPL_APICALL)
 
 //tokenbase
-#define GET_METHOD_ARGS_TOKENBASE_DECL_APICALL      INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLBOOM_TYPE_JWT_TOKENBASE_DECL)
-#define GET_METHOD_ARGS_TOKENBASE_IMPL_APICALL      INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL)
+#define GET_METHOD_ARGS_TOKENBASE_DECL_APICALL      INTERNAL_GET_METHOD_ARGS_DECL_APICALL(APICALLCONTEXT_TYPE_JWT_TOKENBASE_DECL)
+#define GET_METHOD_ARGS_TOKENBASE_IMPL_APICALL      INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(APICALLCONTEXT_TYPE_JWT_TOKENBASE_IMPL)
 
 #define ORMGET_TOKENBASE(_doc, ...)                 apiGET(GET_METHOD_ARGS_TOKENBASE_DECL_APICALL) __VA_ARGS__; \
                                                     QString signOfGET() { return TARGOMAN_M2STR((GET_METHOD_ARGS_TOKENBASE_DECL_APICALL)); } \
@@ -120,11 +120,11 @@ using namespace TAPI;
 #define IMPL_ORMGET_TOKENBASE(_module)              _module::apiGET(GET_METHOD_ARGS_TOKENBASE_IMPL_APICALL)
 
 //used by intfSQLBasedModule
-#define GET_METHOD_ARGS_DECL_INTERNAL               INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLBOOM_DECL)
-#define GET_METHOD_ARGS_IMPL_INTERNAL               INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLBOOM_IMPL)
+#define GET_METHOD_ARGS_DECL_INTERNAL               INTERNAL_GET_METHOD_ARGS_DECL_APICALL(INTFAPICALLCONTEXT_DECL)
+#define GET_METHOD_ARGS_IMPL_INTERNAL               INTERNAL_GET_METHOD_ARGS_IMPL_APICALL(INTFAPICALLCONTEXT_IMPL)
 
 #define GET_METHOD_ARGS_CALL_VALUES \
-    APICALLBOOM_PARAM, \
+    _apiCallContext, \
     _pksByPath, \
     _pageIndex, \
     _pageSize, \
@@ -140,8 +140,8 @@ using namespace TAPI;
 \**********************************************************************/
 //used by Api call methods
 //USER
-#define USER_CREATE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define USER_CREATE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define USER_CREATE_METHOD_ARGS_DECL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext, TAPI::ORMFields_t _createInfo = {}
+#define USER_CREATE_METHOD_ARGS_IMPL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext, TAPI::ORMFields_t _createInfo
 
 #define ORMCREATE_USER(_doc, ...)               apiCREATE(USER_CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfCREATE() { return TARGOMAN_M2STR((USER_CREATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -150,8 +150,8 @@ using namespace TAPI;
 #define IMPL_ORMCREATE_USER(_module)            _module::apiCREATE(USER_CREATE_METHOD_ARGS_IMPL_APICALL)
 
 //API
-#define API_CREATE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define API_CREATE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define API_CREATE_METHOD_ARGS_DECL_APICALL     APICALLCONTEXT_TYPE_JWT_API_DECL &_apiCallContext, TAPI::ORMFields_t _createInfo = {}
+#define API_CREATE_METHOD_ARGS_IMPL_APICALL     APICALLCONTEXT_TYPE_JWT_API_IMPL &_apiCallContext, TAPI::ORMFields_t _createInfo
 
 #define ORMCREATE_API(_doc, ...)                apiCREATE(API_CREATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfCREATE() { return TARGOMAN_M2STR((API_CREATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -160,18 +160,18 @@ using namespace TAPI;
 #define IMPL_ORMCREATE_API(_module)             _module::apiCREATE(API_CREATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define CREATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo = {}
-#define CREATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::ORMFields_t _createInfo
+#define CREATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLCONTEXT_DECL &_apiCallContext, TAPI::ORMFields_t _createInfo = {}
+#define CREATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLCONTEXT_IMPL &_apiCallContext, TAPI::ORMFields_t _createInfo
 
-#define CREATE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _createInfo
+#define CREATE_METHOD_ARGS_CALL_VALUES          _apiCallContext, _createInfo
 
 /**********************************************************************\
 |** UPDATE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
 //USER
-#define USER_UPDATE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define USER_UPDATE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+#define USER_UPDATE_METHOD_ARGS_DECL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define USER_UPDATE_METHOD_ARGS_IMPL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
 #define ORMUPDATE_USER(_doc, ...)               apiUPDATE(USER_UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfUPDATE() { return TARGOMAN_M2STR((USER_UPDATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -180,8 +180,8 @@ using namespace TAPI;
 #define IMPL_ORMUPDATE_USER(_module)            _module::apiUPDATE(USER_UPDATE_METHOD_ARGS_IMPL_APICALL)
 
 //API
-#define API_UPDATE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define API_UPDATE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+#define API_UPDATE_METHOD_ARGS_DECL_APICALL     APICALLCONTEXT_TYPE_JWT_API_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define API_UPDATE_METHOD_ARGS_IMPL_APICALL     APICALLCONTEXT_TYPE_JWT_API_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
 #define ORMUPDATE_API(_doc, ...)                apiUPDATE(API_UPDATE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfUPDATE() { return TARGOMAN_M2STR((API_UPDATE_METHOD_ARGS_DECL_APICALL)); } \
@@ -190,18 +190,18 @@ using namespace TAPI;
 #define IMPL_ORMUPDATE_API(_module)             _module::apiUPDATE(API_UPDATE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define UPDATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
-#define UPDATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
+#define UPDATE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLCONTEXT_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath = {}, TAPI::ORMFields_t _updateInfo = {}
+#define UPDATE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLCONTEXT_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath, TAPI::ORMFields_t _updateInfo
 
-#define UPDATE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _pksByPath, _updateInfo
+#define UPDATE_METHOD_ARGS_CALL_VALUES          _apiCallContext, _pksByPath, _updateInfo
 
 /**********************************************************************\
 |** DELETE ************************************************************|
 \**********************************************************************/
 //used by Api call methods
 //USER
-#define USER_DELETE_METHOD_ARGS_DECL_APICALL    APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath //= {}
-#define USER_DELETE_METHOD_ARGS_IMPL_APICALL    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define USER_DELETE_METHOD_ARGS_DECL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath //= {}
+#define USER_DELETE_METHOD_ARGS_IMPL_APICALL    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath
 
 #define ORMDELETE_USER(_doc, ...)               apiDELETE(USER_DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfDELETE() { return TARGOMAN_M2STR((USER_DELETE_METHOD_ARGS_DECL_APICALL)); } \
@@ -210,8 +210,8 @@ using namespace TAPI;
 #define IMPL_ORMDELETE_USER(_module)            _module::apiDELETE(USER_DELETE_METHOD_ARGS_IMPL_APICALL)
 
 //API
-#define API_DELETE_METHOD_ARGS_DECL_APICALL     APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath //= {}
-#define API_DELETE_METHOD_ARGS_IMPL_APICALL     APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define API_DELETE_METHOD_ARGS_DECL_APICALL     APICALLCONTEXT_TYPE_JWT_API_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath //= {}
+#define API_DELETE_METHOD_ARGS_IMPL_APICALL     APICALLCONTEXT_TYPE_JWT_API_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath
 
 #define ORMDELETE_API(_doc, ...)                apiDELETE(API_DELETE_METHOD_ARGS_DECL_APICALL) __VA_ARGS__; \
                                                 QString signOfDELETE() { return TARGOMAN_M2STR((API_DELETE_METHOD_ARGS_DECL_APICALL)); } \
@@ -220,10 +220,10 @@ using namespace TAPI;
 #define IMPL_ORMDELETE_API(_module)             _module::apiDELETE(API_DELETE_METHOD_ARGS_IMPL_APICALL)
 
 //used by internal methods
-#define DELETE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath //= {}
-#define DELETE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, TAPI::PKsByPath_t _pksByPath
+#define DELETE_METHOD_ARGS_DECL_INTERNAL        INTFAPICALLCONTEXT_DECL &_apiCallContext, TAPI::PKsByPath_t _pksByPath //= {}
+#define DELETE_METHOD_ARGS_IMPL_INTERNAL        INTFAPICALLCONTEXT_IMPL &_apiCallContext, TAPI::PKsByPath_t _pksByPath
 
-#define DELETE_METHOD_ARGS_CALL_VALUES          APICALLBOOM_PARAM, _pksByPath
+#define DELETE_METHOD_ARGS_CALL_VALUES          _apiCallContext, _pksByPath
 
 /**********************************************************************/
 namespace TAPI {

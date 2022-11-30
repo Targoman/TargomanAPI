@@ -285,8 +285,8 @@ void RESTAPIRegistry::registerRESTAPI(
 
             QString ParameterTypeName = parameterTypes.at(ParamIndex);
 
-            //check APICallBoom
-            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) {
+            //check APICallContext
+            if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_BASE_STR)) {
                 DefaultValues.append(QVariant());
                 continue;
             }
@@ -513,39 +513,39 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
                              ;
 
     QList<QByteArray> parameterTypes = _method.parameterTypes();
-    bool HasApiCallBoomParam = false;
+    bool HasApiCallContextParam = false;
 
     for (int i=0; i<_method.parameterCount(); ++i) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        //check APICallBoom
-        if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) {
-            if (HasApiCallBoomParam)
-                throw exRESTRegistry(QString("Invalid duplicate APICALLBOOM parameter (%1) at %2 of %3")
+        //check APICallContext
+        if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_BASE_STR)) {
+            if (HasApiCallContextParam)
+                throw exRESTRegistry(QString("Invalid duplicate APICALLCONTEXT parameter (%1) at %2 of %3")
                                      .arg(_method.parameterNames().at(i).constData())
                                      .arg(i)
                                      .arg(FullMethodName));
 
             if (i > 0)
-                throw exRESTRegistry(QString("APICALLBOOM parameter must be first argument of %1")
+                throw exRESTRegistry(QString("APICALLCONTEXT parameter must be first argument of %1")
                                      .arg(FullMethodName));
 
-            HasApiCallBoomParam = true;
+            HasApiCallContextParam = true;
 
             continue;
         }
 
         if (ParameterTypeName == PARAM_JWT)
-            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: JWT in api method parameters list is prohibited. Use APICallContext instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_REMOTE_IP)
-            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: IP in api method parameters list is prohibited. Use APICallContext instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_COOKIES)
-            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: COOKIES in api method parameters list is prohibited. Use APICallContext instead.").arg(FullMethodName));
 
         if (ParameterTypeName == PARAM_HEADERS)
-            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APICallBoom instead.").arg(FullMethodName));
+            throw exRESTRegistry(QString("%1: HEADERS in api method parameters list is prohibited. Use APICallContext instead.").arg(FullMethodName));
 
         //-- others
         if ((ErrMessage = RESTAPIRegistry::isValidType(_method.parameterType(i), true)).size())
@@ -567,8 +567,8 @@ void RESTAPIRegistry::validateMethodInputAndOutput(const QMetaMethod& _method) {
         }
     }
 
-    if (HasApiCallBoomParam == false)
-        throw exRESTRegistry(QString("APICALLBOOM parameter not defined in %1").arg(FullMethodName));
+    if (HasApiCallContextParam == false)
+        throw exRESTRegistry(QString("APICALLCONTEXT parameter not defined in %1").arg(FullMethodName));
 }
 
 constexpr char CACHE_INTERNAL[] = "CACHEABLE_";

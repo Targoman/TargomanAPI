@@ -38,7 +38,7 @@ intfBaseNMTGateway::intfBaseNMTGateway()
 { ; }
 
 QVariantMap intfBaseNMTGateway::doTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const stuEngineSpecs& _engineSpecs,
     const QString& _text,
     bool _detailed,

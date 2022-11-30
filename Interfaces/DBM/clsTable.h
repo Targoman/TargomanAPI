@@ -144,7 +144,7 @@ public:
 //                     bool _realDelete = false);
 
     DBManager::clsDACResult callSP(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const QString& _spName,
         const QVariantMap& _spArgs = QVariantMap(),
         const QString& _purpose = {},
@@ -152,7 +152,7 @@ public:
     );
 
     DBManager::clsDACResult callSPCacheable(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint32 _maxCacheTime,
         const QString& _spName,
         const QVariantMap& _spArgs = QVariantMap(),
@@ -161,21 +161,21 @@ public:
     );
 
     DBManager::clsDACResult execQuery(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const QString &_queryStr,
         const QVariantList &_params = QVariantList(),
         const QString& _purpose = "",
         quint64* _executionTime = nullptr
     );
     DBManager::clsDACResult execQuery(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const QString &_queryStr,
         const QVariantMap &_params,
         const QString& _purpose = "",
         quint64* _executionTime = nullptr
     );
     DBManager::clsDACResult execQueryCacheable(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint32 _maxCacheTime,
         const QString &_queryStr,
         const QVariantList &_params = QVariantList(),
@@ -183,7 +183,7 @@ public:
         quint64* _executionTime = nullptr
     );
     DBManager::clsDACResult execQueryCacheable(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint32 _maxCacheTime,
         const QString &_queryStr,
         const QVariantMap &_params,
@@ -210,10 +210,10 @@ public:
 
     const QStringList selectableColumnNames(QString _tableAlias = "") const;
 
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
-    virtual ORMCreateQuery makeCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM);
-    virtual ORMUpdateQuery makeUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
-    virtual ORMDeleteQuery makeDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString& _alias = {});
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMCreateQuery makeCreateQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext);
+    virtual ORMUpdateQuery makeUpdateQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString& _alias = {});
+    virtual ORMDeleteQuery makeDeleteQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString& _alias = {});
 
 protected:
     /*inline */const QString domain();

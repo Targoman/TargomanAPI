@@ -38,8 +38,8 @@ Props::Props() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(Props) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblBin::Fields::binID, _apiCallContext.getActorID()}}, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblBin::Name);
@@ -49,9 +49,9 @@ QVariant IMPL_ORMGET_USER(Props) {
 }
 
 quint64 IMPL_ORMCREATE_USER(Props) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        _createInfo.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, _createInfo);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        _createInfo.insert(tblBin::Fields::binID, _apiCallContext.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _apiCallContext.getActorID()}}, _createInfo);
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
@@ -59,18 +59,18 @@ quint64 IMPL_ORMCREATE_USER(Props) {
 bool IMPL_ORMUPDATE_USER(Props) {
     QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
-        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_PATCH,this->moduleBaseName())))
+        ExtraFilters.insert(tblBin::Fields::binID, _apiCallContext.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _apiCallContext.getActorID()}}, ExtraFilters);
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }
 
 bool IMPL_ORMDELETE_USER(Props) {
     QVariantMap ExtraFilters;
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-        ExtraFilters.insert(tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID());
-//    this->setSelfFilters({{tblBin::Fields::binID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+        ExtraFilters.insert(tblBin::Fields::binID, _apiCallContext.getActorID());
+//    this->setSelfFilters({{tblBin::Fields::binID, _apiCallContext.getActorID()}}, ExtraFilters);
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
 }

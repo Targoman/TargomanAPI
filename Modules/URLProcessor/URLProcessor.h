@@ -41,7 +41,7 @@ private slots:
     QString REST_GET(
         canonicalize,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             const QString _url,
             bool _removeWWW = true
         ),
@@ -51,7 +51,7 @@ private slots:
     QString REST_GET(
         convertHexCodes,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             const QString _url,
             bool _convertAll = false
         ),

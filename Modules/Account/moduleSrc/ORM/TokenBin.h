@@ -103,7 +103,7 @@ private slots:
     QVariantList REST_POST(
         removeExpiredAndFetchNew,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             const quint64 _lastFetchedID = 0
         ),
         "removes expired ban items from database and fetch newly items greater than lastID"

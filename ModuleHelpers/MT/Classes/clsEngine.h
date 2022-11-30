@@ -30,7 +30,7 @@
 #include "libTargomanCommon/Macros.h"
 #include "../MTDefs.hpp"
 //#include "../Gateways/intfTranslatorGateway.hpp"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 using namespace Targoman::API::Server;
 
 namespace Targoman::API::ModuleHelpers::MT::Classes {
@@ -115,7 +115,7 @@ public:
     QString fullName() { return this->EngineSpecs.fullName(); }
     const stuEngineSpecs& specs() { return this->EngineSpecs; }
     QVariantMap doTranslation(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const QString& _text,
             bool _detailed,
             bool _detokinize

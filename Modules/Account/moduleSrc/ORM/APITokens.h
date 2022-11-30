@@ -286,17 +286,17 @@ class APITokens : public intfSQLBasedModule
 
 public:
 //    virtual void initializeModule();
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
     stuRequestTokenResult create(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _userID,
         const QString &_name,
         const QStringList &_services = {}
     );
 
     QVariantMap addServices(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         quint64 _tokenID,
         QMap<QString, quint64> &_services
     );
@@ -310,7 +310,7 @@ private slots:
     QVariant REST_GET(
         byService,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL  &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL  &_apiCallContext,
             QStringList                     _services,
 //            TAPI::PKsByPath_t               _pksByPath = {},
             quint64                         _pageIndex = 0,
@@ -328,7 +328,7 @@ private slots:
     QVariantMap REST_UPDATE(
         ,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _token,
             QString _name = {},
             NULLABLE_TYPE(TAPI::DateTime_t) _expireDate = NULLABLE_NULL_VALUE
@@ -339,7 +339,7 @@ private slots:
     Targoman::API::AccountModule::stuRequestTokenResult REST_POST(
         request,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             const QString &_name,
             //TAPI::CommaSeparatedStringList_t
             const QStringList &_services = {}
@@ -350,7 +350,7 @@ private slots:
     QVariantMap REST_POST(
         addServices,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             const QString       &_token,
             //TAPI::CommaSeparatedStringList_t
             const QStringList   &_services = {}
@@ -361,7 +361,7 @@ private slots:
     /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         revoke,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             const QString   &_token,
             TAPI::MD5_t     _pass = {},
             QString         _salt = {}
@@ -372,7 +372,7 @@ private slots:
     bool REST_POST(
         pause,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             const QString &_token
         ),
         "Pause the token"
@@ -381,7 +381,7 @@ private slots:
     bool REST_POST(
         resume,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             const QString &_token
         ),
         "Resume the paused token"

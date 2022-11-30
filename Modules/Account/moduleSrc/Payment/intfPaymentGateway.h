@@ -107,7 +107,7 @@ public: \
 protected: \
     virtual Targoman::API::AccountModule::enuPaymentGatewayType::Type getType() { return _type; }; \
     virtual /*[Response, TrackID, PaymentLink]*/std::tuple<QString, QString, QString> prepareAndRequest( \
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
+            INTFAPICALLCONTEXT_DECL &_apiCallContext, \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
             TAPI::MD5_t _paymentKey, \
             qint64 _amount, \
@@ -115,7 +115,7 @@ protected: \
             const QString &_desc \
             ); \
     virtual /*[Response, refNumber]*/std::tuple<QString, QString> verifyAndSettle( \
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, \
+            INTFAPICALLCONTEXT_DECL &_apiCallContext, \
             const Targoman::API::AccountModule::ORM::tblPaymentGateways::DTO &_paymentGateway, \
             const Targoman::API::AccountModule::ORM::tblOnlinePayments::DTO &_onlinePayment, \
             const TAPI::JSON_t &_pgResponse \
@@ -148,7 +148,7 @@ protected:
 
     /*[Response, TrackID, PaymentLink]*/
     virtual std::tuple<QString, QString, QString> prepareAndRequest(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
             TAPI::MD5_t _paymentKey,
             qint64 _amount,
@@ -158,7 +158,7 @@ protected:
 
     /*[Response, refNumber]*/
     virtual std::tuple<QString, QString> verifyAndSettle(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const ORM::tblPaymentGateways::DTO &_paymentGateway,
             Q_DECL_UNUSED const ORM::tblOnlinePayments::DTO &_onlinePaymentDTO,
             const TAPI::JSON_t &_pgResponse
