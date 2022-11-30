@@ -26,7 +26,7 @@
 namespace Targoman::API::Helpers {
 
 QString LanguageHelper::getI18NClauseForCoalesce(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString &_i18nTableName,
     const QString &_fieldName,
     const QString &_i18nDataFieldName
@@ -39,16 +39,16 @@ QString LanguageHelper::getI18NClauseForCoalesce(
                      .arg(_i18nTableName)
                      .arg(_i18nDataFieldName)
                      .arg(FieldPath)
-                     .arg(APICALLBOOM_PARAM.language())
+                     .arg(_apiCallContext.language())
                      ;
 
-    if (APICALLBOOM_PARAM.language().contains("-"))
+    if (_apiCallContext.language().contains("-"))
         Result += ","
                   + QString("JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '%3.%4'))")
                   .arg(_i18nTableName)
                   .arg(_i18nDataFieldName)
                   .arg(FieldPath)
-                  .arg(APICALLBOOM_PARAM.language().split("-").first());
+                  .arg(_apiCallContext.language().split("-").first());
 
     return Result;
 }

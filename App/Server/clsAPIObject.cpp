@@ -23,7 +23,7 @@
 
 #include "clsAPIObject.h"
 #include "APICache.hpp"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 
 namespace Targoman::API::Server {
 
@@ -68,40 +68,40 @@ clsAPIObject::clsAPIObject(
     foreach (const QByteArray &ParamName, _method.parameterNames()) {
         QString ParameterTypeName = parameterTypes.at(i);
 
-        /*if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL)) {
+        /*if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_USER_DECL)) {
             this->ParamNames.append("JWT");
             this->ParamTypesName.append(PARAM_JWT);
             this->ParamTypesID.append(QMetaType::type(PARAM_JWT));
             this->BaseMethod.DefaultValues[0] = {};
-        } else */if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_BASE_STR)) { //APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL)) {
+        } else */if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_BASE_STR)) { //APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL)) {
             --this->RequiredParamsCount;
             this->BaseMethod.DefaultValues.removeAt(0);
 
-            if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL_STR)) {
+            if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = true;
                 this->TokenAllowUSER = false;
                 this->TokenAllowAPI = false;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = true;
                 this->TokenAllowUSER = true;
                 this->TokenAllowAPI = false;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_API_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = true;
                 this->TokenAllowUSER = false;
                 this->TokenAllowAPI = true;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_USER_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = false;
                 this->TokenAllowUSER = true;
                 this->TokenAllowAPI = false;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_API_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_API_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = false;
                 this->TokenAllowUSER = false;
                 this->TokenAllowAPI = true;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_USER_OR_API_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_USER_OR_API_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = false;
                 this->TokenAllowUSER = true;
                 this->TokenAllowAPI = true;
-            } else if (ParameterTypeName.startsWith(APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL_STR)) {
+            } else if (ParameterTypeName.startsWith(APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL_STR)) {
                 this->TokenAllowANONYMOUSE = true;
                 this->TokenAllowUSER = true;
                 this->TokenAllowAPI = true;
@@ -132,7 +132,7 @@ intfAPIArgManipulator* clsAPIObject::argSpecs(quint8 _paramIndex) const {
 }
 
 QVariant clsAPIObject::invoke(
-    INTFAPICALLBOOM_IMPL *APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL *_apiCallContext,
     bool _isUpdateMethod,
     const QStringList& _args,
 //    /*OUT*/ QVariantMap &_responseHeaders,
@@ -285,7 +285,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APIInternalCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            APICALLBOOM_PARAM->setResponseHeaders(Map.value("headers").toMap());
+            _apiCallContext->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -296,7 +296,7 @@ QVariant clsAPIObject::invoke(
             gServerStats.APICentralCacheStats[this->BaseMethod.name()].inc();
 
             QVariantMap Map = CachedValue.toMap();
-            APICALLBOOM_PARAM->setResponseHeaders(Map.value("headers").toMap());
+            _apiCallContext->setResponseHeaders(Map.value("headers").toMap());
             return Map.value("result");
         }
     }
@@ -317,14 +317,14 @@ QVariant clsAPIObject::invoke(
 
     QVariant Result = APIMethod->invokeMethod(
                           this,
-                          APICALLBOOM_PARAM,
+                          _apiCallContext,
                           Arguments
 //                          _responseHeaders
                           );
 
     QVariantMap ResultWithHeader = QVariantMap({
                                                    { "result", Result },
-                                                   { "headers", APICALLBOOM_PARAM->getResponseHeaders() },
+                                                   { "headers", _apiCallContext->getResponseHeaders() },
                                                });
     if (this->Cache4Secs != 0)
         InternalCache::setValue(CacheKey, ResultWithHeader, this->Cache4Secs);
@@ -337,7 +337,7 @@ QVariant clsAPIObject::invoke(
 }
 
 void clsAPIObject::invokeMethod(
-    INTFAPICALLBOOM_IMPL *APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL *_apiCallContext,
     const QVariantList& _arguments,
     QGenericReturnArgument _returnArg
 //    /*OUT*/ QVariantMap &_responseHeaders
@@ -378,7 +378,7 @@ void clsAPIObject::invokeMethod(
     };
 
     try {
-        QGenericArgument _APICALLBOOM_ARG("APICALLBOOM_PARAM", APICALLBOOM_PARAM);
+        QGenericArgument _APICALLCONTEXT_ARG("_apiCallContext", _apiCallContext);
 
         QGenericArgument Arguments[9];
 
@@ -396,7 +396,7 @@ void clsAPIObject::invokeMethod(
             parent,
             this->IsAsync ? Qt::QueuedConnection : Qt::DirectConnection,
             _returnArg,
-            _APICALLBOOM_ARG, //Q_ARG(intfAPICallBoom, *APICALLBOOM_PARAM),
+            _APICALLCONTEXT_ARG, //Q_ARG(intfAPICallContext, *_apiCallContext),
             Arguments[0],
             Arguments[1],
             Arguments[2],
@@ -434,12 +434,12 @@ bool clsAPIObject::isPolymorphic(const QMetaMethodExtended& _method) {
 }
 
 void clsAPIObject::updateDefaultValues(const QMetaMethodExtended& _method) {
-    ///-1: for APICALLBOOM_PARAM
+    ///-1: for _apiCallContext
     if ((_method.parameterNames().size() - 1) < this->RequiredParamsCount) {
         this->RequiredParamsCount = static_cast<quint8>(_method.parameterNames().size() - 1);
 
         QMetaMethodExtended Method = _method;
-        Method.DefaultValues.removeAt(0); //for APICALLBOOM_PARAM
+        Method.DefaultValues.removeAt(0); //for _apiCallContext
         this->LessArgumentMethods.append(Method);
     }
 }

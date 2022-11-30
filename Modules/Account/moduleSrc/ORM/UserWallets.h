@@ -149,7 +149,7 @@ private slots:
     bool REST_UPDATE(
         setAsDefault, //defaultWallet,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            TAPI::PKsByPath_t _pksByPath
             quint64 _walID
         ),
@@ -159,7 +159,7 @@ private slots:
     bool REST_CREATE(
         transfer,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _destEmailOrMobile,
             quint32 _amount,
             TAPI::MD5_t _pass,
@@ -172,7 +172,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_CREATE(
         requestIncrease,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint32 _amount,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
             QString _domain,
@@ -188,7 +188,7 @@ private slots:
     quint64 REST_POST(
         requestWithdrawal,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _amount,
             quint64 _walID = 0,
             const QString &_desc = {}
@@ -199,7 +199,7 @@ private slots:
     quint64 REST_POST(
         requestWithdrawalFor,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _amount,
             quint64 _targetUsrID,
             const QString &_desc = {}
@@ -211,7 +211,7 @@ private slots:
     bool REST_POST(
         acceptWithdrawal,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _voucherID
         ),
         "Make a withdrawal as accepted and finished"

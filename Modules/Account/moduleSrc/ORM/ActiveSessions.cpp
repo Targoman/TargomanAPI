@@ -45,8 +45,8 @@ ActiveSessions::ActiveSessions() :
 QVariant IMPL_ORMGET_USER(ActiveSessions) {
 //  QVariantMap ExtraFilters;
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, _apiCallContext.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 
@@ -58,12 +58,12 @@ QVariant IMPL_ORMGET_USER(ActiveSessions) {
 bool IMPL_ORMDELETE_USER(ActiveSessions) {
   TAPI::ORMFields_t ExtraFilters;
 
-  if (_pksByPath.trimmed() == clsJWT(APICALLBOOM_PARAM.getJWT()).session())
+  if (_pksByPath.trimmed() == clsJWT(_apiCallContext.getJWT()).session())
     throw exHTTPForbidden("Deleting current session is not allowed");
 
-  if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
-      ExtraFilters.insert(tblActiveSessions::Fields::ssn_usrID, APICALLBOOM_PARAM.getActorID());
-//  this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+  if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false)
+      ExtraFilters.insert(tblActiveSessions::Fields::ssn_usrID, _apiCallContext.getActorID());
+//  this->setSelfFilters({{tblActiveSessions::Fields::ssn_usrID, _apiCallContext.getActorID()}}, ExtraFilters);
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters, true);
 //  return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, ExtraFilters, true);

@@ -159,24 +159,24 @@ baseintfAccountingBasedModule::baseintfAccountingBasedModule(
 |** credit ********************************************************|
 \******************************************************************/
 //stuActiveCredit baseintfAccountingBasedModule::activeAccountObject(
-//    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+//    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    quint64 _actorID
 //) {
-//    return this->findBestMatchedCredit(APICALLBOOM_PARAM, _actorID);
+//    return this->findBestMatchedCredit(_apiCallContext, _actorID);
 //}
 
 stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
-//    QJsonObject Privs = APICALLBOOM_PARAM.getJWTPrivsObject();
+//    QJsonObject Privs = _apiCallContext.getJWTPrivsObject();
 //    if (Privs.contains(this->ServiceName) == false)
 //        throw exHTTPForbidden("[81] You don't have access to: " + this->ServiceName);
 
     stuActiveCredit BestMatchedCredit = this->findBestMatchedCredit(
-                                            APICALLBOOM_PARAM,
-                                            APICALLBOOM_PARAM.getActorID(),
+                                            _apiCallContext,
+                                            _apiCallContext.getActorID(),
                                             _requestedUsage,
                                             _action);
 
@@ -244,12 +244,12 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
         ) {
             FnCheckUsageIterCredit(
                 UsageIter,
-                [this, &APICALLBOOM_PARAM, &FnCheckCredit, &ActiveCredit, &BestMatchedCredit]
+                [this, &_apiCallContext, &FnCheckCredit, &ActiveCredit, &BestMatchedCredit]
                 (const QString CreditKey, qint64 CreditValue) -> bool {
                     if (ActiveCredit.Digested.Limits.contains(CreditKey) == false)
                         return false;
 
-                    if (this->isUnlimited(APICALLBOOM_PARAM, BestMatchedCredit.MyLimitsOnParent) == false)
+                    if (this->isUnlimited(_apiCallContext, BestMatchedCredit.MyLimitsOnParent) == false)
                         FnCheckCredit(CreditKey, CreditValue, BestMatchedCredit.MyLimitsOnParent.value(CreditKey), "Own");
 
                     FnCheckCredit(CreditKey, CreditValue, ActiveCredit.Digested.Limits.value(CreditKey), "Parent");
@@ -261,7 +261,7 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
         return BestMatchedCredit;
     }
 
-    if (this->isUnlimited(APICALLBOOM_PARAM, ActiveCredit.Digested.Limits))
+    if (this->isUnlimited(_apiCallContext, ActiveCredit.Digested.Limits))
         return BestMatchedCredit;
 
     for (auto UsageIter = _requestedUsage.begin();
@@ -284,13 +284,13 @@ stuActiveCredit baseintfAccountingBasedModule::checkUsageIsAllowed(
 }
 
 stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
 ) {
     stuServiceCreditsInfo ServiceCreditsInfo = this->retrieveServiceCreditsInfo(
-                                                   APICALLBOOM_PARAM,
+                                                   _apiCallContext,
                                                    _actorID,
                                                    _requestedUsage,
                                                    _action);
@@ -317,19 +317,19 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
                 : QDateTime(Now.date().addDays(1)).addSecs(NULLABLE_VALUE(_assetItem.UserAsset.uasValidToHour) * 3600);
     };
 
-    auto FnIsInvalidPackage = [this, &APICALLBOOM_PARAM, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
+    auto FnIsInvalidPackage = [this, &_apiCallContext, Now, FnEffectiveStartDateTime, FnEffectiveEndDateTime, _requestedUsage]
                               (const stuAssetItem &_assetItem)
                               -> bool {
         if ((_assetItem.UserAsset.uasValidFromDate.isValid() && _assetItem.UserAsset.uasValidFromDate > Now/*.date()*/)
                || (_assetItem.UserAsset.uasValidToDate.isValid() && _assetItem.UserAsset.uasValidToDate < Now/*.date()*/)
                || (NULLABLE_HAS_VALUE(_assetItem.UserAsset.uasValidFromHour) && Now < FnEffectiveStartDateTime(_assetItem))
                || (NULLABLE_HAS_VALUE(_assetItem.UserAsset.uasValidToHour) && Now > FnEffectiveEndDateTime(_assetItem))
-               || this->isEmpty(APICALLBOOM_PARAM, _assetItem.Digested.Limits)
+               || this->isEmpty(_apiCallContext, _assetItem.Digested.Limits)
             )
             return false;
 
         if (_requestedUsage.size()
-                && (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false)
+                && (this->isUnlimited(_apiCallContext, _assetItem.Digested.Limits) == false)
         ) {
             for (auto UsageIter = _requestedUsage.begin();
                  UsageIter != _requestedUsage.end();
@@ -382,7 +382,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 
                 //uncommewnt and use long credit count
 
-//                if (this->isUnlimited(APICALLBOOM_PARAM, _assetItem.Digested.Limits) == false) {
+//                if (this->isUnlimited(_apiCallContext, _assetItem.Digested.Limits) == false) {
 
 //                    stuUsage Remaining = _assetItem.Digested.Limits.value(UsageIter.key());
 
@@ -406,12 +406,12 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 //                               -1
                                );
 
-    auto FnComparePackages = [this, &APICALLBOOM_PARAM, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
+    auto FnComparePackages = [this, &_apiCallContext, &FnEffectiveEndDateTime] (const stuAssetItem& a, stuAssetItem& b) {
         if (a.UserAsset.uasValidToDate.isValid() && b.UserAsset.uasValidToDate.isValid() == false) return -1;
         if (a.UserAsset.uasValidToDate.isValid() == false && b.UserAsset.uasValidToDate.isValid()) return 1;
 
-        if (this->isUnlimited(APICALLBOOM_PARAM, a.Digested.Limits) && this->isUnlimited(APICALLBOOM_PARAM, b.Digested.Limits) == false) return -1;
-        if (this->isUnlimited(APICALLBOOM_PARAM, a.Digested.Limits) == false && this->isUnlimited(APICALLBOOM_PARAM, b.Digested.Limits)) return 1;
+        if (this->isUnlimited(_apiCallContext, a.Digested.Limits) && this->isUnlimited(_apiCallContext, b.Digested.Limits) == false) return -1;
+        if (this->isUnlimited(_apiCallContext, a.Digested.Limits) == false && this->isUnlimited(_apiCallContext, b.Digested.Limits)) return 1;
 
         if (NULLABLE_HAS_VALUE(a.UserAsset.uasValidToHour) && NULLABLE_IS_NULL(b.UserAsset.uasValidToHour)) return -1;
         if (NULLABLE_IS_NULL(a.UserAsset.uasValidToHour) && NULLABLE_HAS_VALUE(b.UserAsset.uasValidToHour)) return 1;
@@ -452,7 +452,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
         ) {
             if (FnComparePackages(Item, *CandidateIter) < 0) {
 
-                this->breakCredit(APICALLBOOM_PARAM,
+                this->breakCredit(_apiCallContext,
                                   *CandidateIter,
                                   _action);
 
@@ -494,7 +494,7 @@ stuActiveCredit baseintfAccountingBasedModule::findBestMatchedCredit(
 |** basket ********************************************************|
 \******************************************************************/
 Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::internalAddToBasket(
-    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL          &_apiCallContext,
     stuBasketItem                           &_basketItem,
     TAPI::SaleableCode_t                    &_saleableCode,
     Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
@@ -519,7 +519,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     _basketItem.AssetActorID = this->IsTokenBase()
                               ? NULLABLE_VALUE(_apiTokenID)
@@ -574,7 +574,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
                 continue;
         }
 
-        QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM)
+        QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(_apiCallContext)
             .addCols(this->AccountUserAssets->selectableColumnNames())
             .addCols(this->AccountSaleables->selectableColumnNames())
             .removeCols({
@@ -598,7 +598,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
             continue;
 
         return this->internalUpdateBasketItem(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             _lastPreVoucher,
             *it,
             it->Qty + _qty,
@@ -606,7 +606,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     } //find duplicates
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap SaleableInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap SaleableInfo = this->AccountSaleables->makeSelectQuery(_apiCallContext)
 //        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
 //        .addCols(this->AssetUsageLimitsColsName)
@@ -660,7 +660,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 //    _basketItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processItemForBasket(APICALLBOOM_PARAM, _basketItem);
+    this->processItemForBasket(_apiCallContext, _basketItem);
 
     //-- --------------------------------
     stuVoucherItem PreVoucherItem;
@@ -694,7 +694,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     PreVoucherItem.ReferrerParams   = _basketItem.ReferrerParams;
     PreVoucherItem.APITokenID       = _apiTokenID;
 
-    ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(APICALLBOOM_PARAM)
+    ORMCreateQuery qry = this->AccountUserAssets->makeCreateQuery(_apiCallContext)
         .addCols({
                      tblAccountUserAssetsBase::Fields::uas_actorID,
                      tblAccountUserAssetsBase::Fields::uas_slbID,
@@ -776,7 +776,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     }
 
     //-- CustomUserAssetFields
-    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, _basketItem);
+    QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(_apiCallContext, _basketItem);
     for (QVariantMap::const_iterator it = CustomFields.constBegin();
          it != CustomFields.constEnd();
          it++
@@ -811,7 +811,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 
     if (FinalPrice < 0) {
         this->AccountUserAssets->DeleteByPks(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             /*PK*/ QString::number(PreVoucherItem.OrderID),
             {
                 //this is just for make condition safe and strong:
@@ -820,7 +820,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
             false
         );
 
-        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+        this->AccountSaleables->callSP(_apiCallContext,
                                        "spSaleable_unReserve", {
                                            { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
@@ -842,7 +842,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, updateBasketItem, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL      &_apiCallContext,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID,
     qreal                               _newQty,
@@ -857,7 +857,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     ) {
         if (it->UUID == _itemUUID) {
             return internalUpdateBasketItem(
-                APICALLBOOM_PARAM,
+                _apiCallContext,
                 _lastPreVoucher,
                 *it,
                 _newQty,
@@ -870,12 +870,12 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
 }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule, removeBasketItem, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL      &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL      &_apiCallContext,
     Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
     TAPI::MD5_t                         _itemUUID
 )) {
     return this->apiPOSTupdateBasketItem(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         _lastPreVoucher,
         _itemUUID,
         0
@@ -889,7 +889,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
   *     removeBasketItem
   */
 Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::internalUpdateBasketItem(
-    INTFAPICALLBOOM_IMPL                &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL                &_apiCallContext,
     Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
     stuVoucherItem                      &_voucherItem,
     qreal                               _newQty,
@@ -919,7 +919,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
     //-- validate preVoucher and owner --------------------------------
     checkPreVoucherSanity(_lastPreVoucher);
 
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     if (_lastPreVoucher.Items.isEmpty())
         throw exHTTPBadRequest("Pre-Voucher is empty");
@@ -940,7 +940,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         throw exHTTPBadRequest("Item not found in pre-Voucher");
 
     //-- fetch SLB & PRD --------------------------------
-    QVariantMap UserAssetInfo = this->AccountSaleables->makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap UserAssetInfo = this->AccountSaleables->makeSelectQuery(_apiCallContext)
 //        .addCols(this->AccountSaleables->selectableColumnNames())
         .addCols(this->AccountProducts->selectableColumnNames())
 //        .addCols(this->AssetUsageLimitsColsName)
@@ -1006,14 +1006,14 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
 //    AssetItem.Digested.Limits = SaleableUsageLimits;
 
     //-- --------------------------------
-    this->processItemForBasket(APICALLBOOM_PARAM, AssetItem, &_voucherItem);
+    this->processItemForBasket(_apiCallContext, AssetItem, &_voucherItem);
 
     //-- --------------------------------
     qint64 FinalPrice = _lastPreVoucher.ToPay + _lastPreVoucher.Round;
     FinalPrice -= _voucherItem.TotalPrice;
     if (_newQty == 0) { //remove
         this->AccountUserAssets->DeleteByPks(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             /*PK*/ QString::number(_voucherItem.OrderID),
             {
                 //this is just for make condition safe and strong:
@@ -1023,7 +1023,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         );
 
         //moved to processItemForBasket
-//        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+//        this->AccountSaleables->callSP(_apiCallContext,
 //                                       "spSaleable_unReserve", {
 //                                           { "iSaleableID", AssetItem.Saleable.slbID },
 //                                           { "iUserID", CurrentUserID },
@@ -1063,7 +1063,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
         _voucherItem.ReferrerParams     = AssetItem.ReferrerParams;
 //        _voucherItem.APIToken           = AssetItem.APIToken;
 
-        ORMUpdateQuery qry = this->AccountUserAssets->makeUpdateQuery(APICALLBOOM_PARAM)
+        ORMUpdateQuery qry = this->AccountUserAssets->makeUpdateQuery(_apiCallContext)
                           .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, _voucherItem.OrderID })
                           .set(tblAccountUserAssetsBase::Fields::uasVoucherItemInfo, _voucherItem.toJson().toVariantMap())
                           .set(tblAccountUserAssetsBase::Fields::uasQty, _newQty)
@@ -1079,7 +1079,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
             qry.setNull(tblAccountUserAssetsBase::Fields::uas_cpnID);
 
         //-- CustomUserAssetFields
-        QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(APICALLBOOM_PARAM, AssetItem, &_voucherItem);
+        QVariantMap CustomFields = this->getCustomUserAssetFieldsForQuery(_apiCallContext, AssetItem, &_voucherItem);
         for (QVariantMap::const_iterator it = CustomFields.constBegin();
              it != CustomFields.constEnd();
              it++
@@ -1125,7 +1125,7 @@ Targoman::API::AAA::stuBasketActionResult baseintfAccountingBasedModule::interna
   *        removeBasketItem
   */
 void baseintfAccountingBasedModule::processItemForBasket(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -1143,7 +1143,7 @@ void baseintfAccountingBasedModule::processItemForBasket(
     **/
 
     //-- --------------------------------
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     //-- --------------------------------
     if ((_oldVoucherItem == nullptr) && (_basketItem.Qty == 0))
@@ -1200,11 +1200,11 @@ void baseintfAccountingBasedModule::processItemForBasket(
     ///@TODO: 2 ta bekhar 3 ta bebar:
 
     //-- --------------------------------
-    this->computeAdditives(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
+    this->computeAdditives(_apiCallContext, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeAdditives");
 
     //-- --------------------------------
-    this->computeReferrer(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
+    this->computeReferrer(_apiCallContext, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after computeReferrer");
 
     //-- --------------------------------
@@ -1213,27 +1213,27 @@ void baseintfAccountingBasedModule::processItemForBasket(
     //-- discount --------------------------------
     ///@TODO: what if some one uses discount code and at the same time will pay by prize credit
 
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {}, _oldVoucherItem);
+    this->computeSystemDiscount(_apiCallContext, _basketItem, {}, _oldVoucherItem);
     fnComputeTotalPrice("after computeSystemDiscount");
 
-    this->computeCouponDiscount(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
+    this->computeCouponDiscount(_apiCallContext, _basketItem, _oldVoucherItem);
     fnComputeTotalPrice("after applyCouponBasedDiscount");
 
 //    //-- --------------------------------
-//    this->digestPrivs(APICALLBOOM_PARAM, _basketItem, _oldVoucherItem);
+//    this->digestPrivs(_apiCallContext, _basketItem, _oldVoucherItem);
 
     //-- reserve and un-reserve saleable and product ------------------------------------
     ///@TODO: call spSaleable_unReserve by cron
 
     if (DeltaQty > 0) {
-        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+        this->AccountSaleables->callSP(_apiCallContext,
                                        "spSaleable_Reserve", {
                                            { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
                                            { "iQty", DeltaQty },
                                        });
     } else if (DeltaQty < 0) {
-        this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+        this->AccountSaleables->callSP(_apiCallContext,
                                        "spSaleable_unReserve", {
                                            { "iSaleableID", _basketItem.Saleable.slbID },
                                            { "iUserID", CurrentUserID },
@@ -1248,7 +1248,7 @@ void baseintfAccountingBasedModule::processItemForBasket(
 }
 
 void baseintfAccountingBasedModule::digestPrivs(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuAssetItem      &_assetItem
 //    const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -1256,7 +1256,7 @@ void baseintfAccountingBasedModule::digestPrivs(
 }
 
 void baseintfAccountingBasedModule::computeSystemDiscount(
-    INTFAPICALLBOOM_IMPL            &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL            &_apiCallContext,
     INOUT stuBasketItem             &_basketItem,
     const stuPendingSystemDiscount  &_pendingSystemDiscount /*= {}*/,
     const stuVoucherItem            *_oldVoucherItem /*= nullptr*/
@@ -1317,11 +1317,11 @@ void baseintfAccountingBasedModule::computeSystemDiscount(
 }
 
 void baseintfAccountingBasedModule::computeCouponDiscount(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
-//    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+//    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     /**
       * discount code:
@@ -1377,10 +1377,10 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
                                     _oldVoucherItem->OrderID });
     }
 
-    QVariantMap DiscountInfo = this->AccountCoupons->makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap DiscountInfo = this->AccountCoupons->makeSelectQuery(_apiCallContext)
         .addCols(this->AccountCoupons->selectableColumnNames())
 
-        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(_apiCallContext, "", true, false)
                   .addCols({
                                tblAccountUserAssetsBase::Fields::uas_cpnID,
                                tblAccountUserAssetsBase::Fields::uas_vchID,
@@ -1399,7 +1399,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
         )
         .addCol("tmp_cpn_count._discountUsedCount")
 
-        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+        .nestedLeftJoin(this->AccountUserAssets->makeSelectQuery(_apiCallContext, "", true, false)
                   .addCol(tblAccountUserAssetsBase::Fields::uas_cpnID)
                   .addCol(enuAggregation::SUM, tblAccountUserAssetsBase::Fields::uasDiscountAmount, "_discountUsedAmount")
                   .where({ tblAccountUserAssetsBase::Fields::uas_actorID, enuConditionOperator::Equal, _basketItem.AssetActorID}) //CurrentUserID })
@@ -1548,7 +1548,7 @@ void baseintfAccountingBasedModule::computeCouponDiscount(
 |** process and cancel voucher item *******************************|
 \******************************************************************/
 bool baseintfAccountingBasedModule::increaseDiscountUsage(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     if (_voucherItem.SystemDiscounts.count()) {
@@ -1558,7 +1558,7 @@ bool baseintfAccountingBasedModule::increaseDiscountUsage(
     }
 
     if (_voucherItem.CouponDiscount.ID > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+        clsDACResult Result = this->AccountCoupons->callSP(_apiCallContext,
                                                            "spCoupon_IncreaseStats", {
                                                                { "iDiscountID", _voucherItem.CouponDiscount.ID },
                                                                { "iTotalUsedCount", 1 },
@@ -1570,7 +1570,7 @@ bool baseintfAccountingBasedModule::increaseDiscountUsage(
 }
 
 bool baseintfAccountingBasedModule::decreaseDiscountUsage(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     if (_voucherItem.SystemDiscounts.count()) {
@@ -1580,7 +1580,7 @@ bool baseintfAccountingBasedModule::decreaseDiscountUsage(
     }
 
     if (_voucherItem.CouponDiscount.ID > 0) {
-        clsDACResult Result = this->AccountCoupons->callSP(APICALLBOOM_PARAM,
+        clsDACResult Result = this->AccountCoupons->callSP(_apiCallContext,
                                                            "spCoupon_DecreaseStats", {
                                                                { "iDiscountID", _voucherItem.CouponDiscount.ID },
                                                                { "iTotalUsedCount", 1 },
@@ -1592,12 +1592,12 @@ bool baseintfAccountingBasedModule::decreaseDiscountUsage(
 }
 
 bool baseintfAccountingBasedModule::activateUserAsset(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
     return this->AccountUserAssets->Update(
-                        APICALLBOOM_PARAM,
+                        _apiCallContext,
                         /*PK*/ QString::number(_voucherItem.OrderID),
                         TAPI::ORMFields_t({
                             { tblAccountUserAssetsBase::Fields::uas_vchID, _voucherID },
@@ -1610,11 +1610,11 @@ bool baseintfAccountingBasedModule::activateUserAsset(
 }
 
 bool baseintfAccountingBasedModule::removeFromUserAssets(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem
 ) {
     return this->AccountUserAssets->DeleteByPks(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         /*PK*/ QString::number(_voucherItem.OrderID),
         {
             //this is just for make condition safe and strong:
@@ -1625,38 +1625,38 @@ bool baseintfAccountingBasedModule::removeFromUserAssets(
 }
 
 bool baseintfAccountingBasedModule::processVoucherItem(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     quint64 _voucherID
 ) {
-    if (!this->preProcessVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem, _voucherID))
+    if (!this->preProcessVoucherItem(_apiCallContext, _userID, _voucherItem, _voucherID))
         return false;
 
-    if (this->activateUserAsset(APICALLBOOM_PARAM, _voucherItem, _voucherID) == false)
+    if (this->activateUserAsset(_apiCallContext, _voucherItem, _voucherID) == false)
         return false;
 
-    this->increaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
+    this->increaseDiscountUsage(_apiCallContext, _voucherItem);
 
 
     ///@TODO: add prize on item if possible
 
 
-    this->postProcessVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem, _voucherID);
+    this->postProcessVoucherItem(_apiCallContext, _userID, _voucherItem, _voucherID);
 
     return true;
 }
 
 bool baseintfAccountingBasedModule::cancelVoucherItem(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _userID,
     const Targoman::API::AAA::stuVoucherItem &_voucherItem,
     std::function<bool(const QVariantMap &_userAssetInfo)> _fnCheckUserAsset
 ) {
-    if (!this->preCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem))
+    if (!this->preCancelVoucherItem(_apiCallContext, _userID, _voucherItem))
         return false;
 
-    QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap UserAssetInfo = this->AccountUserAssets->makeSelectQuery(_apiCallContext)
                                 .addCols({
                                              tblAccountUserAssetsBase::Fields::uasID,
                                              tblAccountUserAssetsBase::Fields::uas_slbID,
@@ -1672,7 +1672,7 @@ bool baseintfAccountingBasedModule::cancelVoucherItem(
         enuAuditableStatus::toEnum(UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uasStatus, enuAuditableStatus::Pending).toString());
 
     if (UserAssetStatus == TAPI::enuAuditableStatus::Active) {
-        this->decreaseDiscountUsage(APICALLBOOM_PARAM, _voucherItem);
+        this->decreaseDiscountUsage(_apiCallContext, _voucherItem);
 
         ///@TODO: delete prize on item if previously added in processVoucherItem
     }
@@ -1680,10 +1680,10 @@ bool baseintfAccountingBasedModule::cancelVoucherItem(
     quint32 SaleableID = UserAssetInfo.value(tblAccountUserAssetsBase::Fields::uas_slbID).toUInt();
 
     //-- un-reserve saleable & product ------------------------------------
-    this->AccountSaleables->callSP(APICALLBOOM_PARAM,
+    this->AccountSaleables->callSP(_apiCallContext,
                                    "spSaleable_unReserve", {
                                        { "iSaleableID", SaleableID },
-                                       { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                                       { "iUserID", _apiCallContext.getActorID() },
                                        { "iQty", _voucherItem.Qty },
                                    });
 
@@ -1705,9 +1705,9 @@ bool baseintfAccountingBasedModule::cancelVoucherItem(
 //        .execute(_userID);
 
     //-----------------------------------------------------------
-    this->removeFromUserAssets(APICALLBOOM_PARAM, _voucherItem);
+    this->removeFromUserAssets(_apiCallContext, _voucherItem);
 
-    this->postCancelVoucherItem(APICALLBOOM_PARAM, _userID, _voucherItem);
+    this->postCancelVoucherItem(_apiCallContext, _userID, _voucherItem);
 
     return true;
 }
@@ -1733,21 +1733,21 @@ void checkVoucherItemForTrustedActionSanity(stuVoucherItemForTrustedAction &_dat
 }
 
 bool IMPL_REST_POST(baseintfAccountingBasedModule, processVoucherItem, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
     checkVoucherItemForTrustedActionSanity(_data);
 
-    return this->processVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem, _data.VoucherID);
+    return this->processVoucherItem(_apiCallContext, _data.UserID, _data.VoucherItem, _data.VoucherID);
 }
 
 bool IMPL_REST_POST(baseintfAccountingBasedModule, cancelVoucherItem, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     Targoman::API::AAA::stuVoucherItemForTrustedAction _data
 )) {
     checkVoucherItemForTrustedActionSanity(_data);
 
-    return this->cancelVoucherItem(APICALLBOOM_PARAM, _data.UserID, _data.VoucherItem);
+    return this->cancelVoucherItem(_apiCallContext, _data.UserID, _data.VoucherItem);
 }
 
 /***************************************************************************************************\
@@ -1783,7 +1783,7 @@ baseintfAccountingBasedModule_USER::baseintfAccountingBasedModule_USER(
 ) { ; }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule_USER, addToBasket, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL          &_apiCallContext,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
     qreal                                   _qty,
@@ -1795,7 +1795,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     stuBasketItem AssetItem;
 
     return this->internalAddToBasket(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         AssetItem,
         _saleableCode,
         _orderAdditives,
@@ -1842,7 +1842,7 @@ baseintfAccountingBasedModule_API::baseintfAccountingBasedModule_API(
 ) { ; }
 
 Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBasedModule_API, addToBasket, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL          &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL          &_apiCallContext,
     QString                                 _apiToken,
     TAPI::SaleableCode_t                    _saleableCode,
     Targoman::API::AAA::OrderAdditives_t    _orderAdditives,
@@ -1852,7 +1852,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
     TAPI::JSON_t                            _referrerParams,
     Targoman::API::AAA::stuPreVoucher       _lastPreVoucher
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
     stuBasketItem AssetItem;
 
 //    NULLABLE_TYPE(quint64) APITokenID = NULLABLE_NULL_VALUE;
@@ -1880,7 +1880,7 @@ Targoman::API::AAA::stuBasketActionResult IMPL_REST_POST(baseintfAccountingBased
         throw exHTTPInternalServerError("This product IS NOT token base");
 
     return this->internalAddToBasket(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         AssetItem,
         _saleableCode,
         _orderAdditives,

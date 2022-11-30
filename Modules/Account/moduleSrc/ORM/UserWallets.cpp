@@ -46,25 +46,25 @@ UserWallets::UserWallets() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(UserWallets) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID() } }, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _apiCallContext.getActorID() } }, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint64 IMPL_ORMCREATE_USER(UserWallets) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         _createInfo.insert(tblUserWallets::Fields::walDefault, 0);
 
-//        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID() } }, _createInfo);
-        _createInfo.insert(tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID());
+//        this->setSelfFilters({ { tblUserWallets::Fields::wal_usrID, _apiCallContext.getActorID() } }, _createInfo);
+        _createInfo.insert(tblUserWallets::Fields::wal_usrID, _apiCallContext.getActorID());
     }
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(UserWallets) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
@@ -72,9 +72,9 @@ bool IMPL_ORMUPDATE_USER(UserWallets) {
 bool IMPL_ORMDELETE_USER(UserWallets) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblUserWallets::Fields::walDefault, 0);
-        ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID());
+        ExtraFilters.insert(tblUserWallets::Fields::wal_usrID, _apiCallContext.getActorID());
     }
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);
@@ -86,15 +86,15 @@ bool IMPL_ORMDELETE_USER(UserWallets) {
  *     owner
  */
 bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
 //    TAPI::PKsByPath_t _pksByPath
     quint64 _walID
 )) {
-    bool IsPrivileged = Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    bool IsPrivileged = Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spWallet_SetAsDefault", {
-                     { "iUserID", (IsPrivileged ? 0 : APICALLBOOM_PARAM.getActorID()) },
+                     { "iUserID", (IsPrivileged ? 0 : _apiCallContext.getActorID()) },
                      { "iWalID", _walID }, //_pksByPath },
                  });
 
@@ -102,7 +102,7 @@ bool IMPL_REST_UPDATE(UserWallets, setAsDefault, (
 }
 
 bool IMPL_REST_CREATE(UserWallets, transfer, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _destEmailOrMobile,
     quint32 _amount,
     TAPI::MD5_t _pass,
@@ -114,9 +114,9 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 //    QFV.oneOf({QFV.emailNotFake(), QFV.mobile()}).validate(_destEmailOrMobile, "destEmailOrMobile");
     QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spWallet_Transfer", {
-                     { "iFromUserID", APICALLBOOM_PARAM.getActorID() },
+                     { "iFromUserID", _apiCallContext.getActorID() },
                      { "iPass", _pass },
                      { "iSalt", _salt },
                      { "iFromWalID", _fromWalID },
@@ -128,7 +128,7 @@ bool IMPL_REST_CREATE(UserWallets, transfer, (
 }
 
 Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint32 _amount,
     Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
     QString _domain,
@@ -142,7 +142,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
 
     stuVoucher Voucher;
 
-    Voucher.Info.UserID = APICALLBOOM_PARAM.getActorID();
+    Voucher.Info.UserID = _apiCallContext.getActorID();
 //    Voucher.Info.Type = enuPreVoucherType::IncreaseWallet;
     Voucher.Info.Items.append(Targoman::API::AAA::stuVoucherItem(VOUCHER_ITEM_NAME_INC_WALLET, _walID));
     Voucher.Info.Summary = "Increase wallet";
@@ -152,9 +152,9 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
     Voucher.Remained = _amount;
 
     Voucher.ID = Voucher::instance().Create(
-                     APICALLBOOM_PARAM,
+                     _apiCallContext,
                      TAPI::ORMFields_t({
-                                           { tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID() },
+                                           { tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID() },
                                            { tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::Credit },
 //                                           { tblVoucher::Fields::vchDesc, QJsonDocument(Voucher.Info.toJson()).toJson().constData() },
                                            { tblVoucher::Fields::vchDesc, Voucher.Info.toJson().toVariantMap() },
@@ -168,7 +168,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
         } else {
             TAPI::MD5_t PaymentKey;
             Voucher.PaymentLink = Targoman::API::AccountModule::Payment::PaymentLogic::createOnlinePaymentLink(
-                                      APICALLBOOM_PARAM,
+                                      _apiCallContext,
                                       _gatewayType,
                                       _domain,
                                       Voucher.ID,
@@ -181,7 +181,7 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
             Voucher.PaymentKey = PaymentKey;
         }
     } catch (...) {
-        Voucher::instance().Update(APICALLBOOM_PARAM, //SYSTEM_USER_ID,
+        Voucher::instance().Update(_apiCallContext, //SYSTEM_USER_ID,
                      {},
                      TAPI::ORMFields_t({
                         { tblVoucher::Fields::vchStatus, Targoman::API::AAA::enuVoucherStatus::Error }
@@ -196,16 +196,16 @@ Targoman::API::AAA::stuVoucher IMPL_REST_CREATE(UserWallets, requestIncrease, (
 }
 
 quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint64 _amount,
     quint64 _walID,
     const QString &_desc
 )) {
-    return this->callSP(APICALLBOOM_PARAM,
+    return this->callSP(_apiCallContext,
                         "spWithdrawal_Request", {
                             { "iWalletID", _walID },
-                            { "iForUsrID", APICALLBOOM_PARAM.getActorID() },
-                            { "iByUserID", APICALLBOOM_PARAM.getActorID() },
+                            { "iForUsrID", _apiCallContext.getActorID() },
+                            { "iByUserID", _apiCallContext.getActorID() },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
@@ -216,18 +216,18 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawal, (
  *     operator
  */
 quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint64 _amount,
     quint64 _targetUsrID,
     const QString &_desc
 )) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, { "AAA:requestWithdrawal" });
+    Authorization::checkPriv(_apiCallContext, { "AAA:requestWithdrawal" });
 
-    return this->callSP(APICALLBOOM_PARAM,
+    return this->callSP(_apiCallContext,
                         "spWithdrawal_Request", {
                             { "iWalletID", 0 },
                             { "iForUsrID", _targetUsrID },
-                            { "iByUserID", APICALLBOOM_PARAM.getActorID() },
+                            { "iByUserID", _apiCallContext.getActorID() },
                             { "iAmount", _amount },
                             { "iDesc", _desc },
                         }).spDirectOutputs().value("oVoucherID").toULongLong();
@@ -238,15 +238,15 @@ quint64 IMPL_REST_POST(UserWallets, requestWithdrawalFor, (
  *     operator
  */
 bool IMPL_REST_POST(UserWallets, acceptWithdrawal, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint64 _voucherID
 )) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, { "AAA:acceptWithdrawal" });
+    Authorization::checkPriv(_apiCallContext, { "AAA:acceptWithdrawal" });
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spWithdrawal_Accept", {
                      { "iVoucherID", _voucherID },
-                     { "iOperator_usrID", APICALLBOOM_PARAM.getActorID() },
+                     { "iOperator_usrID", _apiCallContext.getActorID() },
                  });
 
     return true;

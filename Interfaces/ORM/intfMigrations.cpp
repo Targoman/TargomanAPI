@@ -44,8 +44,8 @@ intfMigrations::intfMigrations(
     ) { ; }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfMigrations) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, { this->ModuleName + ":Migrations:CRUD~0100" });
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//    Authorization::checkPriv(_apiCallContext, { this->ModuleName + ":Migrations:CRUD~0100" });
+//    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     _orderBy = QStringLiteral("migName, migAppliedAt");
 

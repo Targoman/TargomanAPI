@@ -49,7 +49,7 @@ public:
     static QVariant getPrivValue(const QJsonObject& _privs, const QString& _selector, const QVariant &_defIfNotFoundAndAllIsDefined = {});
 
     static stuActiveAccount processUserObject(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         QJsonObject& _userObj,
         const QStringList& _requiredAccess = {}
 //        const QStringList& _services = {}
@@ -59,7 +59,7 @@ public:
 
 private:
     static stuActiveAccount digestPrivileges(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const QJsonArray &_privs
 //        quint64 _usrID
 //        const QStringList& _services

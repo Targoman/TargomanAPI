@@ -51,7 +51,7 @@ HEADERS += \
     ORM/intfMigrations.h \
     ORM/intfConfigurations.h \
     ORM/intfI18N.h \
-    Server/APICallBoom.h \
+    Server/APICallContext.h \
     Server/ServerCommon.h \
     Server/clsSimpleCrypt.h \
     Server/QJWT.h \
@@ -93,7 +93,7 @@ SOURCES += \
     ORM/intfMigrations.cpp \
     ORM/intfConfigurations.cpp \
     ORM/intfI18N.cpp \
-    Server/APICallBoom.cpp \
+    Server/APICallContext.cpp \
     Server/ServerCommon.cpp \
     Server/clsSimpleCrypt.cpp \
     Server/QJWT.cpp \

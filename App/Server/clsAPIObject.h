@@ -28,7 +28,7 @@
 #include <QMetaMethod>
 
 #include "Interfaces/API/intfPureModule.h"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 
 namespace Targoman::API::Server {
 
@@ -138,7 +138,7 @@ public:
     }
 
     QVariant invoke(
-        INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL *_apiCallContext,
         bool _isUpdateMethod,
         const QStringList& _args,
 //        /*OUT*/ QVariantMap &_responseHeaders,
@@ -151,7 +151,7 @@ public:
     ) const;
 
     void invokeMethod(
-        INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL *_apiCallContext,
         const QVariantList& _arguments,
         QGenericReturnArgument _returnArg
 //        /*OUT*/ QVariantMap &_responseHeaders

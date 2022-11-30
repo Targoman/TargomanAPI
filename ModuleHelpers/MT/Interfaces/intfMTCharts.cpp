@@ -44,10 +44,10 @@ using namespace Targoman::API::ORM;
 namespace Targoman::API::ModuleHelpers::MT::Interfaces {
 
 quint64 checkAPITokenOwner(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     QString             _apiToken
 ) {
-    if (APICALLBOOM_PARAM.jwtActorType() != TAPI::enuTokenActorType::USER)
+    if (_apiCallContext.jwtActorType() != TAPI::enuTokenActorType::USER)
         throw exAuthorization("JWT is not USER type");
 
     _apiToken = _apiToken.trimmed();
@@ -66,7 +66,7 @@ quint64 checkAPITokenOwner(
     if (APITokenJWT.actorType() != TAPI::enuTokenActorType::API)
         throw exAuthorization("Just API Token is allowed");
 
-    if (APITokenJWT.ownerID() != APICALLBOOM_PARAM.getActorID())
+    if (APITokenJWT.ownerID() != _apiCallContext.getActorID())
         throw exAuthorization("API Token is not yours");
 
     quint64 APITokenID = APITokenJWT.actorID();
@@ -322,7 +322,7 @@ const sampleLineData = {
 */
 
 QVariant baseintfMTCharts::getSchema(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     QString _key
 ) {
     ///@TODO: read from tblConfigurations
@@ -334,7 +334,7 @@ QVariant baseintfMTCharts::getSchema(
         I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
     QVariantMap RemainingCreditPercentageMultiProgress = {
-        { "title", I18N->translated(APICALLBOOM_PARAM, "Remaining credit percentage") },
+        { "title", I18N->translated(_apiCallContext, "Remaining credit percentage") },
         { "type", "multiprogress" },
         { "charts", QVariantMap({
               { "%%ITERATION%%", QVariantMap({
@@ -356,7 +356,7 @@ QVariant baseintfMTCharts::getSchema(
     };
 
     QVariantMap RemainingCreditPercentagePieChart = {
-        { "title", I18N->translated(APICALLBOOM_PARAM, "Remaining credit percentage") },
+        { "title", I18N->translated(_apiCallContext, "Remaining credit percentage") },
         { "type", "pie" },
         { "items", QVariantMap({
               { "%%ITERATION%%", QVariantMap({
@@ -375,15 +375,15 @@ QVariant baseintfMTCharts::getSchema(
     };
 
     QVariantMap CreditUsageLineCharts = {
-        { "title", I18N->translated(APICALLBOOM_PARAM, "Credits usages") },
+        { "title", I18N->translated(_apiCallContext, "Credits usages") },
         { "type", "2d" },
         { "axis", QVariantMap({
             { "x", QVariantMap({
-                { "label", I18N->translated(APICALLBOOM_PARAM, "Date") },
+                { "label", I18N->translated(_apiCallContext, "Date") },
                 { "type", "date" },
             }) },
             { "y", QVariantMap({
-                { "label", I18N->translated(APICALLBOOM_PARAM, "Words") },
+                { "label", I18N->translated(_apiCallContext, "Words") },
                 { "type", "int" },
             }) },
         }) },
@@ -405,7 +405,7 @@ QVariant baseintfMTCharts::getSchema(
     };
 
     QVariantMap Charts = {
-        { "title", I18N->translated(APICALLBOOM_PARAM, "MT Charts") },
+        { "title", I18N->translated(_apiCallContext, "MT Charts") },
         { "charts", QVariantList({
               RemainingCreditPercentageMultiProgress,
               RemainingCreditPercentagePieChart,
@@ -671,7 +671,7 @@ const sampleMultipProgressBar = [
 
 //CreditUsageRemained_t, I18NMap
 std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getCreditData(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     QString _key
 ) {
@@ -679,7 +679,7 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getC
 
     //credits
     //------------------------------------------------
-    ORMSelectQuery SelectQuery = ParentModule->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery SelectQuery = ParentModule->accountUserAssets()->makeSelectQuery(_apiCallContext)
                                  .where({ tblAccountUserAssetsBase::Fields::uasStatus,
                                           enuConditionOperator::Equal,
                                           enuAuditableStatus::Active })
@@ -723,7 +723,7 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getC
 
     //usages
     //------------------------------------------------
-    ORMSelectQuery UsageSelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery UsageSelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(_apiCallContext)
                                       .where({ tblAccountAssetUsageBase::Fields::usg_uasID,
                                                enuConditionOperator::In,
                                                AssetsIDs.join(",") })
@@ -758,7 +758,7 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getC
         }
     }
 
-//    QString Schema = getSchema(APICALLBOOM_PARAM, _key).toString();
+//    QString Schema = getSchema(_apiCallContext, _key).toString();
 //    QStringList ChartPaths = extract from schema
 
     QStringList FullKeys;
@@ -794,10 +794,10 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getC
     else
         I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
-    auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
+    auto I18NSelectQuery = I18N->makeSelectQuery(_apiCallContext)
                            .addCol(tblI18N::Fields::i18nKey)
                            .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                               + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
+                                                               + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
                                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
                                                                ")")
                                                        .arg(tblI18N::Name)
@@ -845,12 +845,12 @@ std::tuple<CreditUsageRemained_t, QMap<QString, QString>> baseintfMTCharts::getC
 }
 
 QVariant baseintfMTCharts::remainedDataForProgressBar(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     QString _key
 ) {
     auto [CreditUsageRemained, I18NMap] = getCreditData(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             _actorID,
             _key
             );
@@ -934,12 +934,12 @@ QVariant baseintfMTCharts::remainedDataForProgressBar(
 }
 
 QVariant baseintfMTCharts::remainedDataForPieChart(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     QString _key
 ) {
     auto [CreditUsageRemained, I18NMap] = getCreditData(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             _actorID,
             _key
             );
@@ -969,7 +969,7 @@ QVariant baseintfMTCharts::remainedDataForPieChart(
 }
 
 QVariant baseintfMTCharts::usageDataForLineChart(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     QString _key
 ) {
@@ -978,7 +978,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 
     //usages
     //------------------------------------------------
-    ORMSelectQuery SelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery SelectQuery = ParentModule->accountAssetUsage()->makeSelectQuery(_apiCallContext)
                                  .addCols(ParentModule->accountAssetUsage()->selectableColumnNames())
                                  .innerJoinWith(tblAccountAssetUsageBase::Relation::UserAsset)
                                  .where({ tblAccountUserAssetsBase::Fields::uas_actorID,
@@ -1048,10 +1048,10 @@ QVariant baseintfMTCharts::usageDataForLineChart(
     else
         I18N = dynamic_cast<intfMTModule<true>*>(this->parentModule())->i18n();
 
-    auto I18NSelectQuery = I18N->makeSelectQuery(APICALLBOOM_PARAM)
+    auto I18NSelectQuery = I18N->makeSelectQuery(_apiCallContext)
                            .addCol(tblI18N::Fields::i18nKey)
                            .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                               + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
+                                                               + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblI18N::Name, "", tblI18N::Fields::i18nValue) + ","
                                                                "JSON_UNQUOTE(JSON_EXTRACT(%1.%2, '$.default'))"
                                                                ")")
                                                        .arg(tblI18N::Name)
@@ -1160,7 +1160,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 }
 
 //TAPI::stuTable baseintfMTCharts::charts(
-//    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+//    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
 //    quint64                 _actorID,
 //    quint64                 _pageIndex,
 //    quint16                 _pageSize,
@@ -1229,7 +1229,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 //    //--
 //    QStringList WhereParts;
 
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
 //        WhereParts.append(QString("uas_actorID = %1").arg(_actorID));
 
 //    if (_assetID > 0)
@@ -1260,7 +1260,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 
 //    if (_reportCount) {
 //        QString CountingQueryString = QString("SELECT COUNT(*) AS cnt FROM (\n%1\n) qry").arg(QueryString);
-//        QJsonDocument ResultTotalRows = this->execQuery(APICALLBOOM_PARAM, CountingQueryString).toJson(true);
+//        QJsonDocument ResultTotalRows = this->execQuery(_apiCallContext, CountingQueryString).toJson(true);
 
 //        Result.HasCount = true;
 //        Result.TotalRows = ResultTotalRows
@@ -1277,7 +1277,7 @@ QVariant baseintfMTCharts::usageDataForLineChart(
 //        QueryString += QString("\nLIMIT %1,%2").arg(_pageIndex * _pageSize).arg(_pageSize);
 //    }
 
-//    QJsonDocument ResultRows = this->execQuery(APICALLBOOM_PARAM, QueryString).toJson(false);
+//    QJsonDocument ResultRows = this->execQuery(_apiCallContext, QueryString).toJson(false);
 
 //    Result.Rows = ResultRows
 //                  .toVariant()
@@ -1304,52 +1304,52 @@ baseintfMTCharts_USER::baseintfMTCharts_USER(
 ) { ; }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, schema, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _key
 )) {
-    return getSchema(APICALLBOOM_PARAM, _key);
+    return getSchema(_apiCallContext, _key);
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, remainedDataForProgressBar, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _key
 )) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentActorID = _apiCallContext.getActorID();
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->remainedDataForProgressBar(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, remainedDataForPieChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _key
 )) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentActorID = _apiCallContext.getActorID();
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->remainedDataForPieChart(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_USER, usageDataForLineChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _key
 )) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentActorID = _apiCallContext.getActorID();
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->usageDataForLineChart(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );
@@ -1366,56 +1366,56 @@ baseintfMTCharts_API::baseintfMTCharts_API(
 ) { ; }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, schema, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _apiToken,
     QString _key
 )) {
-    return getSchema(APICALLBOOM_PARAM, _key);
+    return getSchema(_apiCallContext, _key);
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, remainedDataForProgressBar, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL  &_apiCallContext,
     QString _apiToken,
     QString _key
 )) {
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 CurrentActorID = checkAPITokenOwner(_apiCallContext, _apiToken);
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->remainedDataForProgressBar(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, remainedDataForPieChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL  &_apiCallContext,
     QString _apiToken,
     QString _key
 )) {
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 CurrentActorID = checkAPITokenOwner(_apiCallContext, _apiToken);
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->remainedDataForPieChart(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );
 }
 
 QVariant IMPL_REST_GET(baseintfMTCharts_API, usageDataForLineChart, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL  &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL  &_apiCallContext,
     QString _apiToken,
     QString _key
 )) {
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 CurrentActorID = checkAPITokenOwner(_apiCallContext, _apiToken);
 
-//    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+//    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
 
     return this->usageDataForLineChart(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         CurrentActorID,
         _key
     );

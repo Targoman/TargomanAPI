@@ -30,14 +30,14 @@ namespace Targoman::API::ModuleHelpers::MT::Classes {
 using namespace Gateways;
 
 QVariantMap clsEngine::doTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const QString& _text,
     bool _detailed,
     bool _detokinize
 ) {
     intfTranslatorGateway* Gateway = MTHelper::instance().getGateway(this->EngineSpecs.DriverName);
 
-    return Gateway->doTranslation(APICALLBOOM_PARAM,
+    return Gateway->doTranslation(_apiCallContext,
                                   this->EngineSpecs,
                                   _text,
                                   _detailed,

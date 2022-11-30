@@ -48,7 +48,7 @@ using namespace qhttp;
 namespace Targoman::API::ObjectStorage {
 
 QVariantMap ObjectStorageManager::saveFiles(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const quint64 _currentUserID,
     intfUploadFiles &_uploadFiles,
     intfUploadQueue &_uploadQueue,
@@ -60,7 +60,7 @@ QVariantMap ObjectStorageManager::saveFiles(
     foreach (auto _file, _files) {
         try {
             quint64 ID = saveFile(
-                             APICALLBOOM_PARAM,
+                             _apiCallContext,
                              _uploadFiles,
                              _uploadQueue,
                              _uploadGateways,
@@ -76,7 +76,7 @@ QVariantMap ObjectStorageManager::saveFiles(
 }
 
 quint64 ObjectStorageManager::saveFile(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    const quint64 _currentUserID,
     intfUploadFiles &_uploadFiles,
     intfUploadQueue &_uploadQueue,
@@ -101,7 +101,7 @@ quint64 ObjectStorageManager::saveFile(
             throw exTargomanBase("Could not create storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
     }
     //--
-    QString StrOwnerID = QString("user_%1").arg(APICALLBOOM_PARAM.getActorID());
+    QString StrOwnerID = QString("user_%1").arg(_apiCallContext.getActorID());
     if (FullPathDir.exists(StrOwnerID) == false) {
         if (FullPathDir.mkpath(StrOwnerID) == false)
             throw exTargomanBase("Could not create path under storage folder.", ESTATUS_INTERNAL_SERVER_ERROR);
@@ -141,7 +141,7 @@ quint64 ObjectStorageManager::saveFile(
 //    QString FullFileName;
 
     try {
-        QVariantMap SpOutVars = _uploadFiles.callSP(APICALLBOOM_PARAM,
+        QVariantMap SpOutVars = _uploadFiles.callSP(_apiCallContext,
                                                     "spUploadedFile_Create", {
                                                         { "iPath",                  _path },
                                                         { "iOriginalFileName",      _file.Name },
@@ -150,7 +150,7 @@ quint64 ObjectStorageManager::saveFile(
                                                         { "iFileSize",              _file.Size },
                                                         { "iFileType",              FileType },
                                                         { "iMimeType",              MimeType },
-                                                        { "iCreatorUserID",         APICALLBOOM_PARAM.getActorID() },
+                                                        { "iCreatorUserID",         _apiCallContext.getActorID() },
                                                         { "iLockedBy",              ServerCommonConfigs::InstanceID.value() },
                                                     })
                                                     .spDirectOutputs();
@@ -190,7 +190,7 @@ quint64 ObjectStorageManager::saveFile(
 
         if (UploadedFileID > 0) {
             try {
-                _uploadFiles.DeleteByPks(APICALLBOOM_PARAM, QString::number(UploadedFileID));
+                _uploadFiles.DeleteByPks(_apiCallContext, QString::number(UploadedFileID));
             } catch (...) { ; }
         }
 
@@ -205,8 +205,8 @@ quint64 ObjectStorageManager::saveFile(
             QFuture<bool> ret = QtConcurrent::run(
                                     ObjectStorageManager::processQueue,
                                     stuProcessQueueParams(
-                                        APICALLBOOM_PARAM,
-                                        APICALLBOOM_PARAM.getActorID(),
+                                        _apiCallContext,
+                                        _apiCallContext.getActorID(),
                                         _uploadFiles,
                                         _uploadQueue,
                                         _uploadGateways,
@@ -223,12 +223,12 @@ quint64 ObjectStorageManager::saveFile(
     } catch (std::exception &exp) {
         TargomanDebug(5, "ERROR: concurrent run of upload file queue(" << UploadedFileID << "):" << exp.what());
 
-        _uploadQueue.makeUpdateQuery(APICALLBOOM_PARAM)
+        _uploadQueue.makeUpdateQuery(_apiCallContext)
             .set(tblUploadQueue::Fields::uquLockedAt, DBExpression::NIL())
             .set(tblUploadQueue::Fields::uquLockedBy, DBExpression::NIL())
             .where({ tblUploadQueue::Fields::uqu_uflID, enuConditionOperator::Equal, UploadedFileID })
             .andWhere({ tblUploadQueue::Fields::uquLockedAt, enuConditionOperator::NotNull })
-            .execute(APICALLBOOM_PARAM.getActorID())
+            .execute(_apiCallContext.getActorID())
         ;
     }
 
@@ -242,7 +242,7 @@ bool ObjectStorageManager::processQueue(
 
     _processQueueParams.UploadQueue.prepareFiltersList();
 
-    ORMSelectQuery Query = _processQueueParams.UploadQueue.makeSelectQuery(_processQueueParams.APICALLBOOM_PARAM)
+    ORMSelectQuery Query = _processQueueParams.UploadQueue.makeSelectQuery(_processQueueParams._apiCallContext)
         .addCols({
                      //tblUploadQueue::*
                      tblUploadQueue::Fields::uquID,
@@ -356,7 +356,7 @@ bool ObjectStorageManager::processQueue(
     }
 
     if (UploadingQueueIDs.length() && (_processQueueParams.UploadedFileID == 0)) {
-        _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
+        _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams._apiCallContext)
 //                .set(tblUploadQueue::Fields::uquStatus, enuUploadQueueStatus::Uploading)
                 .set(tblUploadQueue::Fields::uquLockedAt, DBExpression::NOW())
                 .set(tblUploadQueue::Fields::uquLockedBy, ServerCommonConfigs::InstanceID.value())
@@ -375,7 +375,7 @@ bool ObjectStorageManager::processQueue(
     foreach (ORM::Private::stuProcessUploadQueueInfo QueueInfo, QueueInfos) {
         bool Stored = false;
         try {
-            _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
+            _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams._apiCallContext)
                     .set(tblUploadQueue::Fields::uquLastTryAt, DBExpression::NOW())
                     .where({ tblUploadQueue::Fields::uquID, enuConditionOperator::Equal, QueueInfo.UploadQueue.uquID })
                     .execute(_processQueueParams.CurrentUserID);
@@ -388,7 +388,7 @@ bool ObjectStorageManager::processQueue(
 //                             << "queueID: " << QueueInfo.UploadQueue.uquID
 //                             );
 
-            Stored = ObjectStorageManager::storeFileToGateway(_processQueueParams.APICALLBOOM_PARAM, QueueInfo);
+            Stored = ObjectStorageManager::storeFileToGateway(_processQueueParams._apiCallContext, QueueInfo);
 
 //            TargomanLogDebug(5, "after ObjectStorageManager::storeFileToGateway");
             /************************************************************************/
@@ -396,7 +396,7 @@ bool ObjectStorageManager::processQueue(
             /************************************************************************/
 
             if (Stored)
-                _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
+                _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams._apiCallContext)
                         .set(tblUploadQueue::Fields::uquLockedAt, DBExpression::NIL())
                         .set(tblUploadQueue::Fields::uquLockedBy, DBExpression::NIL())
                         .set(tblUploadQueue::Fields::uquStoredAt, DBExpression::NOW())
@@ -427,7 +427,7 @@ bool ObjectStorageManager::processQueue(
     //update gateway statictics
     if (GatewayUploadedFileCount.count()) {
         foreach (quint64 GatewayID, GatewayUploadedFileCount.keys()) {
-            _processQueueParams.UploadGateways.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
+            _processQueueParams.UploadGateways.makeUpdateQuery(_processQueueParams._apiCallContext)
                     .increament(tblUploadGateways::Fields::ugwCreatedFilesCount, GatewayUploadedFileCount[GatewayID])
                     .increament(tblUploadGateways::Fields::ugwCreatedFilesSize, GatewayUploadedFileSize[GatewayID])
                     .setPksByPath(GatewayID)
@@ -448,7 +448,7 @@ bool ObjectStorageManager::processQueue(
 //    }
 
     if (FailedQueueIDs.length()) {
-        _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams.APICALLBOOM_PARAM)
+        _processQueueParams.UploadQueue.makeUpdateQuery(_processQueueParams._apiCallContext)
                 .set(tblUploadQueue::Fields::uquLockedAt, DBExpression::NIL())
                 .set(tblUploadQueue::Fields::uquLockedBy, DBExpression::NIL())
                 .set(tblUploadQueue::Fields::uquStatus, enuUploadQueueStatus::Error)
@@ -466,7 +466,7 @@ bool ObjectStorageManager::processQueue(
 }
 
 bool ObjectStorageManager::storeFileToGateway(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const ORM::Private::stuProcessUploadQueueInfo &_queueInfo
 ) {
     switch (NULLABLE_VALUE(_queueInfo.UploadGateways.ugwType)) {
@@ -492,7 +492,7 @@ bool ObjectStorageManager::storeFileToGateway(
 }
 
 void ObjectStorageManager::applyGetFileUrlInQuery(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     ORMSelectQuery &_query,
     Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
     Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
@@ -549,7 +549,7 @@ void ObjectStorageManager::applyGetFileUrlInQuery(
                    enuConditionOperator::Equal,
                    _foreignTableName, _foreignTableUploadedFileIDFieldName })
 
-        .nestedLeftJoin(_uploadQueue.makeSelectQuery(APICALLBOOM_PARAM)
+        .nestedLeftJoin(_uploadQueue.makeSelectQuery(_apiCallContext)
                    .addCol(DBExpression::VALUE(R"(
                                                ROW_NUMBER()
                                                OVER (

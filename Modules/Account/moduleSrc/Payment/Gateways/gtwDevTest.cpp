@@ -34,7 +34,7 @@ TARGOMAN_IMPL_API_PAYMENT_GATEWAY(gtwDevTest)
 
 // [Response, TrackID, PaymentLink]
 std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const ORM::tblPaymentGateways::DTO &_paymentGateway,
     TAPI::MD5_t _paymentKey,
     qint64 _amount,
@@ -50,7 +50,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 #ifdef QT_DEBUG
     QString TrackID = "track_" + _paymentKey;
 
-    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString HostPort = _apiCallContext.hostAndPort();
     QString ServerUrl = QString("https://%1%2")
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);
@@ -75,7 +75,7 @@ std::tuple<QString, QString, QString> gtwDevTest::prepareAndRequest(
 
 // [Response, refNumber]
 std::tuple<QString, QString> gtwDevTest::verifyAndSettle(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     Q_DECL_UNUSED const ORM::tblPaymentGateways::DTO &_paymentGateway,
     Q_DECL_UNUSED const ORM::tblOnlinePayments::DTO &_onlinePaymentDTO,
     Q_DECL_UNUSED const TAPI::JSON_t &_pgResponse

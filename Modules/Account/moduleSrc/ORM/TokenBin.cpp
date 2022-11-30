@@ -41,24 +41,24 @@ TokenBin::TokenBin() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(TokenBin) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 QVariantList IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     const quint64 _lastFetchedID
 )) {
     //1: delete expired
-    this->makeDeleteQuery(APICALLBOOM_PARAM)
+    this->makeDeleteQuery(_apiCallContext)
             .where({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::NotNull })
             .andWhere({ tblTokenBin::Fields::tkbDueDateTime, enuConditionOperator::Less, DBExpression::NOW() })
             .execute(1, {}, true)
             ;
 
     //2: fetch
-    ORMSelectQuery Query = this->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery Query = this->makeSelectQuery(_apiCallContext)
                            .addCols({
                                         tblTokenBin::Fields::tkbID,
                                         tblTokenBin::Fields::tkbTokenMD5,
@@ -74,7 +74,7 @@ QVariantList IMPL_REST_POST(TokenBin, removeExpiredAndFetchNew, (
 
     auto Ret = Query.all();
 
-    bool CompactList = APICALLBOOM_PARAM.requestHeader("compact-list", false).toBool();
+    bool CompactList = _apiCallContext.requestHeader("compact-list", false).toBool();
     return Ret.toVariant(CompactList).toList();
 }
 

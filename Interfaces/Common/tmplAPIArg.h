@@ -27,7 +27,7 @@
 //#include "Interfaces/Common/GenericTypes.h"
 #include "Interfaces/Common/HTTPExceptions.hpp"
 #include "Interfaces/Common/intfAPIArgManipulator.h"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 #include "libTargomanCommon/Logger.h"
 #include "libTargomanCommon/CmdIO.h"
 
@@ -99,7 +99,7 @@ public:
 
     inline QVariant invokeMethod(
             const intfAPIObject *_apiObject,
-            INTFAPICALLBOOM_DECL *APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL *_apiCallContext,
             const QVariantList& _arguments
 //            /*OUT*/ QVariantMap &_responseHeaders
         ) final
@@ -107,7 +107,7 @@ public:
         _itmplType Result;
 
         _apiObject->invokeMethod(
-                    APICALLBOOM_PARAM,
+                    _apiCallContext,
                     _arguments,
                     QReturnArgument<_itmplType>(this->RealTypeName, Result)
 //                    _responseHeaders

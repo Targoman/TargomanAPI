@@ -119,7 +119,7 @@ private slots:
     bool REST_UPDATE(
         setAsDefault,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::PKsByPath_t _pksByPath
         ),
         "change default Currency"

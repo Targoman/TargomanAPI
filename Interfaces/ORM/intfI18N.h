@@ -77,7 +77,7 @@ public:
 
 public:
     QString translated(
-            INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             const QString &_key);
 
 private slots:

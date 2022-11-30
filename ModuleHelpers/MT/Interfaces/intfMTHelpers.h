@@ -418,15 +418,15 @@ class intfMTHelperORMBase
 {
 public:
     typedef typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::USER,
-                             APICALLBOOM_TYPE_JWT_USER_DECL,
-                             APICALLBOOM_TYPE_JWT_API_DECL>::type
-    APICALLBOOM_TYPE_JWT_TOKENBASE_DECL;
+                             APICALLCONTEXT_TYPE_JWT_USER_DECL,
+                             APICALLCONTEXT_TYPE_JWT_API_DECL>::type
+    APICALLCONTEXT_TYPE_JWT_TOKENBASE_DECL;
 //    MT_JWT_TYPE_DECL;
 
     typedef Q_DECL_UNUSED typename std::conditional<_itmplTokenActorType == TAPI::enuTokenActorType::USER,
-                             APICALLBOOM_TYPE_JWT_USER_DECL,
-                             APICALLBOOM_TYPE_JWT_API_DECL>::type
-    APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL;
+                             APICALLCONTEXT_TYPE_JWT_USER_DECL,
+                             APICALLCONTEXT_TYPE_JWT_API_DECL>::type
+    APICALLCONTEXT_TYPE_JWT_TOKENBASE_IMPL;
 //    MT_JWT_TYPE_IMPL;
 
 public:

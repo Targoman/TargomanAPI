@@ -92,7 +92,7 @@ intfMTModule<_itmplIsTokenBase>::intfMTModule(
 /*********************************************************************/
 template <bool _itmplIsTokenBase>
 QVariantMap intfMTModule<_itmplIsTokenBase>::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     Q_DECL_UNUSED const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -202,7 +202,7 @@ NULLABLE_TYPE(stuAssetCredit) extractCreditValue(
 
 template <bool _itmplIsTokenBase>
 stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInfo(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
@@ -230,7 +230,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 
     QString FullCreditKey = QString("%1::%2").arg(_action/*MTAction::TRANSLATE*/).arg(CreditKey);
 
-    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(APICALLBOOM_PARAM)
+    ORMSelectQuery SelectQuery = this->accountUserAssets()->makeSelectQuery(_apiCallContext)
                                  .where({ tblAccountUserAssetsBase::Fields::uasStatus,
                                           enuConditionOperator::Equal,
                                           enuAuditableStatus::Active })
@@ -239,7 +239,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 
     SelectQuery
         //total:
-        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(_apiCallContext, "", true, false)
                         .where({ tblAccountAssetUsageBase::Fields::usgResolution,
                                  enuConditionOperator::Equal,
                                  Targoman::API::AAA::enuAssetUsageResolution::Total
@@ -262,7 +262,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
                 )
 
         //day:
-        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+        .nestedLeftJoin(this->AccountAssetUsage->makeSelectQuery(_apiCallContext, "", true, false)
                         .addCol(tblAccountAssetUsageBase::Fields::usg_uasID)
                         .addCol(enuAggregation::SUM,
                                 tblAccountAssetUsageMTBase::ExtraFields::usgUsedTotalWords,
@@ -424,7 +424,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
         AssetItem.Digested.Limits.insert(FullCreditKey, Usage);
 
         //-- --------------------------------
-        this->digestPrivs(APICALLBOOM_PARAM, AssetItem);
+        this->digestPrivs(_apiCallContext, AssetItem);
 
         //-- --------------------------------
         ActiveCredits.append(AssetItem);
@@ -444,7 +444,7 @@ stuServiceCreditsInfo intfMTModule<_itmplIsTokenBase>::retrieveServiceCreditsInf
 
 template <bool _itmplIsTokenBase>
 void intfMTModule<_itmplIsTokenBase>::breakCredit(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const stuAssetItem &_assetItem,
     Q_DECL_UNUSED const QString &_action
 ) {
@@ -486,7 +486,7 @@ void intfMTModule<_itmplIsTokenBase>::breakCredit(
 //        return;
 
     //-------------
-    ORMUpdateQuery UpdateQuery = this->accountUserAssets()->makeUpdateQuery(APICALLBOOM_PARAM);
+    ORMUpdateQuery UpdateQuery = this->accountUserAssets()->makeUpdateQuery(_apiCallContext);
 
     UpdateQuery
             .set(tblAccountUserAssetsBase::Fields::uasValidFromDate, DBExpression::NIL())
@@ -496,12 +496,12 @@ void intfMTModule<_itmplIsTokenBase>::breakCredit(
             .where({ tblAccountUserAssetsBase::Fields::uasID, enuConditionOperator::Equal, AccountUserAssetsMTBaseDTO.uasID })
             ;
 
-    UpdateQuery.execute(APICALLBOOM_PARAM.getActorID());
+    UpdateQuery.execute(_apiCallContext.getActorID());
 }
 
 template <bool _itmplIsTokenBase>
 bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const UsageLimits_t &_limits
 ) const {
 
@@ -527,7 +527,7 @@ bool intfMTModule<_itmplIsTokenBase>::isUnlimited(
 
 template <bool _itmplIsTokenBase>
 bool intfMTModule<_itmplIsTokenBase>::isEmpty(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const UsageLimits_t &_limits
 ) const {
 
@@ -553,7 +553,7 @@ bool intfMTModule<_itmplIsTokenBase>::isEmpty(
 
 template <bool _itmplIsTokenBase>
 void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     stuActiveCredit &_activeCredit,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
@@ -581,10 +581,10 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
             .arg(tblAccountUserAssetsBase::Name)
         ;
 
-        clsDACResult Result = this->accountUserAssets()->execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result = this->accountUserAssets()->execQuery(_apiCallContext,
                                                                    QueryString,
                                                                    {
-                                                                       APICALLBOOM_PARAM.getActorID(SYSTEM_USER_ID),
+                                                                       _apiCallContext.getActorID(SYSTEM_USER_ID),
                                                                        _activeCredit.Credit.UserAsset.uasID
                                                                    });
     }
@@ -632,7 +632,7 @@ void intfMTModule<_itmplIsTokenBase>::saveAccountUsage(
         };
 
         foreach (QChar Resolution, Resolutions) {
-            clsDACResult Result = this->accountAssetUsage()->execQuery(APICALLBOOM_PARAM,
+            clsDACResult Result = this->accountAssetUsage()->execQuery(_apiCallContext,
                                                                        QueryString,
                                                                        {
                                                                            _activeCredit.Credit.UserAsset.uasID,

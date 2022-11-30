@@ -43,7 +43,7 @@ private slots:
     TAPI::RawData_t EXREST_GET_OR_POST(
         openAPI_json,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             const QString &_module = {}
         ),
         "",
@@ -56,7 +56,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         openAPI_yaml,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext
         ),
         "",
         {
@@ -70,7 +70,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         swaggerui,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext
         ),
         "",
         {
@@ -81,7 +81,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         stats_json,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             bool _full = false
         ),
         "",
@@ -94,7 +94,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         version,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext
         ),
         "",
         {
@@ -105,7 +105,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         ping,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext
         ),
         "",
         {
@@ -116,7 +116,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
         pinguser,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext
         ),
         "",
         {
@@ -127,7 +127,7 @@ private slots:
     QVariant EXREST_GET_OR_POST(
          pingapi,
          (
-             APICALLBOOM_TYPE_JWT_API_DECL &APICALLBOOM_PARAM
+             APICALLCONTEXT_TYPE_JWT_API_DECL &_apiCallContext
          ),
          "",
          {

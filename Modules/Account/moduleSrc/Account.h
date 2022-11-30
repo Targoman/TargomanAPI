@@ -78,7 +78,7 @@ public:
 private:
 //    TAPI::EncodedJWT_t createLoginJWT(bool _remember, const QString& _login, const QString &_ssid, const QString& _services);
     TAPI::EncodedJWT_t createJWTAndSaveToActiveSession(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const QString _login,
         const stuActiveAccount& _activeAccount
 //        const QString& _services = {}
@@ -91,7 +91,7 @@ private slots:
     QString REST_GET_OR_POST(
         normalizePhoneNumber,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _phone,
             QString _country
         ),
@@ -101,7 +101,7 @@ private slots:
     QVariantMap REST_PUT(
         signup,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _role = "BaseUser",
@@ -118,7 +118,7 @@ private slots:
     /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         approveEmail,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _email,
             TAPI::MD5_t _code,
             bool _autoLogin = false,
@@ -133,7 +133,7 @@ private slots:
     /*TAPI::EncodedJWT_t*/QVariantMap REST_POST(
         approveMobile,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             TAPI::Mobile_t _mobile,
             quint32 _code,
             bool _autoLogin = false,
@@ -148,7 +148,7 @@ private slots:
     /*TAPI::EncodedJWT_t*/QVariantMap REST_GET_OR_POST(
         login,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile,
             TAPI::MD5_t _pass,
             QString _salt,
@@ -164,7 +164,7 @@ private slots:
     bool REST_GET_OR_POST(
         loginByMobileOnly,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             TAPI::Mobile_t _mobile,
             bool _signupIfNotExists = false,
             QString _signupRole = "BaseUser",
@@ -180,7 +180,7 @@ private slots:
     bool REST_GET_OR_POST(
         resendApprovalCode,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile
         ),
         "Recreate (if expired) approval code and resend last valid code to the email or mobile."
@@ -189,7 +189,7 @@ private slots:
 //    bool REST_PUT(
 //        requestMobileVerifyCode,
 //        (
-//            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
 //            TAPI::Mobile_t _mobile
 //        ),
 //        "Send verification code for provided mobile."
@@ -198,7 +198,7 @@ private slots:
 //    TAPI::EncodedJWT_t REST_PUT(
 //        verifyLoginByMobileCode,
 //        (
-//            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
 //            TAPI::Mobile_t _mobile,
 //            quint32 _code,
 //            TAPI::CommaSeparatedStringList_t _services = {},
@@ -212,7 +212,7 @@ private slots:
     /*TAPI::EncodedJWT_t*/QVariantMap REST_GET_OR_POST(
         loginByOAuth,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             TAPI::enuOAuthType::Type _type,
             QString _oAuthToken,
 //            TAPI::CommaSeparatedStringList_t _services = {},
@@ -225,7 +225,7 @@ private slots:
 //    Targoman::API::AccountModule::stuMultiJWT REST_GET_OR_POST(
 //        refreshJWT,
 //        (
-//            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
 //            TAPI::JWT_t _loginJWT,
 //            QString _services = {}
 //        ),
@@ -235,7 +235,7 @@ private slots:
     bool REST_GET_OR_POST(
         logout,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext
         ),
         "Logout logged in user"
     )
@@ -243,7 +243,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePass,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::MD5_t _newPass,
             TAPI::MD5_t _oldPass = {},
             QString     _oldPassSalt = {}
@@ -255,7 +255,7 @@ private slots:
     bool REST_GET_OR_POST(
         createForgotPasswordLink,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile
         ),
         "Create a forgot password request returning a UUID for the request"
@@ -264,7 +264,7 @@ private slots:
     bool REST_GET_OR_POST(
         changePassByUUID,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile,
             QString _uuid,
             TAPI::MD5_t _newPass
@@ -277,20 +277,20 @@ private slots:
     \*****************************************************************/
 private:
     Targoman::API::AAA::stuVoucher processVoucher(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        quint64 _userID,
         quint64 _voucherID
     );
 
     void tryCancelVoucher(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        quint64 _userID,
         quint64 _voucherID,
         bool _setAsError = false
     );
 
 //    Targoman::API::AAA::stuVoucher payAndProcessBasket(
-//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+//        APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
 //        QString _domain,
 //        quint64 _voucherID,
 //        NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
@@ -303,7 +303,7 @@ private slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        mergeBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
 //        ),
 //        "Merge given pre-Voucher and user's new asset items by service"
@@ -312,7 +312,7 @@ private slots:
 //    Targoman::API::AAA::stuPreVoucher REST_POST(
 //        getBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext
 //        ),
 //        "Fetch and make current user's pre-Voucher"
 //    )
@@ -320,7 +320,7 @@ private slots:
 //    bool REST_POST(
 //        deleteBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            Targoman::API::AAA::stuPreVoucher _lastPreVoucher
 //        ),
 //        "Remove all items from pre-Voucher"
@@ -333,7 +333,7 @@ private slots:
     bool REST_GET(
         checkBasketVoucherExpirity,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext
         ),
         "Check Vouchers for expirity. called by garbage collector"
     )
@@ -341,7 +341,7 @@ private slots:
     bool REST_POST(
         cancelVoucher,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _voucherID
         ),
         "Cancel Voucher"
@@ -350,7 +350,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         finalizeBasket,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             Targoman::API::AAA::stuPreVoucher _preVoucher,
             QString _domain,
             Targoman::API::AccountModule::enuPaymentGatewayType::Type _gatewayType,
@@ -369,7 +369,7 @@ private slots:
 //    Targoman::API::AAA::stuVoucher REST_POST(
 //        payForBasket,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            QString _domain,
 //            quint64 _voucherID,
 //            NULLABLE_TYPE(Targoman::API::AccountModule::enuPaymentGatewayType::Type) _gatewayType = NULLABLE_NULL_VALUE,
@@ -386,7 +386,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOnlinePayment,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _paymentKey,
 //            QString _domain,
             TAPI::JSON_t _pgResponse
@@ -397,7 +397,7 @@ private slots:
     quint64 REST_POST(
         claimOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _bank,
             QString _receiptCode,
             TAPI::Date_t _receiptDate,
@@ -414,7 +414,7 @@ private slots:
     bool REST_POST(
         rejectOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _offlinePaymentID
         ),
         "reject offline payment claim"
@@ -423,7 +423,7 @@ private slots:
     Targoman::API::AAA::stuVoucher REST_POST(
         approveOfflinePayment,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _offlinePaymentID
         ),
         "approve Voucher by offline payment"
@@ -432,7 +432,7 @@ private slots:
 //    Targoman::API::AAA::stuVoucher EXREST_POST(
 //        approveOfflinePayment_withBankInfo,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            quint64 _vchID,
 //            const QString& _bank,
 //            const QString& _receiptCode,
@@ -453,7 +453,7 @@ private slots:
     quint64 REST_POST(
         addPrizeTo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _targetUsrID,
             quint64 _amount,
             QString _desc
@@ -464,7 +464,7 @@ private slots:
     quint64 REST_POST(
         addIncomeTo,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _targetUsrID,
             quint64 _amount,
             QString _desc
@@ -475,7 +475,7 @@ private slots:
     bool REST_POST(
         checkVoucherTTL,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint64 _voucherID
         ),
         "Check voucher and items for ttl"
@@ -485,7 +485,7 @@ private slots:
     QVariant REST_POST(
         fixtureGetLastForgotPasswordUUIDAndMakeAsSent,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile
         ),
         "fixture: Get Last Forgot Password UUID And Make As Sent"
@@ -494,7 +494,7 @@ private slots:
     QVariant REST_POST(
         fixtureGetLastApprovalRequestCodeAndMakeAsSent,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _emailOrMobile
         ),
         "fixture: Get Last Approval Request Code And Make As Sent"
@@ -503,7 +503,7 @@ private slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -512,7 +512,7 @@ private slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _random = {}
         ),
         "Cleanup sample data"
@@ -520,7 +520,7 @@ private slots:
     bool REST_POST(
         fixtureApproveEmail,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _email
         ),
         "Approve Email Address directly"
@@ -528,7 +528,7 @@ private slots:
     bool REST_POST(
         fixtureApproveMobile,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             TAPI::Mobile_t _mobile
         ),
         "Approve Mobile directly"

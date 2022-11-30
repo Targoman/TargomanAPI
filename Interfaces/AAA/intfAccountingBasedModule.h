@@ -58,48 +58,48 @@ public:
     virtual bool IsTokenBase() = 0;
 
 //    virtual stuActiveCredit activeAccountObject(
-//        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+//        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        quint64 _actorID);
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         const ServiceUsage_t &_requestedUsage = {},
         const QString &_action = {}
     ) = 0;
 
     virtual void breakCredit(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const stuAssetItem &_assetItem,
         const QString &_action = {}
     ) = 0;
 
     virtual bool isUnlimited(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const UsageLimits_t &_limits
     ) const = 0;
 
     virtual bool isEmpty(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const UsageLimits_t &_limits
     ) const = 0;
 
     stuActiveCredit findBestMatchedCredit(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         const ServiceUsage_t &_requestedUsage = {},
         const QString &_action = {});
 
 public:
     stuActiveCredit checkUsageIsAllowed(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
     );
 
     virtual void saveAccountUsage(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         stuActiveCredit &_activeCredit,
         const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
@@ -108,70 +108,70 @@ public:
 protected:
     //-- used by addToBasket: ----------------------------------------
     virtual void processItemForBasket(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void digestPrivs(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuAssetItem      &_assetItem
 //        const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void computeAdditives(
-                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL  &_apiCallContext,
         Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
     virtual void computeReferrer(
-                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL  &_apiCallContext,
         Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { ; }
 
     virtual void computeSystemDiscount(
-        INTFAPICALLBOOM_DECL            &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL            &_apiCallContext,
         INOUT stuBasketItem             &_basketItem,
         const stuPendingSystemDiscount  &_pendingSystemDiscount = {},
         const stuVoucherItem            *_oldVoucherItem = nullptr
     );
 
     virtual void computeCouponDiscount(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
-                      INTFAPICALLBOOM_IMPL  &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL  &_apiCallContext,
         Q_DECL_UNUSED INOUT stuBasketItem   &_basketItem,
         Q_DECL_UNUSED const stuVoucherItem  *_oldVoucherItem = nullptr
     ) { return {}; }
 
     //-- used by processVoucherItem and cancelVoucherItem: ----------------------------------------
     virtual bool increaseDiscountUsage(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
     virtual bool decreaseDiscountUsage(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
     virtual bool activateUserAsset(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     );
     virtual bool removeFromUserAssets(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem
     );
 
     //-- processVoucherItem: ----------------------------------------
     virtual bool preProcessVoucherItem(
-                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         Q_DECL_UNUSED quint64 _userID,
         Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         Q_DECL_UNUSED quint64 _voucherID
@@ -179,13 +179,13 @@ protected:
         return true;
     };
     virtual bool processVoucherItem(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         quint64 _voucherID
     );
     virtual bool postProcessVoucherItem(
-                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         Q_DECL_UNUSED quint64 _userID,
         Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         Q_DECL_UNUSED quint64 _voucherID
@@ -195,20 +195,20 @@ protected:
 
     //-- cancelVoucherItem: ----------------------------------------
     virtual bool preCancelVoucherItem(
-                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         Q_DECL_UNUSED quint64 _userID,
         Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
         return true;
     };
     virtual bool cancelVoucherItem(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _userID,
         const Targoman::API::AAA::stuVoucherItem &_voucherItem,
         std::function<bool(const QVariantMap &_userAssetInfo)> _fnCheckUserAsset = nullptr
     );
     virtual bool postCancelVoucherItem(
-                      INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+                      INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         Q_DECL_UNUSED quint64 _userID,
         Q_DECL_UNUSED const Targoman::API::AAA::stuVoucherItem &_voucherItem
     ) {
@@ -218,7 +218,7 @@ protected:
 
 protected:
     Targoman::API::AAA::stuBasketActionResult internalAddToBasket(
-        APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+        APICALLCONTEXT_TYPE_JWT_USER_DECL          &_apiCallContext,
         stuBasketItem                           &_basketItem,
         TAPI::SaleableCode_t                    &_saleableCode,
         Targoman::API::AAA::OrderAdditives_t    &_orderAdditives,
@@ -232,7 +232,7 @@ protected:
     );
 
     Targoman::API::AAA::stuBasketActionResult internalUpdateBasketItem(
-        INTFAPICALLBOOM_DECL                &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL                &_apiCallContext,
         Targoman::API::AAA::stuPreVoucher   &_lastPreVoucher,
         stuVoucherItem                      &_voucherItem,
         qreal                               _newQty,
@@ -243,7 +243,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         updateBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL      &_apiCallContext,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID,
             qreal                               _newQty,
@@ -255,7 +255,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         removeBasketItem,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL      &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL      &_apiCallContext,
             Targoman::API::AAA::stuPreVoucher   _lastPreVoucher,
             TAPI::MD5_t                         _itemUUID
         ),
@@ -267,7 +267,7 @@ protected slots:
     bool REST_POST(
         processVoucherItem,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Process voucher item"
@@ -276,7 +276,7 @@ protected slots:
     bool REST_POST(
         cancelVoucherItem,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             Targoman::API::AAA::stuVoucherItemForTrustedAction _data
         ),
         "Cancel voucher item"
@@ -340,7 +340,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL          &_apiCallContext,
             TAPI::SaleableCode_t                    _saleableCode,
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},
             qreal                                   _qty = 1,
@@ -383,7 +383,7 @@ protected slots:
     Targoman::API::AAA::stuBasketActionResult REST_POST(
         addToBasket,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL          &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL          &_apiCallContext,
             QString                                 _apiToken,
             TAPI::SaleableCode_t                    _saleableCode,
             Targoman::API::AAA::OrderAdditives_t    _orderAdditives = {},

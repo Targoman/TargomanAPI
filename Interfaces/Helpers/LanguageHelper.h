@@ -25,7 +25,7 @@
 #define TARGOMAN_API_LANGUAGEHELPER_H
 
 #include <QString>
-#include "../Server/APICallBoom.h"
+#include "../Server/APICallContext.h"
 
 namespace Targoman::API::Helpers {
 
@@ -35,7 +35,7 @@ class LanguageHelper
 {
 public:
     static QString getI18NClauseForCoalesce(
-        INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_IMPL &_apiCallContext,
         const QString &_i18nTableName,
         const QString &_fieldName,
         const QString &_i18nDataFieldName = "i18nData");

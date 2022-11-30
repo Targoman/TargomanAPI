@@ -99,10 +99,10 @@ namespace Targoman::API::AAA {
 //constexpr char ASA_LIMITSONPARENT[] = "LP";
 
 quint64 checkAPITokenOwner(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     QString             _apiToken
 ) {
-    if (APICALLBOOM_PARAM.jwtActorType() != TAPI::enuTokenActorType::USER)
+    if (_apiCallContext.jwtActorType() != TAPI::enuTokenActorType::USER)
         throw exAuthorization("JWT is not USER type");
 
     _apiToken = _apiToken.trimmed();
@@ -121,7 +121,7 @@ quint64 checkAPITokenOwner(
     if (APITokenJWT.actorType() != TAPI::enuTokenActorType::API)
         throw exAuthorization("Just API Token is allowed");
 
-    if (APITokenJWT.ownerID() != APICALLBOOM_PARAM.getActorID())
+    if (APITokenJWT.ownerID() != _apiCallContext.getActorID())
         throw exAuthorization("API Token is not yours");
 
     quint64 APITokenID = APITokenJWT.actorID();
@@ -172,11 +172,11 @@ intfAccountUnits::intfAccountUnits(
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
 
-ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
     intfAccountUnitsI18N::MyInstance[this->Schema]->prepareFiltersList();
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate)
         .addCols(this->selectableColumnNames())
     ;
 
@@ -187,7 +187,7 @@ ORMSelectQuery intfAccountUnits::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBO
                         })
             .leftJoin(tblAccountUnitsI18NBase::Name)
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblAccountUnitsI18NBase::Name, "untName") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblAccountUnitsI18NBase::Name, "untName") + ","
                                                 "JSON_UNQUOTE(JSON_EXTRACT(%1.i18nData, '$.untName.default')),"
                                                 "%2.untName)")
                                         .arg(tblAccountUnitsI18NBase::Name)
@@ -212,19 +212,19 @@ QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountUnits) {
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountUnits) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountUnits) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountUnits) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -273,10 +273,10 @@ intfAccountProducts::intfAccountProducts(
     // , intfAccountORMBase<_itmplIsTokenBase>()
 { ; }
 
-ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
     intfAccountProductsI18N::MyInstance[this->Schema]->prepareFiltersList();
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate)
         .addCols(this->selectableColumnNames())
         .inlineInnerJoin(tblAccountUnitsBase::Name/*, tblAccountUnitsBase::Name*/, clsCondition(
                          tblAccountUnitsBase::Name,
@@ -297,14 +297,14 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
                         })
             .leftJoin(tblAccountProductsI18NBase::Name)
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblAccountProductsI18NBase::Name, "prdName") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblAccountProductsI18NBase::Name, "prdName") + ","
                                                 "%1.prdName)")
                                         .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
                                         ),
                     tblAccountProductsBase::Fields::prdName
                     )
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblAccountProductsI18NBase::Name, "prdDesc") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblAccountProductsI18NBase::Name, "prdDesc") + ","
                                                 "%1.prdDesc)")
                                         .arg(_alias.isEmpty() ? tblAccountProductsBase::Name : _alias)
                                         ),
@@ -322,7 +322,7 @@ ORMSelectQuery intfAccountProducts::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICAL
 }
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountProducts) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     constexpr quint16 CACHE_TIME = 0; //15 * 60;
 
@@ -330,19 +330,19 @@ QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountProducts) {
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountProducts) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountProducts) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountProducts) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -391,10 +391,10 @@ intfAccountSaleables::intfAccountSaleables(
     intfAccountSaleables::MyInstance[_schema] = this;
 }
 
-ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
     intfAccountSaleablesI18N::MyInstance[this->Schema]->prepareFiltersList();
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate)
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate)
         .addCols(this->selectableColumnNames())
     ;
 
@@ -406,14 +406,14 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
                         })
             .leftJoin(tblAccountSaleablesI18NBase::Name)
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblAccountSaleablesI18NBase::Name, "slbName") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblAccountSaleablesI18NBase::Name, "slbName") + ","
                                                 "%1.slbName)")
                                         .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
                                         ),
                     tblAccountSaleablesBase::Fields::slbName
                     )
             .addCol(DBExpression::VALUE(QString("COALESCE("
-                                                + LanguageHelper::getI18NClauseForCoalesce(APICALLBOOM_PARAM, tblAccountSaleablesI18NBase::Name, "slbDesc") + ","
+                                                + LanguageHelper::getI18NClauseForCoalesce(_apiCallContext, tblAccountSaleablesI18NBase::Name, "slbDesc") + ","
                                                 "%1.slbDesc)")
                                         .arg(_alias.isEmpty() ? tblAccountSaleablesBase::Name : _alias)
                                         ),
@@ -432,7 +432,7 @@ ORMSelectQuery intfAccountSaleables::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICA
 
 QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleables) {
     clsCondition ExtraFilters = {};
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         ExtraFilters
             .setCond(clsCondition({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::Null })
                 .orCond({ tblAccountSaleablesBase::Fields::slbAvailableFromDate, enuConditionOperator::LessEqual,
@@ -475,19 +475,19 @@ QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleables) {
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountSaleables) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountSaleables) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountSaleables) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -519,19 +519,19 @@ QVariant IMPL_ORMGET_ANONYMOUSE(intfAccountSaleablesFiles) {
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountSaleablesFiles) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountSaleablesFiles) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountSaleablesFiles) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -555,7 +555,7 @@ baseintfAccountUserAssets::baseintfAccountUserAssets(
 { ; }
 
 bool IMPL_REST_UPDATE(baseintfAccountUserAssets, setAsPrefered, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::PKsByPath_t _pksByPath
 )) {
     bool Ok;
@@ -563,16 +563,16 @@ bool IMPL_REST_UPDATE(baseintfAccountUserAssets, setAsPrefered, (
     if (!Ok || !UserPackageID )
         throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spUserAsset_SetAsPrefered", {
-                     { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                     { "iUserID", _apiCallContext.getActorID() },
                      { "iUASID",  UserPackageID },
                  });
     return false;
 }
 
 bool IMPL_REST_UPDATE(baseintfAccountUserAssets, disablePackage, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::PKsByPath_t _pksByPath
 )) {
     bool Ok;
@@ -580,8 +580,8 @@ bool IMPL_REST_UPDATE(baseintfAccountUserAssets, disablePackage, (
     if (!Ok || !UserPackageID )
         throw exHTTPBadRequest("Invalid UserPackageID provided");
 
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
-    /*return this->update(APICALLBOOM_PARAM.getActorID(), {
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    /*return this->update(_apiCallContext.getActorID(), {
                               {tblAccountUserAssets::Fields::uasID, UserPackageID}
                           }, {
                               {tblAccountUserAssets::Fields::uasStatus, TAPI::enuAuditableStatus::Banned},
@@ -607,8 +607,8 @@ baseintfAccountUserAssets_USER::baseintfAccountUserAssets_USER(
 { ; }
 
 QVariant IMPL_ORMGET_USER(baseintfAccountUserAssets_USER) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APICALLBOOM_PARAM.getActorID() }}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, _apiCallContext.getActorID() }}, _filters);
 
     auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
         if (_cols.isEmpty())
@@ -647,7 +647,7 @@ baseintfAccountUserAssets_API::baseintfAccountUserAssets_API(
 { ; }
 
 QVariant IMPL_REST_GET(baseintfAccountUserAssets_API, , (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString             _apiToken,
     TAPI::PKsByPath_t   _pksByPath,
     quint64             _pageIndex,
@@ -660,9 +660,9 @@ QVariant IMPL_REST_GET(baseintfAccountUserAssets_API, , (
 )) {
     bool _translate = true;
 
-    quint64 APITokenID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 APITokenID = checkAPITokenOwner(_apiCallContext, _apiToken);
 
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
         this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, APITokenID }}, _filters);
 
     auto fnTouchQuery = [this, &_cols](ORMSelectQuery &_query) {
@@ -699,9 +699,9 @@ intfAccountUserAssets<_itmplIsTokenBase>::intfAccountUserAssets(
 { ; }
 
 template <bool _itmplIsTokenBase>
-ORMSelectQuery intfAccountUserAssets<_itmplIsTokenBase>::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery intfAccountUserAssets<_itmplIsTokenBase>::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate);
 
     if (_isRoot) {
         Query.addCols(this->selectableColumnNames())
@@ -714,7 +714,7 @@ ORMSelectQuery intfAccountUserAssets<_itmplIsTokenBase>::makeSelectQuery(INTFAPI
 //                      ) tmpNeededFiles
 //                   ON tmpNeededFiles.slf_slbID = tblAccountUserAssets.uas_slbID
 
-             .nestedLeftJoin(intfAccountSaleablesFiles::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+             .nestedLeftJoin(intfAccountSaleablesFiles::MyInstance[this->Schema]->makeSelectQuery(_apiCallContext, "", true, false)
                              .addCol(tblAccountSaleablesFilesBase::Fields::slf_slbID, tblAccountSaleablesFilesBase::Fields::slf_slbID)
                              .addCol(enuAggregation::SUM, tblAccountSaleablesFilesBase::Fields::slfMinCount, "MandatoryFilesCount")
                              .where({ tblAccountSaleablesFilesBase::Fields::slfMinCount, enuConditionOperator::Greater, 0 })
@@ -748,8 +748,8 @@ ORMSelectQuery intfAccountUserAssets<_itmplIsTokenBase>::makeSelectQuery(INTFAPI
 //                      ) tmpProvidedFiles
 //                   ON tmpProvidedFiles.uasufl_uasID = tblAccountUserAssets.uasID
 
-            .nestedLeftJoin(ORMSelectQuery(APICALLBOOM_PARAM,
-                                           intfAccountUserAssetsFiles::MyInstance[this->Schema]->makeSelectQuery(APICALLBOOM_PARAM, "", true, false)
+            .nestedLeftJoin(ORMSelectQuery(_apiCallContext,
+                                           intfAccountUserAssetsFiles::MyInstance[this->Schema]->makeSelectQuery(_apiCallContext, "", true, false)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_uasID)
                                            .addCol(tblAccountUserAssetsFilesBase::Fields::uasufl_slfID)
                                            .addCol(tblAccountSaleablesFilesBase::Fields::slfMinCount)
@@ -844,7 +844,7 @@ intfAccountUserAssetsFiles::intfAccountUserAssetsFiles(
 }
 
 QVariant IMPL_ORMGET_USER(intfAccountUserAssetsFiles) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -891,9 +891,9 @@ baseintfAccountAssetUsage_USER::baseintfAccountAssetUsage_USER(
 { ; }
 
 QVariant IMPL_ORMGET_USER(baseintfAccountAssetUsage_USER) {
-    quint64 CurrentActorID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentActorID = _apiCallContext.getActorID();
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -916,7 +916,7 @@ baseintfAccountAssetUsage_API::baseintfAccountAssetUsage_API(
 { ; }
 
 QVariant IMPL_REST_GET(baseintfAccountAssetUsage_API, , (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString             _apiToken,
     TAPI::PKsByPath_t   _pksByPath,
     quint64             _pageIndex,
@@ -929,9 +929,9 @@ QVariant IMPL_REST_GET(baseintfAccountAssetUsage_API, , (
 )) {
     bool _translate = true;
 
-    quint64 CurrentActorID = checkAPITokenOwner(APICALLBOOM_PARAM, _apiToken);
+    quint64 CurrentActorID = checkAPITokenOwner(_apiCallContext, _apiToken);
 
-//    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+//    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
       this->setSelfFilters({{ tblAccountUserAssetsBase::Fields::uas_actorID, CurrentActorID }}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
@@ -973,25 +973,25 @@ intfAccountCoupons::intfAccountCoupons(
 { ; }
 
 QVariant IMPL_ORMGET_USER(intfAccountCoupons) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountCoupons) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountCoupons) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountCoupons) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
@@ -1015,25 +1015,25 @@ intfAccountPrizes::intfAccountPrizes(
 { ; }
 
 QVariant IMPL_ORMGET_USER(intfAccountPrizes) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
   return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
 
 quint32 IMPL_ORMCREATE_USER(intfAccountPrizes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     return this->Create(CREATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMUPDATE_USER(intfAccountPrizes) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 bool IMPL_ORMDELETE_USER(intfAccountPrizes) {
-  Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+  Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
   return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }

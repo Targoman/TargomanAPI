@@ -67,9 +67,9 @@ User::User() :
 }
 
 QVariant IMPL_ORMGET_USER(User) {
-    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
-        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
-//        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:CRUD~0100" });
+    if (_apiCallContext.getActorID() != _pksByPath.toULongLong())
+        Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
+//        Authorization::checkPriv(_apiCallContext, { "Account:User:CRUD~0100" });
 
     if (_cols.isEmpty())
         _cols = QStringList({
@@ -119,7 +119,7 @@ QVariant IMPL_ORMGET_USER(User) {
 }
 
 quint64 IMPL_ORMCREATE_USER(User) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PUT, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PUT, this->moduleBaseName()));
 
     if (_createInfo.value(tblUser::Fields::usrEmail).toString().isEmpty()
             && _createInfo.value(tblUser::Fields::usrMobile).toString().isEmpty())
@@ -132,14 +132,14 @@ quint64 IMPL_ORMCREATE_USER(User) {
  * this method only can call by admin user
  */
 bool IMPL_ORMUPDATE_USER(User) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_PATCH, this->moduleBaseName()));
 
     return this->Update(UPDATE_METHOD_ARGS_CALL_VALUES);
 }
 
 //bool IMPL_ORMDELETE_USER(User) {
-//    if (APICALLBOOM_PARAM.getActorID() != _pksByPath.toULongLong())
-//        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+//    if (_apiCallContext.getActorID() != _pksByPath.toULongLong())
+//        Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
 //    return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 //}
@@ -149,44 +149,44 @@ bool IMPL_REST_DELETE(User, , (
     TAPI::MD5_t         _pass,
     QString             _salt
 )) {
-    if (APICALLBOOM_PARAM.getActorID() == _pksByPath.toULongLong()) {
+    if (_apiCallContext.getActorID() == _pksByPath.toULongLong()) {
         //check password if is set
-        this->callSP(APICALLBOOM_PARAM,
+        this->callSP(_apiCallContext,
                      "spUser_CheckPassword", {
-                         { "iUserID", APICALLBOOM_PARAM.getActorID() },
+                         { "iUserID", _apiCallContext.getActorID() },
                          { "iPass", _pass },
                          { "iSalt", _salt },
                          { "iThrowIfPassNotSet", 0 },
                      });
     } else
-        Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+        Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES);
 }
 
 ORMSelectQuery User::getPhotoQuery(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _usrID
 ) {
 
     UserExtraInfo::instance().prepareFiltersList();
 
-    return UserExtraInfo::instance().makeSelectQuery(APICALLBOOM_PARAM)
+    return UserExtraInfo::instance().makeSelectQuery(_apiCallContext)
         .addCol(tblUserExtraInfo::Fields::ueiPhoto)
         .where({ tblUserExtraInfo::Fields::uei_usrID, enuConditionOperator::Equal, _usrID })
     ;
 }
 
 TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     quint64 _usrID
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     if (CurrentUserID != _usrID)
-        Authorization::checkPriv(APICALLBOOM_PARAM, { "Account:User:photo:CRUD~0100" });
+        Authorization::checkPriv(_apiCallContext, { "Account:User:photo:CRUD~0100" });
 
-    auto Photo = getPhotoQuery(APICALLBOOM_PARAM, _usrID)
+    auto Photo = getPhotoQuery(_apiCallContext, _usrID)
             .setCacheTime(30)
             .one()
             .value(tblUserExtraInfo::Fields::ueiPhoto).toString().toLatin1();
@@ -196,10 +196,10 @@ TAPI::Base64Image_t IMPL_REST_GET(User, photo, (
 }
 
 bool IMPL_REST_UPDATE(User, photo, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::Base64Image_t _image
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     QString QueryString = QString()
           + "INSERT INTO"
@@ -211,7 +211,7 @@ bool IMPL_REST_UPDATE(User, photo, (
           + "   , ueiUpdatedBy_usrID=?"
           ;
 
-    clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+    clsDACResult Result = UserExtraInfo::instance().execQuery(_apiCallContext,
                                                               QueryString, {
                                                                   _image,
                                                                   CurrentUserID,
@@ -222,15 +222,15 @@ bool IMPL_REST_UPDATE(User, photo, (
     bool OK = Result.numRowsAffected() > 0;
 
     if (OK)
-        getPhotoQuery(APICALLBOOM_PARAM, CurrentUserID).clearCache();
+        getPhotoQuery(_apiCallContext, CurrentUserID).clearCache();
 
     return OK;
 }
 
 bool IMPL_REST_POST(User, deletePhoto, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     QString QueryString = QString()
           + "UPDATE"
@@ -240,7 +240,7 @@ bool IMPL_REST_POST(User, deletePhoto, (
           + " WHERE uei_usrID=?"
           ;
 
-    clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+    clsDACResult Result = UserExtraInfo::instance().execQuery(_apiCallContext,
                                                               QueryString, {
                                                                   CurrentUserID,
                                                                   CurrentUserID,
@@ -249,18 +249,18 @@ bool IMPL_REST_POST(User, deletePhoto, (
     bool OK = Result.numRowsAffected() > 0;
 
     if (OK)
-        getPhotoQuery(APICALLBOOM_PARAM, CurrentUserID).clearCache();
+        getPhotoQuery(_apiCallContext, CurrentUserID).clearCache();
 
     return OK;
 }
 
 bool IMPL_REST_UPDATE(User, email, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::Email_t   _email,
     TAPI::MD5_t     _pass,
     QString         _salt
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     _email = _email.toLower().trimmed();
 
@@ -270,7 +270,7 @@ bool IMPL_REST_UPDATE(User, email, (
     if ((QFV.email().isValid(_email) == false) || (QFV.emailNotFake().isValid(_email) == false))
         throw exHTTPBadRequest("Email domain is suspicious. Please use a real email.");
 
-//    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+//    clsJWT cJWT(_apiCallContext.getJWT());
 //    if (cJWT.canChangePass()) { //hasPass
 //        if (_pass.isEmpty() || _salt.isEmpty())
 //            throw exHTTPBadRequest("Password and salt are required to change email");
@@ -278,7 +278,7 @@ bool IMPL_REST_UPDATE(User, email, (
 //        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 //    }
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spApproval_Request", {
                      { "iBy", "E" },
                      { "iKey", _email },
@@ -288,19 +288,19 @@ bool IMPL_REST_UPDATE(User, email, (
                      { "iThrowIfPassNotSet", 1 },
                      { "iResendApprovalTTLSecs", ApprovalRequest::EmailResendApprovalCodeTTL.value() },
                      { "iExpireApprovalTTLSecs", ApprovalRequest::EmailExpireApprovalCodeTTL.value() },
-                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
+                     { "iUserLanguage", _apiCallContext.language() },
                  });
 
     return true;
 }
 
 bool IMPL_REST_UPDATE(User, mobile, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::Mobile_t  _mobile,
     TAPI::MD5_t     _pass,
     QString         _salt
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     _mobile = PhoneHelper::NormalizePhoneNumber(_mobile);
 
@@ -310,7 +310,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
     if (QFV.mobile().isValid(_mobile) == false)
         throw exHTTPBadRequest("Invalid mobile.");
 
-//    clsJWT cJWT(APICALLBOOM_PARAM.getJWT());
+//    clsJWT cJWT(_apiCallContext.getJWT());
 //    if (cJWT.canChangePass()) { //hasPass
 //        if (_pass.isEmpty() || _salt.isEmpty())
 //            throw exHTTPBadRequest("Password and salt are required to change email");
@@ -318,7 +318,7 @@ bool IMPL_REST_UPDATE(User, mobile, (
 //        QFV.asciiAlNum().maxLenght(20).validate(_salt, "salt");
 //    }
 
-    this->callSP(APICALLBOOM_PARAM,
+    this->callSP(_apiCallContext,
                  "spApproval_Request", {
                      { "iBy", "M" },
                      { "iKey", _mobile },
@@ -328,14 +328,14 @@ bool IMPL_REST_UPDATE(User, mobile, (
                      { "iThrowIfPassNotSet", 1 },
                      { "iResendApprovalTTLSecs", ApprovalRequest::MobileResendApprovalCodeTTL.value() },
                      { "iExpireApprovalTTLSecs", ApprovalRequest::MobileExpireApprovalCodeTTL.value() },
-                     { "iUserLanguage", APICALLBOOM_PARAM.language() },
+                     { "iUserLanguage", _apiCallContext.language() },
                  });
 
     return true;
 }
 
 bool IMPL_REST_UPDATE(User, personalInfo, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString             _name,
     QString             _family,
     TAPI::ISO639_2_t    _language,
@@ -345,7 +345,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     QString             _ssid,
     QString             _address
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     QVariantMap ToUpdate;
 
@@ -359,7 +359,7 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
     if (_address.isNull() == false)                 ToUpdate.insert(tblUser::Fields::usrAddress, _address);
 
     if (ToUpdate.size())
-        this->Update(APICALLBOOM_PARAM,
+        this->Update(_apiCallContext,
                      QString::number(CurrentUserID),
                      ToUpdate
                      );
@@ -368,11 +368,11 @@ bool IMPL_REST_UPDATE(User, personalInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, financialInfo, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     TAPI::Sheba_t   _iban,
     TAPI::Ether_t   _ether
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     QStringList ToUpdate;
     QVariantList Params;
@@ -401,7 +401,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
 
         Params.append(CurrentUserID);
 
-        clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result = UserExtraInfo::instance().execQuery(_apiCallContext,
                                                                   QueryString,
                                                                   Params + Params
                                                                   );
@@ -411,7 +411,7 @@ bool IMPL_REST_UPDATE(User, financialInfo, (
 }
 
 bool IMPL_REST_UPDATE(User, extraInfo, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     NULLABLE_TYPE(TAPI::Date_t)    _birthDate,
     QString         _job,
     QString         _education,
@@ -419,7 +419,7 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 //        QString         _language,
     QString         _theme
 )) {
-    quint64 CurrentUserID = APICALLBOOM_PARAM.getActorID();
+    quint64 CurrentUserID = _apiCallContext.getActorID();
 
     QVariantMap ToUpdateJson;
     QStringList ToRemoveJson;
@@ -526,7 +526,7 @@ bool IMPL_REST_UPDATE(User, extraInfo, (
 
         qDebug() << "******************************" << QueryString;
 
-        clsDACResult Result = UserExtraInfo::instance().execQuery(APICALLBOOM_PARAM,
+        clsDACResult Result = UserExtraInfo::instance().execQuery(_apiCallContext,
                                                                   QueryString,
                                                                   Params + Params
                                                                   );
@@ -550,7 +550,7 @@ UserExtraInfo::UserExtraInfo() :
         tblUserExtraInfo::Private::Indexes
 ) { ; }
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Sheba_t _sheba))
+//bool IMPL_REST_UPDATE(UserExtraInfo, sheba, (APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext, TAPI::Sheba_t _sheba))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -558,13 +558,13 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _sheba, APICALLBOOM_PARAM.getActorID(), APICALLBOOM_PARAM.getActorID() }
+//                              { _sheba, _apiCallContext.getActorID(), _apiCallContext.getActorID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;
 //}
 
-//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM, TAPI::Ether_t _etherAddress))
+//bool IMPL_REST_UPDATE(UserExtraInfo, etherAddress, (APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext, TAPI::Ether_t _etherAddress))
 //{
 //    clsDACResult Result = UserExtraInfo::instance().execQuery(
 //                              "UPDATE " + this->Name
@@ -572,7 +572,7 @@ UserExtraInfo::UserExtraInfo() :
 //                              + "SET " + tblUserExtraInfo::Fields::ueiEther +" = ?, " +tblUserExtraInfo::Fields::ueiUpdatedBy_usrID + " = ?"
 //                              + QUERY_SEPARATOR
 //                              + "WHERE uei_usrID = ?",
-//                              { _etherAddress, APICALLBOOM_PARAM.getActorID(), APICALLBOOM_PARAM.getActorID() }
+//                              { _etherAddress, _apiCallContext.getActorID(), _apiCallContext.getActorID() }
 //        );
 
 //    return Result.numRowsAffected() > 0;

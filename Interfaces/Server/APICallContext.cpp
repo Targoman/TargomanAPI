@@ -21,7 +21,7 @@
  * @author Kambiz Zandi <kambizzandi@gmail.com>
  */
 
-#include "APICallBoom.h"
+#include "APICallContext.h"
 #include "ServerCommon.h"
 #include "Interfaces/AAA/clsJWT.hpp"
 //#include "App/Server/clsRequestHandler.h"
@@ -39,16 +39,16 @@ namespace Targoman::API::Server {
 
 class clsRequestHandler;
 
-class APICallBoomData : public QSharedData
+class APICallContextData : public QSharedData
 {
 public:
-    APICallBoomData(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
+    APICallContextData(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
         QSharedData(),
         FNTiming(_fnTiming),
         AcceptLanguage("en")
     { ; }
 
-    APICallBoomData(const APICallBoomData &_other) :
+    APICallContextData(const APICallContextData &_other) :
         QSharedData(_other),
 //        RequestHandler(_other.RequestHandler),
         FNTiming(_other.FNTiming),
@@ -63,7 +63,7 @@ public:
         AcceptLanguage(_other.AcceptLanguage)
     { ; }
 
-    virtual ~APICallBoomData() { ; }
+    virtual ~APICallContextData() { ; }
 
 public:
 //    clsRequestHandler *RequestHandler;
@@ -81,15 +81,15 @@ public:
     QString AcceptLanguage;
 };
 
-intfAPICallBoom::intfAPICallBoom(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
-    Data(new APICallBoomData(_fnTiming)) { ; }
+intfAPICallContext::intfAPICallContext(std::function<void(const QString &_name, const QString &_desc, quint64 _nanoSecs)> _fnTiming) :
+    Data(new APICallContextData(_fnTiming)) { ; }
 
-intfAPICallBoom::intfAPICallBoom(const intfAPICallBoom& _other) :
+intfAPICallContext::intfAPICallContext(const intfAPICallContext& _other) :
     Data(_other.Data) { ; }
 
-intfAPICallBoom::~intfAPICallBoom() { ; }
+intfAPICallContext::~intfAPICallContext() { ; }
 
-void intfAPICallBoom::initialize(
+void intfAPICallContext::initialize(
     const QString &_apiPath,
     const QJsonObject &_JWT,
     const QVariantMap &_headers,
@@ -126,58 +126,58 @@ void intfAPICallBoom::initialize(
     }
 }
 
-void intfAPICallBoom::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
+void intfAPICallContext::setJWT(/*TAPI::JWT_t*/QJsonObject &_JWT) {
     this->Data->JWT = _JWT;
 }
 
-/*TAPI::JWT_t*/QJsonObject &intfAPICallBoom::getJWT() {
+/*TAPI::JWT_t*/QJsonObject &intfAPICallContext::getJWT() {
     return this->Data->JWT;
 }
 
-bool intfAPICallBoom::isAnonymouse() {
+bool intfAPICallContext::isAnonymouse() {
     return this->Data->JWT.isEmpty();
 }
-TAPI::enuTokenActorType::Type intfAPICallBoom::jwtActorType() {
+TAPI::enuTokenActorType::Type intfAPICallContext::jwtActorType() {
     if (this->isAnonymouse())
         return TAPI::enuTokenActorType::ANONYMOUSE;
 
     return Targoman::API::AAA::clsJWT(this->Data->JWT).actorType();
 }
 
-quint64 intfAPICallBoom::getActorID(quint64 _default) {
+quint64 intfAPICallContext::getActorID(quint64 _default) {
     quint64 ActorID = Targoman::API::AAA::clsJWT(this->Data->JWT).actorID();
     if (ActorID == 0)
         ActorID = _default;
     return ActorID;
 }
-QJsonObject intfAPICallBoom::getJWTPrivsObject() {
+QJsonObject intfAPICallContext::getJWTPrivsObject() {
     return Targoman::API::AAA::clsJWT(this->Data->JWT).privsObject();
 }
 
-QString intfAPICallBoom::getIP() {
+QString intfAPICallContext::getIP() {
     return this->Data->IP;
 }
 
-QList<QPair<QString, QString>> intfAPICallBoom::getRequestQueryParams() {
+QList<QPair<QString, QString>> intfAPICallContext::getRequestQueryParams() {
     return this->Data->RequestQueryParams;
 }
 
-QList<QPair<QString, QString>> intfAPICallBoom::getRequestBodyParams() {
+QList<QPair<QString, QString>> intfAPICallContext::getRequestBodyParams() {
     return this->Data->RequestBodyParams;
 }
 
-//void intfAPICallBoom::setRequestAPIPath(const QString &_path) {
+//void intfAPICallContext::setRequestAPIPath(const QString &_path) {
 //    this->Data->RequestAPIPath = _path;
 //}
-QString intfAPICallBoom::requestAPIPath() const {
+QString intfAPICallContext::requestAPIPath() const {
     return this->Data->RequestAPIPath;
 }
 
-const QVariantMap intfAPICallBoom::requestHeaders() const {
+const QVariantMap intfAPICallContext::requestHeaders() const {
     return this->Data->RequestHeaders;
 }
 
-QVariant intfAPICallBoom::requestHeader(const QString &_name, const QVariant &_default) const {
+QVariant intfAPICallContext::requestHeader(const QString &_name, const QVariant &_default) const {
     for (auto It = this->Data->RequestHeaders.constBegin();
          It != this->Data->RequestHeaders.constEnd();
          It++
@@ -189,7 +189,7 @@ QVariant intfAPICallBoom::requestHeader(const QString &_name, const QVariant &_d
     return _default;
 }
 
-QString intfAPICallBoom::host(const QString &_default) const {
+QString intfAPICallContext::host(const QString &_default) const {
     if (this->Data->RequestHeaders.contains("host") == false)
         return _default;
 
@@ -202,7 +202,7 @@ QString intfAPICallBoom::host(const QString &_default) const {
     return Host;
 }
 
-quint16 intfAPICallBoom::port() const {
+quint16 intfAPICallContext::port() const {
     if (this->Data->RequestHeaders.contains("host") == false)
         return ServerCommonConfigs::ListenPort.value();
 
@@ -215,7 +215,7 @@ quint16 intfAPICallBoom::port() const {
     return Host.mid(idx+1).toUInt();
 }
 
-QString intfAPICallBoom::hostAndPort(const QString &_defaultHost) const {
+QString intfAPICallContext::hostAndPort(const QString &_defaultHost) const {
     QString Host = this->host(_defaultHost);
     quint16 Port = this->port();
 
@@ -231,43 +231,43 @@ QString intfAPICallBoom::hostAndPort(const QString &_defaultHost) const {
     return HostPort;
 }
 
-QString intfAPICallBoom::language() const {
+QString intfAPICallContext::language() const {
     return this->Data->AcceptLanguage;
 }
 
-//void intfAPICallBoom::setResponseHeaders(const QVariantMap &_headers) {
+//void intfAPICallContext::setResponseHeaders(const QVariantMap &_headers) {
 //    this->Data->ResponseHeaders.clear();
 
 //    for (QVariantMap::const_iterator it=_headers.constBegin(); it!=_headers.constEnd(); it++) {
 //        this->Data->ResponseHeaders.insert(it.key().toLatin1(), it->toByteArray());
 //    }
 //}
-void intfAPICallBoom::setResponseHeaders(const QVariantMap &_headers) {
+void intfAPICallContext::setResponseHeaders(const QVariantMap &_headers) {
     this->Data->ResponseHeaders = _headers;
 }
-QVariantMap intfAPICallBoom::getResponseHeaders() {
+QVariantMap intfAPICallContext::getResponseHeaders() {
     return this->Data->ResponseHeaders;
 }
-void intfAPICallBoom::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
+void intfAPICallContext::addResponseHeader(const QString &_header, const QVariant &_value, bool _multiValue) {
     if (_multiValue && this->Data->ResponseHeaders.contains(_header))
         this->Data->ResponseHeaders[_header] = this->Data->ResponseHeaders[_header].toString() + "," + _value.toString();
     else
         this->Data->ResponseHeaders.insert(_header, _value.toString());
 }
-void intfAPICallBoom::addResponseHeaderNameToExpose(const QString &_header) {
+void intfAPICallContext::addResponseHeaderNameToExpose(const QString &_header) {
     this->addResponseHeader("Access-Control-Expose-Headers", _header, true);
 }
 
-void intfAPICallBoom::addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs) {
+void intfAPICallContext::addToTimings(const QString &_name, const QString &_desc, quint64 _nanoSecs) {
     this->Data->FNTiming(_name, _desc, _nanoSecs);
 }
 
 //--------------------------------------------------------------------
-template class APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL;
-template class APICALLBOOM_TYPE_JWT_USER_DECL;
-template class APICALLBOOM_TYPE_JWT_API_DECL;
+template class APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL;
+template class APICALLCONTEXT_TYPE_JWT_USER_DECL;
+template class APICALLCONTEXT_TYPE_JWT_API_DECL;
 
-template class APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL;
-template class APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL;
+template class APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_DECL;
+template class APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_API_DECL;
 
 } //namespace Targoman::API::Server

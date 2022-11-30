@@ -302,7 +302,7 @@ class PaymentGatewayTypes : public intfSQLBasedModule
     TARGOMAN_API_SUBMODULE_DEFINE(Account, PaymentGatewayTypes)
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET_USER("Get payment gateway type information")
@@ -326,7 +326,7 @@ private slots:
     QVariantList REST_GET_OR_POST(
         availableGatewayTypes,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             quint32 _amount,
             QString _domain
         ),

@@ -39,7 +39,7 @@ void FormalityChecker::initializeModule() {
 }
 
 QString IMPL_REST_GET_OR_POST(FormalityChecker, check, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     const QString _text,
     const TAPI::ISO639_2_t& _lang
 )) {

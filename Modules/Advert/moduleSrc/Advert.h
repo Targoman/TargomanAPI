@@ -79,31 +79,31 @@ class Advert : public intfAccountingBasedModule<false>
 
 protected:
     virtual stuServiceCreditsInfo retrieveServiceCreditsInfo(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         const ServiceUsage_t &_requestedUsage = {},
         const QString &_action = {}
     );
 
     virtual void breakCredit(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const stuAssetItem &_assetItem,
         const QString &_action = {}
     );
 
     virtual bool isUnlimited(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const UsageLimits_t &_limits
     ) const;
 
     virtual bool isEmpty(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const UsageLimits_t &_limits
     ) const;
 
 public:
     virtual void saveAccountUsage(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         stuActiveCredit &_activeCredit,
         const ServiceUsage_t &_requestedUsage,
         const QString &_action = {}
@@ -111,19 +111,19 @@ public:
 
 protected:
     virtual void computeAdditives(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual void computeReferrer(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
 
     virtual QVariantMap getCustomUserAssetFieldsForQuery(
-        INTFAPICALLBOOM_DECL    &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL    &_apiCallContext,
         INOUT stuBasketItem     &_basketItem,
         const stuVoucherItem    *_oldVoucherItem = nullptr
     );
@@ -132,7 +132,7 @@ protected slots:
 //    bool REST_POST(
 //        processVoucher,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Process voucher item"
@@ -141,7 +141,7 @@ protected slots:
 //    bool REST_POST(
 //        cancelVoucher,
 //        (
-//            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+//            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
 //            Targoman::API::AAA::stuVoucherItem _voucherItem
 //        ),
 //        "Cancel voucher item"
@@ -150,7 +150,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newBanner,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order
         ),
@@ -160,7 +160,7 @@ protected slots:
     Targoman::API::AdvertModule::stuAdvert REST_GET(
         newText,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             QString _location,
             Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
             QString _keywords
@@ -171,7 +171,7 @@ protected slots:
     QString REST_GET(
         retrieveURL,
         (
-            APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL &_apiCallContext,
             quint64 _id,
             TAPI::IPv4_t _clientIP,
             QString _agent
@@ -184,7 +184,7 @@ protected slots:
     QVariant REST_POST(
         fixtureSetup,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _random = {}
         ),
         "Create sample data. give random=1 to auto generate random number"
@@ -193,7 +193,7 @@ protected slots:
     QVariant REST_POST(
         fixtureCleanup,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _random = {}
         ),
         "Cleanup sample data"
@@ -201,7 +201,7 @@ protected slots:
 //    bool REST_POST(
 //        fixtureSetupVoucher,
 //        (
-//                APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM
+//                APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext
 //        ),
 //        "Sets up basket and voucher"
 //    )

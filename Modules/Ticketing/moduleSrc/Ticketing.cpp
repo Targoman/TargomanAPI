@@ -78,7 +78,7 @@ Ticketing::Ticketing() :
 }
 
 quint64 Ticketing::insertTicket(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
 //    quint64 _createdBy,
     quint64 _targetUserID,
     quint32 _serviceID,
@@ -107,12 +107,12 @@ quint64 Ticketing::insertTicket(
     if (_unitID > 0)
         CreateFields.insert(tblTickets::Fields::tkt_untID, _unitID);
 
-    quint64 TicketID = Tickets::instance().Create(APICALLBOOM_PARAM,
+    quint64 TicketID = Tickets::instance().Create(_apiCallContext,
                                     CreateFields
                                     );
 
     if (_files.isEmpty() == false) {
-        ORMCreateQuery QueryCreateAttachments = TicketAttachments::instance().makeCreateQuery(APICALLBOOM_PARAM)
+        ORMCreateQuery QueryCreateAttachments = TicketAttachments::instance().makeCreateQuery(_apiCallContext)
                                              .addCol(tblTicketAttachments::Fields::tat_tktID)
                                              .addCol(tblTicketAttachments::Fields::tat_uplID)
                                              ;
@@ -121,7 +121,7 @@ quint64 Ticketing::insertTicket(
             if (_file.Size > 0) {
                 try {
                     quint64 UploadedFileID = ObjectStorageManager::saveFile(
-                                                 APICALLBOOM_PARAM,
+                                                 _apiCallContext,
                                                  UploadFiles::instance(),
                                                  UploadQueue::instance(),
                                                  UploadGateways::instance(),
@@ -139,14 +139,14 @@ quint64 Ticketing::insertTicket(
             }
         }
 
-        QueryCreateAttachments.execute(APICALLBOOM_PARAM.getActorID());
+        QueryCreateAttachments.execute(_apiCallContext.getActorID());
     }
 
     return TicketID;
 }
 
 QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     const QString &_title,
     const QString &_body,
     quint32 _serviceID,
@@ -157,7 +157,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     const TAPI::stuFileInfo &_file_3,
     const TAPI::stuFileInfo &_file_4
 )) {
-//    Authorization::checkPriv(APICALLBOOM_PARAM, { this->moduleBaseName() + ":canPUTNewMessage" });
+//    Authorization::checkPriv(_apiCallContext, { this->moduleBaseName() + ":canPUTNewMessage" });
 
     TAPI::Files_t Files;
     if (_file_1.Size > 0) Files.append(_file_1);
@@ -166,7 +166,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
     if (_file_4.Size > 0) Files.append(_file_4);
 
     quint64 ID = this->insertTicket(
-                     APICALLBOOM_PARAM,
+                     _apiCallContext,
                      _targetUserID,
                      _serviceID,
                      0,
@@ -183,7 +183,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newMessage, (
 }
 
 QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     const QString &_title,
     const QString &_body,
     Targoman::API::TicketingModule::enuTicketType::Type _ticketType,
@@ -194,7 +194,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     const TAPI::stuFileInfo &_file_3,
     const TAPI::stuFileInfo &_file_4
 )) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, {});
+    Authorization::checkPriv(_apiCallContext, {});
 
     if (_inReplyTicketID && (_ticketType != enuTicketType::Reply))
         throw exHTTPBadRequest("Reply tickets must have reply type");
@@ -210,7 +210,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
     if (_file_4.Size > 0) Files.append(_file_4);
 
     quint64 ID = this->insertTicket(
-                     APICALLBOOM_PARAM,
+                     _apiCallContext,
                      0,
                      _serviceID,
                      _inReplyTicketID,
@@ -230,7 +230,7 @@ QVariantMap IMPL_REST_PUT(Ticketing, newFeedback, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _random
 )) {
     QVariantMap Result;
@@ -271,7 +271,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                 { Gateways::NFSMetaInfoJsonKey::Path, ".../ticketing" },
                             })},
                         })
-                .execute(APICALLBOOM_PARAM.getActorID())
+                .execute(_apiCallContext.getActorID())
                 ;
         Result.insert("NFS", res);
     }
@@ -293,14 +293,14 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
                                   { Gateways::AWSS3MetaInfoJsonKey::AccessKey, "1" },
                             })},
                         })
-                .execute(APICALLBOOM_PARAM.getActorID())
+                .execute(_apiCallContext.getActorID())
                 ;
         Result.insert("S3", res);
     }
 */
     //-- newMessage
     QVariant res = RESTClientHelper::callAPI(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
        RESTClientHelper::PUT,
        "Ticketing/newMessage",
        {},
@@ -318,7 +318,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 
     //-- newFeedback(1)
     res = RESTClientHelper::callAPI(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         RESTClientHelper::PUT,
         "Ticketing/newFeedback",
         {},
@@ -338,7 +338,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 
     //-- newFeedback(2)
     res = RESTClientHelper::callAPI(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         RESTClientHelper::PUT,
         "Ticketing/newFeedback",
         {},
@@ -361,7 +361,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureSetup, (
 }
 
 QVariant IMPL_REST_POST(Ticketing, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _random
 )) {
     QVariantMap Result;
@@ -372,7 +372,7 @@ QVariant IMPL_REST_POST(Ticketing, fixtureCleanup, (
               FROM tblTickets t
              WHERE t.tkt_svcID=?
         ;)";
-        clsDACResult DACResult = this->execQuery(APICALLBOOM_PARAM,
+        clsDACResult DACResult = this->execQuery(_apiCallContext,
                                                  QueryString, {
                                                      _random.toInt()
                                                  });

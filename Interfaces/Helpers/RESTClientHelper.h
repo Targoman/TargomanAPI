@@ -29,7 +29,7 @@
 #include "QtCUrl.h"
 #include "Interfaces/Common/GenericTypes.h"
 #include "libTargomanCommon/Configuration/tmplConfigurable.h"
-#include "Interfaces/Server/APICallBoom.h"
+#include "Interfaces/Server/APICallContext.h"
 
 using namespace Targoman::API::Server;
 
@@ -64,7 +64,7 @@ public:
     );
 
     static QVariant callAPI(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         RESTClientHelper::enuHTTPMethod _method,
         const QString &_api,
         const QVariantMap &_urlArgs = {},

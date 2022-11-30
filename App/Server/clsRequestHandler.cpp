@@ -339,29 +339,29 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         this->addToTimings(_name, _desc, _nanoSecs);
     };
 
-    QScopedPointer<intfAPICallBoom> APICALLBOOM;
+    QScopedPointer<intfAPICallContext> APICALLCONTEXT;
 
     if (_apiObject->tokenAllowANONYMOUSE()) {
         if (_apiObject->tokenAllowUSER()) {
             if (_apiObject->tokenAllowAPI())
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_OR_API_DECL(FnTiming));
             else
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(FnTiming));
         } else {
             if (_apiObject->tokenAllowAPI())
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_API_DECL(FnTiming));
             else
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL(FnTiming));
         }
     } else {
         if (_apiObject->tokenAllowUSER()) {
             if (_apiObject->tokenAllowAPI())
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_OR_API_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_USER_OR_API_DECL(FnTiming));
             else
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_USER_DECL(FnTiming));
         } else {
             if (_apiObject->tokenAllowAPI())
-                APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(FnTiming));
+                APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_API_DECL(FnTiming));
             else
                 throw exHTTPInternalServerError("jwt f,f,f");
         }
@@ -370,16 +370,16 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 //    enuTokenActorType::Type TokenActorType = _apiObject->tokenActorType();
 //    if (TokenActorType == enuTokenActorType::USER) {
 //        if (_apiObject->tokenIsOptional())
-//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(fnTiming));
+//            APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_USER_DECL(fnTiming));
 //        else
-//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_USER_DECL(fnTiming));
+//            APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_USER_DECL(fnTiming));
 //    } else if (TokenActorType == enuTokenActorType::API) {
 //        if (_apiObject->tokenIsOptional())
-//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_OR_API_DECL(fnTiming));
+//            APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_OR_API_DECL(fnTiming));
 //        else
-//            APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_API_DECL(fnTiming));
+//            APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_API_DECL(fnTiming));
 //    } else //enuTokenActorType::ANONYMOUSE
-//        APICALLBOOM.reset(new APICALLBOOM_TYPE_JWT_ANONYMOUSE_DECL(fnTiming));
+//        APICALLCONTEXT.reset(new APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_DECL(fnTiming));
 
     try {
         for (auto QueryIter = _queries.begin(); QueryIter != _queries.end(); ++QueryIter)
@@ -395,7 +395,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
         //JWT
         TAPI::JWT_t JWT;
         {
-            auto JWTServerTiming = APICALLBOOM->createScopeTiming("jwt");
+            auto JWTServerTiming = APICALLCONTEXT->createScopeTiming("jwt");
 
             QString BearerToken;
             QString Auth = Headers.value("authorization");
@@ -409,8 +409,8 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     throw exHTTPForbidden("No authentication header is present");
             } else if (_apiObject->noJWTNeeded()) {
 //                throw exHTTPForbidden("The authentication header should not be sent for anonymouse apis");
-                APICALLBOOM->addResponseHeader("x-tapi-jwt-warning", "no jwt needed");
-                APICALLBOOM->addResponseHeaderNameToExpose("x-tapi-jwt-warning");
+                APICALLCONTEXT->addResponseHeader("x-tapi-jwt-warning", "no jwt needed");
+                APICALLCONTEXT->addResponseHeaderNameToExpose("x-tapi-jwt-warning");
 
             } else {
                 try {
@@ -443,11 +443,11 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                         JWTTokenActorType = enuTokenActorType::toEnum(JWT["typ"].toString());
 
                     if (JWTTokenActorType == enuTokenActorType::USER) {
-                        auto RenewJWTServerTiming = APICALLBOOM->createScopeTiming("jwt", "renew");
+                        auto RenewJWTServerTiming = APICALLCONTEXT->createScopeTiming("jwt", "renew");
 
                         bool IsRenewed = false;
                         QString NewToken = Authentication::renewExpiredJWT(
-                                               *APICALLBOOM,
+                                               *APICALLCONTEXT,
                                                JWT,
                                                RemoteIP,
                                                IsRenewed
@@ -455,12 +455,12 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
                         BearerToken = NewToken;
 
-                        APICALLBOOM->addResponseHeader("x-auth-new-token", BearerToken);
-                        APICALLBOOM->addResponseHeaderNameToExpose("x-auth-new-token");
+                        APICALLCONTEXT->addResponseHeader("x-auth-new-token", BearerToken);
+                        APICALLCONTEXT->addResponseHeaderNameToExpose("x-auth-new-token");
 
                         if (IsRenewed == false) {
-                            APICALLBOOM->addResponseHeader("x-auth-warning", "replace token");
-                            APICALLBOOM->addResponseHeaderNameToExpose("x-auth-warning");
+                            APICALLCONTEXT->addResponseHeader("x-auth-warning", "replace token");
+                            APICALLCONTEXT->addResponseHeaderNameToExpose("x-auth-warning");
                         }
                     } else if (JWTTokenActorType == enuTokenActorType::API)
                         throw exHTTPForbidden("API token is expired");
@@ -482,7 +482,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
 
         Headers.remove("cookie");
 
-        APICALLBOOM->initialize(
+        APICALLCONTEXT->initialize(
                     _api,
                     JWT,
                     Headers.toVariant().toMap(),
@@ -493,7 +493,7 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                     );
 
         QVariant Result = _apiObject->invoke(
-                              APICALLBOOM.data(),
+                              APICALLCONTEXT.data(),
                               this->Request->method() == qhttp::EHTTP_PATCH,
                               _queries,
 //                              ResponseHeaders,
@@ -505,19 +505,19 @@ clsRequestHandler::stuResult clsRequestHandler::run(
                               _pksByPath
                               );
 
-        return stuResult(Result, {}, APICALLBOOM->getResponseHeaders());
+        return stuResult(Result, {}, APICALLCONTEXT->getResponseHeaders());
     } catch (exHTTPError& ex) {
-        return stuResult(ex.what(), ex.additionalInfo(), APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), ex.additionalInfo(), APICALLCONTEXT->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exTargomanBase& ex) {
-        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
+        return stuResult(ex.what(), {}, APICALLCONTEXT->getResponseHeaders(), static_cast<qhttp::TStatusCode>(ex.httpCode()));
     } catch (exQFVRequiredParam &ex) {
-        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), {}, APICALLCONTEXT->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (exQFVInvalidValue &ex) {
-        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
+        return stuResult(ex.what(), {}, APICALLCONTEXT->getResponseHeaders(), qhttp::ESTATUS_BAD_REQUEST);
     } catch (std::exception &ex) {
-        return stuResult(ex.what(), {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult(ex.what(), {}, APICALLCONTEXT->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     } catch (...) {
-        return stuResult("INTERNAL SERVER ERROR!!!", {}, APICALLBOOM->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
+        return stuResult("INTERNAL SERVER ERROR!!!", {}, APICALLCONTEXT->getResponseHeaders(), qhttp::ESTATUS_INTERNAL_SERVER_ERROR);
     }
 }
 

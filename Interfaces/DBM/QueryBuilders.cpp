@@ -1154,21 +1154,21 @@ template <class itmplDerived>
 class clsBaseQueryData : public QSharedData
 {
 public:
-    clsBaseQueryData(INTFAPICALLBOOM_IMPL &_APICALLBOOM_PARAM,
+    clsBaseQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                      itmplDerived* _owner,
                      clsTable& _table,
                      const QString& _alias = {}) :
-        APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
+        _apiCallContext(_apiCallContext),
         Owner(_owner),
         _FromTable(_table),
         Alias(_alias)
     { ; }
 
-    clsBaseQueryData(INTFAPICALLBOOM_IMPL &_APICALLBOOM_PARAM,
+    clsBaseQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                      itmplDerived* _owner,
                      const ORMSelectQuery& _fromQuery,
                      const QString& _alias = {}) :
-        APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
+        _apiCallContext(_apiCallContext),
         Owner(_owner),
         FromQuery(_fromQuery),
         Alias(_alias)
@@ -1230,7 +1230,7 @@ public:
     friend clsQueryGroupAndHavingTraitData<itmplDerived>;
 
 public:
-    INTFAPICALLBOOM_DECL        &APICALLBOOM_PARAM;
+    INTFAPICALLCONTEXT_DECL        &_apiCallContext;
     itmplDerived                *Owner;
     clsTable                    _FromTable;
     ORMSelectQuery              FromQuery;
@@ -1256,22 +1256,22 @@ tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(itmplDerived* _derived,
 }
 
 template <class itmplDerived, class itmplData>
-tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                                                       itmplDerived* _derived,
                                                       clsTable& _table,
                                                       const QString& _alias) :
-    Data(new itmplData(APICALLBOOM_PARAM, _derived, _table, _alias))
+    Data(new itmplData(_apiCallContext, _derived, _table, _alias))
 {
     if (_table.AllCols.isEmpty())
         throw exQueryBuilder(QString("Call prepareFiltersList on table (%1) before creating a QueryBuilder").arg(_table.Name));
 }
 
 template <class itmplDerived, class itmplData>
-tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+tmplBaseQuery<itmplDerived, itmplData>::tmplBaseQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                                                       itmplDerived* _derived,
                                                       const ORMSelectQuery& _fromQuery,
                                                       const QString& _alias) :
-    Data(new itmplData(APICALLBOOM_PARAM, _derived, _fromQuery, _alias))
+    Data(new itmplData(_apiCallContext, _derived, _fromQuery, _alias))
 {
 //    if (_table.AllCols.isEmpty())
 //        throw exQueryBuilder(QString("Call prepareFiltersList on table (%1) before creating a QueryBuilder").arg(_table.Name));
@@ -1493,17 +1493,17 @@ struct stuORMSelectQueryPreparedItems {
 class clsORMSelectQueryData : public clsBaseQueryData<ORMSelectQuery>
 {
 public:
-    clsORMSelectQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMSelectQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMSelectQuery* _owner,
                           clsTable& _table,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMSelectQuery>(APICALLBOOM_PARAM, _owner, _table, _alias) { ; }
+        clsBaseQueryData<ORMSelectQuery>(_apiCallContext, _owner, _table, _alias) { ; }
 
-    clsORMSelectQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMSelectQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMSelectQuery* _owner,
                           const ORMSelectQuery& _fromQuery,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMSelectQuery>(APICALLBOOM_PARAM, _owner, _fromQuery, _alias) { ; }
+        clsBaseQueryData<ORMSelectQuery>(_apiCallContext, _owner, _fromQuery, _alias) { ; }
 
 //    clsORMSelectQueryData(const clsORMSelectQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMSelectQueryData() { ; }
@@ -1880,7 +1880,7 @@ itmplDerived& tmplQueryJoinTrait<itmplDerived>::inlineJoin(enuJoinType::Type _jo
 
     clsTable* ForeignTable = clsTable::Registry[_foreignTable];
 
-    ORMSelectQuery Query = ForeignTable->makeSelectQuery(this->JoinTraitData->Owner->Data->APICALLBOOM_PARAM); //, _alias);
+    ORMSelectQuery Query = ForeignTable->makeSelectQuery(this->JoinTraitData->Owner->Data->_apiCallContext); //, _alias);
 
     //no union, no where, no group by, no having
     if (Query.isPure()) {
@@ -2517,15 +2517,15 @@ ORMSelectQuery::ORMSelectQuery(const ORMSelectQuery& _other) :
     tmplQueryGroupAndHavingTrait<ORMSelectQuery>::GroupAndHavingTraitData->Owner = this;
 }
 
-ORMSelectQuery::ORMSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(APICALLBOOM_PARAM, this, _table, _alias),
+ORMSelectQuery::ORMSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(_apiCallContext, this, _table, _alias),
     tmplQueryJoinTrait<ORMSelectQuery>(this),
     tmplQueryWhereTrait<ORMSelectQuery>(this),
     tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this)
 { ; }
 
-ORMSelectQuery::ORMSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias) :
-    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(APICALLBOOM_PARAM, this, _fromQuery, _alias),
+ORMSelectQuery::ORMSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const ORMSelectQuery& _fromQuery, const QString& _alias) :
+    tmplBaseQuery<ORMSelectQuery, clsORMSelectQueryData>(_apiCallContext, this, _fromQuery, _alias),
     tmplQueryJoinTrait<ORMSelectQuery>(this),
     tmplQueryWhereTrait<ORMSelectQuery>(this),
     tmplQueryGroupAndHavingTrait<ORMSelectQuery>(this)
@@ -3126,17 +3126,17 @@ struct stuORMCreateQueryPreparedItems {
 class clsORMCreateQueryData : public clsBaseQueryData<ORMCreateQuery>
 {
 public:
-    clsORMCreateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMCreateQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMCreateQuery* _owner,
                           clsTable& _table,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMCreateQuery>(APICALLBOOM_PARAM, _owner, _table, _alias) { ; }
+        clsBaseQueryData<ORMCreateQuery>(_apiCallContext, _owner, _table, _alias) { ; }
 
-    clsORMCreateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMCreateQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMCreateQuery* _owner,
                           const ORMSelectQuery& _fromQuery,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMCreateQuery>(APICALLBOOM_PARAM, _owner, _fromQuery, _alias) { ; }
+        clsBaseQueryData<ORMCreateQuery>(_apiCallContext, _owner, _fromQuery, _alias) { ; }
 
 //    clsORMCreateQueryData(const clsORMCreateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMCreateQueryData() { ; }
@@ -3316,8 +3316,8 @@ public:
 ORMCreateQuery::ORMCreateQuery(const ORMCreateQuery& _other) :
     tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(this, _other) { ; }
 
-ORMCreateQuery::ORMCreateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(APICALLBOOM_PARAM, this, _table, _alias) { ; }
+ORMCreateQuery::ORMCreateQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMCreateQuery, clsORMCreateQueryData>(_apiCallContext, this, _table, _alias) { ; }
 
 ORMCreateQuery::~ORMCreateQuery() { ; }
 
@@ -3660,17 +3660,17 @@ struct stuORMUpdateQueryPreparedItems {
 class clsORMUpdateQueryData : public clsBaseQueryData<ORMUpdateQuery>
 {
 public:
-    clsORMUpdateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMUpdateQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMUpdateQuery* _owner,
                           clsTable& _table,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMUpdateQuery>(APICALLBOOM_PARAM, _owner, _table, _alias) { ; }
+        clsBaseQueryData<ORMUpdateQuery>(_apiCallContext, _owner, _table, _alias) { ; }
 
-    clsORMUpdateQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMUpdateQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMUpdateQuery* _owner,
                           const ORMSelectQuery& _fromQuery,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMUpdateQuery>(APICALLBOOM_PARAM, _owner, _fromQuery, _alias) { ; }
+        clsBaseQueryData<ORMUpdateQuery>(_apiCallContext, _owner, _fromQuery, _alias) { ; }
 
 //    clsORMUpdateQueryData(const clsORMUpdateQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMUpdateQueryData() { ; }
@@ -3793,8 +3793,8 @@ ORMUpdateQuery::ORMUpdateQuery(const ORMUpdateQuery& _other) :
     tmplQueryJoinTrait<ORMUpdateQuery>::JoinTraitData->Owner = this;
     tmplQueryWhereTrait<ORMUpdateQuery>::WhereTraitData->Owner = this;
 }
-ORMUpdateQuery::ORMUpdateQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>(APICALLBOOM_PARAM, this, _table, _alias),
+ORMUpdateQuery::ORMUpdateQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMUpdateQuery, clsORMUpdateQueryData>(_apiCallContext, this, _table, _alias),
     tmplQueryJoinTrait<ORMUpdateQuery>(this),
     tmplQueryWhereTrait<ORMUpdateQuery>(this) { ; }
 ORMUpdateQuery::~ORMUpdateQuery() { ; }
@@ -3954,17 +3954,17 @@ struct stuORMDeleteQueryPreparedItems {
 class clsORMDeleteQueryData : public clsBaseQueryData<ORMDeleteQuery>
 {
 public:
-    clsORMDeleteQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMDeleteQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMDeleteQuery* _owner,
                           clsTable& _table,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMDeleteQuery>(APICALLBOOM_PARAM, _owner, _table, _alias) { ; }
+        clsBaseQueryData<ORMDeleteQuery>(_apiCallContext, _owner, _table, _alias) { ; }
 
-    clsORMDeleteQueryData(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    clsORMDeleteQueryData(INTFAPICALLCONTEXT_IMPL &_apiCallContext,
                           ORMDeleteQuery* _owner,
                           const ORMSelectQuery& _fromQuery,
                           const QString& _alias = {}) :
-        clsBaseQueryData<ORMDeleteQuery>(APICALLBOOM_PARAM, _owner, _fromQuery, _alias) { ; }
+        clsBaseQueryData<ORMDeleteQuery>(_apiCallContext, _owner, _fromQuery, _alias) { ; }
 
 //    clsORMDeleteQueryData(const clsORMDeleteQueryData& _other) : Table(_other.Table), Alias(_other.Alias) { ; }
 //    ~clsORMDeleteQueryData() { ; }
@@ -4002,8 +4002,8 @@ ORMDeleteQuery::ORMDeleteQuery(const ORMDeleteQuery& _other) :
     tmplQueryJoinTrait<ORMDeleteQuery>::JoinTraitData->Owner = this;
     tmplQueryWhereTrait<ORMDeleteQuery>::WhereTraitData->Owner = this;
 }
-ORMDeleteQuery::ORMDeleteQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias) :
-    tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>(APICALLBOOM_PARAM, this, _table, _alias),
+ORMDeleteQuery::ORMDeleteQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, clsTable& _table, const QString& _alias) :
+    tmplBaseQuery<ORMDeleteQuery, clsORMDeleteQueryData>(_apiCallContext, this, _table, _alias),
     tmplQueryJoinTrait<ORMDeleteQuery>(this),
     tmplQueryWhereTrait<ORMDeleteQuery>(this) { ; }
 ORMDeleteQuery::~ORMDeleteQuery() { ; }
@@ -4121,7 +4121,7 @@ quint64 ORMDeleteQuery::execute(quint64 _currentUserID, QVariantMap _args, bool 
         QString statusFieldName = this->Data->table().getStatusColumnName();
         if (statusFieldName.isEmpty() == false) {
             QT_TRY {
-                quint64 rowsAffected = ORMUpdateQuery(this->Data->APICALLBOOM_PARAM, this->Data->table())
+                quint64 rowsAffected = ORMUpdateQuery(this->Data->_apiCallContext, this->Data->table())
                         .set(statusFieldName, "Removed")
                         .where(this->WhereTraitData->WhereClauses)
                         .setPksByPath(this->WhereTraitData->PksByPath)

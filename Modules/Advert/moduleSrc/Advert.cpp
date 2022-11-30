@@ -130,7 +130,7 @@ Advert::Advert() :
 // accounting
 /*********************************************************************/
 stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     quint64 _actorID,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
@@ -146,26 +146,26 @@ stuServiceCreditsInfo Advert::retrieveServiceCreditsInfo(
 }
 
 void Advert::breakCredit(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const stuAssetItem &_assetItem,
     const QString &_action
 ) {
 }
 
 bool Advert::isUnlimited(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const UsageLimits_t &_limits
 ) const {
 }
 
 bool Advert::isEmpty(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const UsageLimits_t &_limits
 ) const {
 }
 
 void Advert::saveAccountUsage(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     stuActiveCredit &_activeCredit,
     const ServiceUsage_t &_requestedUsage,
     const QString &_action
@@ -195,7 +195,7 @@ void Advert::saveAccountUsage(
 // basket
 /*********************************************************************/
 void Advert::computeAdditives(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -205,7 +205,7 @@ void Advert::computeAdditives(
 };
 
 void Advert::computeReferrer(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -244,7 +244,7 @@ void Advert::computeReferrer(
     }
 
     //2: add, modify or remove system discount
-    this->computeSystemDiscount(APICALLBOOM_PARAM, _basketItem, {
+    this->computeSystemDiscount(_apiCallContext, _basketItem, {
                                   QString("referrer_%1").arg("fp.com"),
                                   "5% off by fp.com",
                                   5,
@@ -269,7 +269,7 @@ void Advert::computeReferrer(
 };
 
 QVariantMap Advert::getCustomUserAssetFieldsForQuery(
-    INTFAPICALLBOOM_IMPL    &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL    &_apiCallContext,
     INOUT stuBasketItem     &_basketItem,
     const stuVoucherItem    *_oldVoucherItem /*= nullptr*/
 ) {
@@ -285,7 +285,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 
 /***************************************************************************************************/
 //bool IMPL_REST_POST(Advert, processVoucher, (
-//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+//        APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -299,7 +299,7 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 //}
 
 //bool IMPL_REST_POST(Advert, cancelVoucher, (
-//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+//        APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
 //        Targoman::API::AAA::stuVoucherItem _voucherItem
 //    ))
 //{
@@ -313,14 +313,14 @@ QVariantMap Advert::getCustomUserAssetFieldsForQuery(
 //}
 
 Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newBanner, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order
 )) {
 }
 
 Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _location,
     Targoman::API::AdvertModule::enuAdvertOrder::Type _order,
     const QString _keywords
@@ -328,7 +328,7 @@ Targoman::API::AdvertModule::stuAdvert IMPL_REST_GET(Advert, newText, (
 }
 
 QString IMPL_REST_GET(Advert, retrieveURL, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     quint64 _id,
     TAPI::IPv4_t _clientIP,
     QString _agent
@@ -340,7 +340,7 @@ QString IMPL_REST_GET(Advert, retrieveURL, (
 \****************************************************************/
 #ifdef QT_DEBUG
 QVariant IMPL_REST_POST(Advert, fixtureSetup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _random
 )) {
     QVariantMap Result;
@@ -359,7 +359,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblLocations::Fields::locPlaceCode,  "FIX" },
     };
 
-    quint32 LocationID = Locations::instance().makeCreateQuery(APICALLBOOM_PARAM)
+    quint32 LocationID = Locations::instance().makeCreateQuery(_apiCallContext)
                          .addCols({
                                       tblLocations::Fields::locURL,
                                       tblLocations::Fields::locPlaceCode,
@@ -388,7 +388,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountProducts::ExtraFields::prd_locID,         LocationID },
     });
 
-    quint32 ProductID = this->AccountProducts->Create(APICALLBOOM_PARAM, ProductValues);
+    quint32 ProductID = this->AccountProducts->Create(_apiCallContext, ProductValues);
 
     ProductValues.insert(tblAccountProductsBase::Fields::prdID, ProductID);
     Result.insert("Product", ProductValues);
@@ -414,7 +414,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
         { tblAccountSaleablesBase::Fields::slbVoucherTemplate,  FixtureHelper::MakeRandomizeName(_random, " ", "fixture saleable", "vt") },
     });
 
-    quint32 SaleableID = this->AccountSaleables->Create(APICALLBOOM_PARAM, SaleableValues);
+    quint32 SaleableID = this->AccountSaleables->Create(_apiCallContext, SaleableValues);
 
     SaleableValues.insert(tblAccountSaleablesBase::Fields::slbID, SaleableID);
     Result.insert("Saleable", SaleableValues);
@@ -445,7 +445,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 //        { tblAccountCouponsBase::Fields::cpnStatus,  },
     };
 
-    quint32 CouponID = this->AccountCoupons->makeCreateQuery(APICALLBOOM_PARAM)
+    quint32 CouponID = this->AccountCoupons->makeCreateQuery(_apiCallContext)
                        .addCols({
 //                                    tblAccountCouponsBase::Fields::cpnID,
                                     tblAccountCouponsBase::Fields::cpnCode,
@@ -476,7 +476,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 
     //-- add to basket --------------------------------------
     stuBasketActionResult BasketActionResult = this->apiPOSTaddToBasket(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         /* saleableCode     */ SaleableCode,
         /* orderAdditives   */ { { "adtv1", "1 1 1" }, { "adtv2", "222" } },
         /* qty              */ 1,
@@ -491,7 +491,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 
     //-- finalize basket --------------------------------------
     QVariant res = RESTClientHelper::callAPI(
-        APICALLBOOM_PARAM,
+        _apiCallContext,
         RESTClientHelper::POST,
         "Account/finalizeBasket",
         {},
@@ -509,7 +509,7 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
     //-- approve online payment --------------------------------------
     if (Voucher.PaymentKey.isEmpty() == false) {
         QVariant res = RESTClientHelper::callAPI(
-            APICALLBOOM_PARAM,
+            _apiCallContext,
             RESTClientHelper::POST,
             "Account/approveOnlinePayment",
             {},
@@ -530,13 +530,13 @@ QVariant IMPL_REST_POST(Advert, fixtureSetup, (
 }
 
 //bool IMPL_REST_POST(Advert, fixtureSetupVoucher, (
-//        APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+//        APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext
 //    ))
 //{
 //}
 
 QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext,
     QString _random
 )) {
     QVariantMap Result;
@@ -551,7 +551,7 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountCoupons c
              WHERE c.cpnCode=?
         ;)";
-        clsDACResult DACResult = this->AccountCoupons->execQuery(APICALLBOOM_PARAM,
+        clsDACResult DACResult = this->AccountCoupons->execQuery(_apiCallContext,
                                                                  QueryString, {
                                                                      CouponCode
                                                                  });
@@ -568,7 +568,7 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountSaleables s
              WHERE s.slbCode=?
         ;)";
-        clsDACResult DACResult = this->AccountSaleables->execQuery(APICALLBOOM_PARAM,
+        clsDACResult DACResult = this->AccountSaleables->execQuery(_apiCallContext,
                                                                    QueryString, {
                                                                        SaleableCode
                                                                    });
@@ -585,7 +585,7 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblAccountProducts p
              WHERE p.prdCode=?
         ;)";
-        clsDACResult DACResult = this->AccountProducts->execQuery(APICALLBOOM_PARAM,
+        clsDACResult DACResult = this->AccountProducts->execQuery(_apiCallContext,
                                                                   QueryString, {
                                                                       ProductCode
                                                                   });
@@ -602,7 +602,7 @@ QVariant IMPL_REST_POST(Advert, fixtureCleanup, (
               FROM tblLocations l
              WHERE l.locURL=?
         ;)";
-        clsDACResult DACResult = Locations::instance().execQuery(APICALLBOOM_PARAM,
+        clsDACResult DACResult = Locations::instance().execQuery(_apiCallContext,
                                                                  QueryString, {
                                                                      LocationUrl
                                                                  });

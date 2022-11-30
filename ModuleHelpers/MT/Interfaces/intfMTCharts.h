@@ -85,7 +85,7 @@ public:
 
 protected:
     QVariant getSchema(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         QString _key = {}
     );
 
@@ -93,25 +93,25 @@ protected:
 
     //CreditUsageRemained_t, I18NMap
     std::tuple<CreditUsageRemained_t, QMap<QString, QString>> getCreditData(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         QString _key = {}
     );
 
     QVariant remainedDataForProgressBar(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         QString _key = {}
     );
 
     QVariant remainedDataForPieChart(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         QString _key = {}
     );
 
     QVariant usageDataForLineChart(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         quint64 _actorID,
         QString _key = {}
     );
@@ -137,7 +137,7 @@ protected slots:
     QVariant REST_GET(
         schema,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _key = {}
         ),
         "Get Charts schema"
@@ -146,7 +146,7 @@ protected slots:
     QVariant REST_GET(
         remainedDataForProgressBar,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _key = {}
         ),
         "Get MT Usage chart data for progress bar"
@@ -155,7 +155,7 @@ protected slots:
     QVariant REST_GET(
         remainedDataForPieChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _key = {}
         ),
         "Get MT Usage chart data for pie chart"
@@ -164,7 +164,7 @@ protected slots:
     QVariant REST_GET(
         usageDataForLineChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _key = {}
         ),
         "Get MT Usage chart data for lin chart"
@@ -190,7 +190,7 @@ protected slots:
     QVariant REST_GET(
         schema,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _apiToken,
             QString _key = {}
         ),
@@ -200,7 +200,7 @@ protected slots:
     QVariant REST_GET(
         remainedDataForProgressBar,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _apiToken,
             QString _key = {}
         ),
@@ -210,7 +210,7 @@ protected slots:
     QVariant REST_GET(
         remainedDataForPieChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _apiToken,
             QString _key = {}
         ),
@@ -220,7 +220,7 @@ protected slots:
     QVariant REST_GET(
         usageDataForLineChart,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString _apiToken,
             QString _key = {}
         ),

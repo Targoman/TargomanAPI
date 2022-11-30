@@ -83,7 +83,7 @@ QVariant RESTClientHelper::callAPI(
 }
 
 QVariant RESTClientHelper::callAPI(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     RESTClientHelper::enuHTTPMethod _method,
     const QString &_api,
     const QVariantMap &_urlArgs,
@@ -93,7 +93,7 @@ QVariant RESTClientHelper::callAPI(
     const QStringList &_requestHeaders,
     QVariantMap *_outResponseHeaders
 ) {
-    TAPI::JWT_t JWT = APICALLBOOM_PARAM.getJWT();
+    TAPI::JWT_t JWT = _apiCallContext.getJWT();
 
     QString OldEncodedJWT = JWT["encodedJWT"].toString();
     QVariantMap ResponseHeaders;
@@ -113,8 +113,8 @@ QVariant RESTClientHelper::callAPI(
 #ifdef TARGOMAN_API_ENABLE_JWT_DASTRESHTE
     if (OldEncodedJWT != JWT["encodedJWT"].toString())
     {
-        APICALLBOOM_PARAM.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
-        APICALLBOOM_PARAM.setJWT(JWT);
+        _apiCallContext.addResponseHeader("x-auth-new-token", JWT["encodedJWT"].toString());
+        _apiCallContext.setJWT(JWT);
     }
 #endif
 

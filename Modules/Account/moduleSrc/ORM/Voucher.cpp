@@ -37,13 +37,13 @@ Voucher::Voucher() :
         tblVoucher::Private::Indexes
 ) { ; }
 
-ORMSelectQuery Voucher::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
+ORMSelectQuery Voucher::makeSelectQuery(INTFAPICALLCONTEXT_IMPL &_apiCallContext, const QString &_alias, Q_DECL_UNUSED bool _translate, Q_DECL_UNUSED bool _isRoot) {
 
-    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(APICALLBOOM_PARAM, _alias, _translate);
+    ORMSelectQuery Query = intfSQLBasedModule::makeSelectQuery(_apiCallContext, _alias, _translate);
 
     if (_isRoot) {
         Query.addCols(this->selectableColumnNames())
-             .nestedLeftJoin(Voucher::instance().makeSelectQuery(APICALLBOOM_PARAM, "", _translate, false)
+             .nestedLeftJoin(Voucher::instance().makeSelectQuery(_apiCallContext, "", _translate, false)
                              .addCol(tblVoucher::Fields::vch_rootVchID)
                              .addCol(DBExpression::VALUE("SUM(tblVoucher.vchTotalAmount * CASE tblVoucher.vchType WHEN 'R' THEN 1 ELSE -1 END)"), "vchTotalFreezed")
                              .where({ tblVoucher::Fields::vchType, enuConditionOperator::In, QString("'%1','%2'")
@@ -63,8 +63,8 @@ ORMSelectQuery Voucher::makeSelectQuery(INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
 }
 
 QVariant IMPL_ORMGET_USER(Voucher) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID()}}, _filters);
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 }
@@ -72,11 +72,11 @@ QVariant IMPL_ORMGET_USER(Voucher) {
 bool IMPL_ORMDELETE_USER(Voucher) {
     TAPI::ORMFields_t ExtraFilters;
 
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName())) == false) {
         ExtraFilters.insert(tblVoucher::Fields::vchType, Targoman::API::AAA::enuVoucherType::toStr(Targoman::API::AAA::enuVoucherType::Withdrawal));
 
-        ExtraFilters.insert(tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID());
-//        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, APICALLBOOM_PARAM.getActorID()}}, ExtraFilters);
+        ExtraFilters.insert(tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID());
+//        this->setSelfFilters({{tblVoucher::Fields::vch_usrID, _apiCallContext.getActorID()}}, ExtraFilters);
     }
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, ExtraFilters);

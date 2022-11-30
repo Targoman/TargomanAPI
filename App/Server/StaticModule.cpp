@@ -35,15 +35,15 @@ StaticModule::StaticModule() :
 { ; }
 
 TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     const QString &_module
 )) {
     gServerStats.Success.inc();
 
     return TAPI::RawData_t(
                 QJsonDocument(OpenAPIGenerator::retrieveJson(
-                    APICALLBOOM_PARAM.host(),
-                    APICALLBOOM_PARAM.port(),
+                    _apiCallContext.host(),
+                    _apiCallContext.port(),
                     _module
                 )).toJson(QJsonDocument::Compact),
                 "application/json; charset=utf-8"
@@ -51,7 +51,7 @@ TAPI::RawData_t IMPL_REST_GET_OR_POST(StaticModule, openAPI_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext
 )) {
     throw exHTTPMethodNotAllowed("Yaml openAPI is not implemented yet");
 }
@@ -59,12 +59,12 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, openAPI_yaml, (
 //TAPI::ResponseRedirect_t
 //TAPI::FileData_t
 QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext
 )) {
     if (ServerCommonConfigs::SwaggerUI.value().isEmpty())
         throw exHTTPNotFound("Swagger is not configured");
 
-    QString API = APICALLBOOM_PARAM.requestAPIPath();
+    QString API = _apiCallContext.requestAPIPath();
 
     QString File = API.mid(sizeof("/swaggerUI") - 1).replace(QRegularExpression("//+"), "/");
 
@@ -78,7 +78,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, swaggerui, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     bool _full
 )) {
     gServerStats.Success.inc();
@@ -87,7 +87,7 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, stats_json, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext
 )) {
     gServerStats.Success.inc();
 
@@ -103,11 +103,11 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, version, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext
 )) {
     gServerStats.Success.inc();
 
-    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString HostPort = _apiCallContext.hostAndPort();
     QString ServerUrl = QString("https://%1%2")
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);
@@ -119,11 +119,11 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, ping, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, pinguser, (
-    APICALLBOOM_TYPE_JWT_USER_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_USER_IMPL &_apiCallContext
 )) {
     gServerStats.Success.inc();
 
-    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString HostPort = _apiCallContext.hostAndPort();
     QString ServerUrl = QString("https://%1%2")
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);
@@ -135,11 +135,11 @@ QVariant IMPL_REST_GET_OR_POST(StaticModule, pinguser, (
 }
 
 QVariant IMPL_REST_GET_OR_POST(StaticModule, pingapi, (
-    APICALLBOOM_TYPE_JWT_API_IMPL &APICALLBOOM_PARAM
+    APICALLCONTEXT_TYPE_JWT_API_IMPL &_apiCallContext
 )) {
     gServerStats.Success.inc();
 
-    QString HostPort = APICALLBOOM_PARAM.hostAndPort();
+    QString HostPort = _apiCallContext.hostAndPort();
     QString ServerUrl = QString("https://%1%2")
                         .arg(HostPort)
                         .arg(ServerCommonConfigs::BasePathWithVersion);

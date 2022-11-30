@@ -101,14 +101,14 @@ AccountPrizes     | ANONY | USER  | API   |
 //{
 //public:
 //    typedef typename std::conditional<_itmplIsTokenBase,
-//                            APICALLBOOM_TYPE_JWT_API_DECL,
-//                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
-//    APICALLBOOM_TYPE_JWT_TOKENBASE_DECL;
+//                            APICALLCONTEXT_TYPE_JWT_API_DECL,
+//                            APICALLCONTEXT_TYPE_JWT_USER_DECL>::type
+//    APICALLCONTEXT_TYPE_JWT_TOKENBASE_DECL;
 
 //    typedef Q_DECL_UNUSED typename std::conditional<_itmplIsTokenBase,
-//                            APICALLBOOM_TYPE_JWT_API_DECL,
-//                            APICALLBOOM_TYPE_JWT_USER_DECL>::type
-//    APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL;
+//                            APICALLCONTEXT_TYPE_JWT_API_DECL,
+//                            APICALLCONTEXT_TYPE_JWT_USER_DECL>::type
+//    APICALLCONTEXT_TYPE_JWT_TOKENBASE_IMPL;
 
 //public:
 //    bool IsTokenBase() { return _itmplIsTokenBase; }
@@ -117,13 +117,13 @@ AccountPrizes     | ANONY | USER  | API   |
 #define ACCORM_TOKENBASE_TYPES(_isTokenBase) \
     public: \
         typedef typename std::conditional<_isTokenBase, \
-                                APICALLBOOM_TYPE_JWT_API_DECL, \
-                                APICALLBOOM_TYPE_JWT_USER_DECL>::type \
-        APICALLBOOM_TYPE_JWT_TOKENBASE_DECL; \
+                                APICALLCONTEXT_TYPE_JWT_API_DECL, \
+                                APICALLCONTEXT_TYPE_JWT_USER_DECL>::type \
+        APICALLCONTEXT_TYPE_JWT_TOKENBASE_DECL; \
         typedef Q_DECL_UNUSED typename std::conditional<_isTokenBase, \
-                                APICALLBOOM_TYPE_JWT_API_DECL, \
-                                APICALLBOOM_TYPE_JWT_USER_DECL>::type \
-        APICALLBOOM_TYPE_JWT_TOKENBASE_IMPL; \
+                                APICALLCONTEXT_TYPE_JWT_API_DECL, \
+                                APICALLCONTEXT_TYPE_JWT_USER_DECL>::type \
+        APICALLCONTEXT_TYPE_JWT_TOKENBASE_IMPL; \
     public: \
         bool IsTokenBase() { return _isTokenBase; }
 
@@ -160,7 +160,7 @@ public:
                      const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET_ANONYMOUSE("Get Available Units")
@@ -202,7 +202,7 @@ public:
                         const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET_ANONYMOUSE("Get Available Products")
@@ -248,7 +248,7 @@ public:
     static QMap<QString, intfAccountSaleables*> MyInstance;
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 private slots:
     QVariant ORMGET_ANONYMOUSE("Get Available Saleables")
@@ -271,7 +271,7 @@ public:
                               const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 //public:
-//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+//    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 
 public:
     //key: schema
@@ -305,7 +305,7 @@ private slots:
     bool REST_UPDATE(
         disablePackage,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset banned by an authorized user"
@@ -314,7 +314,7 @@ private slots:
     bool REST_UPDATE(
         setAsPrefered,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a user Asset as prefered"
@@ -356,7 +356,7 @@ private slots:
     QVariant REST_GET(
         ,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString             _apiToken,
             TAPI::PKsByPath_t   _pksByPath = {},
             quint64             _pageIndex = 0,
@@ -383,7 +383,7 @@ public:
                           const QList<DBM::stuDBIndex>& _exclusiveIndexes = {});
 
 public:
-    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
+    virtual ORMSelectQuery makeSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const QString &_alias = {}, bool _translate = true, bool _isRoot = true);
 };
 
 /******************************************************/
@@ -467,7 +467,7 @@ private slots:
     QVariant REST_GET(
         ,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             QString             _apiToken,
             TAPI::PKsByPath_t   _pksByPath = {},
             quint64             _pageIndex = 0,

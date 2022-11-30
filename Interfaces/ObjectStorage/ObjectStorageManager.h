@@ -57,7 +57,7 @@ class ObjectStorageManager
 {
 public:
     static QVariantMap saveFiles(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        const quint64 _currentUserID,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
@@ -67,7 +67,7 @@ public:
     );
 
     static quint64 saveFile(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
 //        const quint64 _currentUserID,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
@@ -84,7 +84,7 @@ public:
 //            );
 
     static void applyGetFileUrlInQuery(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         ORMSelectQuery &_query,
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
         Targoman::API::ObjectStorage::ORM::intfUploadGateways &_uploadGateways,
@@ -103,7 +103,7 @@ public:
 
 private:
     struct stuProcessQueueParams {
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM;
+        INTFAPICALLCONTEXT_DECL &_apiCallContext;
         quint64 CurrentUserID;
         Targoman::API::ObjectStorage::ORM::intfUploadFiles &UploadFiles;
         Targoman::API::ObjectStorage::ORM::intfUploadQueue &UploadQueue;
@@ -112,7 +112,7 @@ private:
         quint16 MaxItemsCount = 100;
 
         stuProcessQueueParams(const stuProcessQueueParams &_other) :
-            APICALLBOOM_PARAM(_other.APICALLBOOM_PARAM),
+            _apiCallContext(_other._apiCallContext),
             CurrentUserID(_other.CurrentUserID),
             UploadFiles(_other.UploadFiles),
             UploadQueue(_other.UploadQueue),
@@ -122,7 +122,7 @@ private:
         { ; }
 
         stuProcessQueueParams(
-            INTFAPICALLBOOM_DECL &_APICALLBOOM_PARAM,
+            INTFAPICALLCONTEXT_DECL &_apiCallContext,
             quint64 _currentUserID,
             Targoman::API::ObjectStorage::ORM::intfUploadFiles &_uploadFiles,
             Targoman::API::ObjectStorage::ORM::intfUploadQueue &_uploadQueue,
@@ -130,7 +130,7 @@ private:
             quint64 _uploadedFileID = 0,
             quint16 _maxItemsCount = 100
         ) :
-            APICALLBOOM_PARAM(_APICALLBOOM_PARAM),
+            _apiCallContext(_apiCallContext),
             CurrentUserID(_currentUserID),
             UploadFiles(_uploadFiles),
             UploadQueue(_uploadQueue),
@@ -144,7 +144,7 @@ private:
         const stuProcessQueueParams &_processQueueParams);
 
     static bool storeFileToGateway(
-        INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+        INTFAPICALLCONTEXT_DECL &_apiCallContext,
         const ORM::Private::stuProcessUploadQueueInfo &_queueInfo);
 };
 

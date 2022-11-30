@@ -350,11 +350,11 @@ public:
     tmplBaseQuery();
     tmplBaseQuery(itmplDerived* _derived,
                   const tmplBaseQuery<itmplDerived, itmplData>& _other);
-    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    tmplBaseQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext,
                   itmplDerived* _derived,
                   clsTable& _table,
                   const QString& _alias = {});
-    tmplBaseQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM,
+    tmplBaseQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext,
                   itmplDerived* _derived,
                   const ORMSelectQuery& _fromQuery,
                   const QString& _alias = {});
@@ -509,9 +509,9 @@ class ORMSelectQuery :
 public:
     ORMSelectQuery();
     ORMSelectQuery(const ORMSelectQuery& _other);
-    ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    ORMSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, clsTable& _table, const QString& _alias = {});
     //alias is mandatory for nested from query
-    ORMSelectQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, const ORMSelectQuery& _fromQuery, const QString& _alias /*= {}*/);
+    ORMSelectQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, const ORMSelectQuery& _fromQuery, const QString& _alias /*= {}*/);
     virtual ~ORMSelectQuery();
 
     virtual ORMSelectQuery& addColsFromInlineJoinCols(Q_DECL_UNUSED const QList<clsColSpecs>& _colsSpecs);
@@ -605,7 +605,7 @@ class ORMCreateQuery :
 {
 public:
     ORMCreateQuery(const ORMCreateQuery& _other);
-    ORMCreateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    ORMCreateQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, clsTable& _table, const QString& _alias = {});
     virtual ~ORMCreateQuery();
 
 public:
@@ -634,7 +634,7 @@ class ORMUpdateQuery :
 {
 public:
     ORMUpdateQuery(const ORMUpdateQuery& _other);
-    ORMUpdateQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    ORMUpdateQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, clsTable& _table, const QString& _alias = {});
     virtual ~ORMUpdateQuery();
 
     ORMUpdateQuery& setNull(const QString& _col);
@@ -664,7 +664,7 @@ class ORMDeleteQuery :
 {
 public:
     ORMDeleteQuery(const ORMDeleteQuery& _other);
-    ORMDeleteQuery(INTFAPICALLBOOM_DECL &APICALLBOOM_PARAM, clsTable& _table, const QString& _alias = {});
+    ORMDeleteQuery(INTFAPICALLCONTEXT_DECL &_apiCallContext, clsTable& _table, const QString& _alias = {});
     virtual ~ORMDeleteQuery();
 
 public:

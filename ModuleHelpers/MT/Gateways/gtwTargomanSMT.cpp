@@ -28,7 +28,7 @@ namespace Targoman::API::ModuleHelpers::MT::Gateways {
 TARGOMAN_API_MT_GATEWAY_IMPL(gtwTargomanSMT)
 
 QVariantMap gtwTargomanSMT::doTranslation(
-    INTFAPICALLBOOM_IMPL &APICALLBOOM_PARAM,
+    INTFAPICALLCONTEXT_IMPL &_apiCallContext,
     const stuEngineSpecs& _engineSpecs,
     const QString& _text,
     bool _detailed,

@@ -188,7 +188,7 @@ private slots:
         ,
         (
 //            GET_METHOD_ARGS_DECL_APICALL,
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::PKsByPath_t _pksByPath = {},
             quint64 _pageIndex = 0,
             quint16 _pageSize = 20,
@@ -208,7 +208,7 @@ private slots:
     QVariant REST_UPDATE(
         setAsRead,
         (
-            APICALLBOOM_TYPE_JWT_USER_DECL &APICALLBOOM_PARAM,
+            APICALLCONTEXT_TYPE_JWT_USER_DECL &_apiCallContext,
             TAPI::PKsByPath_t _pksByPath
         ),
         "Mark a ticket as readed by current user"

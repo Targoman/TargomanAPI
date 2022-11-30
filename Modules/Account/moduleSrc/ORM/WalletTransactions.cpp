@@ -57,8 +57,8 @@ WalletTransactions::WalletTransactions() :
 ) { ; }
 
 QVariant IMPL_ORMGET_USER(WalletTransactions) {
-    if (Authorization::hasPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
-        this->setSelfFilters({{tblUserWallets::Fields::wal_usrID, APICALLBOOM_PARAM.getActorID()}}, _filters);
+    if (Authorization::hasPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName())) == false)
+        this->setSelfFilters({{tblUserWallets::Fields::wal_usrID, _apiCallContext.getActorID()}}, _filters);
 
     auto fnTouchQuery = [](ORMSelectQuery &_query) {
         _query.innerJoin(tblUserWallets::Name);

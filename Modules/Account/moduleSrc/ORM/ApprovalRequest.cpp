@@ -90,7 +90,7 @@ ApprovalRequest::ApprovalRequest() :
     ) { ; }
 
 QVariant IMPL_ORMGET_USER(ApprovalRequest) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_GET, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_GET, this->moduleBaseName()));
 
     return this->Select(GET_METHOD_ARGS_CALL_VALUES);
 
@@ -100,17 +100,17 @@ QVariant IMPL_ORMGET_USER(ApprovalRequest) {
 }
 
 bool IMPL_ORMDELETE_USER(ApprovalRequest) {
-    Authorization::checkPriv(APICALLBOOM_PARAM, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
+    Authorization::checkPriv(_apiCallContext, this->privOn(EHTTP_DELETE, this->moduleBaseName()));
 
     return this->DeleteByPks(DELETE_METHOD_ARGS_CALL_VALUES, {}, true);
 //    return this->deleteByPKs(DELETE_METHOD_CALL_ARGS_APICALL, {}, true);
 }
 
 QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
-    APICALLBOOM_TYPE_JWT_ANONYMOUSE_IMPL &APICALLBOOM_PARAM,
+    APICALLCONTEXT_TYPE_JWT_ANONYMOUSE_IMPL &_apiCallContext,
     QString _emailOrMobile
 )) {
-    Authorization::validateIPAddress(APICALLBOOM_PARAM, APICALLBOOM_PARAM.getIP());
+    Authorization::validateIPAddress(_apiCallContext, _apiCallContext.getIP());
 
     enuApprovalType::Type Type;
 
@@ -125,7 +125,7 @@ QVariant IMPL_REST_GET_OR_POST(ApprovalRequest, timerInfo, (
     } else
         throw exHTTPBadRequest("emailOrMobile must be a valid email or mobile");
 
-    QVariantMap Info = this->makeSelectQuery(APICALLBOOM_PARAM)
+    QVariantMap Info = this->makeSelectQuery(_apiCallContext)
 //                            .addCols(ApprovalRequest::instance().selectableColumnNames())
 //                            .addCol(Targoman::API::CURRENT_TIMESTAMP)
                             .where({ tblApprovalRequest::Fields::aprApprovalKey, enuConditionOperator::Equal, _emailOrMobile })
